@@ -13,12 +13,10 @@ import soccerFieldImage from "@/assets/soccer-field.jpg";
 import stadiumBwImage from "@/assets/stadium-bw.jpg";
 import soccerTrainingFieldImage from "@/assets/soccer-training-field.jpg";
 import { useIsMobile } from "@/hooks/use-mobile";
-
 const Index = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "quarterly" | "biannual">("monthly");
-  
   const benefitsSection = useScrollAnimation();
   const carouselSection = useScrollAnimation();
   const appScreensSection = useScrollAnimation();
@@ -64,19 +62,8 @@ const Index = () => {
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Video Background - Different for mobile and desktop */}
-        <video 
-          autoPlay 
-          loop 
-          muted 
-          playsInline
-          preload={isMobile ? "metadata" : "auto"}
-          className="absolute inset-0 w-full h-full object-cover z-0"
-          key={isMobile ? "mobile" : "desktop"}
-        >
-          <source 
-            src={isMobile ? "/hero-video-mobile.mp4" : "/hero-video.mp4"} 
-            type="video/mp4" 
-          />
+        <video autoPlay loop muted playsInline preload={isMobile ? "metadata" : "auto"} className="absolute inset-0 w-full h-full object-cover z-0" key={isMobile ? "mobile" : "desktop"}>
+          <source src={isMobile ? "/hero-video-mobile.mp4" : "/hero-video.mp4"} type="video/mp4" />
           {/* Fallback para navegadores sem suporte */}
           Seu navegador não suporta vídeos HTML5.
         </video>
@@ -85,32 +72,41 @@ const Index = () => {
 
         <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in">
           {/* Logo */}
-          <div className="flex justify-center mb-8 animate-zoom-in" style={{ marginTop: "2rem" }}>
-            <img 
-              src={logoImage} 
-              alt="YM SPORTS Logo" 
-              className="w-56 h-56 md:w-80 md:h-80 object-contain"
-            />
+          <div className="flex justify-center mb-8 animate-zoom-in" style={{
+          marginTop: "2rem"
+        }}>
+            <img src={logoImage} alt="YM SPORTS Logo" className="w-56 h-56 md:w-80 md:h-80 object-contain" />
           </div>
           
-          <h1 className="text-3xl md:text-5xl font-astro font-bold mb-4 text-foreground animate-fade-down" style={{ animationDelay: "0.2s" }}>
+          <h1 className="text-3xl md:text-5xl font-astro font-bold mb-4 text-foreground animate-fade-down" style={{
+          animationDelay: "0.2s"
+        }}>
             YM SPORTS
           </h1>
           
-          <p className="text-xl md:text-2xl font-astro font-bold mb-6 text-primary animate-fade-up" style={{ animationDelay: "0.4s" }}>
-            A evolução do esporte começa aqui.
-          </p>
+          <p className="text-xl md:text-2xl font-astro font-bold mb-6 text-primary animate-fade-up" style={{
+          animationDelay: "0.4s"
+        }}>A evolução do esporte 
+começa aqui.</p>
           
-          <p className="text-base md:text-lg text-muted-foreground mb-4 max-w-3xl mx-auto animate-fade-up leading-relaxed" style={{ animationDelay: "0.6s" }}>
+          <p className="text-base md:text-lg text-muted-foreground mb-4 max-w-3xl mx-auto animate-fade-up leading-relaxed" style={{
+          animationDelay: "0.6s"
+        }}>
             Mais do que um aplicativo, a YM SPORTS é a sua nova plataforma de experiências esportivas, feita para aproximar pessoas, inovar o meio digital por meio de conquistas e impulsionar o esporte em todas as áreas.
           </p>
-          <p className="text-lg md:text-xl font-semibold text-foreground mb-2 max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "0.8s" }}>
+          <p className="text-lg md:text-xl font-semibold text-foreground mb-2 max-w-2xl mx-auto animate-fade-up" style={{
+          animationDelay: "0.8s"
+        }}>
             Algo nunca visto antes,
           </p>
-          <p className="text-lg md:text-xl font-semibold text-primary mb-12 max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "1s" }}>
+          <p className="text-lg md:text-xl font-semibold text-primary mb-12 max-w-2xl mx-auto animate-fade-up" style={{
+          animationDelay: "1s"
+        }}>
             Pensando e feito para você!
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-up mb-20" style={{ animationDelay: "1.2s" }}>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-up mb-20" style={{
+          animationDelay: "1.2s"
+        }}>
             <Button variant="hero" size="xl" onClick={() => navigate("/auth/signup")} className="w-full sm:w-auto hover:scale-110 transition-transform duration-300">Começar agora</Button>
             <Button variant="outline" size="xl" onClick={() => navigate("/auth/login")} className="w-full sm:w-auto hover:scale-110 transition-transform duration-300">
               Entrar
@@ -125,10 +121,9 @@ const Index = () => {
       {/* Benefits Section */}
       <section ref={benefitsSection.ref} className="relative py-20 overflow-hidden">
         {/* Background Image with Overlay */}
-        <div 
-          className="absolute inset-0 z-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${soccerTrainingFieldImage})` }}
-        />
+        <div className="absolute inset-0 z-0 bg-cover bg-center" style={{
+        backgroundImage: `url(${soccerTrainingFieldImage})`
+      }} />
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/70 via-black/60 to-black" />
         
         <div className="relative z-10 container mx-auto px-4">
@@ -152,14 +147,9 @@ const Index = () => {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {benefits.map((benefit, index) => (
-              <div 
-                key={index} 
-                className={`relative overflow-hidden rounded-2xl p-8 group ${benefitsSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
-                style={{
-                  transitionDelay: benefitsSection.isVisible ? `${index * 0.15}s` : '0s'
-                }}
-              >
+            {benefits.map((benefit, index) => <div key={index} className={`relative overflow-hidden rounded-2xl p-8 group ${benefitsSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`} style={{
+            transitionDelay: benefitsSection.isVisible ? `${index * 0.15}s` : '0s'
+          }}>
                 {/* Animated Background */}
                 <div className="absolute inset-0 bg-gradient-to-br from-card via-card to-muted transition-all duration-500 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -180,8 +170,7 @@ const Index = () => {
                 
                 {/* Glow Effect */}
                 <div className="absolute -inset-1 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
       </section>
@@ -202,11 +191,7 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Feature 1 - Calendário Inteligente */}
             <div className="group relative overflow-hidden rounded-2xl aspect-square cursor-pointer">
-              <img 
-                src={new URL('../assets/kids-celebration.jpg', import.meta.url).href}
-                alt="Calendário inteligente para organizar jogos" 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
+              <img src={new URL('../assets/kids-celebration.jpg', import.meta.url).href} alt="Calendário inteligente para organizar jogos" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
               
               <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
@@ -224,11 +209,7 @@ const Index = () => {
 
             {/* Feature 2 - Inteligência Artificial */}
             <div className="group relative overflow-hidden rounded-2xl aspect-square cursor-pointer">
-              <img 
-                src={new URL('../assets/kids-training.jpg', import.meta.url).href}
-                alt="Treinos personalizados com Inteligência Artificial" 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
+              <img src={new URL('../assets/kids-training.jpg', import.meta.url).href} alt="Treinos personalizados com Inteligência Artificial" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
               
               {/* Content that slides up on hover */}
@@ -247,11 +228,7 @@ const Index = () => {
 
             {/* Feature 3 - Ranking Regional */}
             <div className="group relative overflow-hidden rounded-2xl aspect-square cursor-pointer">
-              <img 
-                src={new URL('../assets/kids-match.jpg', import.meta.url).href}
-                alt="Ranking regional e competições" 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
+              <img src={new URL('../assets/kids-match.jpg', import.meta.url).href} alt="Ranking regional e competições" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
               
               <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
@@ -269,11 +246,7 @@ const Index = () => {
 
             {/* Feature 4 - Portfólio Online */}
             <div className="group relative overflow-hidden rounded-2xl aspect-square cursor-pointer">
-              <img 
-                src={new URL('../assets/kid-skill.jpg', import.meta.url).href}
-                alt="Portfólio online profissional" 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
+              <img src={new URL('../assets/kid-skill.jpg', import.meta.url).href} alt="Portfólio online profissional" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
               
               <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
@@ -305,21 +278,14 @@ const Index = () => {
             Imagens reais de dentro do nosso APP que você vai ter acesso a todas as funções!
           </p>
 
-          <Carousel
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-            plugins={[
-              Autoplay({
-                delay: 3000,
-              }),
-            ]}
-            className={`w-full max-w-6xl mx-auto transition-all duration-1000 delay-400 ${appScreensSection.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}
-          >
+          <Carousel opts={{
+          align: "start",
+          loop: true
+        }} plugins={[Autoplay({
+          delay: 3000
+        })]} className={`w-full max-w-6xl mx-auto transition-all duration-1000 delay-400 ${appScreensSection.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
             <CarouselContent className="-ml-2 md:-ml-4">
-              {[1, 2, 3, 4, 5, 6].map((num) => (
-                <CarouselItem key={num} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+              {[1, 2, 3, 4, 5, 6].map(num => <CarouselItem key={num} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
                   <Card className="border-border overflow-hidden group hover:scale-105 transition-all duration-300 hover:shadow-[var(--shadow-glow)]">
                     <div className="aspect-[9/16] bg-gradient-to-br from-primary/20 via-card to-secondary/20 flex items-center justify-center relative">
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -331,8 +297,7 @@ const Index = () => {
                       </p>
                     </div>
                   </Card>
-                </CarouselItem>
-              ))}
+                </CarouselItem>)}
             </CarouselContent>
             <CarouselPrevious className="left-2" />
             <CarouselNext className="right-2" />
@@ -378,10 +343,9 @@ const Index = () => {
             {/* Pricing Card */}
             <Card className={`border-border p-8 md:p-10 text-center relative overflow-hidden shadow-xl transition-all duration-1000 delay-600 ${pricingSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
               {/* Background Image with Opacity */}
-              <div 
-                className="absolute inset-0 bg-cover bg-center opacity-50"
-                style={{ backgroundImage: `url(${stadiumBwImage})` }}
-              />
+              <div className="absolute inset-0 bg-cover bg-center opacity-50" style={{
+              backgroundImage: `url(${stadiumBwImage})`
+            }} />
               <div className="absolute inset-0 bg-gradient-to-br from-black/50 via-black/40 to-black/50" />
               <div className="relative z-10">
                 <div className="mb-6">
@@ -445,11 +409,7 @@ const Index = () => {
           
           {/* Logo abaixo do botão */}
           <div className="mt-12 flex justify-center">
-            <img 
-              src={logoImage} 
-              alt="YM SPORTS Logo" 
-              className="w-56 h-56 md:w-64 md:h-64 object-contain opacity-80"
-            />
+            <img src={logoImage} alt="YM SPORTS Logo" className="w-56 h-56 md:w-64 md:h-64 object-contain opacity-80" />
           </div>
         </div>
       </section>
