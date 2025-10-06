@@ -1,0 +1,204 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 13%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 13%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 47 99% 52%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 26%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 26%;
+    --muted-foreground: 0 0% 62%;
+
+    --accent: 47 99% 52%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 26%;
+    --input: 0 0% 26%;
+    --ring: 47 99% 52%;
+
+    --radius: 0.75rem;
+
+    --gradient-hero: linear-gradient(135deg, hsl(0, 0%, 0%) 0%, hsl(0, 0%, 13%) 50%, hsl(0, 0%, 26%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 13%) 0%, hsl(0, 0%, 8%) 100%);
+    --shadow-glow: 0 0 40px hsl(47, 99%, 52%, 0.3);
+  }
+}
+
+@layer utilities {
+
+  @keyframes fade-up {
+    0% {
+      opacity: 0;
+      transform: translateY(60px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-down {
+    0% {
+      opacity: 0;
+      transform: translateY(-60px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-in-left {
+    0% {
+      opacity: 0;
+      transform: translateX(-100px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slide-in-right {
+    0% {
+      opacity: 0;
+      transform: translateX(100px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes zoom-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes rotate-in {
+    0% {
+      opacity: 0;
+      transform: rotate(-180deg) scale(0);
+    }
+    100% {
+      opacity: 1;
+      transform: rotate(0) scale(1);
+    }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% {
+      box-shadow: 0 0 20px hsl(47, 99%, 52%, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 60px hsl(47, 99%, 52%, 0.6);
+    }
+  }
+
+  @keyframes scroll-infinite {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes scroll-infinite-fast {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-fade-up {
+    animation: fade-up 0.8s ease-out forwards;
+    opacity: 0;
+  }
+
+  .animate-fade-down {
+    animation: fade-down 0.8s ease-out forwards;
+    opacity: 0;
+  }
+
+  .animate-slide-left {
+    animation: slide-in-left 0.8s ease-out forwards;
+    opacity: 0;
+  }
+
+  .animate-slide-right {
+    animation: slide-in-right 0.8s ease-out forwards;
+    opacity: 0;
+  }
+
+  .animate-zoom-in {
+    animation: zoom-in 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  .animate-rotate-in {
+    animation: rotate-in 0.8s ease-out forwards;
+    opacity: 0;
+  }
+
+  .animate-glow {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+
+  .animate-scroll-infinite {
+    animation: scroll-infinite 20s linear infinite;
+  }
+
+  .animate-scroll-infinite-fast {
+    animation: scroll-infinite-fast 10s linear infinite;
+  }
+
+  .scroll-animation {
+    opacity: 0;
+    transform: translateY(60px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  }
+
+  .scroll-animation.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
