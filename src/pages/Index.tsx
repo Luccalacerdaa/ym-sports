@@ -86,8 +86,10 @@ const Index = () => {
           
           <p className="text-xl md:text-2xl font-astro font-bold mb-6 text-primary animate-fade-up" style={{
           animationDelay: "0.4s"
-        }}>A evolução do esporte  
-começa aqui.</p>
+        }}>
+            A evolução do esporte<br />
+            começa aqui.
+          </p>
           
           <p className="text-base md:text-lg text-muted-foreground mb-4 max-w-3xl mx-auto animate-fade-up leading-relaxed" style={{
           animationDelay: "0.6s"
