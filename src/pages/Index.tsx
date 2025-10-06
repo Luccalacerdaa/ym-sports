@@ -12,8 +12,11 @@ import { ScrollingBanner } from "@/components/ScrollingBanner";
 import soccerFieldImage from "@/assets/soccer-field.jpg";
 import stadiumBwImage from "@/assets/stadium-bw.jpg";
 import soccerTrainingFieldImage from "@/assets/soccer-training-field.jpg";
+import { useIsMobile } from "@/hooks/use-mobile";
+
 const Index = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "quarterly" | "biannual">("monthly");
   
   const benefitsSection = useScrollAnimation();
@@ -60,15 +63,22 @@ const Index = () => {
   return <div className="min-h-screen bg-gradient-to-br from-black via-secondary to-black">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Video Background */}
+        {/* Video Background - Different for mobile and desktop */}
         <video 
           autoPlay 
           loop 
           muted 
           playsInline
+          preload={isMobile ? "metadata" : "auto"}
           className="absolute inset-0 w-full h-full object-cover z-0"
+          key={isMobile ? "mobile" : "desktop"}
         >
-          <source src="/hero-video.mp4" type="video/mp4" />
+          <source 
+            src={isMobile ? "/hero-video-mobile.mp4" : "/hero-video.mp4"} 
+            type="video/mp4" 
+          />
+          {/* Fallback para navegadores sem suporte */}
+          Seu navegador não suporta vídeos HTML5.
         </video>
         
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/70 via-black/50 to-black" />
