@@ -4,10 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 import logoImage from "@/assets/ym-sports-logo-white-bg.png";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { signUp } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,6 +20,7 @@ const Signup = () => {
     height: "",
     weight: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -24,10 +29,62 @@ const Signup = () => {
     });
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implementar lógica de cadastro
-    console.log("Cadastro:", formData);
+    setLoading(true);
+    
+    try {
+      // Criar usuário no Supabase Auth
+      const { data, error } = await signUp(formData.email, formData.password);
+      
+      if (error) {
+        toast.error("Erro ao criar conta: " + error.message);
+        return;
+      }
+
+      // Se o usuário foi criado, salvar dados do perfil
+      if (data.user) {
+        console.log("Usuário criado:", data.user.id);
+        console.log("Dados do formulário:", formData);
+        
+        try {
+          const profileData = {
+            id: data.user.id,
+            name: formData.name || 'Usuário',
+            age: formData.age ? parseInt(formData.age) : null,
+            height: formData.height ? parseInt(formData.height) : null,
+            weight: formData.weight ? parseInt(formData.weight) : null,
+            email: formData.email,
+          };
+          
+          console.log("Dados do perfil a serem salvos:", profileData);
+          
+          const { data: profileResult, error: profileError } = await supabase
+            .from('profiles')
+            .insert(profileData)
+            .select()
+            .single();
+
+          if (profileError) {
+            console.error("Erro ao salvar perfil:", profileError);
+            toast.warning("Conta criada, mas houve problema ao salvar o perfil. Você pode editar depois.");
+          } else {
+            console.log("Perfil criado com sucesso:", profileResult);
+            toast.success("Perfil criado com sucesso!");
+          }
+        } catch (profileError) {
+          console.error("Erro ao salvar perfil:", profileError);
+          toast.warning("Conta criada, mas houve problema ao salvar o perfil. Você pode editar depois.");
+        }
+      }
+
+      toast.success("Conta criada com sucesso! Você já pode fazer login.");
+      navigate("/auth/login");
+    } catch (error) {
+      toast.error("Erro inesperado ao criar conta");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -122,8 +179,8 @@ const Signup = () => {
                 />
               </div>
             </div>
-            <Button type="submit" variant="hero" size="lg" className="w-full">
-              Criar Conta
+            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
+              {loading ? "Criando conta..." : "Criar Conta"}
             </Button>
           </form>
           <div className="mt-6 text-center">

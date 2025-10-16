@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Trophy, TrendingUp, Zap, Check } from "lucide-react";
+import { Calendar, Trophy, TrendingUp, Zap, Check, Megaphone, Heart, Volume2, VolumeX } from "lucide-react";
 import logoImage from "@/assets/ym-sports-logo-new.png";
 import { useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -13,46 +13,80 @@ import soccerFieldImage from "@/assets/soccer-field.jpg";
 import stadiumBwImage from "@/assets/stadium-bw.jpg";
 import soccerTrainingFieldImage from "@/assets/soccer-training-field.jpg";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useEffect, useRef } from "react";
 const Index = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "quarterly" | "biannual">("monthly");
+  const [isMuted, setIsMuted] = useState(true);
+  const [volume, setVolume] = useState(0.3);
   const benefitsSection = useScrollAnimation();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Configurar volume do vídeo e forçar play
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.volume = volume;
+      videoRef.current.muted = isMuted;
+      
+      // Forçar play do vídeo
+      const playVideo = async () => {
+        try {
+          await videoRef.current?.play();
+        } catch (error) {
+          console.log('Erro ao reproduzir vídeo:', error);
+        }
+      };
+      
+      playVideo();
+    }
+  }, [volume, isMuted]);
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+  };
+
+  const handleVolumeChange = (newVolume: number) => {
+    setVolume(newVolume);
+    if (newVolume > 0 && isMuted) {
+      setIsMuted(false);
+    }
+  };
   const carouselSection = useScrollAnimation();
   const appScreensSection = useScrollAnimation();
   const pricingSection = useScrollAnimation();
   const ctaSection = useScrollAnimation();
   const planPrices = {
     monthly: {
-      value: 12.90,
-      total: 12.90,
+      value: 15.90,
+      total: 15.90,
       label: "Mensal"
     },
     quarterly: {
-      value: 11.61,
-      total: 34.83,
+      value: 14.63,
+      total: 43.90,
       label: "Trimestral",
-      discount: "10% OFF"
+      discount: "8% OFF"
     },
     biannual: {
-      value: 10.97,
-      total: 65.82,
+      value: 12.90,
+      total: 77.40,
       label: "Semestral",
-      discount: "15% OFF"
+      discount: "19% OFF"
     }
   };
   const benefits = [{
-    icon: Calendar,
-    title: "calendário",
-    description: "organize seus jogos e planeje sua carreira."
+    icon: Megaphone,
+    title: "divulgação",
+    description: "Com o APP, você ganha oportunidade para fazer seus materiais de divulgação Pré-jogo com descontos exclusivos."
   }, {
     icon: TrendingUp,
     title: "treinos",
     description: "inteligência artificial que produz treinamentos específicos e personalizados pensando na sua melhor versão."
   }, {
-    icon: Trophy,
-    title: "ranking",
-    description: "ferramenta que permite você disputar com atletas reais perto de você!"
+    icon: Heart,
+    title: "motivação",
+    description: "Aba específica dentro do APP que impulsiona o seu dia com mensagens de motivação e incentivo de atletas bem sucedidos."
   }, {
     icon: Zap,
     title: "portfólio online",
@@ -61,12 +95,46 @@ const Index = () => {
   return <div className="min-h-screen bg-gradient-to-br from-black via-secondary to-black">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Video Background - Different for mobile and desktop */}
-        <video autoPlay loop muted playsInline preload={isMobile ? "metadata" : "auto"} className="absolute inset-0 w-full h-full object-cover z-0" key={isMobile ? "mobile" : "desktop"}>
-          <source src={isMobile ? "/hero-video-mobile.mp4" : "/hero-video.mp4"} type="video/mp4" />
-          {/* Fallback para navegadores sem suporte */}
+        {/* Video Background - Same for mobile and desktop */}
+        <video 
+          ref={videoRef} 
+          autoPlay 
+          loop 
+          muted={isMuted}
+          playsInline 
+          preload="metadata"
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        >
+          <source src="/hero-video.mp4" type="video/mp4" />
           Seu navegador não suporta vídeos HTML5.
         </video>
+        
+        {/* Controles de Volume */}
+        <div className="absolute bottom-8 right-8 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-sm rounded-full px-4 py-3">
+          <button
+            onClick={toggleMute}
+            className="text-white hover:text-primary transition-colors"
+            aria-label={isMuted ? "Ativar som" : "Silenciar"}
+          >
+            {isMuted ? (
+              <VolumeX className="h-6 w-6" />
+            ) : (
+              <Volume2 className="h-6 w-6" />
+            )}
+          </button>
+          {!isMuted && (
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              value={volume}
+              onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+              className="w-24 accent-primary"
+              aria-label="Controle de volume"
+            />
+          )}
+        </div>
         
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/70 via-black/50 to-black" />
 
@@ -145,7 +213,7 @@ const Index = () => {
               Desde o primeiro treino até as grandes conquistas.
             </p>
             <p className="text-xl md:text-2xl font-bold text-primary">
-              um impulso pro seu futuro!
+              Um impulso pro seu futuro!
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

@@ -2,40 +2,46 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Trophy, Dumbbell, Bell, ArrowRight, Medal, Flame } from "lucide-react";
+import { Calendar, Trophy, Dumbbell, Bell, ArrowRight, Medal, Flame, User, Clock, MapPin, Users, Gamepad2, Target } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
+import { useEvents } from "@/hooks/useEvents";
+import { useTrainings } from "@/hooks/useTrainings";
+import { useProgress } from "@/hooks/useProgress";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
-  // Mock data - futuramente virá do backend
-  const player = {
-    name: "João Silva",
-    age: 22,
-    height: "1.78m",
-    weight: "75kg",
-    avatar: "/placeholder.svg",
-  };
+  const { user } = useAuth();
+  const { profile, loading: profileLoading } = useProfile();
+  const { getUpcomingEvents } = useEvents();
+  const { getTodaysTraining } = useTrainings();
+  const { progress, getLevelProgress } = useProgress();
+  const navigate = useNavigate();
 
-  const ranking = {
-    position: 12,
-    points: 2450,
-    region: "São Paulo",
-  };
+  // Obter próximos eventos e treino de hoje
+  const upcomingEvents = getUpcomingEvents(3);
+  const todaysTraining = getTodaysTraining();
+  
+  // Calcular progresso do nível
+  const levelProgress = progress ? getLevelProgress(progress.total_points, progress.current_level) : { progress: 0, pointsToNext: 100 };
 
-  const nextEvents = [
-    { date: "15 Fev", type: "Jogo", opponent: "FC Santos" },
-    { date: "18 Fev", type: "Treino", description: "Tático" },
-  ];
+  // Dados reais do usuário
+  const displayName = profile?.name || 'Usuário';
+  const userAge = profile?.age || 'Não informado';
+  const userHeight = profile?.height ? `${profile.height}cm` : 'Não informado';
+  const userWeight = profile?.weight ? `${profile.weight}kg` : 'Não informado';
 
-  const todayTraining = {
-    title: "Treino de Resistência",
-    duration: "45 min",
-    difficulty: "Médio",
-  };
-
-  const notifications = [
-    "Novo jogo adicionado ao calendário",
-    "Você subiu 3 posições no ranking",
-    "Treino especial disponível hoje",
-  ];
+  // Se ainda está carregando o perfil
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
@@ -46,7 +52,7 @@ export default function Dashboard() {
             <Flame className="h-8 w-8 text-primary animate-pulse" />
             <div>
               <h1 className="text-3xl font-bold text-foreground">
-                Olá, {player.name}!
+                Olá, {displayName}!
               </h1>
               <p className="text-muted-foreground">Seu melhor amigo no caminho do futebol</p>
             </div>
@@ -62,41 +68,116 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Avatar className="h-12 w-12">
-                  <AvatarImage src={player.avatar} alt={player.name} />
+                  <AvatarImage src={profile?.avatar_url} alt={displayName} />
                   <AvatarFallback className="bg-primary text-primary-foreground">
-                    {player.name.split(" ").map(n => n[0]).join("")}
+                    {displayName.split(" ").map(n => n[0]).join("").slice(0, 2)}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <div className="font-bold">{player.name}</div>
-                  <div className="text-sm text-muted-foreground">Jogador</div>
+                  <div className="font-bold">{displayName}</div>
+                  <div className="text-sm text-muted-foreground">{user?.email}</div>
                 </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid grid-cols-3 gap-2 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-primary">{player.age}</div>
+                  <div className="text-2xl font-bold text-primary">{userAge}</div>
                   <div className="text-xs text-muted-foreground">anos</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-primary">{player.height}</div>
+                  <div className="text-2xl font-bold text-primary">{userHeight}</div>
                   <div className="text-xs text-muted-foreground">altura</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-primary">{player.weight}</div>
+                  <div className="text-2xl font-bold text-primary">{userWeight}</div>
                   <div className="text-xs text-muted-foreground">peso</div>
                 </div>
               </div>
-              <Button className="w-full" variant="outline">
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => navigate('/dashboard/profile')}
+              >
                 Ver perfil completo
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>
           </Card>
 
-          {/* Card Calendário */}
+          {/* Card Progresso */}
           <Card className="hover-scale transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: "0.1s" }}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-primary" />
+                Progresso
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {progress ? (
+                <>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Medal className="h-4 w-4 text-yellow-500" />
+                        <span className="font-semibold">Nível {progress.current_level}</span>
+                      </div>
+                      <Badge variant="outline" className="text-primary">
+                        {progress.total_points} pts
+                      </Badge>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Progresso para o próximo nível</span>
+                        <span>{levelProgress.pointsToNext} pts restantes</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-primary to-primary/80 h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${levelProgress.progress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 pt-2">
+                      <div className="text-center">
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <Flame className="h-4 w-4 text-orange-500" />
+                          <span className="text-lg font-bold">{progress.current_workout_streak}</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">Sequência</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <Target className="h-4 w-4 text-green-500" />
+                          <span className="text-lg font-bold">{progress.total_workouts_completed}</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">Treinos</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => navigate('/dashboard/achievements')}
+                  >
+                    Ver Conquistas
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </>
+              ) : (
+                <div className="text-center py-4">
+                  <Trophy className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-muted-foreground text-sm">Complete seu primeiro treino para começar a ganhar pontos!</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Card Calendário */}
+          <Card className="hover-scale transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: "0.2s" }}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-primary" />
@@ -104,105 +185,189 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {nextEvents.map((event, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-primary">{event.date.split(" ")[0]}</div>
-                    <div className="text-xs text-muted-foreground">{event.date.split(" ")[1]}</div>
-                  </div>
-                  <div className="flex-1">
-                    <Badge variant={event.type === "Jogo" ? "default" : "secondary"}>
-                      {event.type}
-                    </Badge>
-                    <p className="text-sm mt-1">{event.opponent || event.description}</p>
-                  </div>
+              {upcomingEvents.length === 0 ? (
+                <div className="text-center py-8">
+                  <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">Nenhum evento agendado</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Crie eventos no calendário para vê-los aqui
+                  </p>
                 </div>
-              ))}
-              <Button className="w-full" variant="outline">
+              ) : (
+                <div className="space-y-3">
+                  {upcomingEvents.map((event, index) => (
+                    <div key={event.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <div className="flex-shrink-0">
+                        {event.event_type === 'game' ? (
+                          <Gamepad2 className="h-5 w-5 text-red-500" />
+                        ) : event.event_type === 'training' ? (
+                          <Dumbbell className="h-5 w-5 text-blue-500" />
+                        ) : (
+                          <Calendar className="h-5 w-5 text-gray-500" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{event.title}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          <span>
+                            {new Date(event.start_date).toLocaleDateString('pt-BR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                        {event.location && (
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                            <MapPin className="h-3 w-3" />
+                            <span className="truncate">{event.location}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => navigate('/dashboard/calendar')}
+              >
                 Ver calendário completo
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>
           </Card>
 
           {/* Card Ranking */}
-          <Card className="hover-scale transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: "0.2s" }}>
+          <Card className="hover-scale transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: "0.3s" }}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-primary" />
-                Ranking Regional
+                Ranking
               </CardTitle>
-              <CardDescription>{ranking.region}</CardDescription>
+              <CardDescription>Sistema de pontuação</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-center">
-                <Medal className="h-20 w-20 text-primary" />
+                <Trophy className="h-16 w-16 text-muted-foreground" />
               </div>
               <div className="text-center space-y-2">
                 <div>
-                  <div className="text-4xl font-bold text-primary">#{ranking.position}</div>
+                  <div className="text-2xl font-bold text-primary">--</div>
                   <div className="text-sm text-muted-foreground">Posição Atual</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">{ranking.points}</div>
+                  <div className="text-xl font-bold text-muted-foreground">0</div>
                   <div className="text-xs text-muted-foreground">Pontos Acumulados</div>
                 </div>
               </div>
-              <Button className="w-full">
+              <Button 
+                className="w-full"
+                onClick={() => navigate('/dashboard/ranking')}
+              >
                 Ver ranking completo
               </Button>
             </CardContent>
           </Card>
 
           {/* Card Treino do Dia */}
-          <Card className="hover-scale transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: "0.3s" }}>
+          <Card className="hover-scale transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: "0.4s" }}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Dumbbell className="h-5 w-5 text-primary" />
-                Treino do Dia
+                Treino de Hoje
               </CardTitle>
-              <CardDescription>Sugerido por IA</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold">{todayTraining.title}</h3>
-                <div className="flex gap-2">
-                  <Badge variant="secondary">{todayTraining.duration}</Badge>
-                  <Badge variant="outline">{todayTraining.difficulty}</Badge>
+              {todaysTraining ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold">{todaysTraining.title}</h3>
+                    <Badge variant="secondary">
+                      {todaysTraining.difficulty_level === 'beginner' ? 'Iniciante' :
+                       todaysTraining.difficulty_level === 'intermediate' ? 'Intermediário' : 'Avançado'}
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      {todaysTraining.duration_minutes} min
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Target className="h-4 w-4" />
+                      {todaysTraining.exercises.length} exercícios
+                    </div>
+                  </div>
+
+                  {todaysTraining.description && (
+                    <p className="text-sm text-muted-foreground">{todaysTraining.description}</p>
+                  )}
+
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium">Exercícios:</h4>
+                    <div className="space-y-1">
+                      {todaysTraining.exercises.slice(0, 3).map((exercise, index) => (
+                        <div key={index} className="flex items-center justify-between text-sm">
+                          <span>{exercise.name}</span>
+                          <span className="text-muted-foreground">
+                            {exercise.sets}x {exercise.reps}
+                          </span>
+                        </div>
+                      ))}
+                      {todaysTraining.exercises.length > 3 && (
+                        <p className="text-xs text-muted-foreground">
+                          +{todaysTraining.exercises.length - 3} exercícios
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <Button className="w-full">
+                    Iniciar Treino
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Progresso</span>
-                  <span className="font-medium">0%</span>
+              ) : (
+                <div className="text-center py-6">
+                  <Dumbbell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">Nenhum treino programado</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Gere um plano de treinos personalizado
+                  </p>
                 </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-primary w-0" />
-                </div>
-              </div>
-              <Button className="w-full">
-                Ver detalhes
+              )}
+              
+              <Button 
+                className="w-full"
+                variant="outline"
+                onClick={() => navigate('/dashboard/training')}
+              >
+                {todaysTraining ? 'Ver todos os treinos' : 'Criar treinos'}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>
           </Card>
 
           {/* Card Notificações */}
-          <Card className="hover-scale transition-all hover:shadow-lg animate-fade-in md:col-span-2" style={{ animationDelay: "0.4s" }}>
+          <Card className="hover-scale transition-all hover:shadow-lg animate-fade-in md:col-span-2" style={{ animationDelay: "0.5s" }}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5 text-primary" />
-                Notificações Recentes
+                Notificações
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-3">
-                {notifications.map((notif, i) => (
-                  <li key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                    <div className="h-2 w-2 rounded-full bg-primary mt-2 flex-shrink-0" />
-                    <p className="text-sm flex-1">{notif}</p>
-                  </li>
-                ))}
-              </ul>
+              <div className="text-center py-8">
+                <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">Nenhuma notificação</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  As notificações aparecerão aqui quando houver novidades
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>

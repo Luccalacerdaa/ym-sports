@@ -4,18 +4,35 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import logoImage from "@/assets/ym-sports-logo-white-bg.png";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implementar lógica de login com Lovable Cloud
-    console.log("Login:", { email, password });
-    navigate("/dashboard");
+    setLoading(true);
+    
+    try {
+      const { data, error } = await signIn(email, password);
+      
+      if (error) {
+        toast.error("Erro ao fazer login: " + error.message);
+      } else {
+        toast.success("Login realizado com sucesso!");
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      toast.error("Erro inesperado ao fazer login");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -60,8 +77,8 @@ const Login = () => {
                 className="bg-secondary/50 border-border"
               />
             </div>
-            <Button type="submit" variant="hero" size="lg" className="w-full">
-              Entrar
+            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
+              {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
           <div className="mt-6 text-center">

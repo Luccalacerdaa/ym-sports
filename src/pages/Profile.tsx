@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -6,6 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePhotoUpload } from "@/hooks/usePhotoUpload";
+import { toast } from "sonner";
 import { 
   User, 
   Ruler, 
@@ -16,36 +20,144 @@ import {
   Calendar,
   Edit2,
   Save,
-  X
+  X,
+  LogOut,
+  Camera,
+  Phone,
+  Building
 } from "lucide-react";
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState({
-    name: "João Silva",
-    age: "22",
-    height: "1.78",
-    weight: "75",
-    position: "Atacante",
-    currentTeam: "FC São Paulo",
-    previousTeams: ["Juventus SP", "Palmeiras Sub-20"],
-    achievements: [
-      "Campeão Paulista Sub-20 (2022)",
-      "Artilheiro da Copa Regional (2023)",
-      "Melhor Jogador do Mês - Agosto 2023"
-    ],
-    bio: "Apaixonado por futebol desde criança. Busco sempre evoluir e alcançar novos objetivos.",
-    avatar: "/placeholder.svg"
+  const { user, signOut } = useAuth();
+  const { profile, loading, error, updateProfile, createProfile } = useProfile();
+  const { uploadPhoto, uploading: photoUploading } = usePhotoUpload();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Estado local para edição
+  const [editData, setEditData] = useState({
+    name: "",
+    age: "",
+    height: "",
+    weight: "",
+    bio: "",
+    current_team: "",
+    position: "",
+    phone: "",
+    location: "",
+    previous_teams: "",
+    championships_won: "",
   });
 
-  const handleSave = () => {
-    // Aqui salvaria no backend
-    setIsEditing(false);
+  // Atualizar dados de edição quando o perfil carregar
+  useEffect(() => {
+    if (profile) {
+      setEditData({
+        name: profile.name || "",
+        age: profile.age?.toString() || "",
+        height: profile.height?.toString() || "",
+        weight: profile.weight?.toString() || "",
+        bio: profile.bio || "",
+        current_team: profile.current_team || "",
+        position: profile.position || "",
+        phone: profile.phone || "",
+        location: profile.location || "",
+        previous_teams: profile.previous_teams?.join(", ") || "",
+        championships_won: profile.championships_won?.join(", ") || "",
+      });
+    }
+  }, [profile]);
+
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const photoUrl = await uploadPhoto(file);
+    if (photoUrl) {
+      // Atualizar o perfil com a nova foto
+      await updateProfile({ avatar_url: photoUrl });
+      toast.success("Foto atualizada com sucesso!");
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      const updates = {
+        name: editData.name,
+        age: editData.age ? parseInt(editData.age) : undefined,
+        height: editData.height ? parseInt(editData.height) : undefined,
+        weight: editData.weight ? parseInt(editData.weight) : undefined,
+        bio: editData.bio,
+        current_team: editData.current_team,
+        position: editData.position,
+        phone: editData.phone,
+        location: editData.location,
+        previous_teams: editData.previous_teams ? editData.previous_teams.split(", ").filter(t => t.trim()) : [],
+        championships_won: editData.championships_won ? editData.championships_won.split(", ").filter(c => c.trim()) : [],
+      };
+
+      const { error } = await updateProfile(updates);
+      
+      if (error) {
+        toast.error("Erro ao salvar perfil: " + error.message);
+      } else {
+        toast.success("Perfil atualizado com sucesso!");
+        setIsEditing(false);
+      }
+    } catch (err) {
+      toast.error("Erro inesperado ao salvar perfil");
+    }
   };
 
   const handleCancel = () => {
+    if (profile) {
+      setEditData({
+        name: profile.name || "",
+        age: profile.age?.toString() || "",
+        height: profile.height?.toString() || "",
+        weight: profile.weight?.toString() || "",
+        bio: profile.bio || "",
+        current_team: profile.current_team || "",
+        position: profile.position || "",
+        phone: profile.phone || "",
+        location: profile.location || "",
+        previous_teams: profile.previous_teams?.join(", ") || "",
+        championships_won: profile.championships_won?.join(", ") || "",
+      });
+    }
     setIsEditing(false);
   };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast.success("Logout realizado com sucesso!");
+    } catch (error) {
+      toast.error("Erro ao fazer logout");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando perfil...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background">
+        <div className="text-center">
+          <p className="text-destructive mb-4">Erro ao carregar perfil: {error}</p>
+          <Button onClick={() => window.location.reload()}>Tentar novamente</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-6">
@@ -57,39 +169,51 @@ export default function Profile() {
             <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="relative group">
                 <Avatar className="h-32 w-32 border-4 border-primary">
-                  <AvatarImage src={profile.avatar} alt={profile.name} />
+                  <AvatarImage src={profile?.avatar_url} alt={profile?.name || "Usuário"} />
                   <AvatarFallback className="bg-primary text-primary-foreground text-3xl">
-                    {profile.name.split(" ").map(n => n[0]).join("")}
+                    {(profile?.name || user?.email || "U").split(" ").map(n => n[0]).join("").slice(0, 2)}
                   </AvatarFallback>
                 </Avatar>
-                {isEditing && (
-                  <Button 
-                    size="icon" 
-                    className="absolute bottom-0 right-0 h-10 w-10 rounded-full"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                )}
+                <Button 
+                  size="icon" 
+                  className="absolute bottom-0 right-0 h-10 w-10 rounded-full"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={photoUploading}
+                >
+                  {photoUploading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
               </div>
               
               <div className="flex-1 text-center md:text-left space-y-2">
                 {isEditing ? (
                   <Input 
-                    value={profile.name}
-                    onChange={(e) => setProfile({...profile, name: e.target.value})}
+                    value={editData.name}
+                    onChange={(e) => setEditData({...editData, name: e.target.value})}
                     className="text-2xl font-bold max-w-md"
+                    placeholder="Seu nome"
                   />
                 ) : (
-                  <h1 className="text-3xl font-bold">{profile.name}</h1>
+                  <h1 className="text-3xl font-bold">{profile?.name || "Usuário"}</h1>
                 )}
                 <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                   <Badge className="flex items-center gap-1">
                     <Shield className="h-3 w-3" />
-                    {profile.position}
+                    {profile?.age ? `${profile.age} anos` : "Idade não informada"}
                   </Badge>
                   <Badge variant="secondary" className="flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
-                    {profile.currentTeam}
+                    {user?.email || "Email não disponível"}
                   </Badge>
                 </div>
               </div>
@@ -107,10 +231,16 @@ export default function Profile() {
                     </Button>
                   </>
                 ) : (
-                  <Button onClick={() => setIsEditing(true)} className="gap-2">
-                    <Edit2 className="h-4 w-4" />
-                    Editar Perfil
-                  </Button>
+                  <>
+                    <Button onClick={() => setIsEditing(true)} className="gap-2">
+                      <Edit2 className="h-4 w-4" />
+                      Editar Perfil
+                    </Button>
+                    <Button onClick={handleLogout} variant="outline" className="gap-2">
+                      <LogOut className="h-4 w-4" />
+                      Sair
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
@@ -136,27 +266,21 @@ export default function Profile() {
                   {isEditing ? (
                     <Input 
                       type="number"
-                      value={profile.age}
-                      onChange={(e) => setProfile({...profile, age: e.target.value})}
+                      value={editData.age}
+                      onChange={(e) => setEditData({...editData, age: e.target.value})}
+                      placeholder="Idade"
                     />
                   ) : (
-                    <p className="text-2xl font-bold text-primary">{profile.age} anos</p>
+                    <p className="text-2xl font-bold text-primary">{profile?.age || "Não informado"} anos</p>
                   )}
                 </div>
                 
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2 text-muted-foreground">
                     <Shield className="h-4 w-4" />
-                    Posição
+                    Email
                   </Label>
-                  {isEditing ? (
-                    <Input 
-                      value={profile.position}
-                      onChange={(e) => setProfile({...profile, position: e.target.value})}
-                    />
-                  ) : (
-                    <p className="text-2xl font-bold text-primary">{profile.position}</p>
-                  )}
+                  <p className="text-lg font-semibold">{user?.email || "Email não disponível"}</p>
                 </div>
 
                 <div className="space-y-2">
@@ -168,14 +292,14 @@ export default function Profile() {
                     <div className="flex items-center gap-2">
                       <Input 
                         type="number"
-                        step="0.01"
-                        value={profile.height}
-                        onChange={(e) => setProfile({...profile, height: e.target.value})}
+                        value={editData.height}
+                        onChange={(e) => setEditData({...editData, height: e.target.value})}
+                        placeholder="Altura em cm"
                       />
-                      <span className="text-sm text-muted-foreground">m</span>
+                      <span className="text-sm text-muted-foreground">cm</span>
                     </div>
                   ) : (
-                    <p className="text-2xl font-bold text-primary">{profile.height}m</p>
+                    <p className="text-2xl font-bold text-primary">{profile?.height || "Não informado"}cm</p>
                   )}
                 </div>
 
@@ -188,31 +312,18 @@ export default function Profile() {
                     <div className="flex items-center gap-2">
                       <Input 
                         type="number"
-                        value={profile.weight}
-                        onChange={(e) => setProfile({...profile, weight: e.target.value})}
+                        value={editData.weight}
+                        onChange={(e) => setEditData({...editData, weight: e.target.value})}
+                        placeholder="Peso em kg"
                       />
                       <span className="text-sm text-muted-foreground">kg</span>
                     </div>
                   ) : (
-                    <p className="text-2xl font-bold text-primary">{profile.weight}kg</p>
+                    <p className="text-2xl font-bold text-primary">{profile?.weight || "Não informado"}kg</p>
                   )}
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  Time Atual
-                </Label>
-                {isEditing ? (
-                  <Input 
-                    value={profile.currentTeam}
-                    onChange={(e) => setProfile({...profile, currentTeam: e.target.value})}
-                  />
-                ) : (
-                  <p className="text-lg font-semibold">{profile.currentTeam}</p>
-                )}
-              </div>
             </CardContent>
           </Card>
 
@@ -224,59 +335,177 @@ export default function Profile() {
             <CardContent>
               {isEditing ? (
                 <Textarea 
-                  value={profile.bio}
-                  onChange={(e) => setProfile({...profile, bio: e.target.value})}
+                  value={editData.bio}
+                  onChange={(e) => setEditData({...editData, bio: e.target.value})}
                   rows={6}
                   placeholder="Conte um pouco sobre você..."
                 />
               ) : (
-                <p className="text-muted-foreground leading-relaxed">{profile.bio}</p>
+                <p className="text-muted-foreground leading-relaxed">
+                  {profile?.bio || "Nenhuma biografia adicionada ainda. Clique em 'Editar Perfil' para adicionar uma."}
+                </p>
               )}
             </CardContent>
           </Card>
 
-          {/* Times Anteriores */}
-          <Card className="hover-scale animate-fade-in" style={{ animationDelay: "0.3s" }}>
+          {/* Informações do Futebol */}
+          <Card className="hover-scale animate-fade-in" style={{ animationDelay: "0.25s" }}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-primary" />
-                Times Anteriores
+                Carreira no Futebol
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {profile.previousTeams.map((team, index) => (
-                  <div 
-                    key={index} 
-                    className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                  >
-                    <div className="h-2 w-2 rounded-full bg-primary" />
-                    <span className="font-medium">{team}</span>
-                  </div>
-                ))}
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-muted-foreground">
+                    <Building className="h-4 w-4" />
+                    Time Atual
+                  </Label>
+                  {isEditing ? (
+                    <Input 
+                      value={editData.current_team}
+                      onChange={(e) => setEditData({...editData, current_team: e.target.value})}
+                      placeholder="Nome do seu time atual"
+                    />
+                  ) : (
+                    <p className="text-lg font-semibold">{profile?.current_team || "Não informado"}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-muted-foreground">
+                    <User className="h-4 w-4" />
+                    Posição
+                  </Label>
+                  {isEditing ? (
+                    <Input 
+                      value={editData.position}
+                      onChange={(e) => setEditData({...editData, position: e.target.value})}
+                      placeholder="Sua posição no campo"
+                    />
+                  ) : (
+                    <p className="text-lg font-semibold">{profile?.position || "Não informado"}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-muted-foreground">
+                    <Trophy className="h-4 w-4" />
+                    Times Anteriores
+                  </Label>
+                  {isEditing ? (
+                    <Input 
+                      value={editData.previous_teams}
+                      onChange={(e) => setEditData({...editData, previous_teams: e.target.value})}
+                      placeholder="Separados por vírgula"
+                    />
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {profile?.previous_teams && profile.previous_teams.length > 0 ? (
+                        profile.previous_teams.map((team, index) => (
+                          <Badge key={index} variant="secondary">{team}</Badge>
+                        ))
+                      ) : (
+                        <p className="text-muted-foreground">Nenhum time anterior</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-muted-foreground">
+                    <Trophy className="h-4 w-4" />
+                    Campeonatos Ganhos
+                  </Label>
+                  {isEditing ? (
+                    <Input 
+                      value={editData.championships_won}
+                      onChange={(e) => setEditData({...editData, championships_won: e.target.value})}
+                      placeholder="Separados por vírgula"
+                    />
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {profile?.championships_won && profile.championships_won.length > 0 ? (
+                        profile.championships_won.map((championship, index) => (
+                          <Badge key={index} variant="default" className="bg-yellow-600">
+                            {championship}
+                          </Badge>
+                        ))
+                      ) : (
+                        <p className="text-muted-foreground">Nenhum campeonato</p>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Conquistas */}
-          <Card className="hover-scale animate-fade-in" style={{ animationDelay: "0.4s" }}>
+          {/* Informações de Contato */}
+          <Card className="hover-scale animate-fade-in" style={{ animationDelay: "0.3s" }}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-primary" />
-                Conquistas e Títulos
+                <Phone className="h-5 w-5 text-primary" />
+                Contato
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-muted-foreground">
+                    <Phone className="h-4 w-4" />
+                    Telefone
+                  </Label>
+                  {isEditing ? (
+                    <Input 
+                      value={editData.phone}
+                      onChange={(e) => setEditData({...editData, phone: e.target.value})}
+                      placeholder="Seu telefone"
+                    />
+                  ) : (
+                    <p className="text-lg font-semibold">{profile?.phone || "Não informado"}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-muted-foreground">
+                    <MapPin className="h-4 w-4" />
+                    Localização
+                  </Label>
+                  {isEditing ? (
+                    <Input 
+                      value={editData.location}
+                      onChange={(e) => setEditData({...editData, location: e.target.value})}
+                      placeholder="Sua cidade/estado"
+                    />
+                  ) : (
+                    <p className="text-lg font-semibold">{profile?.location || "Não informado"}</p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Informações da Conta */}
+          <Card className="hover-scale animate-fade-in" style={{ animationDelay: "0.3s" }}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5 text-primary" />
+                Informações da Conta
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="space-y-2">
-                {profile.achievements.map((achievement, index) => (
-                  <div 
-                    key={index} 
-                    className="flex items-start gap-3 p-3 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors"
-                  >
-                    <Trophy className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span className="text-sm font-medium leading-relaxed">{achievement}</span>
-                  </div>
-                ))}
+                <Label className="text-muted-foreground">Email</Label>
+                <p className="text-lg font-semibold">{user?.email}</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-muted-foreground">Membro desde</Label>
+                <p className="text-lg font-semibold">
+                  {user?.created_at ? new Date(user.created_at).toLocaleDateString('pt-BR') : 'Não disponível'}
+                </p>
               </div>
             </CardContent>
           </Card>

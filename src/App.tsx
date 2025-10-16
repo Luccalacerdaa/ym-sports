@@ -3,12 +3,19 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-import CalendarPage from "./pages/CalendarPage";
+import Calendar from "./pages/Calendar";
+import Training from "./pages/Training";
+import HeightProjection from "./pages/HeightProjection";
+import ExerciseLibrary from "./pages/ExerciseLibrary";
+import Achievements from "./pages/Achievements";
+import Ranking from "./pages/Ranking";
 import DashboardLayout from "./pages/DashboardLayout";
 import NotFound from "./pages/NotFound";
 
@@ -16,27 +23,36 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth/login" element={<Login />} />
-          <Route path="/auth/signup" element={<Signup />} />
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="calendar" element={<CalendarPage />} />
-            <Route path="ranking" element={<div className="p-6">Ranking em construção</div>} />
-            <Route path="training" element={<div className="p-6">Treinos em construção</div>} />
-            <Route path="nutrition" element={<div className="p-6">Nutrição em construção</div>} />
-            <Route path="settings" element={<div className="p-6">Configurações em construção</div>} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth/login" element={<Login />} />
+            <Route path="/auth/signup" element={<Signup />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="calendar" element={<Calendar />} />
+              <Route path="training" element={<Training />} />
+              <Route path="height-projection" element={<HeightProjection />} />
+              <Route path="exercises" element={<ExerciseLibrary />} />
+              <Route path="achievements" element={<Achievements />} />
+              <Route path="ranking" element={<Ranking />} />
+              <Route path="nutrition" element={<div className="p-6">Nutrição em construção</div>} />
+              <Route path="settings" element={<div className="p-6">Configurações em construção</div>} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

@@ -1,5 +1,7 @@
-import { User, Settings, LogOut, Apple } from "lucide-react";
+import { User, Settings, LogOut, Apple, TrendingUp, Dumbbell, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +14,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function TopNavBar() {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const { profile } = useProfile();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate("/");
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+    }
+  };
+
+  const displayName = profile?.name || user?.email?.split('@')[0] || 'Usuário';
+  const avatarInitials = displayName.split(" ").map(n => n[0]).join("").slice(0, 2);
 
   return (
     <div className="sticky top-0 z-40 w-full bg-black/95 backdrop-blur-sm border-b border-border">
@@ -21,9 +37,9 @@ export function TopNavBar() {
         <DropdownMenu>
           <DropdownMenuTrigger className="focus:outline-none">
             <Avatar className="h-9 w-9 border-2 border-primary/50 hover:border-primary transition-colors">
-              <AvatarImage src="" alt="Perfil" />
+              <AvatarImage src={profile?.avatar_url} alt={displayName} />
               <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                U
+                {avatarInitials}
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
@@ -34,6 +50,18 @@ export function TopNavBar() {
               <User className="mr-2 h-4 w-4" />
               <span>Perfil</span>
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/dashboard/height-projection")}>
+              <TrendingUp className="mr-2 h-4 w-4" />
+              <span>Altura e Projeção</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/dashboard/exercises")}>
+              <Dumbbell className="mr-2 h-4 w-4" />
+              <span>Biblioteca de Exercícios</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/dashboard/achievements")}>
+              <Trophy className="mr-2 h-4 w-4" />
+              <span>Conquistas</span>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/dashboard/nutrition")}>
               <Apple className="mr-2 h-4 w-4" />
               <span>Nutrição</span>
@@ -43,7 +71,7 @@ export function TopNavBar() {
               <span>Configurações</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate("/")}>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Sair</span>
             </DropdownMenuItem>
