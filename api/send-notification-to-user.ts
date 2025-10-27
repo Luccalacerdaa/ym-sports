@@ -67,11 +67,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const results = await Promise.allSettled(
       subscriptions.map(async (sub) => {
         try {
-          await webpush.sendNotification(sub.subscription_data, payload);
-          console.log(`✅ Notificação enviada para: ${sub.endpoint.substring(0, 50)}...`);
-          return { success: true, endpoint: sub.endpoint };
+          console.log(`📤 Tentando enviar para: ${sub.endpoint.substring(0, 80)}...`);
+          console.log(`📋 Payload:`, JSON.parse(payload));
+          
+          const result = await webpush.sendNotification(sub.subscription_data, payload);
+          
+          console.log(`✅ Web-push diz: SUCESSO para ${sub.endpoint.substring(0, 50)}...`);
+          console.log(`📊 Status code:`, result.statusCode);
+          console.log(`📄 Headers:`, result.headers);
+          
+          return { success: true, endpoint: sub.endpoint, statusCode: result.statusCode };
         } catch (error: any) {
-          console.error(`❌ Erro ao enviar para: ${sub.endpoint.substring(0, 50)}...`, error.message);
+          console.error(`❌ ERRO ao enviar para: ${sub.endpoint.substring(0, 50)}...`);
+          console.error(`   Mensagem:`, error.message);
+          console.error(`   Status:`, error.statusCode);
+          console.error(`   Body:`, error.body);
           
           // Se a inscrição está inválida (410 Gone ou 404 Not Found), remover do banco
           if (error.statusCode === 410 || error.statusCode === 404) {
@@ -82,7 +92,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               .eq('id', sub.id);
           }
           
-          return { success: false, endpoint: sub.endpoint, error: error.message };
+          return { success: false, endpoint: sub.endpoint, error: error.message, statusCode: error.statusCode };
         }
       })
     );
