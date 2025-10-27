@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧪 Teste de Ícones - YM Sports</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+      color: #fff;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, #ff6b00, #ff9500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 40px;
+      font-size: 1.1rem;
+    }
+
+    .section {
+      background: #1a1a1a;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 1px solid #333;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: #ff6b00;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .icon-card {
+      background: #0a0a0a;
+      border: 2px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .icon-card:hover {
+      border-color: #ff6b00;
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(255, 107, 0, 0.3);
+    }
+
+    .icon-wrapper {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 150px;
+    }
+
+    .icon-wrapper img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .icon-info {
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
+
+    .icon-size {
+      color: #ff6b00;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .icon-status {
+      margin-top: 10px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    .status-ok {
+      background: #00ff0033;
+      color: #00ff00;
+    }
+
+    .status-error {
+      background: #ff000033;
+      color: #ff0000;
+    }
+
+    .test-notification {
+      background: linear-gradient(135deg, #ff6b00, #ff9500);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    .test-notification:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 20px rgba(255, 107, 0, 0.5);
+    }
+
+    .test-notification:active {
+      transform: scale(0.98);
+    }
+
+    .manifest-info {
+      background: #0a0a0a;
+      border: 2px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      color: #0f0;
+      overflow-x: auto;
+    }
+
+    .manifest-info pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .alert {
+      background: #ff6b0022;
+      border: 2px solid #ff6b00;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      color: #ff9500;
+    }
+
+    .alert strong {
+      color: #ff6b00;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .icon-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Teste de Ícones - YM Sports</h1>
+    <p class="subtitle">Verificação de todos os ícones PWA e notificações</p>
+
+    <div class="alert">
+      <strong>📋 INSTRUÇÕES:</strong><br>
+      1. Verifique se todos os ícones aparecem corretamente (fundo branco)<br>
+      2. Se algum ícone mostrar "❌ Erro", o arquivo não existe ou está inacessível<br>
+      3. Clique em "Testar Notificação" para ver o ícone na notificação<br>
+      4. Se os ícones não aparecerem, envie novos arquivos PNG com fundo transparente
+    </div>
+
+    <!-- Seção: Ícones PWA -->
+    <div class="section">
+      <h2 class="section-title">📱 Ícones PWA (Progressive Web App)</h2>
+      <div class="icon-grid" id="pwa-icons"></div>
+    </div>
+
+    <!-- Seção: Ícones de Notificação -->
+    <div class="section">
+      <h2 class="section-title">🔔 Ícones de Notificação</h2>
+      <div class="icon-grid" id="notification-icons"></div>
+    </div>
+
+    <!-- Seção: Teste de Notificação -->
+    <div class="section">
+      <h2 class="section-title">🧪 Teste de Notificação</h2>
+      <p style="color: #888; margin-bottom: 15px;">
+        Clique no botão abaixo para enviar uma notificação de teste e ver como o ícone aparece:
+      </p>
+      <button class="test-notification" onclick="testNotification()">
+        🔔 Enviar Notificação de Teste
+      </button>
+      <div id="notification-result" style="margin-top: 15px; color: #888;"></div>
+    </div>
+
+    <!-- Seção: Manifest Info -->
+    <div class="section">
+      <h2 class="section-title">📄 Informações do Manifest</h2>
+      <div class="manifest-info" id="manifest-info">
+        <pre>Carregando manifest.webmanifest...</pre>
+      </div>
+    </div>
+
+    <!-- Seção: Requisitos -->
+    <div class="section">
+      <h2 class="section-title">📐 Requisitos dos Ícones</h2>
+      <div style="color: #888; line-height: 1.8;">
+        <p><strong style="color: #ff6b00;">Formato:</strong> PNG com fundo transparente</p>
+        <p><strong style="color: #ff6b00;">Proporção:</strong> 1:1 (quadrado)</p>
+        <p><strong style="color: #ff6b00;">Tamanhos necessários:</strong></p>
+        <ul style="margin-left: 20px; margin-top: 10px;">
+          <li>48x48 - Favicon alternativo</li>
+          <li>72x72 - Android pequeno</li>
+          <li>96x96 - Badge de notificações</li>
+          <li>144x144 - Android médio</li>
+          <li>192x192 - PWA padrão (notificações)</li>
+          <li>512x512 - PWA alta resolução</li>
+        </ul>
+        <p style="margin-top: 15px;"><strong style="color: #ff6b00;">Dica:</strong> Use um logo simples e legível em tamanhos pequenos</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Lista de ícones para testar
+    const icons = [
+      { path: '/icons/icon-48.png', size: '48x48', purpose: 'Favicon' },
+      { path: '/icons/icon-72.png', size: '72x72', purpose: 'Android pequeno' },
+      { path: '/icons/icon-96.png', size: '96x96', purpose: 'Badge notificação' },
+      { path: '/icons/icon-144.png', size: '144x144', purpose: 'Android médio' },
+      { path: '/icons/icon-192.png', size: '192x192', purpose: 'PWA padrão' },
+      { path: '/icons/icon-512.png', size: '512x512', purpose: 'PWA alta resolução' },
+      { path: '/icons/logo.png', size: '500x500', purpose: 'Logo original' }
+    ];
+
+    const notificationIcons = [
+      { path: '/icons/icon-192.png', size: '192x192', purpose: 'Ícone principal' },
+      { path: '/icons/icon-96.png', size: '96x96', purpose: 'Badge (canto)' }
+    ];
+
+    // Função para criar card de ícone
+    function createIconCard(icon, containerId) {
+      const card = document.createElement('div');
+      card.className = 'icon-card';
+      
+      const wrapper = document.createElement('div');
+      wrapper.className = 'icon-wrapper';
+      
+      const img = document.createElement('img');
+      img.src = icon.path;
+      img.alt = icon.size;
+      img.style.maxWidth = '128px';
+      img.style.maxHeight = '128px';
+      
+      const status = document.createElement('div');
+      status.className = 'icon-status';
+      status.textContent = '⏳ Carregando...';
+      
+      // Verificar se a imagem carrega
+      img.onload = () => {
+        status.className = 'icon-status status-ok';
+        status.textContent = '✅ OK';
+      };
+      
+      img.onerror = () => {
+        status.className = 'icon-status status-error';
+        status.textContent = '❌ Erro ao carregar';
+        wrapper.style.background = '#ff000022';
+      };
+      
+      wrapper.appendChild(img);
+      card.appendChild(wrapper);
+      card.innerHTML += `
+        <div class="icon-info">${icon.purpose}</div>
+        <div class="icon-size">${icon.size}</div>
+      `;
+      card.appendChild(status);
+      
+      document.getElementById(containerId).appendChild(card);
+    }
+
+    // Carregar ícones PWA
+    icons.forEach(icon => createIconCard(icon, 'pwa-icons'));
+
+    // Carregar ícones de notificação
+    notificationIcons.forEach(icon => createIconCard(icon, 'notification-icons'));
+
+    // Carregar manifest
+    fetch('/manifest.webmanifest')
+      .then(r => r.json())
+      .then(manifest => {
+        document.getElementById('manifest-info').innerHTML = `<pre>${JSON.stringify(manifest, null, 2)}</pre>`;
+      })
+      .catch(err => {
+        document.getElementById('manifest-info').innerHTML = `<pre style="color: #f00;">Erro ao carregar manifest: ${err.message}</pre>`;
+      });
+
+    // Função de teste de notificação
+    async function testNotification() {
+      const result = document.getElementById('notification-result');
+      
+      // Verificar suporte
+      if (!('Notification' in window)) {
+        result.innerHTML = '<span style="color: #f00;">❌ Notificações não suportadas neste navegador</span>';
+        return;
+      }
+
+      // Solicitar permissão
+      if (Notification.permission === 'default') {
+        result.innerHTML = '<span style="color: #ff6b00;">⏳ Solicitando permissão...</span>';
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          result.innerHTML = '<span style="color: #f00;">❌ Permissão negada</span>';
+          return;
+        }
+      }
+
+      if (Notification.permission !== 'granted') {
+        result.innerHTML = '<span style="color: #f00;">❌ Permissão de notificação não concedida</span>';
+        return;
+      }
+
+      // Enviar notificação
+      try {
+        result.innerHTML = '<span style="color: #0f0;">✅ Enviando notificação...</span>';
+        
+        const notification = new Notification('🧪 Teste - YM Sports', {
+          body: 'Verifique se o logo aparece corretamente!',
+          icon: '/icons/icon-192.png',
+          badge: '/icons/icon-96.png',
+          vibrate: [200, 100, 200],
+          tag: 'test-icon'
+        });
+
+        notification.onclick = () => {
+          notification.close();
+        };
+
+        result.innerHTML = '<span style="color: #0f0;">✅ Notificação enviada! Verifique se o logo aparece.</span>';
+      } catch (error) {
+        result.innerHTML = `<span style="color: #f00;">❌ Erro: ${error.message}</span>`;
+      }
+    }
+
+    // Auto-scroll suave
+    window.addEventListener('load', () => {
+      console.log('🎨 Página de teste de ícones carregada!');
+      console.log('📱 Testando', icons.length, 'ícones PWA');
+      console.log('🔔 Testando', notificationIcons.length, 'ícones de notificação');
+    });
+  </script>
+</body>
+</html>
+
