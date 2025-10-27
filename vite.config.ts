@@ -16,6 +16,13 @@ export default defineConfig(({ mode }) => ({
     VitePWA({ 
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icons/*.png'],
+      // Usar nosso Service Worker customizado
+      srcDir: 'public',
+      filename: 'sw.js',
+      strategies: 'injectManifest',
+      injectManifest: {
+        injectionPoint: undefined
+      },
       manifest: {
         name: 'YM Sports - O melhor amigo do jogador',
         short_name: 'YM Sports',
@@ -35,7 +42,9 @@ export default defineConfig(({ mode }) => ({
             type: 'image/png'
           }
         ]
-      }
+      },
+      // Desabilitar registro automático (vamos registrar manualmente)
+      injectRegister: null
     })
   ].filter(Boolean),
   resolve: {
