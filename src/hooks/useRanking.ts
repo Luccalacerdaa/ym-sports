@@ -301,7 +301,16 @@ export const useRanking = () => {
 
       const { data, error } = await query.limit(50);
 
-      if (error) throw error;
+      if (error) {
+        console.error(`Erro na query de ranking ${type}:`, error);
+        throw error;
+      }
+
+      // Se não houver dados, retornar array vazio ao invés de erro
+      if (!data || data.length === 0) {
+        console.log(`Nenhum ranking ${type} encontrado`);
+        return [];
+      }
 
       const rankingsWithUserInfo = data?.map(entry => ({
         ...entry,
@@ -346,8 +355,15 @@ export const useRanking = () => {
         `)
         .order('total_points', { ascending: false});
 
-      if (progressError) throw progressError;
-      if (!progressData || progressData.length === 0) return;
+      if (progressError) {
+        console.error('Erro ao buscar user_progress:', progressError);
+        throw progressError;
+      }
+      
+      if (!progressData || progressData.length === 0) {
+        console.log('Nenhum dado de progresso encontrado');
+        return;
+      }
 
       // Buscar localizações de todos os usuários
       const { data: locationsData, error: locationsError } = await supabase
