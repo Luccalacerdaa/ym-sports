@@ -27,19 +27,48 @@ export default defineConfig(({ mode }) => ({
         name: 'YM Sports - O melhor amigo do jogador',
         short_name: 'YM Sports',
         description: 'Eleve seu desempenho esportivo com treinos inteligentes, calendário de jogos, ranking regional e gamificação.',
-        theme_color: '#000000',
+        theme_color: '#ff6b00',
         background_color: '#000000',
         display: 'standalone',
+        orientation: 'portrait',
+        scope: '/',
+        start_url: '/',
         icons: [
           {
-            src: 'icons/logo.png',
-            sizes: '192x192',
-            type: 'image/png'
+            src: 'icons/icon-48.png',
+            sizes: '48x48',
+            type: 'image/png',
+            purpose: 'any'
           },
           {
-            src: 'icons/logo.png',
+            src: 'icons/icon-72.png',
+            sizes: '72x72',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: 'icons/icon-96.png',
+            sizes: '96x96',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: 'icons/icon-144.png',
+            sizes: '144x144',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: 'icons/icon-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
+            src: 'icons/icon-512.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
           }
         ]
       },

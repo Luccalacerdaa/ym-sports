@@ -55,7 +55,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const payload = JSON.stringify({
       title,
       body: body || '',
-      icon: icon || 'https://ym-sports.vercel.app/icons/logo.png',
+      icon: icon || 'https://ym-sports.vercel.app/icons/icon-192.png',
       url: url || 'https://ym-sports.vercel.app/dashboard',
       data: data || {},
       timestamp: Date.now()

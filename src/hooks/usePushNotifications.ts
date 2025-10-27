@@ -240,8 +240,8 @@ export const usePushNotifications = () => {
 
     new Notification('🧪 Teste - YM Sports', {
       body: 'Esta é uma notificação de teste!',
-      icon: '/icons/logo.png',
-      badge: '/icons/logo.png',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-96.png',
       vibrate: [200, 100, 200]
     });
 

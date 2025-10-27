@@ -49,8 +49,8 @@ self.addEventListener('push', (event) => {
   let title = '⚽ YM Sports';
   let options = {
     body: 'Nova atualização!',
-    icon: `${APP_URL}/icons/logo.png`,
-    badge: `${APP_URL}/icons/logo.png`,
+    icon: `${APP_URL}/icons/icon-192.png`,
+    badge: `${APP_URL}/icons/icon-96.png`,
     data: { url: `${APP_URL}/dashboard` },
     vibrate: [200, 100, 200],
     tag: 'ym-sports',
@@ -66,8 +66,8 @@ self.addEventListener('push', (event) => {
       title = data.title || title;
       options = {
         body: data.body || 'Nova atualização no YM Sports!',
-        icon: data.icon || `${APP_URL}/icons/logo.png`,
-        badge: `${APP_URL}/icons/logo.png`,
+        icon: data.icon || `${APP_URL}/icons/icon-192.png`,
+        badge: `${APP_URL}/icons/icon-96.png`,
         image: data.image || undefined,
         data: {
           url: data.url || `${APP_URL}/dashboard`,
