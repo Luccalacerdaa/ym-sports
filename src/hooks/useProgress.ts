@@ -311,6 +311,26 @@ export const useProgress = () => {
 
       setProgress(updatedProgress);
 
+      // Enviar notificação se subiu de nível
+      if (result?.levelUp) {
+        try {
+          await fetch('/api/send-notification-to-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_id: user.id,
+              title: '🎉 Parabéns! Subiu de Nível!',
+              body: `Você alcançou o nível ${result.newLevel}! Continue treinando!`,
+              url: '/dashboard',
+              icon: '/icons/logo.png',
+              data: { type: 'level_up', level: result.newLevel }
+            })
+          });
+        } catch (error) {
+          console.error('Erro ao enviar notificação de nível:', error);
+        }
+      }
+
       return result;
     } catch (err: any) {
       console.error('Erro ao registrar treino:', err);
@@ -377,6 +397,28 @@ export const useProgress = () => {
               achievement_id: achievement.id,
               achievement_name: achievement.name,
             });
+          }
+
+          // Enviar notificação de conquista desbloqueada
+          try {
+            await fetch('/api/send-notification-to-user', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                user_id: user.id,
+                title: `🏆 Nova Conquista Desbloqueada!`,
+                body: `${achievement.icon} ${achievement.name} - ${achievement.description}`,
+                url: '/dashboard/achievements',
+                icon: '/icons/logo.png',
+                data: { 
+                  type: 'achievement_unlocked', 
+                  achievement_id: achievement.id,
+                  achievement_name: achievement.name
+                }
+              })
+            });
+          } catch (error) {
+            console.error('Erro ao enviar notificação de conquista:', error);
           }
         }
       }

@@ -181,7 +181,8 @@ export const useEvents = () => {
   // Carregar eventos quando o usuário mudar
   useEffect(() => {
     fetchEvents();
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   return {
     events,

@@ -11,7 +11,7 @@ const navItems = [
 export function BottomNavBar() {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-black border-t border-border">
-      <nav className="flex justify-around items-center h-16 max-w-screen-xl mx-auto">
+      <nav className="flex justify-around items-center h-20 max-w-screen-xl mx-auto">
         {navItems.map((item) => (
           <NavLink
             key={item.title}
@@ -25,8 +25,8 @@ export function BottomNavBar() {
               }`
             }
           >
-            <item.icon className="h-6 w-6 mb-1" />
-            <span className="text-xs font-medium">{item.title}</span>
+            <item.icon className="h-7 w-7 mb-1" />
+            <span className="text-sm font-medium">{item.title}</span>
           </NavLink>
         ))}
       </nav>

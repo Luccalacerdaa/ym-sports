@@ -400,36 +400,66 @@ export default function Ranking() {
         </TabsList>
 
         <TabsContent value="national">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5 text-primary" />
-                Ranking Nacional
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <RankingTable rankings={nationalRanking} type="national" />
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-primary" />
+                  Ranking Nacional
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RankingTable rankings={nationalRanking} type="national" />
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Map className="h-5 w-5 text-primary" />
+                  Mapa Nacional
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <MapRanking rankingType="national" />
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="regional">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Flag className="h-5 w-5 text-primary" />
-                Ranking Regional
-                {userLocation && (
-                  <Badge variant="outline" className="ml-2">
-                    {userLocation.region}
-                  </Badge>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {userLocation ? (
-                <RankingTable rankings={regionalRanking} type="regional" />
-              ) : (
+          {userLocation ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Flag className="h-5 w-5 text-primary" />
+                    Ranking Regional
+                    <Badge variant="outline" className="ml-2">
+                      {userLocation.region}
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RankingTable rankings={regionalRanking} type="regional" />
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Map className="h-5 w-5 text-primary" />
+                    Mapa Regional - {userLocation.region}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <MapRanking rankingType="regional" />
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-8">
                 <div className="text-center py-8">
                   <MapPin className="h-12 w-12 text-primary mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Detectando sua localização...</h3>
@@ -469,28 +499,44 @@ export default function Ranking() {
                     )}
                   </Button>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="local">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-primary" />
-                Ranking Local
-                {userLocation && (
-                  <Badge variant="outline" className="ml-2">
-                    {userLocation.state}
-                  </Badge>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {userLocation ? (
-                <RankingTable rankings={localRanking} type="local" />
-              ) : (
+          {userLocation ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    Ranking Local
+                    <Badge variant="outline" className="ml-2">
+                      {userLocation.state}
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RankingTable rankings={localRanking} type="local" />
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Map className="h-5 w-5 text-primary" />
+                    Mapa Local - {userLocation.state}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <MapRanking rankingType="local" />
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-8">
                 <div className="text-center py-8">
                   <MapPin className="h-12 w-12 text-primary mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Detectando sua localização...</h3>
@@ -530,9 +576,9 @@ export default function Ranking() {
                     )}
                   </Button>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="map">

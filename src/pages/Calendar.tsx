@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEvents } from "@/hooks/useEvents";
 import { toast } from "sonner";
-import Calendar from 'react-calendar';
+import ReactCalendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import './Calendar.css';
 import { 
@@ -79,9 +79,16 @@ export default function Calendar() {
 
   // Função para abrir dialog de criação com data selecionada
   const openCreateDialog = () => {
+    // Preencher com a data selecionada e horário padrão (09:00)
+    const dateWithTime = new Date(selectedDate);
+    dateWithTime.setHours(9, 0, 0, 0);
+    const localDateTime = new Date(dateWithTime.getTime() - dateWithTime.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
+    
     setFormData(prev => ({
       ...prev,
-      start_date: selectedDate.toISOString().split('T')[0]
+      start_date: localDateTime
     }));
     setIsCreateDialogOpen(true);
   };
@@ -213,7 +220,7 @@ export default function Calendar() {
                 <CardTitle>Calendário</CardTitle>
               </CardHeader>
               <CardContent>
-                <Calendar
+                <ReactCalendar
                   onChange={handleDateChange}
                   value={selectedDate}
                   locale="pt-BR"
@@ -387,6 +394,35 @@ export default function Calendar() {
                   onChange={(e) => setFormData({...formData, start_date: e.target.value})}
                   required
                 />
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <span className="text-xs text-muted-foreground w-full">Horários rápidos:</span>
+                  {[
+                    { label: '06:00', hour: 6 },
+                    { label: '09:00', hour: 9 },
+                    { label: '12:00', hour: 12 },
+                    { label: '15:00', hour: 15 },
+                    { label: '18:00', hour: 18 },
+                    { label: '20:00', hour: 20 },
+                  ].map(({ label, hour }) => (
+                    <Button
+                      key={label}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="text-xs"
+                      onClick={() => {
+                        const date = new Date(selectedDate);
+                        date.setHours(hour, 0, 0, 0);
+                        const localDateTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+                          .toISOString()
+                          .slice(0, 16);
+                        setFormData({...formData, start_date: localDateTime});
+                      }}
+                    >
+                      {label}
+                    </Button>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-2">
