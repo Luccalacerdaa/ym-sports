@@ -2,101 +2,128 @@
 // Este arquivo gerencia as notificações push mesmo quando o app está fechado
 
 const APP_URL = 'https://ym-sports.vercel.app';
-const CACHE_NAME = 'ym-sports-v1';
+const CACHE_NAME = 'ym-sports-v2';
+
+console.log('[SW] 🚀 Service Worker YM Sports carregado!');
 
 // Evento: Instalação do Service Worker
 self.addEventListener('install', (event) => {
-  console.log('[SW] Service Worker instalado');
+  console.log('[SW] ⚙️ Service Worker instalando...');
   self.skipWaiting(); // Ativa imediatamente
+  console.log('[SW] ✅ Service Worker instalado!');
 });
 
 // Evento: Ativação do Service Worker
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Service Worker ativado');
-  event.waitUntil(clients.claim()); // Assume controle imediatamente
+  console.log('[SW] ⚙️ Service Worker ativando...');
+  event.waitUntil(
+    clients.claim().then(() => {
+      console.log('[SW] ✅ Service Worker ativado e controlando páginas!');
+    })
+  );
 });
 
 // Evento: Receber notificação push
 self.addEventListener('push', (event) => {
-  console.log('[SW] Push recebido:', event);
+  console.log('[SW] 📥 PUSH EVENT RECEBIDO!', event);
+  console.log('[SW] 📋 event.data existe?', !!event.data);
   
-  if (!event.data) {
-    console.log('[SW] Push sem dados');
-    return;
-  }
+  // SEMPRE mostrar uma notificação, mesmo sem dados
+  let title = '⚽ YM Sports';
+  let options = {
+    body: 'Nova atualização!',
+    icon: `${APP_URL}/icons/logo.png`,
+    badge: `${APP_URL}/icons/logo.png`,
+    data: { url: `${APP_URL}/dashboard` },
+    vibrate: [200, 100, 200],
+    tag: 'ym-sports',
+    requireInteraction: false,
+    timestamp: Date.now()
+  };
 
-  try {
-    const data = event.data.json();
-    console.log('[SW] Dados do push:', data);
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      console.log('[SW] ✅ Dados do push parseados:', data);
 
-    // Configurações da notificação
-    const options = {
-      body: data.body || 'Nova atualização no YM Sports!',
-      icon: data.icon || `${APP_URL}/icons/logo.png`,
-      badge: `${APP_URL}/icons/logo.png`,
-      image: data.image || null,
-      data: {
-        url: data.url || `${APP_URL}/dashboard`,
-        ...data.data
-      },
-      actions: [
-        {
-          action: 'open',
-          title: '👀 Ver Agora',
-          icon: `${APP_URL}/icons/logo.png`
+      title = data.title || title;
+      options = {
+        body: data.body || 'Nova atualização no YM Sports!',
+        icon: data.icon || `${APP_URL}/icons/logo.png`,
+        badge: `${APP_URL}/icons/logo.png`,
+        image: data.image || undefined,
+        data: {
+          url: data.url || `${APP_URL}/dashboard`,
+          ...data.data
         },
-        {
-          action: 'close',
-          title: '✖️ Fechar'
-        }
-      ],
-      vibrate: [200, 100, 200], // Padrão de vibração
-      requireInteraction: false, // Não requer interação para sumir
-      timestamp: Date.now(),
-      tag: data.tag || 'ym-sports-notification', // Agrupa notificações similares
-      renotify: true // Vibra novamente se já existe notificação com mesma tag
-    };
-
-    event.waitUntil(
-      self.registration.showNotification(data.title || '⚽ YM Sports', options)
-    );
-  } catch (error) {
-    console.error('[SW] Erro ao processar push:', error);
-    
-    // Fallback: mostrar notificação genérica
-    event.waitUntil(
-      self.registration.showNotification('YM Sports', {
-        body: 'Você tem uma nova atualização!',
-        icon: `${APP_URL}/icons/logo.png`,
-        data: { url: `${APP_URL}/dashboard` }
-      })
-    );
+        actions: [
+          {
+            action: 'open',
+            title: '👀 Ver Agora'
+          },
+          {
+            action: 'close',
+            title: '✖️ Fechar'
+          }
+        ],
+        vibrate: [200, 100, 200],
+        requireInteraction: false,
+        timestamp: data.timestamp || Date.now(),
+        tag: data.tag || 'ym-sports-notification',
+        renotify: true
+      };
+    } catch (error) {
+      console.error('[SW] ❌ Erro ao fazer parse do push:', error);
+      // Usar valores padrão definidos acima
+    }
+  } else {
+    console.log('[SW] ⚠️ Push sem dados, usando notificação padrão');
   }
+
+  console.log('[SW] 📤 Mostrando notificação:', title, options);
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+      .then(() => {
+        console.log('[SW] ✅ Notificação exibida com sucesso!');
+      })
+      .catch((error) => {
+        console.error('[SW] ❌ Erro ao exibir notificação:', error);
+      })
+  );
 });
 
 // Evento: Clique na notificação
 self.addEventListener('notificationclick', (event) => {
-  console.log('[SW] Notificação clicada:', event.action);
+  console.log('[SW] 🖱️ Notificação clicada!');
+  console.log('[SW] 📋 Action:', event.action);
+  console.log('[SW] 📋 Data:', event.notification.data);
   
-  event.notification.close(); // Fecha a notificação
+  event.notification.close();
+  console.log('[SW] ✅ Notificação fechada');
 
   // Se clicou em "fechar", não faz nada
   if (event.action === 'close') {
+    console.log('[SW] ❌ Usuário fechou a notificação');
     return;
   }
 
   const urlToOpen = event.notification.data?.url || `${APP_URL}/dashboard`;
+  console.log('[SW] 🌐 URL para abrir:', urlToOpen);
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
+        console.log('[SW] 🔍 Janelas abertas:', clientList.length);
+        
         // Se já tem uma janela do app aberta, focar nela
         for (let client of clientList) {
           if (client.url.startsWith(APP_URL) && 'focus' in client) {
-            console.log('[SW] Focando janela existente');
+            console.log('[SW] ✅ Focando janela existente');
             return client.focus().then(() => {
               // Navegar para a URL se possível
               if ('navigate' in client) {
+                console.log('[SW] 🚀 Navegando para:', urlToOpen);
                 return client.navigate(urlToOpen);
               }
             });
@@ -105,12 +132,12 @@ self.addEventListener('notificationclick', (event) => {
         
         // Se não tem janela aberta, abrir nova
         if (clients.openWindow) {
-          console.log('[SW] Abrindo nova janela:', urlToOpen);
+          console.log('[SW] 🆕 Abrindo nova janela');
           return clients.openWindow(urlToOpen);
         }
       })
       .catch((error) => {
-        console.error('[SW] Erro ao abrir janela:', error);
+        console.error('[SW] ❌ Erro ao abrir janela:', error);
       })
   );
 });
@@ -152,5 +179,3 @@ self.addEventListener('message', (event) => {
     });
   }
 });
-
-console.log('[SW] Service Worker YM Sports carregado ✅');
