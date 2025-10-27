@@ -2,9 +2,10 @@
 // Este arquivo gerencia as notificações push mesmo quando o app está fechado
 
 const APP_URL = 'https://ym-sports.vercel.app';
-const CACHE_NAME = 'ym-sports-v2';
+const SW_VERSION = '2.1.0'; // Incrementar para forçar atualização
+const CACHE_NAME = `ym-sports-v${SW_VERSION}`;
 
-console.log('[SW] 🚀 Service Worker YM Sports carregado!');
+console.log(`[SW] 🚀 Service Worker YM Sports v${SW_VERSION} carregado!`);
 
 // Evento: Instalação do Service Worker
 self.addEventListener('install', (event) => {
@@ -16,9 +17,25 @@ self.addEventListener('install', (event) => {
 // Evento: Ativação do Service Worker
 self.addEventListener('activate', (event) => {
   console.log('[SW] ⚙️ Service Worker ativando...');
+  
   event.waitUntil(
-    clients.claim().then(() => {
+    Promise.all([
+      // Limpar caches antigos
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(cacheName => {
+            if (cacheName !== CACHE_NAME && cacheName.startsWith('ym-sports-v')) {
+              console.log('[SW] 🗑️ Removendo cache antigo:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      // Assumir controle das páginas
+      clients.claim()
+    ]).then(() => {
       console.log('[SW] ✅ Service Worker ativado e controlando páginas!');
+      console.log('[SW] 📦 Cache atual:', CACHE_NAME);
     })
   );
 });

@@ -59,10 +59,33 @@ export const usePushNotifications = () => {
   const registerServiceWorker = async (): Promise<ServiceWorkerRegistration | null> => {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/'
+        scope: '/',
+        updateViaCache: 'none' // Não usar cache para o sw.js
       });
       
       console.log('✅ Service Worker registrado:', registration.scope);
+      
+      // Forçar atualização se houver nova versão aguardando
+      if (registration.waiting) {
+        console.log('🔄 Nova versão do SW detectada, ativando...');
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+      
+      // Verificar atualizações periodicamente
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        console.log('🆕 Nova versão do SW encontrada!');
+        
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('✅ Nova versão instalada! Recarregando...');
+              // Recarregar a página para usar a nova versão
+              window.location.reload();
+            }
+          });
+        }
+      });
       
       // Aguardar até que o Service Worker esteja ativo
       await navigator.serviceWorker.ready;
