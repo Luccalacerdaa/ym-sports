@@ -198,7 +198,7 @@ const Index = () => {
         
         <div className="relative z-10 container mx-auto px-4">
           <h2 className={`text-3xl md:text-5xl font-astro font-bold text-center mb-6 text-foreground transition-all duration-1000 ${benefitsSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-            PORQUE ESCOLHER A YM SPORTS?
+            POR QUE ESCOLHER A YM SPORTS?
           </h2>
           
           {/* Hero Text Over Image */}
@@ -463,6 +463,15 @@ const Index = () => {
 
       {/* Scrolling Banner */}
       <ScrollingBanner text="COMECE SUA JORNADA HOJE" />
+
+      {/* Inspirational Quote Section */}
+      <section className="py-16 bg-gradient-to-b from-black to-black/50">
+        <div className="container mx-auto px-4">
+          <h3 className="text-3xl md:text-5xl font-astro font-bold text-center text-primary animate-fade-in">
+            A diferença entre tentar e conquistar começa aqui
+          </h3>
+        </div>
+      </section>
 
       {/* CTA Section */}
       <section ref={ctaSection.ref} className="py-20 bg-black">

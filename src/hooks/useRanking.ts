@@ -337,19 +337,35 @@ export const useRanking = () => {
     try {
       setError(null);
 
-      // Buscar todos os usuários com progresso e localização
-      const { data: usersData, error: usersError } = await supabase
+      // Buscar todos os usuários com progresso
+      const { data: progressData, error: progressError } = await supabase
         .from('user_progress')
         .select(`
           *,
-          user_locations (*),
           profiles (name, avatar_url)
         `)
-        .order('total_points', { ascending: false });
+        .order('total_points', { ascending: false});
 
-      if (usersError) throw usersError;
+      if (progressError) throw progressError;
+      if (!progressData || progressData.length === 0) return;
 
-      if (!usersData || usersData.length === 0) return;
+      // Buscar localizações de todos os usuários
+      const { data: locationsData, error: locationsError } = await supabase
+        .from('user_locations')
+        .select('*');
+
+      if (locationsError) console.error('Erro ao buscar localizações:', locationsError);
+
+      // Mapear localizações por user_id
+      const locationsByUser = new Map(
+        locationsData?.map(loc => [loc.user_id, loc]) || []
+      );
+
+      // Combinar dados de progresso com localização
+      const usersData = progressData.map(progress => ({
+        ...progress,
+        user_locations: locationsByUser.get(progress.user_id) || null
+      }));
 
       // Calcular ranking nacional
       const nationalRankings = usersData.map((userData, index) => ({
