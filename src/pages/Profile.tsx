@@ -10,6 +10,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePhotoUpload } from "@/hooks/usePhotoUpload";
 import { NotificationSettings } from "@/components/NotificationSettings";
+import { ImageCropper } from "@/components/ImageCropper";
 import { toast } from "sonner";
 import { 
   User, 
@@ -30,6 +31,8 @@ import {
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { user, signOut } = useAuth();
   const { profile, loading, error, updateProfile, createProfile } = useProfile();
   const { uploadPhoto, uploading: photoUploading } = usePhotoUpload();
@@ -73,11 +76,37 @@ export default function Profile() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const photoUrl = await uploadPhoto(file);
-    if (photoUrl) {
-      // Atualizar o perfil com a nova foto
-      await updateProfile({ avatar_url: photoUrl });
-      toast.success("Foto atualizada com sucesso!");
+    // Criar URL para a imagem selecionada
+    const imageUrl = URL.createObjectURL(file);
+    setSelectedImage(imageUrl);
+    setIsCropperOpen(true);
+  };
+  
+  const handleCropComplete = async (croppedImageUrl: string) => {
+    try {
+      // Converter a URL de dados para um Blob
+      const response = await fetch(croppedImageUrl);
+      const blob = await response.blob();
+      
+      // Criar um arquivo a partir do Blob
+      const file = new File([blob], "profile-image.jpg", { type: "image/jpeg" });
+      
+      // Fazer upload do arquivo
+      const photoUrl = await uploadPhoto(file);
+      if (photoUrl) {
+        // Atualizar o perfil com a nova foto
+        await updateProfile({ avatar_url: photoUrl });
+        toast.success("Foto atualizada com sucesso!");
+      }
+    } catch (error) {
+      console.error("Erro ao processar imagem:", error);
+      toast.error("Erro ao processar imagem");
+    } finally {
+      // Limpar a URL criada para evitar vazamentos de memória
+      if (selectedImage) {
+        URL.revokeObjectURL(selectedImage);
+      }
+      setSelectedImage(null);
     }
   };
 
@@ -163,6 +192,22 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-6">
       <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
+        {/* Image Cropper */}
+        {selectedImage && (
+          <ImageCropper
+            open={isCropperOpen}
+            onClose={() => {
+              setIsCropperOpen(false);
+              if (selectedImage) {
+                URL.revokeObjectURL(selectedImage);
+              }
+              setSelectedImage(null);
+            }}
+            onCropComplete={handleCropComplete}
+            imageSrc={selectedImage}
+          />
+        )}
+        
         {/* Header Card */}
         <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent" />

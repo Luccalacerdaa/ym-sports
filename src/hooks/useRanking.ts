@@ -350,7 +350,18 @@ export const useRanking = () => {
       }
       
       // Combinar dados de rankings com perfis e progresso
-      const rankingsWithUserInfo = data.map(entry => {
+      // Primeiro, remover duplicatas (mesmo usuário aparecendo mais de uma vez)
+      const uniqueUserIds = new Set();
+      const uniqueRankings = data.filter(entry => {
+        if (uniqueUserIds.has(entry.user_id)) {
+          return false; // Filtrar duplicatas
+        }
+        uniqueUserIds.add(entry.user_id);
+        return true;
+      });
+      
+      // Agora mapear os rankings únicos para adicionar informações de usuário
+      const rankingsWithUserInfo = uniqueRankings.map(entry => {
         const profile = profilesData?.find(p => p.id === entry.user_id);
         const progress = progressData?.find(p => p.user_id === entry.user_id);
         

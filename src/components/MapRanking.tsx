@@ -358,13 +358,28 @@ export const MapRanking = ({ className, rankingType = 'all' }: MapRankingProps) 
       
       el.innerHTML = `${position}`;
       
-      // Adicionar hover effect
+      // Corrigir problema do ícone do top 1 que desaparece
+      // Usar um sistema de hover que não muda a posição do elemento
       el.addEventListener('mouseenter', () => {
-        el.style.transform = 'scale(1.1)';
+        // Aplicar transform com !important para evitar conflitos
+        el.style.cssText = `
+          ${el.style.cssText}
+          transform: scale(1.1) !important;
+          z-index: 1000 !important;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+          transition: all 0.2s ease !important;
+        `;
       });
       
       el.addEventListener('mouseleave', () => {
-        el.style.transform = 'scale(1)';
+        // Restaurar o estilo original com !important para garantir
+        el.style.cssText = `
+          ${el.style.cssText.replace(/transform:.*?!important;/g, '')}
+          transform: scale(1) !important;
+          z-index: ${100 - position} !important;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+          transition: all 0.2s ease !important;
+        `;
       });
 
       // Criar popup com informações detalhadas do jogador

@@ -243,12 +243,17 @@ export default function Ranking() {
                   </div>
                   
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 overflow-hidden">
                       {entry.user_avatar ? (
                         <img 
                           src={entry.user_avatar} 
                           alt={entry.user_name}
                           className="w-10 h-10 rounded-full object-cover"
+                          onError={(e) => {
+                            // Se a imagem falhar ao carregar, mostrar a inicial
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.parentElement!.innerHTML = `<span class="text-primary font-bold">${entry.user_name?.charAt(0) || 'U'}</span>`;
+                          }}
                         />
                       ) : (
                         <span className="text-primary font-bold">
@@ -258,7 +263,7 @@ export default function Ranking() {
                     </div>
                     
                     <div>
-                      <h3 className="font-semibold">{entry.user_name}</h3>
+                      <h3 className="font-semibold">{entry.user_name || 'Usuário'}</h3>
                       <p className="text-sm text-muted-foreground">
                         {entry.user_location || 'Brasil'}
                       </p>
