@@ -326,10 +326,10 @@ export const useRanking = () => {
       // ALTERAÇÃO: Buscar perfis separadamente com mais dados
       const userIds = data.map(entry => entry.user_id);
       
-      // Buscar perfis com mais detalhes
+      // Buscar perfis com mais detalhes (removido campo username que não existe)
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, name, avatar_url, username')
+        .select('id, name, avatar_url')
         .in('id', userIds);
 
       if (profilesError) {
@@ -354,8 +354,8 @@ export const useRanking = () => {
         const profile = profilesData?.find(p => p.id === entry.user_id);
         const progress = progressData?.find(p => p.user_id === entry.user_id);
         
-        // Usar nome do perfil, ou username, ou "Usuário" como fallback
-        const displayName = profile?.name || profile?.username || 'Usuário';
+        // Usar nome do perfil ou "Usuário" como fallback
+        const displayName = profile?.name || `Usuário #${entry.position}`;
         
         // Usar pontos do progresso se disponíveis (mais atualizados)
         const points = progress?.total_points || entry.total_points;

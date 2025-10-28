@@ -1,20 +1,37 @@
 /* Estilos para garantir que a barra inferior esteja sempre visível */
+:root {
+  --app-height: 100vh;
+}
+
+html, body {
+  height: var(--app-height);
+  overflow-x: hidden !important; /* Previne scroll horizontal */
+  position: relative !important;
+  overscroll-behavior-y: none !important; /* Previne scroll elástico que pode causar problemas */
+}
+
 body {
   padding-bottom: env(safe-area-inset-bottom, 80px) !important;
-  overscroll-behavior-y: none !important; /* Previne scroll elástico que pode causar problemas */
-  overflow-x: hidden !important; /* Previne scroll horizontal */
+  -webkit-touch-callout: none !important; /* Previne menu de contexto */
+  touch-action: manipulation !important; /* Otimiza para toque */
 }
 
 /* Corrigir problemas com inputs de data em dispositivos móveis */
 input[type="date"],
 input[type="time"],
-input[type="datetime-local"] {
+input[type="datetime-local"],
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
   max-width: 100% !important;
-  min-height: 40px !important; /* Garantir altura mínima para toque */
+  min-height: 44px !important; /* Garantir altura mínima para toque (44px é o recomendado pela Apple) */
   font-size: 16px !important; /* Evita zoom automático em iOS */
   -webkit-appearance: none !important; /* Remover estilo nativo */
   -moz-appearance: none !important;
   appearance: none !important;
+  transform: translateZ(0) !important; /* Força aceleração de hardware */
 }
 
 /* Garantir que nenhum elemento cubra a barra inferior */
@@ -29,6 +46,7 @@ input[type="datetime-local"] {
   backface-visibility: hidden !important;
   height: auto !important; /* Impedir que a altura seja alterada */
   min-height: 60px !important; /* Altura mínima */
+  transition: none !important; /* Previne animações que podem causar problemas */
 }
 
 /* Garantir que dialogs não afetem a barra inferior */
@@ -63,6 +81,7 @@ html, body {
   .fixed-bottom-bar {
     position: fixed !important;
     bottom: 0 !important;
+    height: 60px !important;
   }
   
   /* Corrigir problema de zoom em inputs */
@@ -73,5 +92,30 @@ html, body {
   /* Garantir que o conteúdo não fique escondido pela barra */
   main {
     padding-bottom: 80px !important;
+  }
+  
+  /* Estilo específico para quando o teclado está aberto */
+  body.keyboard-open {
+    /* Adicionar padding extra para evitar que o conteúdo fique escondido pelo teclado */
+    padding-bottom: 250px !important;
+  }
+  
+  /* Evitar que a barra desapareça quando o teclado está aberto */
+  body.keyboard-open .fixed-bottom-bar {
+    position: fixed !important;
+    bottom: 0 !important;
+    z-index: 9999 !important;
+  }
+  
+  /* Melhorar experiência de toque em inputs */
+  input, textarea, select {
+    padding: 12px !important;
+    margin-bottom: 8px !important;
+  }
+  
+  /* Prevenir comportamentos estranhos com inputs */
+  input:focus, textarea:focus, select:focus {
+    position: relative !important;
+    z-index: 1 !important;
   }
 }
