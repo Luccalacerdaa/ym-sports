@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,7 @@ export default function Calendar() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [dialogHeight, setDialogHeight] = useState<number>(0);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -351,7 +352,13 @@ export default function Calendar() {
             resetForm();
           }
         }}>
-          <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
+          <DialogContent 
+              className="max-w-md max-h-[85vh] overflow-y-auto"
+              style={{ 
+                paddingBottom: `${dialogHeight > 0 ? dialogHeight + 20 : 0}px`,
+                marginBottom: '80px' // Espaço extra para garantir que o botão de submit esteja visível
+              }}
+            >
             <DialogHeader>
               <DialogTitle>{editingEvent ? 'Editar Evento' : 'Criar Novo Evento'}</DialogTitle>
             </DialogHeader>
@@ -468,7 +475,16 @@ export default function Calendar() {
                 />
               </div>
 
-              <div className="flex gap-2 pt-4">
+              <div 
+                className="flex gap-2 pt-4"
+                ref={(el) => {
+                  if (el && isCreateDialogOpen) {
+                    // Calcular altura do botão + margem para o padding do DialogContent
+                    const height = el.getBoundingClientRect().height;
+                    setDialogHeight(height);
+                  }
+                }}
+              >
                 <Button type="submit" className="flex-1">
                   {editingEvent ? 'Salvar Alterações' : 'Criar Evento'}
                 </Button>

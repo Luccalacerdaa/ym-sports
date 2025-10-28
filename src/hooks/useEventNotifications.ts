@@ -12,15 +12,16 @@ export const useEventNotifications = () => {
     const checkUpcomingEvents = async () => {
       try {
         const now = new Date();
-        const in15Minutes = new Date(now.getTime() + 15 * 60 * 1000);
+        const in30Minutes = new Date(now.getTime() + 30 * 60 * 1000);
+        const exactStart = new Date(now.getTime());
         
-        // Buscar eventos que começam nos próximos 15 minutos
+        // Buscar eventos que começam nos próximos 30 minutos ou estão começando agora
         const { data: upcomingEvents, error } = await supabase
           .from('events')
           .select('*')
           .eq('user_id', user.id)
           .gte('start_date', now.toISOString())
-          .lte('start_date', in15Minutes.toISOString());
+          .lte('start_date', in30Minutes.toISOString());
 
         if (error) throw error;
 
@@ -31,9 +32,12 @@ export const useEventNotifications = () => {
           
           // Verificar se já enviou notificação para este evento (localStorage)
           const notificationKey = `event_notified_${event.id}`;
+          const notificationStartKey = `event_start_notified_${event.id}`;
           const alreadyNotified = localStorage.getItem(notificationKey);
+          const alreadyNotifiedStart = localStorage.getItem(notificationStartKey);
           
-          if (!alreadyNotified && minutesUntil <= 15) {
+          // Notificar 30 minutos antes ou quando o evento estiver começando
+          if (!alreadyNotified && minutesUntil <= 30 && minutesUntil > 5) {
             // Enviar notificação local
             if ('Notification' in window && Notification.permission === 'granted') {
               new Notification(`📅 ${event.title}`, {
@@ -73,6 +77,50 @@ export const useEventNotifications = () => {
             // Limpar após 1 dia
             setTimeout(() => {
               localStorage.removeItem(notificationKey);
+            }, 24 * 60 * 60 * 1000);
+          }
+          
+          // Notificar quando o evento estiver começando (entre 0 e 5 minutos)
+          if (!alreadyNotifiedStart && minutesUntil <= 5 && minutesUntil >= 0) {
+            // Enviar notificação local
+            if ('Notification' in window && Notification.permission === 'granted') {
+              new Notification(`🚀 ${event.title}`, {
+                body: `Está começando agora!${event.location ? ` - ${event.location}` : ''}`,
+                icon: '/icons/icon-192.png',
+                badge: '/icons/icon-96.png',
+                tag: `event-start-${event.id}`,
+                requireInteraction: true,
+              });
+            }
+
+            // Enviar notificação push
+            try {
+              await fetch('/api/send-notification-to-user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  user_id: user.id,
+                  title: `🚀 ${event.title}`,
+                  body: `Está começando agora!${event.location ? ` - ${event.location}` : ''}`,
+                  url: '/dashboard/calendar',
+                  icon: '/icons/icon-192.png',
+                  data: { 
+                    type: 'event_start', 
+                    event_id: event.id,
+                    event_title: event.title
+                  }
+                })
+              });
+            } catch (error) {
+              console.error('Erro ao enviar notificação push de início:', error);
+            }
+
+            // Marcar como notificado
+            localStorage.setItem(notificationStartKey, 'true');
+            
+            // Limpar após 1 dia
+            setTimeout(() => {
+              localStorage.removeItem(notificationStartKey);
             }, 24 * 60 * 60 * 1000);
           }
         }

@@ -7,6 +7,8 @@
   font-family: inherit;
   line-height: 1.125em;
   border-radius: 0.5rem;
+  z-index: 10; /* Garantir que o calendário não seja afetado pela hotbar */
+  position: relative; /* Para garantir que o z-index funcione */
 }
 
 .react-calendar--doubleView {
