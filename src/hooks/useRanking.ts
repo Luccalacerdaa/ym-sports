@@ -323,25 +323,49 @@ export const useRanking = () => {
         return [];
       }
 
-      // ALTERAÇÃO: Buscar perfis separadamente
+      // ALTERAÇÃO: Buscar perfis separadamente com mais dados
       const userIds = data.map(entry => entry.user_id);
+      
+      // Buscar perfis com mais detalhes
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, name, avatar_url')
+        .select('id, name, avatar_url, username')
         .in('id', userIds);
 
       if (profilesError) {
         console.warn('Erro ao buscar perfis:', profilesError);
       }
 
-      // Combinar dados de rankings com perfis
+      console.log('Perfis encontrados:', profilesData?.length || 0);
+      console.log('Perfis encontrados (amostra):', profilesData?.slice(0, 3));
+      
+      // Buscar progresso para garantir pontuação correta
+      const { data: progressData, error: progressError } = await supabase
+        .from('user_progress')
+        .select('user_id, total_points')
+        .in('user_id', userIds);
+        
+      if (progressError) {
+        console.warn('Erro ao buscar progresso dos usuários:', progressError);
+      }
+      
+      // Combinar dados de rankings com perfis e progresso
       const rankingsWithUserInfo = data.map(entry => {
         const profile = profilesData?.find(p => p.id === entry.user_id);
+        const progress = progressData?.find(p => p.user_id === entry.user_id);
+        
+        // Usar nome do perfil, ou username, ou "Usuário" como fallback
+        const displayName = profile?.name || profile?.username || 'Usuário';
+        
+        // Usar pontos do progresso se disponíveis (mais atualizados)
+        const points = progress?.total_points || entry.total_points;
+        
         return {
           ...entry,
-          user_name: profile?.name || 'Usuário',
+          user_name: displayName,
           user_avatar: profile?.avatar_url,
           user_location: `${entry.region || 'Brasil'}`,
+          total_points: points, // Atualizar pontos com o valor mais recente
         };
       });
 
@@ -427,15 +451,24 @@ export const useRanking = () => {
       const now = new Date().toISOString();
       const rankingsToInsert = [];
       
+      // Ordenar progresso por pontos (decrescente) para garantir posições corretas
+      progressData.sort((a, b) => b.total_points - a.total_points);
+      
       // Ranking nacional
-      const nationalRankings = progressData.map((progress, index) => ({
-        user_id: progress.user_id,
-        ranking_type: 'national',
-        position: index + 1,
-        total_points: progress.total_points,
-        period: 'all_time',
-        calculated_at: now
-      }));
+      const nationalRankings = progressData.map((progress, index) => {
+        // Buscar perfil do usuário para debug
+        const profile = profilesData.find(p => p.id === progress.user_id);
+        console.log(`Ranking nacional #${index + 1}: ${profile?.name || progress.user_id} - ${progress.total_points} pontos`);
+        
+        return {
+          user_id: progress.user_id,
+          ranking_type: 'national',
+          position: index + 1,
+          total_points: progress.total_points,
+          period: 'all_time',
+          calculated_at: now
+        };
+      });
       rankingsToInsert.push(...nationalRankings);
       
       // Rankings regionais e locais
@@ -703,37 +736,73 @@ export const useRanking = () => {
     if (!user) return { total_points: 0 };
 
     try {
+      console.log('Obtendo posição do usuário nos rankings...');
+      
       // Buscar progresso do usuário
       const { data: progress, error: progressError } = await supabase
         .from('user_progress')
-        .select('total_points')
+        .select('total_points, current_level')
         .eq('user_id', user.id)
         .single();
 
       if (progressError && progressError.code !== 'PGRST116') throw progressError;
 
       const total_points = progress?.total_points || 0;
+      const current_level = progress?.current_level || 1;
+      
+      console.log(`Progresso do usuário: ${total_points} pontos, nível ${current_level}`);
 
       // Buscar posições nos rankings
       const { data: rankings, error: rankingsError } = await supabase
         .from('rankings')
-        .select('ranking_type, position')
+        .select('ranking_type, position, region')
         .eq('user_id', user.id)
         .eq('period', 'all_time');
 
       if (rankingsError) throw rankingsError;
+      
+      console.log('Rankings do usuário:', rankings);
 
-      // Extrair posições
-      let national, regional, local;
-      if (rankings) {
-        for (const rank of rankings) {
-          if (rank.ranking_type === 'national') national = rank.position;
-          else if (rank.ranking_type === 'regional') regional = rank.position;
-          else if (rank.ranking_type === 'local') local = rank.position;
+      // Se não há rankings, recalcular
+      if (!rankings || rankings.length === 0) {
+        console.log('Nenhum ranking encontrado para o usuário, recalculando...');
+        await calculateRankings();
+        
+        // Buscar novamente
+        const { data: updatedRankings, error: updatedError } = await supabase
+          .from('rankings')
+          .select('ranking_type, position, region')
+          .eq('user_id', user.id)
+          .eq('period', 'all_time');
+          
+        if (!updatedError && updatedRankings) {
+          console.log('Rankings recalculados:', updatedRankings);
+          rankings = updatedRankings;
         }
       }
 
-      return { national, regional, local, total_points };
+      // Extrair posições
+      let national, regional, local;
+      if (rankings && rankings.length > 0) {
+        for (const rank of rankings) {
+          if (rank.ranking_type === 'national') {
+            national = rank.position;
+            console.log(`Posição nacional: #${national}`);
+          }
+          else if (rank.ranking_type === 'regional') {
+            regional = rank.position;
+            console.log(`Posição regional (${rank.region}): #${regional}`);
+          }
+          else if (rank.ranking_type === 'local') {
+            local = rank.position;
+            console.log(`Posição local (${rank.region}): #${local}`);
+          }
+        }
+      } else {
+        console.log('Nenhum ranking encontrado para o usuário após recálculo');
+      }
+
+      return { national, regional, local, total_points, current_level };
     } catch (err: any) {
       console.error('Erro ao obter posição do usuário:', err);
       setError(err.message);

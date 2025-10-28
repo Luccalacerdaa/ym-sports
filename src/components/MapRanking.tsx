@@ -229,6 +229,10 @@ export const MapRanking = ({ className, rankingType = 'all' }: MapRankingProps) 
       }
     }
 
+    // Log para debug
+    console.log(`Exibindo ${rankingsToShow.length} jogadores no mapa (${selectedRegion})`);
+    console.log('Amostra de jogadores:', rankingsToShow.slice(0, 3));
+    
     // Adicionar marcadores para cada atleta
     rankingsToShow.forEach((athlete, index) => {
       // Verificar se o atleta tem dados completos
@@ -236,6 +240,10 @@ export const MapRanking = ({ className, rankingType = 'all' }: MapRankingProps) 
         console.log("Atleta sem dados completos:", athlete);
         return; // Pular este atleta
       }
+      
+      // Log para debug de cada jogador
+      console.log(`Adicionando marcador para ${athlete.user_name || 'Usuário'} (#${athlete.position})`);
+      
 
       let coordinates: [number, number];
       let jitter = 0.05; // Adicionar um pequeno deslocamento aleatório para evitar sobreposição

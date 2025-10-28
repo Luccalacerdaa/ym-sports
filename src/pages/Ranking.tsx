@@ -80,20 +80,52 @@ export default function Ranking() {
   const [selectedTab, setSelectedTab] = useState('national');
   const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [userPosition, setUserPosition] = useState<any>(null);
   const [locationForm, setLocationForm] = useState({
     state: '',
     city_approximate: '',
     postal_code_prefix: '',
   });
+  
+  // Buscar posição do usuário
+  useEffect(() => {
+    if (!loading) {
+      const fetchUserPosition = async () => {
+        try {
+          const position = await getUserPosition();
+          console.log('Posição do usuário obtida:', position);
+          setUserPosition(position);
+        } catch (error) {
+          console.error('Erro ao buscar posição do usuário:', error);
+        }
+      };
+      
+      fetchUserPosition();
+    }
+  }, [loading, selectedTab]);
 
   // Buscar rankings ao carregar
   useEffect(() => {
     if (!loading) {
-      fetchRankings('national');
-      if (userLocation) {
-        fetchRankings('regional');
-        fetchRankings('local');
-      }
+      const loadRankings = async () => {
+        // Forçar recálculo dos rankings para garantir dados atualizados
+        try {
+          console.log("Recalculando rankings...");
+          await calculateRankings();
+          console.log("Rankings recalculados com sucesso!");
+          
+          // Buscar rankings atualizados
+          await fetchRankings('national');
+          if (userLocation) {
+            await fetchRankings('regional');
+            await fetchRankings('local');
+          }
+        } catch (error) {
+          console.error("Erro ao carregar rankings:", error);
+        }
+      };
+      
+      loadRankings();
     }
   }, [loading, userLocation]);
 
@@ -321,7 +353,11 @@ export default function Ranking() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">
-                    {userPosition ? `#${userPosition.position}` : '-'}
+                    {userPosition ? 
+                      (selectedTab === 'national' ? `#${userPosition.national || '-'}` :
+                       selectedTab === 'regional' ? `#${userPosition.regional || '-'}` :
+                       selectedTab === 'local' ? `#${userPosition.local || '-'}` : '-') 
+                      : '-'}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {selectedTab === 'national' ? 'Nacional' :
