@@ -1,0 +1,32 @@
+/* Estilos para o GeoVisualizer */
+.shadow-glow-yellow {
+  box-shadow: 0 0 10px 2px rgba(234, 179, 8, 0.4);
+}
+
+.shadow-glow-gray {
+  box-shadow: 0 0 10px 2px rgba(209, 213, 219, 0.4);
+}
+
+.shadow-glow-amber {
+  box-shadow: 0 0 10px 2px rgba(180, 83, 9, 0.4);
+}
+
+/* Animação de pulse para o usuário atual */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pulse-animation {
+  animation: pulse 2s infinite ease-in-out;
+}

@@ -262,23 +262,56 @@ export default function Training() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="duration">Duração por sessão (minutos)</Label>
-                    <Input
-                      id="duration"
-                      type="number"
-                      value={aiRequest.customDuration || aiRequest.sessionDuration}
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value) || 15;
-                        if (value < 15) {
-                          toast.error("Duração mínima é 15 minutos");
-                          return;
-                        }
-                        setAiRequest({...aiRequest, sessionDuration: value, customDuration: e.target.value});
-                      }}
-                      min="15"
-                      max="300"
-                      placeholder="Mínimo 15 minutos"
-                    />
-                    <p className="text-xs text-muted-foreground">Entre 15 e 300 minutos</p>
+                    <div className="flex gap-2">
+                      <Input
+                        id="duration"
+                        type="number"
+                        value={aiRequest.customDuration || aiRequest.sessionDuration}
+                        onChange={(e) => {
+                          const inputValue = e.target.value;
+                          const value = parseInt(inputValue);
+                          
+                          // Sempre atualizar o campo de entrada
+                          setAiRequest({...aiRequest, customDuration: inputValue});
+                          
+                          // Validar e atualizar o valor real apenas se for válido
+                          if (!isNaN(value) && value >= 15 && value <= 300) {
+                            setAiRequest(prev => ({...prev, sessionDuration: value}));
+                          }
+                        }}
+                        min="15"
+                        max="300"
+                        placeholder="Mínimo 15 minutos"
+                        className="flex-1"
+                      />
+                      <div className="flex gap-1">
+                        {[15, 30, 45].map(duration => (
+                          <Button
+                            key={duration}
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setAiRequest({
+                              ...aiRequest, 
+                              sessionDuration: duration,
+                              customDuration: duration.toString()
+                            })}
+                            className={aiRequest.sessionDuration === duration ? 'bg-primary/10' : ''}
+                          >
+                            {duration}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                    {aiRequest.customDuration && (isNaN(parseInt(aiRequest.customDuration)) || parseInt(aiRequest.customDuration) < 15) && (
+                      <p className="text-xs text-destructive">A duração mínima é de 15 minutos</p>
+                    )}
+                    {aiRequest.customDuration && parseInt(aiRequest.customDuration) > 300 && (
+                      <p className="text-xs text-destructive">A duração máxima é de 300 minutos</p>
+                    )}
+                    {!(aiRequest.customDuration && (isNaN(parseInt(aiRequest.customDuration)) || parseInt(aiRequest.customDuration) < 15 || parseInt(aiRequest.customDuration) > 300)) && (
+                      <p className="text-xs text-muted-foreground">Entre 15 e 300 minutos</p>
+                    )}
                   </div>
                   
                   <div className="space-y-2">

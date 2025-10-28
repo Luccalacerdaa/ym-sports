@@ -11,6 +11,8 @@ import { useRanking } from '@/hooks/useRanking';
 import { useProfile } from '@/hooks/useProfile';
 import { useProgress } from '@/hooks/useProgress';
 import { MapRanking } from '@/components/MapRanking';
+import { GeoVisualizer } from '@/components/GeoVisualizer';
+import '../styles/geo-visualizer.css';
 import { toast } from 'sonner';
 import { 
   Trophy, 
@@ -454,17 +456,7 @@ export default function Ranking() {
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Map className="h-5 w-5 text-primary" />
-                  Mapa Nacional
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <MapRanking rankingType="national" />
-              </CardContent>
-            </Card>
+            <GeoVisualizer rankingType="national" />
           </div>
         </TabsContent>
 
@@ -486,17 +478,7 @@ export default function Ranking() {
                 </CardContent>
               </Card>
               
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Map className="h-5 w-5 text-primary" />
-                    Mapa Regional - {userLocation.region}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <MapRanking rankingType="regional" />
-                </CardContent>
-              </Card>
+              <GeoVisualizer rankingType="regional" />
             </div>
           ) : (
             <Card>
@@ -563,17 +545,7 @@ export default function Ranking() {
                 </CardContent>
               </Card>
               
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Map className="h-5 w-5 text-primary" />
-                    Mapa Local - {userLocation.state}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <MapRanking rankingType="local" />
-                </CardContent>
-              </Card>
+              <GeoVisualizer rankingType="local" />
             </div>
           ) : (
             <Card>
@@ -623,7 +595,7 @@ export default function Ranking() {
         </TabsContent>
 
         <TabsContent value="map">
-          <MapRanking />
+          <GeoVisualizer />
         </TabsContent>
       </Tabs>
 

@@ -50,13 +50,19 @@ SOLICITAÇÃO DE TREINO PERSONALIZADO:
 - Dias disponíveis: ${daysText}
 - Duração por sessão: ${request.sessionDuration} minutos
 - Nível de dificuldade: ${request.difficulty}
-- Equipamentos disponíveis: ${equipmentText}
-- Foco do treino: ${focusText}
+- Equipamentos disponíveis: ${equipmentText || "Apenas peso corporal"}
+- Foco do treino: ${focusText || "Geral"}
 
 INSTRUÇÕES:
 Você é um preparador físico especializado em futebol com 20+ anos de experiência. Crie um plano de treinos semanal ULTRA PERSONALIZADO baseado no perfil específico do atleta.
 
-IMPORTANTE: Gere treinos para TODOS os dias disponíveis. Se ${request.availableDays.length} dias foram selecionados, crie ${request.availableDays.length} treinos diferentes.
+IMPORTANTE: 
+- Gere treinos para TODOS os dias disponíveis. Se ${request.availableDays.length} dias foram selecionados, crie ${request.availableDays.length} treinos diferentes.
+- VOCÊ DEVE USAR OS EQUIPAMENTOS INFORMADOS! Se o atleta informou que tem ${equipmentText || "apenas peso corporal"}, TODOS os treinos devem utilizar esses equipamentos.
+- Cada treino deve ter pelo menos um exercício que utilize um dos equipamentos informados.
+- Se o atleta informou que tem halteres, barras ou kettlebell, inclua exercícios com pesos.
+- Se o atleta informou que tem bicicleta ou esteira, inclua exercícios cardiovasculares com esses equipamentos.
+- Adapte a duração dos exercícios para que o treino completo dure exatamente ${request.sessionDuration} minutos.
 
 LIMITAÇÕES PARA EVITAR CORTE:
 - Máximo 3 exercícios por treino
@@ -105,6 +111,11 @@ DIRETRIZES CRÍTICAS:
 8. Varie COMPLETAMENTE os treinos - cada dia deve ser único
 9. Inclua progressão semanal baseada no perfil
 10. SEMPRE explique o "porquê" de cada escolha
+11. OBRIGATÓRIO: Utilize os equipamentos informados pelo atleta em TODOS os treinos
+12. Distribua os exercícios para utilizar o tempo total solicitado (${request.sessionDuration} minutos)
+13. Crie treinos profissionais com progressão lógica (aquecimento → parte principal → finalização)
+14. Inclua tempos de descanso realistas entre séries (30-90 segundos dependendo da intensidade)
+15. Considere o nível de dificuldade solicitado (${request.difficulty}) ao definir intensidade
 
 TIPOS DE TREINO POR DIA:
 - Segunda: Força e Potência (adaptado ao biotipo)
@@ -131,13 +142,19 @@ ADAPTAÇÕES POR POSIÇÃO:
 VÍDEOS E IMAGENS:
 - SEMPRE inclua links do YouTube para cada exercício
 - Use vídeos em PORTUGUÊS de canais brasileiros como:
-  * Canal do Personal (exercícios em português)
+  * Treino em Casa (exercícios em português)
   * Hipertrofia (canais de musculação em português)
+  * Fabio Giga (treinos de futebol)
+  * Leandro Twin (exercícios com halteres)
+  * Renato Cariani (exercícios com barras)
+  * Rodrigo Purchio (exercícios funcionais)
   * Canais de futebol brasileiros para exercícios específicos
 - Para exercícios de futebol, use vídeos de canais brasileiros de treinamento
 - Inclua descrições detalhadas de execução em PORTUGUÊS
 - Mencione benefícios específicos para o perfil
 - Se não souber um vídeo específico, use um vídeo genérico do exercício em português
+- IMPORTANTE: Verifique que os vídeos mostram EXATAMENTE o exercício descrito
+- Priorize vídeos que mostram a técnica correta de execução
 
 BASE DE EXERCÍCIOS DISPONÍVEIS:
 ${exerciseDatabase.map(ex => 
