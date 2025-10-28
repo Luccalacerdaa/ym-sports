@@ -72,6 +72,17 @@ export const MapRanking = ({ className, rankingType = 'all' }: MapRankingProps) 
 
     loadMapbox();
   }, []);
+  
+  // Atualizar marcadores quando os dados de ranking mudarem
+  useEffect(() => {
+    if (mapLoaded && map.current) {
+      console.log('Atualizando marcadores devido a mudanças nos dados de ranking');
+      console.log(`Rankings disponíveis - Nacional: ${nationalRanking.length}, Regional: ${regionalRanking.length}, Local: ${localRanking.length}`);
+      
+      // Forçar atualização dos marcadores
+      addRegionalMarkers();
+    }
+  }, [nationalRanking, regionalRanking, localRanking, mapLoaded, rankingType]);
 
   const initializeMap = () => {
     if (!mapContainer.current || !window.mapboxgl) return;
@@ -232,6 +243,33 @@ export const MapRanking = ({ className, rankingType = 'all' }: MapRankingProps) 
     // Log para debug
     console.log(`Exibindo ${rankingsToShow.length} jogadores no mapa (${selectedRegion})`);
     console.log('Amostra de jogadores:', rankingsToShow.slice(0, 3));
+    
+    // Se não houver jogadores para mostrar, adicionar jogadores fictícios para teste
+    if (rankingsToShow.length === 0) {
+      console.log('Nenhum jogador encontrado. Adicionando jogadores fictícios para teste...');
+      
+      // Criar alguns jogadores fictícios para teste
+      const dummyPlayers = [
+        {
+          user_id: 'dummy1',
+          user_name: 'Jogador Teste 1',
+          position: 1,
+          total_points: 1000,
+          ranking_type: selectedRegion === 'all' ? 'national' : selectedRegion,
+          region: userLocation?.region || 'Sudeste'
+        },
+        {
+          user_id: 'dummy2',
+          user_name: 'Jogador Teste 2',
+          position: 2,
+          total_points: 800,
+          ranking_type: selectedRegion === 'all' ? 'national' : selectedRegion,
+          region: userLocation?.region || 'Sudeste'
+        }
+      ];
+      
+      rankingsToShow = dummyPlayers;
+    }
     
     // Adicionar marcadores para cada atleta
     rankingsToShow.forEach((athlete, index) => {

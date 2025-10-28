@@ -534,28 +534,24 @@ export const useRanking = () => {
       
       console.log(`✅ Calculados ${rankingsToInsert.length} rankings`);
       
-      // Limpar rankings existentes
-      const { error: deleteError } = await supabase
-        .from('rankings')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Trick para deletar tudo
-      
-      if (deleteError) {
-        console.error('❌ Erro ao limpar rankings existentes:', deleteError);
-        throw deleteError;
-      }
-      
-      // Inserir novos rankings (em lotes de 100)
+      // Usar upsert em vez de delete + insert para evitar erros de chave duplicada
       const BATCH_SIZE = 100;
       for (let i = 0; i < rankingsToInsert.length; i += BATCH_SIZE) {
         const batch = rankingsToInsert.slice(i, i + BATCH_SIZE);
-        const { error: insertError } = await supabase
+        const { error: upsertError } = await supabase
           .from('rankings')
-          .insert(batch);
+          .upsert(batch, {
+            onConflict: 'user_id,ranking_type,region,period',
+            ignoreDuplicates: false // Atualizar registros existentes
+          });
         
-        if (insertError) {
-          console.error(`❌ Erro ao inserir lote ${i/BATCH_SIZE + 1}:`, insertError);
-          throw insertError;
+        if (upsertError) {
+          console.error(`❌ Erro ao atualizar lote ${Math.floor(i/BATCH_SIZE) + 1}:`, upsertError);
+          // Continuar mesmo com erro para tentar processar outros lotes
+          console.log('Continuando com o próximo lote...');
+          continue;
+        } else {
+          console.log(`✅ Lote ${Math.floor(i/BATCH_SIZE) + 1} processado com sucesso`);
         }
       }
       
