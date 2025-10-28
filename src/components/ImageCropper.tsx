@@ -64,6 +64,7 @@ export function ImageCropper({ open, onClose, onCropComplete, imageSrc }: ImageC
 
     return new Promise((resolve, reject) => {
       image.onload = () => {
+        // Criar um canvas temporário para aplicar a rotação
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
@@ -72,26 +73,37 @@ export function ImageCropper({ open, onClose, onCropComplete, imageSrc }: ImageC
           return;
         }
 
+        // Calcular o tamanho do canvas para acomodar a imagem rotacionada
         const maxSize = Math.max(image.width, image.height);
         const safeArea = 2 * ((maxSize / 2) * Math.sqrt(2));
 
-        // Set dimensions to double those of the image to allow for rotation
+        // Definir as dimensões do canvas
         canvas.width = safeArea;
         canvas.height = safeArea;
 
-        // Translate canvas center to image center
-        ctx.translate(safeArea / 2, safeArea / 2);
-        ctx.rotate((rotation * Math.PI) / 180);
-        ctx.translate(-safeArea / 2, -safeArea / 2);
+        // Limpar o canvas com fundo transparente
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Draw image at the center of the canvas
+        // Mover para o centro do canvas
+        ctx.translate(safeArea / 2, safeArea / 2);
+        
+        // Aplicar rotação
+        ctx.rotate((rotation * Math.PI) / 180);
+        
+        // Desenhar a imagem centralizada
         ctx.drawImage(
           image,
-          safeArea / 2 - image.width / 2,
-          safeArea / 2 - image.height / 2
+          -image.width / 2,
+          -image.height / 2,
+          image.width,
+          image.height
         );
+        
+        // Voltar à origem
+        ctx.rotate(-(rotation * Math.PI) / 180);
+        ctx.translate(-safeArea / 2, -safeArea / 2);
 
-        // Create a circular crop
+        // Criar um segundo canvas para o recorte circular
         const croppedCanvas = document.createElement('canvas');
         const croppedCtx = croppedCanvas.getContext('2d');
 
@@ -100,17 +112,23 @@ export function ImageCropper({ open, onClose, onCropComplete, imageSrc }: ImageC
           return;
         }
 
-        // Set dimensions to the size of the crop
-        const size = Math.min(pixelCrop.width, pixelCrop.height);
-        croppedCanvas.width = size;
-        croppedCanvas.height = size;
+        // Definir um tamanho fixo para o resultado final (300x300 é um bom tamanho para avatar)
+        const finalSize = 300;
+        croppedCanvas.width = finalSize;
+        croppedCanvas.height = finalSize;
 
-        // Draw a circle and clip to it
+        // Desenhar um círculo e recortar
         croppedCtx.beginPath();
-        croppedCtx.arc(size / 2, size / 2, size / 2, 0, 2 * Math.PI);
+        croppedCtx.arc(finalSize / 2, finalSize / 2, finalSize / 2, 0, 2 * Math.PI);
         croppedCtx.clip();
 
-        // Draw the cropped image
+        // Calcular a escala para ajustar a área recortada ao tamanho final
+        const scale = Math.max(
+          finalSize / pixelCrop.width,
+          finalSize / pixelCrop.height
+        );
+        
+        // Desenhar a área recortada no canvas final
         croppedCtx.drawImage(
           canvas,
           pixelCrop.x,
@@ -119,8 +137,8 @@ export function ImageCropper({ open, onClose, onCropComplete, imageSrc }: ImageC
           pixelCrop.height,
           0,
           0,
-          size,
-          size
+          finalSize,
+          finalSize
         );
 
         // Get the data URL of the cropped image
@@ -139,21 +157,39 @@ export function ImageCropper({ open, onClose, onCropComplete, imageSrc }: ImageC
         <DialogHeader>
           <DialogTitle>Ajustar Foto de Perfil</DialogTitle>
         </DialogHeader>
-        <div className="relative h-80 w-full overflow-hidden rounded-md">
-          <Cropper
-            image={imageSrc}
-            crop={crop}
-            zoom={zoom}
-            rotation={rotation}
-            aspect={1}
-            cropShape="round"
-            showGrid={false}
-            onCropChange={onCropChange}
-            onCropComplete={onCropCompleted}
-            onZoomChange={onZoomChange}
-            ref={cropperRef}
-          />
-        </div>
+      <div className="relative h-80 w-full overflow-hidden rounded-md">
+        <Cropper
+          image={imageSrc}
+          crop={crop}
+          zoom={zoom}
+          rotation={rotation}
+          aspect={1}
+          cropShape="round"
+          showGrid={true}
+          onCropChange={onCropChange}
+          onCropComplete={onCropCompleted}
+          onZoomChange={onZoomChange}
+          ref={cropperRef}
+          style={{
+            containerStyle: {
+              position: 'relative',
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#000'
+            },
+            cropAreaStyle: {
+              color: 'rgba(255, 107, 0, 0.7)',
+              border: '2px solid #FF6B00',
+              boxShadow: '0 0 0 9999em rgba(0, 0, 0, 0.7)'
+            },
+            mediaStyle: {
+              maxHeight: '100%',
+              maxWidth: '100%',
+              objectFit: 'contain'
+            }
+          }}
+        />
+      </div>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">

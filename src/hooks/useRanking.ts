@@ -294,6 +294,11 @@ export const useRanking = () => {
         console.log('Calculando rankings pela primeira vez...');
         await calculateRankings();
       }
+      
+      // Forçar recálculo dos rankings para garantir dados atualizados
+      // Isso garante que os jogadores apareçam no mapa
+      console.log('Forçando recálculo dos rankings para garantir dados atualizados...');
+      await calculateRankings();
 
       // ALTERAÇÃO: Buscar rankings sem a junção direta com profiles
       let query = supabase
