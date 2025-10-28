@@ -6,7 +6,7 @@ export default function DashboardLayout() {
   return (
     <div className="min-h-screen flex flex-col w-full bg-black">
       <TopNavBar />
-      <main className="flex-1 pb-20">
+      <main className="flex-1 pb-16 sm:pb-20 overflow-x-hidden">
         <Outlet />
       </main>
       <BottomNavBar />

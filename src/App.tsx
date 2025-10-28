@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useUpdateNotification } from "./hooks/useUpdateNotification";
+import { useEventNotifications } from "./hooks/useEventNotifications";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -25,6 +26,9 @@ const queryClient = new QueryClient();
 const AppContent = () => {
   // Hook para detectar e notificar sobre atualizações do PWA
   useUpdateNotification();
+  
+  // Hook para notificar sobre eventos próximos
+  useEventNotifications();
 
   return (
     <BrowserRouter>

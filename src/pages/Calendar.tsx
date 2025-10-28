@@ -351,11 +351,11 @@ export default function Calendar() {
             resetForm();
           }
         }}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingEvent ? 'Editar Evento' : 'Criar Novo Evento'}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleCreateEvent} className="space-y-4">
+            <form onSubmit={handleCreateEvent} className="space-y-3">
               <div className="space-y-2">
                 <Label htmlFor="title">Título *</Label>
                 <Input
