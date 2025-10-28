@@ -298,8 +298,6 @@ export default function Ranking() {
     );
   }
 
-  const userPosition = getUserPosition(selectedTab as any);
-
   return (
     <div className="p-6 space-y-6">
       {/* Header */}

@@ -395,13 +395,39 @@ export default function Calendar() {
 
               <div className="space-y-2">
                 <Label htmlFor="start_date">Data de Início *</Label>
-                <Input
-                  id="start_date"
-                  type="datetime-local"
-                  value={formData.start_date}
-                  onChange={(e) => setFormData({...formData, start_date: e.target.value})}
-                  required
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div>
+                    <Input
+                      id="start_date"
+                      type="date"
+                      value={formData.start_date.split('T')[0]}
+                      onChange={(e) => {
+                        // Preservar o horário existente ou usar horário padrão
+                        const currentTime = formData.start_date.includes('T') 
+                          ? formData.start_date.split('T')[1] 
+                          : '09:00';
+                        setFormData({...formData, start_date: `${e.target.value}T${currentTime}`});
+                      }}
+                      required
+                      className="mb-2"
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      id="start_time"
+                      type="time"
+                      value={formData.start_date.includes('T') ? formData.start_date.split('T')[1] : '09:00'}
+                      onChange={(e) => {
+                        // Preservar a data existente ou usar a data selecionada
+                        const currentDate = formData.start_date.includes('T') 
+                          ? formData.start_date.split('T')[0] 
+                          : selectedDate.toISOString().split('T')[0];
+                        setFormData({...formData, start_date: `${currentDate}T${e.target.value}`});
+                      }}
+                      required
+                    />
+                  </div>
+                </div>
                 <div className="flex flex-wrap gap-2 mt-2">
                   <span className="text-xs text-muted-foreground w-full">Horários rápidos:</span>
                   {[
@@ -435,12 +461,37 @@ export default function Calendar() {
 
               <div className="space-y-2">
                 <Label htmlFor="end_date">Data de Fim</Label>
-                <Input
-                  id="end_date"
-                  type="datetime-local"
-                  value={formData.end_date}
-                  onChange={(e) => setFormData({...formData, end_date: e.target.value})}
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div>
+                    <Input
+                      id="end_date"
+                      type="date"
+                      value={formData.end_date?.split('T')[0] || ''}
+                      onChange={(e) => {
+                        // Preservar o horário existente ou usar horário padrão
+                        const currentTime = formData.end_date?.includes('T') 
+                          ? formData.end_date.split('T')[1] 
+                          : '10:00';
+                        setFormData({...formData, end_date: `${e.target.value}T${currentTime}`});
+                      }}
+                      className="mb-2"
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      id="end_time"
+                      type="time"
+                      value={formData.end_date?.includes('T') ? formData.end_date.split('T')[1] : ''}
+                      onChange={(e) => {
+                        // Preservar a data existente ou usar a data selecionada
+                        const currentDate = formData.end_date?.includes('T') 
+                          ? formData.end_date.split('T')[0] 
+                          : formData.start_date.split('T')[0]; // Usar mesma data do início
+                        setFormData({...formData, end_date: `${currentDate}T${e.target.value}`});
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2">

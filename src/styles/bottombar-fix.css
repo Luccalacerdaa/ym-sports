@@ -1,7 +1,20 @@
 /* Estilos para garantir que a barra inferior esteja sempre visível */
 body {
   padding-bottom: env(safe-area-inset-bottom, 80px) !important;
-  overscroll-behavior-y: none; /* Previne scroll elástico que pode causar problemas */
+  overscroll-behavior-y: none !important; /* Previne scroll elástico que pode causar problemas */
+  overflow-x: hidden !important; /* Previne scroll horizontal */
+}
+
+/* Corrigir problemas com inputs de data em dispositivos móveis */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  max-width: 100% !important;
+  min-height: 40px !important; /* Garantir altura mínima para toque */
+  font-size: 16px !important; /* Evita zoom automático em iOS */
+  -webkit-appearance: none !important; /* Remover estilo nativo */
+  -moz-appearance: none !important;
+  appearance: none !important;
 }
 
 /* Garantir que nenhum elemento cubra a barra inferior */
@@ -14,11 +27,16 @@ body {
   transform: translateZ(0) !important;
   will-change: transform !important;
   backface-visibility: hidden !important;
+  height: auto !important; /* Impedir que a altura seja alterada */
+  min-height: 60px !important; /* Altura mínima */
 }
 
 /* Garantir que dialogs não afetem a barra inferior */
 .dialog-container {
   padding-bottom: 80px !important;
+  max-height: 85vh !important; /* Limitar altura máxima */
+  overflow-y: auto !important; /* Garantir scroll */
+  -webkit-overflow-scrolling: touch !important; /* Scroll suave em iOS */
 }
 
 /* Impedir que elementos com z-index alto cubram a barra */
@@ -32,4 +50,28 @@ body {
 /* Exceção para a barra inferior */
 .bottom-nav-exception {
   z-index: 9999 !important;
+}
+
+/* Corrigir problemas de layout após interação com inputs */
+html, body {
+  height: 100% !important;
+  position: relative !important;
+}
+
+/* Forçar posição fixa mesmo após interação com inputs */
+@media (max-width: 768px) {
+  .fixed-bottom-bar {
+    position: fixed !important;
+    bottom: 0 !important;
+  }
+  
+  /* Corrigir problema de zoom em inputs */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  
+  /* Garantir que o conteúdo não fique escondido pela barra */
+  main {
+    padding-bottom: 80px !important;
+  }
 }
