@@ -60,7 +60,7 @@ export const MapRanking = ({ className }: MapRankingProps) => {
         script.src = 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js';
         script.async = true;
         script.onload = () => {
-          window.mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA'; // Token público do Mapbox (default token)
+          window.mapboxgl.accessToken = 'pk.eyJ1IjoibHVjY2FsYWNlcmRhYSIsImEiOiJjbTh6YXplYTEwMmJxMmpvbWh4bW1mOWY2In0.75keYWvJ5tU7KW6f7HZ1vg'; // Token público do Mapbox (token personalizado)
           initializeMap();
         };
         document.head.appendChild(script);
