@@ -2,10 +2,18 @@
 // Este arquivo gerencia as notificações push mesmo quando o app está fechado
 
 const APP_URL = 'https://ym-sports.vercel.app';
-const SW_VERSION = '2.1.0'; // Incrementar para forçar atualização
+const SW_VERSION = '3.0.0'; // Incrementar para forçar atualização
 const CACHE_NAME = `ym-sports-v${SW_VERSION}`;
 
 console.log(`[SW] 🚀 Service Worker YM Sports v${SW_VERSION} carregado!`);
+
+// Listener para mensagens de SKIP_WAITING
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[SW] ⏩ SKIP_WAITING recebido, ativando nova versão...');
+    self.skipWaiting();
+  }
+});
 
 // Evento: Instalação do Service Worker
 self.addEventListener('install', (event) => {
