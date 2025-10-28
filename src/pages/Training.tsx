@@ -74,6 +74,7 @@ export default function Training() {
     goals: [] as string[],
     availableDays: [] as string[],
     sessionDuration: 60,
+    customDuration: '',
     difficulty: 'intermediate' as 'beginner' | 'intermediate' | 'advanced',
     equipment: [] as string[],
     focus: [] as string[],
@@ -156,6 +157,7 @@ export default function Training() {
         duration_minutes: training.duration_minutes || 60,
         exercises_count: training.exercises.length,
         difficulty_level: training.difficulty_level,
+        training_id: training.id,
       });
 
       if (result?.levelIncreased) {
@@ -163,9 +165,9 @@ export default function Training() {
       } else {
         toast.success("Treino completado! Pontos adicionados ao seu progresso.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao registrar treino:', error);
-      toast.error("Erro ao registrar progresso do treino");
+      toast.error(error.message || "Erro ao registrar progresso do treino");
     }
   };
 
@@ -263,11 +265,20 @@ export default function Training() {
                     <Input
                       id="duration"
                       type="number"
-                      value={aiRequest.sessionDuration}
-                      onChange={(e) => setAiRequest({...aiRequest, sessionDuration: parseInt(e.target.value) || 60})}
+                      value={aiRequest.customDuration || aiRequest.sessionDuration}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 15;
+                        if (value < 15) {
+                          toast.error("Duração mínima é 15 minutos");
+                          return;
+                        }
+                        setAiRequest({...aiRequest, sessionDuration: value, customDuration: e.target.value});
+                      }}
                       min="15"
-                      max="180"
+                      max="300"
+                      placeholder="Mínimo 15 minutos"
                     />
+                    <p className="text-xs text-muted-foreground">Entre 15 e 300 minutos</p>
                   </div>
                   
                   <div className="space-y-2">
@@ -521,21 +532,21 @@ export default function Training() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Dumbbell className="h-5 w-5 text-primary" />
-                {selectedTraining?.title}
+                <span className="break-words">{selectedTraining?.title}</span>
               </DialogTitle>
             </DialogHeader>
             
             {selectedTraining && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {/* Informações Básicas */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                     <span className="text-sm">{selectedTraining.duration_minutes} minutos</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Target className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{selectedTraining.muscle_groups.join(', ')}</span>
+                    <Target className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-sm break-words">{selectedTraining.muscle_groups.join(', ')}</span>
                   </div>
                   <Badge className={getDifficultyInfo(selectedTraining.difficulty_level)?.color}>
                     {getDifficultyInfo(selectedTraining.difficulty_level)?.label}
@@ -546,18 +557,18 @@ export default function Training() {
                 {selectedTraining.description && (
                   <div>
                     <h3 className="font-semibold mb-2">Descrição do Treino</h3>
-                    <p className="text-muted-foreground">{selectedTraining.description}</p>
+                    <p className="text-sm text-muted-foreground break-words">{selectedTraining.description}</p>
                   </div>
                 )}
 
                 {/* Rationale do Treino */}
                 {selectedTraining.training_rationale && (
-                  <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-                    <h3 className="font-semibold mb-2 flex items-center gap-2">
-                      <Lightbulb className="h-4 w-4 text-blue-600" />
-                      Por que este treino é ideal para você?
+                  <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                    <h3 className="font-semibold mb-2 flex items-center gap-2 text-sm">
+                      <Lightbulb className="h-4 w-4 text-primary flex-shrink-0" />
+                      <span className="break-words">Por que este treino é ideal para você?</span>
                     </h3>
-                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                    <p className="text-xs text-foreground/80 break-words">
                       {selectedTraining.training_rationale}
                     </p>
                   </div>
@@ -565,12 +576,12 @@ export default function Training() {
 
                 {/* Benefícios de Performance */}
                 {selectedTraining.performance_benefits && (
-                  <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
-                    <h3 className="font-semibold mb-2 flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-green-600" />
-                      Como isso melhora sua performance
+                  <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                    <h3 className="font-semibold mb-2 flex items-center gap-2 text-sm">
+                      <TrendingUp className="h-4 w-4 text-primary flex-shrink-0" />
+                      <span className="break-words">Como isso melhora sua performance</span>
                     </h3>
-                    <p className="text-sm text-green-700 dark:text-green-300">
+                    <p className="text-xs text-foreground/80 break-words">
                       {selectedTraining.performance_benefits}
                     </p>
                   </div>
@@ -578,12 +589,12 @@ export default function Training() {
 
                 {/* Adaptações */}
                 {selectedTraining.adaptation_notes && (
-                  <div className="p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg">
-                    <h3 className="font-semibold mb-2 flex items-center gap-2">
-                      <Info className="h-4 w-4 text-orange-600" />
-                      Adaptações específicas para seu perfil
+                  <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                    <h3 className="font-semibold mb-2 flex items-center gap-2 text-sm">
+                      <Info className="h-4 w-4 text-primary flex-shrink-0" />
+                      <span className="break-words">Adaptações específicas para seu perfil</span>
                     </h3>
-                    <p className="text-sm text-orange-700 dark:text-orange-300">
+                    <p className="text-xs text-foreground/80 break-words">
                       {selectedTraining.adaptation_notes}
                     </p>
                   </div>
@@ -592,36 +603,36 @@ export default function Training() {
                 {/* Exercícios */}
                 <div>
                   <h3 className="font-semibold mb-4">Exercícios</h3>
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {selectedTraining.exercises.map((exercise, index) => (
                       <Card key={index}>
-                        <CardContent className="p-4">
+                        <CardContent className="p-3 sm:p-4">
                           <div className="space-y-3">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <h4 className="font-semibold">{exercise.name}</h4>
-                                <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-semibold text-sm sm:text-base break-words">{exercise.name}</h4>
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground mt-1">
                                   <span>{exercise.sets} séries</span>
-                                  <span>{exercise.reps} repetições</span>
-                                  {exercise.weight && <span>{exercise.weight}</span>}
-                                  {exercise.rest_time && <span>Descanso: {exercise.rest_time}</span>}
+                                  <span>{exercise.reps} reps</span>
+                                  {exercise.weight && <span className="break-words">{exercise.weight}</span>}
+                                  {exercise.rest_time && <span className="break-words">Descanso: {exercise.rest_time}</span>}
                                 </div>
                               </div>
-                              <div className="flex gap-2">
+                              <div className="flex gap-2 flex-shrink-0">
                                 <Button 
                                   size="sm" 
                                   variant="outline"
                                   onClick={() => handleViewExercise(exercise)}
-                                  className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black"
+                                  className="border-primary text-primary hover:bg-primary hover:text-black text-xs"
                                 >
-                                  <Eye className="h-4 w-4 mr-1" />
-                                  Ver Exercício
+                                  <Eye className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                                  <span className="hidden sm:inline">Ver Exercício</span>
                                 </Button>
                                 {exercise.video_url && (
-                                  <Button size="sm" variant="outline" asChild>
+                                  <Button size="sm" variant="outline" asChild className="text-xs">
                                     <a href={exercise.video_url} target="_blank" rel="noopener noreferrer">
-                                      <Play className="h-4 w-4 mr-1" />
-                                      Ver Vídeo
+                                      <Play className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                                      <span className="hidden sm:inline">Vídeo</span>
                                     </a>
                                   </Button>
                                 )}
@@ -631,24 +642,24 @@ export default function Training() {
                             {/* Descrição do exercício */}
                             {exercise.description && (
                               <div>
-                                <h5 className="text-sm font-medium mb-1">Como executar:</h5>
-                                <p className="text-sm text-muted-foreground">{exercise.description}</p>
+                                <h5 className="text-xs sm:text-sm font-medium mb-1">Como executar:</h5>
+                                <p className="text-xs sm:text-sm text-muted-foreground break-words">{exercise.description}</p>
                               </div>
                             )}
 
                             {/* Benefícios do exercício */}
                             {exercise.benefits && (
-                              <div className="p-3 bg-muted/50 rounded-lg">
-                                <h5 className="text-sm font-medium mb-1">Benefícios:</h5>
-                                <p className="text-sm text-muted-foreground">{exercise.benefits}</p>
+                              <div className="p-2 sm:p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                                <h5 className="text-xs sm:text-sm font-medium mb-1">Benefícios:</h5>
+                                <p className="text-xs sm:text-sm text-foreground/80 break-words">{exercise.benefits}</p>
                               </div>
                             )}
 
                             {/* Notas */}
                             {exercise.notes && (
-                              <div className="p-3 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg">
-                                <h5 className="text-sm font-medium mb-1">Dicas importantes:</h5>
-                                <p className="text-sm text-yellow-700 dark:text-yellow-300">{exercise.notes}</p>
+                              <div className="p-2 sm:p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                                <h5 className="text-xs sm:text-sm font-medium mb-1">Dicas importantes:</h5>
+                                <p className="text-xs sm:text-sm text-foreground/80 break-words">{exercise.notes}</p>
                               </div>
                             )}
                           </div>

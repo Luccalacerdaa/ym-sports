@@ -255,11 +255,29 @@ export const useProgress = () => {
     duration_minutes: number;
     exercises_count: number;
     difficulty_level: string;
+    training_id: string;
   }) => {
     if (!user || !progress) return;
 
     try {
       const today = new Date().toISOString().split('T')[0];
+      
+      // Verificar se já completou este treino hoje
+      const { data: existingActivity, error: checkError } = await supabase
+        .from('user_activities')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('activity_type', 'workout_completed')
+        .gte('created_at', `${today}T00:00:00`)
+        .eq('activity_data->>training_id', workoutData.training_id)
+        .maybeSingle();
+
+      if (checkError) throw checkError;
+
+      if (existingActivity) {
+        throw new Error('Você já completou este treino hoje! Volte amanhã para ganhar mais pontos.');
+      }
+
       const lastWorkoutDate = progress.last_workout_date;
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);

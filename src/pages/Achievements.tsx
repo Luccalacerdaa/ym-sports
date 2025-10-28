@@ -89,22 +89,22 @@ const Achievements = () => {
   // Função para obter ícone da raridade
   const getRarityIcon = (rarity: string) => {
     switch (rarity) {
-      case 'common': return <Medal className="h-4 w-4 text-gray-500" />;
-      case 'rare': return <Award className="h-4 w-4 text-blue-500" />;
-      case 'epic': return <Crown className="h-4 w-4 text-purple-500" />;
-      case 'legendary': return <Star className="h-4 w-4 text-yellow-500" />;
-      default: return <Medal className="h-4 w-4 text-gray-500" />;
+      case 'common': return <Medal className="h-4 w-4 text-primary" />;
+      case 'rare': return <Award className="h-4 w-4 text-primary" />;
+      case 'epic': return <Crown className="h-4 w-4 text-primary" />;
+      case 'legendary': return <Star className="h-4 w-4 text-primary" />;
+      default: return <Medal className="h-4 w-4 text-primary" />;
     }
   };
 
   // Função para obter cor da raridade
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
-      case 'common': return 'bg-gray-100 text-gray-800 border-gray-300';
-      case 'rare': return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'epic': return 'bg-purple-100 text-purple-800 border-purple-300';
-      case 'legendary': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+      case 'common': return 'bg-primary/10 text-foreground border-primary/20';
+      case 'rare': return 'bg-primary/20 text-foreground border-primary/30';
+      case 'epic': return 'bg-primary/30 text-foreground border-primary/40';
+      case 'legendary': return 'bg-primary/40 text-foreground border-primary/50';
+      default: return 'bg-primary/10 text-foreground border-primary/20';
     }
   };
 
@@ -158,8 +158,8 @@ const Achievements = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Star className="h-5 w-5 text-blue-600" />
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Star className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{progress.current_level}</p>
@@ -172,8 +172,8 @@ const Achievements = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Target className="h-5 w-5 text-green-600" />
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Target className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{progress.total_points}</p>
@@ -186,8 +186,8 @@ const Achievements = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Flame className="h-5 w-5 text-orange-600" />
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Flame className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{progress.current_workout_streak}</p>
@@ -200,8 +200,8 @@ const Achievements = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Trophy className="h-5 w-5 text-purple-600" />
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Trophy className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{userAchievements.length}</p>
@@ -259,14 +259,14 @@ const Achievements = () => {
                 {unlockedAchievements.map((achievement) => {
                   const userAchievement = userAchievements.find(ua => ua.achievement_id === achievement.id);
                   return (
-                    <Card key={achievement.id} className="border-green-200 bg-green-50">
+                    <Card key={achievement.id} className="border-primary/30 bg-primary/5">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex items-center gap-2">
                             <span className="text-2xl">{achievement.icon}</span>
                             <div>
-                              <h4 className="font-semibold text-green-800">{achievement.name}</h4>
-                              <p className="text-sm text-green-600">{achievement.description}</p>
+                              <h4 className="font-semibold text-foreground">{achievement.name}</h4>
+                              <p className="text-sm text-foreground/70">{achievement.description}</p>
                             </div>
                           </div>
                           <Badge className={`${getRarityColor(achievement.rarity)} flex items-center gap-1`}>
@@ -276,13 +276,13 @@ const Achievements = () => {
                         </div>
                         
                         {userAchievement && (
-                          <div className="text-xs text-green-600">
+                          <div className="text-xs text-primary">
                             Desbloqueada em: {new Date(userAchievement.unlocked_at).toLocaleDateString('pt-BR')}
                           </div>
                         )}
                         
                         {achievement.points_reward > 0 && (
-                          <div className="mt-2 flex items-center gap-1 text-sm text-green-700">
+                          <div className="mt-2 flex items-center gap-1 text-sm text-primary">
                             <Star className="h-3 w-3" />
                             +{achievement.points_reward} pontos
                           </div>
@@ -387,7 +387,7 @@ const Achievements = () => {
                       </p>
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-green-600 border-green-300">
+                  <Badge variant="outline" className="text-primary border-primary/30">
                     +{activity.points_earned} pts
                   </Badge>
                 </div>
