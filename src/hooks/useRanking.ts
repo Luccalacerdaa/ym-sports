@@ -347,17 +347,37 @@ export const useRanking = () => {
       setError(null);
 
       // Buscar todos os usuários com progresso
+      console.log('🔍 Buscando user_progress...');
       const { data: progressData, error: progressError } = await supabase
         .from('user_progress')
-        .select(`
-          *,
-          profiles (name, avatar_url)
-        `)
+        .select('*')
         .order('total_points', { ascending: false});
 
       if (progressError) {
-        console.error('Erro ao buscar user_progress:', progressError);
+        console.error('❌ Erro ao buscar user_progress:', progressError);
+        console.error('Detalhes:', {
+          message: progressError.message,
+          code: progressError.code,
+          details: progressError.details,
+          hint: progressError.hint
+        });
         throw progressError;
+      }
+      
+      console.log(`✅ Encontrados ${progressData?.length || 0} usuários com progresso`);
+      
+      // Buscar perfis separadamente
+      let profilesData: any[] = [];
+      if (progressData && progressData.length > 0) {
+        const userIds = progressData.map(p => p.user_id);
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, name, avatar_url')
+          .in('id', userIds);
+        
+        if (!profilesError && profiles) {
+          profilesData = profiles;
+        }
       }
       
       if (!progressData || progressData.length === 0) {
@@ -376,11 +396,17 @@ export const useRanking = () => {
       const locationsByUser = new Map(
         locationsData?.map(loc => [loc.user_id, loc]) || []
       );
+      
+      // Mapear perfis por user_id
+      const profilesByUser = new Map(
+        profilesData.map(profile => [profile.id, profile])
+      );
 
-      // Combinar dados de progresso com localização
+      // Combinar dados de progresso com localização e perfil
       const usersData = progressData.map(progress => ({
         ...progress,
-        user_locations: locationsByUser.get(progress.user_id) || null
+        user_locations: locationsByUser.get(progress.user_id) || null,
+        profiles: profilesByUser.get(progress.user_id) || { name: 'Usuário', avatar_url: null }
       }));
 
       // Calcular ranking nacional
