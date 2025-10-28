@@ -1,11 +1,19 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Fundo laranja -->
-  <rect width="512" height="512" rx="128" fill="#FF6B00"/>
+  <!-- Fundo branco -->
+  <rect width="512" height="512" rx="128" fill="white"/>
   
-  <!-- Letra Y -->
-  <path d="M150 140 L200 240 L200 340 L250 340 L250 240 L300 140 L250 140 L225 200 L200 140 Z" fill="white" stroke="white" stroke-width="4"/>
+  <!-- Logo YM -->
+  <g transform="translate(96, 96) scale(1.6)">
+    <!-- M esquerdo -->
+    <path d="M40 40 L70 80 L100 40 L70 80 L70 160" stroke="black" stroke-width="16" fill="none" stroke-linecap="square" stroke-linejoin="round"/>
+    
+    <!-- Y central -->
+    <path d="M100 40 L130 80 L160 40 M130 80 L130 160" stroke="black" stroke-width="16" fill="none" stroke-linecap="square" stroke-linejoin="round"/>
+    
+    <!-- M direito -->
+    <path d="M160 40 L190 80 L220 40 L190 80 L190 160" stroke="black" stroke-width="16" fill="none" stroke-linecap="square" stroke-linejoin="round"/>
+  </g>
   
-  <!-- Letra M -->
-  <path d="M320 140 L320 340 L370 340 L370 200 L400 340 L430 340 L460 200 L460 340 L510 340 L510 140 L450 140 L415 280 L380 140 Z" fill="white" stroke="white" stroke-width="4"/>
+  <!-- Texto SPORTS -->
+  <text x="256" y="420" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="black">SPORTS</text>
 </svg>
-
