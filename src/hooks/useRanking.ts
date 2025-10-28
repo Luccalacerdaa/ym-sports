@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export interface UserLocation {
   id: string;
   user_id: string;
   state: string;
   region: string;
-  city_approximate?: string;
-  postal_code_prefix?: string;
-  latitude_approximate?: number;
-  longitude_approximate?: number;
+  city_approximate: string;
+  postal_code_prefix: string;
+  latitude_approximate: number | null;
+  longitude_approximate: number | null;
+
   created_at: string;
   updated_at: string;
 }
@@ -39,7 +41,6 @@ export interface RegionalAchievement {
   points_reward: number;
   icon: string;
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
-  created_at: string;
 }
 
 export interface UserRegionalAchievement {
@@ -47,6 +48,7 @@ export interface UserRegionalAchievement {
   user_id: string;
   achievement_id: string;
   unlocked_at: string;
+
   achievement?: RegionalAchievement;
 }
 
@@ -93,174 +95,188 @@ export const useRanking = () => {
   };
 
   // Obter localização do usuário via geolocalização
-  const getCurrentLocation = (): Promise<{ lat: number; lng: number }> => {
+  const getCurrentLocation = (): Promise<GeolocationPosition> => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
-        reject(new Error('Geolocalização não suportada pelo navegador'));
+        reject(new Error('Geolocalização não é suportada pelo seu navegador'));
         return;
       }
 
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          resolve({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-        },
-        (error) => {
-          reject(new Error(`Erro na geolocalização: ${error.message}`));
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 300000 // 5 minutos
-        }
-      );
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      });
     });
   };
 
-  // Converter coordenadas para estado/região
-  const getLocationFromCoordinates = async (lat: number, lng: number) => {
+  // Obter cidade/estado a partir das coordenadas
+  const getLocationFromCoordinates = async (lat: number, lng: number): Promise<{
+    state: string;
+    state_code: string;
+    city: string;
+    postal_code?: string;
+  }> => {
     try {
-      // Mapeamento de coordenadas aproximadas dos estados brasileiros
-      const brazilStates = {
-        'AC': { bounds: { north: -7.0, south: -11.0, east: -66.0, west: -73.0 }, region: 'Norte' },
-        'AL': { bounds: { north: -8.5, south: -10.0, east: -35.0, west: -38.0 }, region: 'Nordeste' },
-        'AP': { bounds: { north: 4.0, south: -2.0, east: -49.0, west: -52.0 }, region: 'Norte' },
-        'AM': { bounds: { north: 2.0, south: -13.0, east: -56.0, west: -73.0 }, region: 'Norte' },
-        'BA': { bounds: { north: -8.0, south: -18.0, east: -37.0, west: -46.0 }, region: 'Nordeste' },
-        'CE': { bounds: { north: -2.0, south: -7.0, east: -37.0, west: -41.0 }, region: 'Nordeste' },
-        'DF': { bounds: { north: -15.0, south: -16.0, east: -47.0, west: -48.0 }, region: 'Centro-Oeste' },
-        'ES': { bounds: { north: -17.0, south: -21.0, east: -39.0, west: -41.0 }, region: 'Sudeste' },
-        'GO': { bounds: { north: -12.0, south: -19.0, east: -46.0, west: -52.0 }, region: 'Centro-Oeste' },
-        'MA': { bounds: { north: -1.0, south: -10.0, east: -41.0, west: -48.0 }, region: 'Nordeste' },
-        'MT': { bounds: { north: -7.0, south: -18.0, east: -50.0, west: -61.0 }, region: 'Centro-Oeste' },
-        'MS': { bounds: { north: -17.0, south: -24.0, east: -51.0, west: -58.0 }, region: 'Centro-Oeste' },
-        'MG': { bounds: { north: -14.0, south: -23.0, east: -39.0, west: -51.0 }, region: 'Sudeste' },
-        'PA': { bounds: { north: 2.0, south: -9.0, east: -46.0, west: -58.0 }, region: 'Norte' },
-        'PB': { bounds: { north: -6.0, south: -8.0, east: -34.0, west: -38.0 }, region: 'Nordeste' },
-        'PR': { bounds: { north: -22.0, south: -26.0, east: -48.0, west: -54.0 }, region: 'Sul' },
-        'PE': { bounds: { north: -7.0, south: -9.0, east: -34.0, west: -41.0 }, region: 'Nordeste' },
-        'PI': { bounds: { north: -5.0, south: -10.0, east: -40.0, west: -45.0 }, region: 'Nordeste' },
-        'RJ': { bounds: { north: -20.0, south: -23.0, east: -40.0, west: -45.0 }, region: 'Sudeste' },
-        'RN': { bounds: { north: -4.0, south: -6.0, east: -35.0, west: -38.0 }, region: 'Nordeste' },
-        'RS': { bounds: { north: -27.0, south: -34.0, east: -49.0, west: -58.0 }, region: 'Sul' },
-        'RO': { bounds: { north: -7.0, south: -15.0, east: -59.0, west: -66.0 }, region: 'Norte' },
-        'RR': { bounds: { north: 6.0, south: -2.0, east: -58.0, west: -65.0 }, region: 'Norte' },
-        'SC': { bounds: { north: -25.0, south: -29.0, east: -48.0, west: -54.0 }, region: 'Sul' },
-        'SP': { bounds: { north: -19.0, south: -25.0, east: -44.0, west: -51.0 }, region: 'Sudeste' },
-        'SE': { bounds: { north: -9.0, south: -11.0, east: -36.0, west: -38.0 }, region: 'Nordeste' },
-        'TO': { bounds: { north: -5.0, south: -13.0, east: -45.0, west: -50.0 }, region: 'Norte' }
-      };
+      // Usar API de geocodificação reversa
+      const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=pt`);
+      const data = await response.json();
 
-      // Encontrar o estado baseado nas coordenadas
-      for (const [state, data] of Object.entries(brazilStates)) {
-        const { bounds, region } = data;
-        if (lat >= bounds.south && lat <= bounds.north && 
-            lng >= bounds.west && lng <= bounds.east) {
-          return { state, region, coordinates: { lat, lng } };
-        }
-      }
-
-      // Se não encontrou, retornar localização padrão (Brasília)
-      return { 
-        state: 'DF', 
-        region: 'Centro-Oeste', 
-        coordinates: { lat, lng } 
+      return {
+        state: data.principalSubdivision || 'Desconhecido',
+        state_code: data.principalSubdivisionCode?.split('-')[1] || 'XX',
+        city: data.city || data.locality || 'Desconhecido',
+        postal_code: data.postcode
       };
     } catch (error) {
-      console.error('Erro ao converter coordenadas:', error);
-      return { 
-        state: 'DF', 
-        region: 'Centro-Oeste', 
-        coordinates: { lat, lng } 
-      };
+      console.error('Erro ao obter localização a partir das coordenadas:', error);
+      throw new Error('Não foi possível determinar sua localização');
     }
   };
 
-  // Atualizar localização do usuário via geolocalização
+  // Atualizar localização do usuário a partir do GPS
   const updateUserLocationFromGPS = async () => {
-    if (!user) return null;
+    if (!user) return { success: false, error: 'Usuário não autenticado' };
 
     try {
-      // Solicitar permissão e obter localização
-      const coordinates = await getCurrentLocation();
+      const position = await getCurrentLocation();
+      const { latitude, longitude } = position.coords;
+
+      // Obter informações de localidade
+      const locationInfo = await getLocationFromCoordinates(latitude, longitude);
+      const state_code = locationInfo.state_code;
       
-      // Converter coordenadas para estado/região
-      const locationData = await getLocationFromCoordinates(coordinates.lat, coordinates.lng);
-      
-      // Salvar no banco de dados
-      const { data, error } = await supabase
+      if (!state_code || state_code === 'XX') {
+        return { 
+          success: false, 
+          error: 'Não foi possível determinar seu estado. Por favor, tente novamente ou use a configuração manual.' 
+        };
+      }
+
+      // Mapear estado para região
+      const region = STATE_TO_REGION[state_code] || 'Desconhecido';
+
+      // Preparar dados para salvar
+      const locationData = {
+        user_id: user.id,
+        state: state_code,
+        region,
+        city_approximate: locationInfo.city,
+        postal_code_prefix: locationInfo.postal_code ? locationInfo.postal_code.substring(0, 5) : null,
+        latitude_approximate: latitude,
+        longitude_approximate: longitude,
+        updated_at: new Date().toISOString()
+      };
+
+      // Verificar se já existe localização
+      const { data: existingLocation } = await supabase
         .from('user_locations')
-        .upsert({
-          user_id: user.id,
-          state: locationData.state,
-          region: locationData.region,
-          latitude_approximate: locationData.coordinates.lat,
-          longitude_approximate: locationData.coordinates.lng,
-          updated_at: new Date().toISOString(),
-        })
-        .select()
+        .select('id')
+        .eq('user_id', user.id)
         .single();
 
-      if (error) throw error;
+      let result;
+      if (existingLocation) {
+        // Atualizar localização existente
+        result = await supabase
+          .from('user_locations')
+          .update(locationData)
+          .eq('id', existingLocation.id);
+      } else {
+        // Inserir nova localização
+        result = await supabase
+          .from('user_locations')
+          .insert(locationData);
+      }
 
-      setUserLocation(data);
-      
-      // Recarregar dados
-      await fetchRankings('national');
-      await fetchRankings('regional');
-      await fetchRankings('local');
-      
-      return { success: true, location: locationData, data };
+      if (result.error) throw result.error;
+
+      // Atualizar estado local
+      await fetchUserLocation();
+
+      return { 
+        success: true, 
+        location: { 
+          state: state_code, 
+          region,
+          city: locationInfo.city 
+        } 
+      };
     } catch (err: any) {
-      console.error('Erro ao obter localização:', err);
-      setError(err.message);
-      return { success: false, error: err.message };
+      console.error('Erro ao atualizar localização via GPS:', err);
+      
+      // Mensagens de erro mais amigáveis
+      let errorMessage = 'Erro ao obter sua localização';
+      
+      if (err.code === 1) {
+        errorMessage = 'Permissão de localização negada. Por favor, permita o acesso à sua localização.';
+      } else if (err.code === 2) {
+        errorMessage = 'Não foi possível determinar sua localização. Verifique se o GPS está ativado.';
+      } else if (err.code === 3) {
+        errorMessage = 'Tempo esgotado ao tentar obter localização. Tente novamente.';
+      }
+      
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     }
   };
 
-  // Atualizar localização do usuário (método antigo mantido para compatibilidade)
-  const updateUserLocation = async (locationData: {
-    state: string;
-    city_approximate?: string;
-    postal_code_prefix?: string;
-    latitude_approximate?: number;
-    longitude_approximate?: number;
-  }) => {
+  // Atualizar localização do usuário manualmente
+  const updateUserLocation = async (state: string, city_approximate: string, postal_code_prefix: string) => {
     if (!user) return;
 
     try {
-      setError(null);
+      // Mapear estado para região
+      const region = STATE_TO_REGION[state] || 'Desconhecido';
 
-      const region = STATE_TO_REGION[locationData.state] || 'Desconhecida';
+      // Preparar dados para salvar
+      const locationData = {
+        user_id: user.id,
+        state,
+        region,
+        city_approximate,
+        postal_code_prefix,
+        latitude_approximate: null,
+        longitude_approximate: null,
+        updated_at: new Date().toISOString()
+      };
 
-      const { data, error } = await supabase
+      // Verificar se já existe localização
+      const { data: existingLocation } = await supabase
         .from('user_locations')
-        .upsert({
-          user_id: user.id,
-          state: locationData.state,
-          region: region,
-          city_approximate: locationData.city_approximate,
-          postal_code_prefix: locationData.postal_code_prefix,
-          latitude_approximate: locationData.latitude_approximate,
-          longitude_approximate: locationData.longitude_approximate,
-        })
-        .select()
+        .select('id')
+        .eq('user_id', user.id)
         .single();
 
-      if (error) throw error;
+      if (existingLocation) {
+        // Atualizar localização existente
+        const { error } = await supabase
+          .from('user_locations')
+          .update(locationData)
+          .eq('id', existingLocation.id);
 
-      setUserLocation(data);
-      return data;
+        if (error) throw error;
+      } else {
+        // Inserir nova localização
+        const { error } = await supabase
+          .from('user_locations')
+          .insert(locationData);
+
+        if (error) throw error;
+      }
+
+      // Atualizar estado local
+      await fetchUserLocation();
+      
+      return { success: true, location: { state, region, city: city_approximate } };
     } catch (err: any) {
-      console.error('Erro ao atualizar localização:', err);
+      console.error('Erro ao atualizar localização do usuário:', err);
       setError(err.message);
       throw err;
     }
   };
 
-  // Buscar rankings
+  // Buscar rankings - CORRIGIDO para evitar erro 400
   const fetchRankings = async (type: 'national' | 'regional' | 'local' = 'national') => {
     try {
       setError(null);
@@ -279,15 +295,10 @@ export const useRanking = () => {
         await calculateRankings();
       }
 
+      // ALTERAÇÃO: Buscar rankings sem a junção direta com profiles
       let query = supabase
         .from('rankings')
-        .select(`
-          *,
-          profiles:user_id (
-            name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('period', 'all_time')
         .order('position', { ascending: true });
 
@@ -312,12 +323,27 @@ export const useRanking = () => {
         return [];
       }
 
-      const rankingsWithUserInfo = data?.map(entry => ({
-        ...entry,
-        user_name: entry.profiles?.name || 'Usuário',
-        user_avatar: entry.profiles?.avatar_url,
-        user_location: `${entry.region || 'Brasil'}`,
-      })) || [];
+      // ALTERAÇÃO: Buscar perfis separadamente
+      const userIds = data.map(entry => entry.user_id);
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, name, avatar_url')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.warn('Erro ao buscar perfis:', profilesError);
+      }
+
+      // Combinar dados de rankings com perfis
+      const rankingsWithUserInfo = data.map(entry => {
+        const profile = profilesData?.find(p => p.id === entry.user_id);
+        return {
+          ...entry,
+          user_name: profile?.name || 'Usuário',
+          user_avatar: profile?.avatar_url,
+          user_location: `${entry.region || 'Brasil'}`,
+        };
+      });
 
       switch (type) {
         case 'national':
@@ -339,7 +365,7 @@ export const useRanking = () => {
     }
   };
 
-  // Calcular rankings
+  // Calcular rankings - CORRIGIDO para evitar erro 400
   const calculateRankings = async () => {
     if (!user) return;
 
@@ -390,121 +416,130 @@ export const useRanking = () => {
         .from('user_locations')
         .select('*');
 
-      if (locationsError) console.error('Erro ao buscar localizações:', locationsError);
-
-      // Mapear localizações por user_id
-      const locationsByUser = new Map(
-        locationsData?.map(loc => [loc.user_id, loc]) || []
-      );
+      if (locationsError) {
+        console.error('❌ Erro ao buscar user_locations:', locationsError);
+        throw locationsError;
+      }
       
-      // Mapear perfis por user_id
-      const profilesByUser = new Map(
-        profilesData.map(profile => [profile.id, profile])
-      );
+      console.log(`✅ Encontradas ${locationsData?.length || 0} localizações de usuários`);
 
-      // Combinar dados de progresso com localização e perfil
-      const usersData = progressData.map(progress => ({
-        ...progress,
-        user_locations: locationsByUser.get(progress.user_id) || null,
-        profiles: profilesByUser.get(progress.user_id) || { name: 'Usuário', avatar_url: null }
-      }));
-
-      // Calcular ranking nacional
-      const nationalRankings = usersData.map((userData, index) => ({
-        user_id: userData.user_id,
-        ranking_type: 'national' as const,
+      // Calcular rankings
+      const now = new Date().toISOString();
+      const rankingsToInsert = [];
+      
+      // Ranking nacional
+      const nationalRankings = progressData.map((progress, index) => ({
+        user_id: progress.user_id,
+        ranking_type: 'national',
         position: index + 1,
-        total_points: userData.total_points,
-        period: 'all_time' as const,
-        region: null,
+        total_points: progress.total_points,
+        period: 'all_time',
+        calculated_at: now
       }));
-
-      // Calcular rankings regionais
-      const regionalRankings: any[] = [];
-      const localRankings: any[] = [];
-
-      // Agrupar por região e estado
-      const byRegion: { [key: string]: any[] } = {};
-      const byState: { [key: string]: any[] } = {};
-
-      usersData.forEach((userData) => {
-        if (userData.user_locations) {
-          const region = userData.user_locations.region;
-          const state = userData.user_locations.state;
-
-          if (region) {
-            if (!byRegion[region]) byRegion[region] = [];
-            byRegion[region].push(userData);
-          }
-
-          if (state) {
-            if (!byState[state]) byState[state] = [];
-            byState[state].push(userData);
+      rankingsToInsert.push(...nationalRankings);
+      
+      // Rankings regionais e locais
+      if (locationsData && locationsData.length > 0) {
+        // Agrupar por região
+        const regionGroups: { [key: string]: any[] } = {};
+        const stateGroups: { [key: string]: any[] } = {};
+        
+        // Combinar progresso com localização
+        for (const progress of progressData) {
+          const location = locationsData.find(loc => loc.user_id === progress.user_id);
+          if (location) {
+            // Agrupar por região
+            if (!regionGroups[location.region]) {
+              regionGroups[location.region] = [];
+            }
+            regionGroups[location.region].push({
+              ...progress,
+              region: location.region
+            });
+            
+            // Agrupar por estado
+            if (!stateGroups[location.state]) {
+              stateGroups[location.state] = [];
+            }
+            stateGroups[location.state].push({
+              ...progress,
+              region: location.state
+            });
           }
         }
-      });
-
-      // Calcular posições regionais
-      Object.entries(byRegion).forEach(([region, users]) => {
-        users
-          .sort((a, b) => b.total_points - a.total_points)
-          .forEach((userData, index) => {
-            regionalRankings.push({
-              user_id: userData.user_id,
-              ranking_type: 'regional',
-              position: index + 1,
-              total_points: userData.total_points,
-              period: 'all_time',
-              region: region,
-            });
-          });
-      });
-
-      // Calcular posições locais (por estado)
-      Object.entries(byState).forEach(([state, users]) => {
-        users
-          .sort((a, b) => b.total_points - a.total_points)
-          .forEach((userData, index) => {
-            localRankings.push({
-              user_id: userData.user_id,
-              ranking_type: 'local',
-              position: index + 1,
-              total_points: userData.total_points,
-              period: 'all_time',
-              region: state,
-            });
-          });
-      });
-
-      // Limpar rankings antigos
-      await supabase.from('rankings').delete().eq('period', 'all_time');
-
-      // Inserir novos rankings
-      const allRankings = [...nationalRankings, ...regionalRankings, ...localRankings];
+        
+        // Calcular rankings regionais
+        for (const region in regionGroups) {
+          const users = regionGroups[region].sort((a, b) => b.total_points - a.total_points);
+          const regionalRankings = users.map((user, index) => ({
+            user_id: user.user_id,
+            ranking_type: 'regional',
+            region,
+            position: index + 1,
+            total_points: user.total_points,
+            period: 'all_time',
+            calculated_at: now
+          }));
+          rankingsToInsert.push(...regionalRankings);
+        }
+        
+        // Calcular rankings locais (por estado)
+        for (const state in stateGroups) {
+          const users = stateGroups[state].sort((a, b) => b.total_points - a.total_points);
+          const localRankings = users.map((user, index) => ({
+            user_id: user.user_id,
+            ranking_type: 'local',
+            region: state,
+            position: index + 1,
+            total_points: user.total_points,
+            period: 'all_time',
+            calculated_at: now
+          }));
+          rankingsToInsert.push(...localRankings);
+        }
+      }
       
-      if (allRankings.length > 0) {
+      console.log(`✅ Calculados ${rankingsToInsert.length} rankings`);
+      
+      // Limpar rankings existentes
+      const { error: deleteError } = await supabase
+        .from('rankings')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Trick para deletar tudo
+      
+      if (deleteError) {
+        console.error('❌ Erro ao limpar rankings existentes:', deleteError);
+        throw deleteError;
+      }
+      
+      // Inserir novos rankings (em lotes de 100)
+      const BATCH_SIZE = 100;
+      for (let i = 0; i < rankingsToInsert.length; i += BATCH_SIZE) {
+        const batch = rankingsToInsert.slice(i, i + BATCH_SIZE);
         const { error: insertError } = await supabase
           .from('rankings')
-          .insert(allRankings);
-
-        if (insertError) throw insertError;
+          .insert(batch);
+        
+        if (insertError) {
+          console.error(`❌ Erro ao inserir lote ${i/BATCH_SIZE + 1}:`, insertError);
+          throw insertError;
+        }
       }
-
-      // Recarregar rankings
-      await Promise.all([
-        fetchRankings('national'),
-        fetchRankings('regional'),
-        fetchRankings('local'),
-      ]);
-
+      
+      console.log('✅ Rankings calculados e atualizados com sucesso!');
+      
       // Verificar conquistas regionais
       await checkRegionalAchievements();
-
-      return allRankings;
+      
+      // Recarregar rankings
+      if (userLocation) {
+        await fetchRankings('national');
+        await fetchRankings('regional');
+        await fetchRankings('local');
+      }
     } catch (err: any) {
       console.error('Erro ao calcular rankings:', err);
       setError(err.message);
-      throw err;
     }
   };
 
@@ -514,10 +549,9 @@ export const useRanking = () => {
       const { data, error } = await supabase
         .from('regional_achievements')
         .select('*')
-        .order('rarity', { ascending: true });
+        .order('requirement_value', { ascending: true });
 
       if (error) throw error;
-
       setRegionalAchievements(data || []);
     } catch (err: any) {
       console.error('Erro ao buscar conquistas regionais:', err);
@@ -540,7 +574,6 @@ export const useRanking = () => {
         .order('unlocked_at', { ascending: false });
 
       if (error) throw error;
-
       setUserRegionalAchievements(data || []);
     } catch (err: any) {
       console.error('Erro ao buscar conquistas regionais do usuário:', err);
@@ -553,7 +586,7 @@ export const useRanking = () => {
     if (!user || !userLocation) return;
 
     try {
-      // Buscar conquistas que o usuário ainda não tem
+      // Buscar conquistas disponíveis para a região do usuário
       const { data: availableAchievements, error: achievementsError } = await supabase
         .from('regional_achievements')
         .select('*')
@@ -561,150 +594,160 @@ export const useRanking = () => {
 
       if (achievementsError) throw achievementsError;
 
-      // Filtrar conquistas que o usuário já possui
-      const userAchievementIds = userRegionalAchievements.map(ua => ua.achievement_id);
-      const newAvailableAchievements = availableAchievements?.filter(achievement => 
-        !userAchievementIds.includes(achievement.id)
-      ) || [];
+      // Buscar conquistas já desbloqueadas pelo usuário
+      const { data: userAchievements, error: userAchievementsError } = await supabase
+        .from('user_regional_achievements')
+        .select('achievement_id')
+        .eq('user_id', user.id);
 
-      // Buscar progresso atual do usuário
-      const { data: userProgress, error: progressError } = await supabase
-        .from('user_progress')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      if (userAchievementsError) throw userAchievementsError;
 
-      if (progressError) throw progressError;
+      // Filtrar conquistas já desbloqueadas
+      const unlockedIds = userAchievements?.map(a => a.achievement_id) || [];
+      const availableToUnlock = availableAchievements?.filter(a => !unlockedIds.includes(a.id)) || [];
 
-      // Buscar posição atual do usuário nos rankings
-      const { data: userRankings, error: rankingError } = await supabase
-        .from('rankings')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('period', 'all_time');
+      // Buscar posição do usuário nos rankings
+      const userPositions = await getUserPosition();
 
-      if (rankingError) throw rankingError;
+      // Verificar cada conquista
+      for (const achievement of availableToUnlock) {
+        let unlocked = false;
 
-      const newAchievements = [];
-
-      for (const achievement of newAvailableAchievements) {
-        let shouldUnlock = false;
-
-        switch (achievement.requirement_type) {
-          case 'points':
-            shouldUnlock = userProgress.total_points >= achievement.requirement_value;
-            break;
-          case 'position':
-            const relevantRanking = userRankings?.find(r => 
-              (achievement.region === 'Brasil' && r.ranking_type === 'national') ||
-              (achievement.region === userLocation.region && r.ranking_type === 'regional') ||
-              (achievement.region === userLocation.state && r.ranking_type === 'local')
-            );
-            shouldUnlock = relevantRanking && relevantRanking.position <= achievement.requirement_value;
-            break;
+        if (achievement.requirement_type === 'points') {
+          // Verificar pontos totais
+          if (userPositions.total_points >= achievement.requirement_value) {
+            unlocked = true;
+          }
+        } else if (achievement.requirement_type === 'position') {
+          // Verificar posição no ranking
+          if (achievement.region === 'Brasil' && userPositions.national && 
+              userPositions.national <= achievement.requirement_value) {
+            unlocked = true;
+          } else if (achievement.region === userLocation.region && userPositions.regional && 
+                    userPositions.regional <= achievement.requirement_value) {
+            unlocked = true;
+          } else if (achievement.region === userLocation.state && userPositions.local && 
+                    userPositions.local <= achievement.requirement_value) {
+            unlocked = true;
+          }
         }
 
-        if (shouldUnlock) {
-          // Desbloquear conquista
+        // Desbloquear conquista
+        if (unlocked) {
           const { error: unlockError } = await supabase
             .from('user_regional_achievements')
             .insert({
               user_id: user.id,
               achievement_id: achievement.id,
+              unlocked_at: new Date().toISOString()
             });
 
-          if (unlockError) throw unlockError;
+          if (unlockError) {
+            console.error('Erro ao desbloquear conquista:', unlockError);
+            continue;
+          }
 
-          newAchievements.push(achievement);
+          // Notificar usuário
+          toast.success(`🏆 Nova conquista regional desbloqueada: ${achievement.name}`);
 
-          // Adicionar pontos da conquista se houver
+          // Adicionar pontos ao usuário
           if (achievement.points_reward > 0) {
-            await supabase
+            const { error: updateError } = await supabase
               .from('user_progress')
               .update({
-                total_points: userProgress.total_points + achievement.points_reward,
+                total_points: userPositions.total_points + achievement.points_reward,
+                updated_at: new Date().toISOString()
               })
               .eq('user_id', user.id);
+
+            if (!updateError) {
+              toast.success(`+${achievement.points_reward} pontos adicionados!`);
+            }
           }
         }
       }
 
-      // Recarregar conquistas do usuário se houver novas
-      if (newAchievements.length > 0) {
-        await fetchUserRegionalAchievements();
-      }
-
-      return newAchievements;
+      // Recarregar conquistas do usuário
+      await fetchUserRegionalAchievements();
     } catch (err: any) {
       console.error('Erro ao verificar conquistas regionais:', err);
       setError(err.message);
-      return [];
     }
   };
 
-  // Obter posição do usuário atual
-  const getUserPosition = (type: 'national' | 'regional' | 'local') => {
-    if (!user) return null;
+  // Obter posição do usuário nos rankings
+  const getUserPosition = async () => {
+    if (!user) return { total_points: 0 };
 
-    let rankings: RankingEntry[] = [];
-    switch (type) {
-      case 'national':
-        rankings = nationalRanking;
-        break;
-      case 'regional':
-        rankings = regionalRanking;
-        break;
-      case 'local':
-        rankings = localRanking;
-        break;
+    try {
+      // Buscar progresso do usuário
+      const { data: progress, error: progressError } = await supabase
+        .from('user_progress')
+        .select('total_points')
+        .eq('user_id', user.id)
+        .single();
+
+      if (progressError && progressError.code !== 'PGRST116') throw progressError;
+
+      const total_points = progress?.total_points || 0;
+
+      // Buscar posições nos rankings
+      const { data: rankings, error: rankingsError } = await supabase
+        .from('rankings')
+        .select('ranking_type, position')
+        .eq('user_id', user.id)
+        .eq('period', 'all_time');
+
+      if (rankingsError) throw rankingsError;
+
+      // Extrair posições
+      let national, regional, local;
+      if (rankings) {
+        for (const rank of rankings) {
+          if (rank.ranking_type === 'national') national = rank.position;
+          else if (rank.ranking_type === 'regional') regional = rank.position;
+          else if (rank.ranking_type === 'local') local = rank.position;
+        }
+      }
+
+      return { national, regional, local, total_points };
+    } catch (err: any) {
+      console.error('Erro ao obter posição do usuário:', err);
+      setError(err.message);
+      return { total_points: 0 };
     }
-
-    return rankings.find(ranking => ranking.user_id === user.id) || null;
   };
 
-  // Inicializar dados
+  // Carregar dados ao inicializar
   useEffect(() => {
     if (user) {
-      const initializeData = async () => {
+      const loadData = async () => {
         setLoading(true);
-        await fetchUserLocation();
-        await fetchRegionalAchievements();
-        await fetchUserRegionalAchievements();
-        
-        // Se não tem localização, solicitar automaticamente
-        if (!userLocation) {
-          console.log('Usuário sem localização, solicitando GPS automaticamente...');
-          try {
-            const result = await updateUserLocationFromGPS();
-            if (result?.success) {
-              console.log('Localização obtida automaticamente:', result.location);
-            }
-          } catch (error) {
-            console.log('Não foi possível obter localização automaticamente:', error);
-          }
+        setError(null);
+        try {
+          await fetchUserLocation();
+          await fetchRegionalAchievements();
+          await fetchUserRegionalAchievements();
+        } catch (err: any) {
+          console.error('Erro ao carregar dados de ranking:', err);
+          setError(err.message);
+        } finally {
+          setLoading(false);
         }
-        
-        setLoading(false);
       };
 
-      initializeData();
+      loadData();
     }
   }, [user]);
 
-  // Efeito para solicitar localização quando userLocation mudar
+  // Solicitar localização GPS se não estiver definida
   useEffect(() => {
-    if (user && userLocation) {
-      // Recarregar rankings quando localização for definida
-      const reloadRankings = async () => {
-        await Promise.all([
-          fetchRankings('national'),
-          fetchRankings('regional'),
-          fetchRankings('local'),
-        ]);
-      };
-      reloadRankings();
+    if (user && !loading && !userLocation) {
+      updateUserLocationFromGPS().catch(err => {
+        console.warn('Não foi possível obter localização automática:', err);
+      });
     }
-  }, [userLocation]);
+  }, [user, loading, userLocation]);
 
   return {
     userLocation,
@@ -719,8 +762,6 @@ export const useRanking = () => {
     updateUserLocationFromGPS,
     fetchRankings,
     calculateRankings,
-    checkRegionalAchievements,
-    getUserPosition,
-    fetchUserRegionalAchievements,
+    getUserPosition
   };
 };
