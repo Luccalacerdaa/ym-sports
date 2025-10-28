@@ -15,13 +15,14 @@ declare global {
 
 interface MapRankingProps {
   className?: string;
+  rankingType?: 'national' | 'regional' | 'local';
 }
 
-export const MapRanking = ({ className }: MapRankingProps) => {
+export const MapRanking = ({ className, rankingType = 'all' }: MapRankingProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<any>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [selectedRegion, setSelectedRegion] = useState<string>('all');
+  const [selectedRegion, setSelectedRegion] = useState<string>(rankingType || 'all');
   const [mapStyle, setMapStyle] = useState<string>('streets');
   const { nationalRanking, regionalRanking, localRanking, userLocation } = useRanking();
 
@@ -75,17 +76,77 @@ export const MapRanking = ({ className }: MapRankingProps) => {
   const initializeMap = () => {
     if (!mapContainer.current || !window.mapboxgl) return;
 
+    // Determinar centro e zoom com base no tipo de ranking
+    let center = [-47.8825, -15.7942]; // Centro do Brasil (padrão)
+    let zoom = 4; // Zoom padrão para visualização nacional
+
+    // Ajustar centro e zoom com base no tipo de ranking e localização do usuário
+    if (selectedRegion === 'regional' && userLocation) {
+      // Para visualização regional, centralizar na região do usuário
+      const regionCenter = regionCoordinates[userLocation.region];
+      if (regionCenter) {
+        center = regionCenter;
+        zoom = 5; // Zoom mais aproximado para região
+      }
+    } else if (selectedRegion === 'local' && userLocation) {
+      // Para visualização local, centralizar no estado do usuário
+      const stateCenter = stateCoordinates[userLocation.state];
+      if (stateCenter) {
+        center = stateCenter;
+        zoom = 7; // Zoom mais aproximado para visualização local (60km)
+      }
+    }
+
     map.current = new window.mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v11',
-      center: [-47.8825, -15.7942], // Centro do Brasil
-      zoom: 4,
+      center: center,
+      zoom: zoom,
       projection: 'mercator'
     });
 
     map.current.on('load', () => {
       setMapLoaded(true);
       addRegionalMarkers();
+      
+      // Adicionar círculo de 60km para visualização local
+      if (selectedRegion === 'local' && userLocation && userLocation.latitude_approximate && userLocation.longitude_approximate) {
+        try {
+          map.current.addSource('local-radius', {
+            'type': 'geojson',
+            'data': {
+              'type': 'Feature',
+              'geometry': {
+                'type': 'Point',
+                'coordinates': [userLocation.longitude_approximate, userLocation.latitude_approximate]
+              },
+              'properties': {}
+            }
+          });
+          
+          map.current.addLayer({
+            'id': 'local-radius-layer',
+            'type': 'circle',
+            'source': 'local-radius',
+            'paint': {
+              'circle-radius': {
+                'stops': [
+                  [0, 0],
+                  [7, 60 * 1000 / 111320], // 60km em graus aproximadamente
+                  [10, 60 * 1000 / 11132], // Ajuste de escala para diferentes níveis de zoom
+                  [15, 60 * 1000 / 1113.2]
+                ],
+                'base': 2
+              },
+              'circle-color': 'rgba(255, 107, 0, 0.1)',
+              'circle-stroke-width': 2,
+              'circle-stroke-color': 'rgba(255, 107, 0, 0.5)'
+            }
+          });
+        } catch (error) {
+          console.error("Erro ao adicionar círculo de raio local:", error);
+        }
+      }
     });
 
     // Adicionar controles de navegação
@@ -99,19 +160,29 @@ export const MapRanking = ({ className }: MapRankingProps) => {
     const markers = document.querySelectorAll('.mapboxgl-marker');
     markers.forEach(marker => marker.remove());
 
+    // Limpar camadas existentes
+    if (map.current.getLayer('local-radius-layer')) {
+      map.current.removeLayer('local-radius-layer');
+    }
+    if (map.current.getSource('local-radius')) {
+      map.current.removeSource('local-radius');
+    }
+
     let rankingsToShow: any[] = [];
     
+    // Selecionar rankings com base no tipo
     switch (selectedRegion) {
       case 'national':
-        rankingsToShow = nationalRanking.slice(0, 10);
+        rankingsToShow = nationalRanking.slice(0, 20); // Mostrar mais jogadores
         break;
       case 'regional':
-        rankingsToShow = regionalRanking.slice(0, 10);
+        rankingsToShow = regionalRanking.slice(0, 15); // Mostrar mais jogadores regionais
         break;
       case 'local':
-        rankingsToShow = localRanking.slice(0, 10);
+        rankingsToShow = localRanking.slice(0, 15); // Mostrar mais jogadores locais
         break;
       default:
+        // Combinação de todos os rankings
         rankingsToShow = [
           ...nationalRanking.slice(0, 5),
           ...regionalRanking.slice(0, 5),
@@ -119,48 +190,127 @@ export const MapRanking = ({ className }: MapRankingProps) => {
         ];
     }
 
+    // Adicionar círculo de 60km para visualização local
+    if (selectedRegion === 'local' && userLocation && userLocation.latitude_approximate && userLocation.longitude_approximate) {
+      try {
+        map.current.addSource('local-radius', {
+          'type': 'geojson',
+          'data': {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'Point',
+              'coordinates': [userLocation.longitude_approximate, userLocation.latitude_approximate]
+            },
+            'properties': {}
+          }
+        });
+        
+        map.current.addLayer({
+          'id': 'local-radius-layer',
+          'type': 'circle',
+          'source': 'local-radius',
+          'paint': {
+            'circle-radius': {
+              'stops': [
+                [0, 0],
+                [7, 60 * 1000 / 111320], // 60km em graus aproximadamente
+                [10, 60 * 1000 / 11132], // Ajuste de escala para diferentes níveis de zoom
+                [15, 60 * 1000 / 1113.2]
+              ],
+              'base': 2
+            },
+            'circle-color': 'rgba(255, 107, 0, 0.1)',
+            'circle-stroke-width': 2,
+            'circle-stroke-color': 'rgba(255, 107, 0, 0.5)'
+          }
+        });
+      } catch (error) {
+        console.error("Erro ao adicionar círculo de raio local:", error);
+      }
+    }
+
+    // Adicionar marcadores para cada atleta
     rankingsToShow.forEach((athlete, index) => {
+      // Verificar se o atleta tem dados completos
+      if (!athlete || !athlete.user_id) {
+        console.log("Atleta sem dados completos:", athlete);
+        return; // Pular este atleta
+      }
+
       let coordinates: [number, number];
+      let jitter = 0.05; // Adicionar um pequeno deslocamento aleatório para evitar sobreposição
       
       // Determinar coordenadas baseado no tipo de ranking
-      if (athlete.ranking_type === 'national') {
+      if (athlete.ranking_type === 'national' || selectedRegion === 'national') {
         // Para ranking nacional, usar coordenadas das capitais dos estados com mais atletas
-        const topStates = ['SP', 'RJ', 'MG', 'RS', 'PR'];
+        const topStates = ['SP', 'RJ', 'MG', 'RS', 'PR', 'BA', 'SC', 'PE', 'CE', 'GO'];
         const stateIndex = index % topStates.length;
-        coordinates = stateCoordinates[topStates[stateIndex]];
-      } else if (athlete.ranking_type === 'regional') {
+        const baseCoords = stateCoordinates[topStates[stateIndex]];
+        
+        if (baseCoords) {
+          // Adicionar pequena variação para evitar sobreposição
+          coordinates = [
+            baseCoords[0] + (Math.random() - 0.5) * jitter,
+            baseCoords[1] + (Math.random() - 0.5) * jitter
+          ];
+        } else {
+          coordinates = [-47.8825 + (Math.random() - 0.5) * jitter, -15.7942 + (Math.random() - 0.5) * jitter];
+        }
+      } else if (athlete.ranking_type === 'regional' || selectedRegion === 'regional') {
         // Para ranking regional, usar coordenadas da região
-        coordinates = regionCoordinates[athlete.region] || [-47.8825, -15.7942];
+        const baseCoords = regionCoordinates[athlete.region];
+        if (baseCoords) {
+          coordinates = [
+            baseCoords[0] + (Math.random() - 0.5) * jitter,
+            baseCoords[1] + (Math.random() - 0.5) * jitter
+          ];
+        } else {
+          coordinates = [-47.8825 + (Math.random() - 0.5) * jitter, -15.7942 + (Math.random() - 0.5) * jitter];
+        }
       } else {
         // Para ranking local, usar coordenadas do estado
-        coordinates = stateCoordinates[athlete.region] || [-47.8825, -15.7942];
+        const baseCoords = stateCoordinates[athlete.region];
+        if (baseCoords) {
+          coordinates = [
+            baseCoords[0] + (Math.random() - 0.5) * jitter,
+            baseCoords[1] + (Math.random() - 0.5) * jitter
+          ];
+        } else {
+          coordinates = [-47.8825 + (Math.random() - 0.5) * jitter, -15.7942 + (Math.random() - 0.5) * jitter];
+        }
       }
 
       // Criar elemento do marcador
       const el = document.createElement('div');
       el.className = 'athlete-marker';
+      
+      // Determinar o estilo do marcador com base na posição
+      const position = athlete.position || index + 1;
+      
       el.style.cssText = `
-        width: 40px;
-        height: 40px;
+        width: ${position === 1 ? 50 : position === 2 ? 45 : position === 3 ? 40 : 35}px;
+        height: ${position === 1 ? 50 : position === 2 ? 45 : position === 3 ? 40 : 35}px;
         border-radius: 50%;
-        background: ${index < 3 ? 
-          (index === 0 ? 'linear-gradient(135deg, #FFD700, #FFA500)' :
-           index === 1 ? 'linear-gradient(135deg, #C0C0C0, #808080)' :
-           'linear-gradient(135deg, #CD7F32, #8B4513)') :
-          'linear-gradient(135deg, #4F46E5, #7C3AED)'};
-        border: 3px solid white;
+        background: ${position === 1 ? 'linear-gradient(135deg, #FFD700, #FFA500)' :
+                    position === 2 ? 'linear-gradient(135deg, #E0E0E0, #A9A9A9)' :
+                    position === 3 ? 'linear-gradient(135deg, #CD7F32, #8B4513)' :
+                    'linear-gradient(135deg, #FF6B00, #E05600)'};
+        border: ${position <= 3 ? 3 : 2}px solid ${position === 1 ? '#FFD700' : 
+                                                  position === 2 ? '#C0C0C0' : 
+                                                  position === 3 ? '#CD7F32' : 'white'};
         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: bold;
         color: white;
-        font-size: 14px;
+        font-size: ${position === 1 ? 18 : position === 2 ? 16 : position === 3 ? 14 : 12}px;
         cursor: pointer;
         transition: transform 0.2s ease;
+        z-index: ${100 - position};
       `;
       
-      el.innerHTML = `#${index + 1}`;
+      el.innerHTML = `${position}`;
       
       // Adicionar hover effect
       el.addEventListener('mouseenter', () => {
@@ -171,33 +321,56 @@ export const MapRanking = ({ className }: MapRankingProps) => {
         el.style.transform = 'scale(1)';
       });
 
-      // Criar popup
+      // Criar popup com informações detalhadas do jogador
       const popup = new window.mapboxgl.Popup({
         offset: 25,
         closeButton: true,
-        closeOnClick: false
+        closeOnClick: false,
+        maxWidth: '300px'
       }).setHTML(`
-        <div class="p-3 min-w-[200px]">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+        <div class="p-4 min-w-[250px] max-w-[300px]">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center border-2 ${
+              position === 1 ? 'border-amber-400' : 
+              position === 2 ? 'border-slate-300' : 
+              position === 3 ? 'border-amber-700' : 'border-primary'
+            }">
               ${athlete.user_avatar ? 
-                `<img src="${athlete.user_avatar}" alt="${athlete.user_name}" class="w-12 h-12 rounded-full object-cover" />` :
-                `<span class="text-primary font-bold text-lg">${athlete.user_name?.charAt(0) || 'U'}</span>`
+                `<img src="${athlete.user_avatar}" alt="${athlete.user_name || 'Atleta'}" class="w-16 h-16 rounded-full object-cover" />` :
+                `<span class="text-primary font-bold text-xl">${(athlete.user_name || 'A')[0]}</span>`
               }
             </div>
             <div>
-              <h3 class="font-semibold">${athlete.user_name}</h3>
+              <h3 class="font-bold text-lg">${athlete.user_name || 'Atleta'}</h3>
               <p class="text-sm text-muted-foreground">${athlete.user_location || 'Brasil'}</p>
+              <div class="flex items-center gap-1 mt-1">
+                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full ${
+                  position === 1 ? 'bg-amber-400' : 
+                  position === 2 ? 'bg-slate-300' : 
+                  position === 3 ? 'bg-amber-700' : 'bg-primary'
+                } text-white text-xs font-bold">${position}</span>
+                <span class="text-xs text-muted-foreground">
+                  ${athlete.ranking_type === 'national' ? 'Ranking Nacional' : 
+                    athlete.ranking_type === 'regional' ? `Ranking Regional` : 
+                    `Ranking Local`}
+                </span>
+              </div>
             </div>
           </div>
-          <div class="space-y-2">
-            <div class="flex justify-between">
-              <span class="text-sm">Posição:</span>
-              <Badge variant="outline">#${athlete.position}</Badge>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-sm">Pontos:</span>
-              <span class="font-semibold text-primary">${athlete.total_points.toLocaleString()}</span>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center bg-primary/10 p-3 rounded-md">
+              <div class="flex flex-col">
+                <span class="text-xs text-muted-foreground">Posição</span>
+                <span class="font-bold text-lg ${
+                  position === 1 ? 'text-amber-400' : 
+                  position === 2 ? 'text-slate-300' : 
+                  position === 3 ? 'text-amber-700' : 'text-primary'
+                }">#${position}</span>
+              </div>
+              <div class="flex flex-col items-end">
+                <span class="text-xs text-muted-foreground">Pontuação</span>
+                <span class="font-bold text-lg">${athlete.total_points?.toLocaleString() || '0'}</span>
+              </div>
             </div>
             <div class="flex justify-between">
               <span class="text-sm">Ranking:</span>

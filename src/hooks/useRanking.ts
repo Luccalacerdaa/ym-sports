@@ -634,12 +634,35 @@ export const useRanking = () => {
 
         // Desbloquear conquista
         if (unlocked) {
+          // Verificar novamente se a conquista já foi desbloqueada (para evitar erro 409)
+          const { data: existingAchievement, error: checkError } = await supabase
+            .from('user_regional_achievements')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('achievement_id', achievement.id)
+            .maybeSingle();
+            
+          if (checkError) {
+            console.error('Erro ao verificar conquista existente:', checkError);
+            continue;
+          }
+          
+          // Se a conquista já existe, pular
+          if (existingAchievement) {
+            console.log(`Conquista ${achievement.name} já desbloqueada anteriormente`);
+            continue;
+          }
+          
+          // Inserir com upsert para evitar conflitos (erro 409)
           const { error: unlockError } = await supabase
             .from('user_regional_achievements')
-            .insert({
+            .upsert({
               user_id: user.id,
               achievement_id: achievement.id,
               unlocked_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id,achievement_id',
+              ignoreDuplicates: true
             });
 
           if (unlockError) {
