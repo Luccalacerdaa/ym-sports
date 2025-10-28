@@ -54,101 +54,97 @@ export function ImageCropper({ open, onClose, onCropComplete, imageSrc }: ImageC
   /**
    * Creates a cropped image based on the crop area and rotation
    */
-  const getCroppedImg = (
+  const createImage = (url: string): Promise<HTMLImageElement> =>
+    new Promise((resolve, reject) => {
+      const image = new Image();
+      image.addEventListener('load', () => resolve(image));
+      image.addEventListener('error', (error) => reject(error));
+      image.setAttribute('crossOrigin', 'anonymous');
+      image.src = url;
+    });
+
+  const getCroppedImg = async (
     imageSrc: string,
     pixelCrop: Area,
     rotation = 0
   ): Promise<string> => {
-    const image = new Image();
-    image.src = imageSrc;
+    try {
+      const image = await createImage(imageSrc);
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
 
-    return new Promise((resolve, reject) => {
-      image.onload = () => {
-        // Criar um canvas temporário para aplicar a rotação
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        throw new Error('No 2d context');
+      }
 
-        if (!ctx) {
-          reject(new Error('No 2d context'));
-          return;
-        }
+      // Definir um tamanho fixo para o resultado final
+      const size = Math.min(image.width, image.height);
+      const finalSize = 300; // Tamanho final da imagem
 
-        // Calcular o tamanho do canvas para acomodar a imagem rotacionada
-        const maxSize = Math.max(image.width, image.height);
-        const safeArea = 2 * ((maxSize / 2) * Math.sqrt(2));
+      // Definir dimensões do canvas
+      canvas.width = finalSize;
+      canvas.height = finalSize;
 
-        // Definir as dimensões do canvas
-        canvas.width = safeArea;
-        canvas.height = safeArea;
+      // Preencher com fundo transparente
+      ctx.fillStyle = 'transparent';
+      ctx.fillRect(0, 0, finalSize, finalSize);
 
-        // Limpar o canvas com fundo transparente
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Criar um caminho circular para recorte
+      ctx.beginPath();
+      ctx.arc(finalSize / 2, finalSize / 2, finalSize / 2, 0, Math.PI * 2);
+      ctx.clip();
 
-        // Mover para o centro do canvas
-        ctx.translate(safeArea / 2, safeArea / 2);
-        
-        // Aplicar rotação
-        ctx.rotate((rotation * Math.PI) / 180);
-        
-        // Desenhar a imagem centralizada
-        ctx.drawImage(
-          image,
-          -image.width / 2,
-          -image.height / 2,
-          image.width,
-          image.height
-        );
-        
-        // Voltar à origem
-        ctx.rotate(-(rotation * Math.PI) / 180);
-        ctx.translate(-safeArea / 2, -safeArea / 2);
+      // Calcular proporções para centralizar a imagem recortada
+      const scaleX = image.naturalWidth / image.width;
+      const scaleY = image.naturalHeight / image.height;
 
-        // Criar um segundo canvas para o recorte circular
-        const croppedCanvas = document.createElement('canvas');
-        const croppedCtx = croppedCanvas.getContext('2d');
+      // Ajustar as coordenadas do recorte
+      const cropX = pixelCrop.x * scaleX;
+      const cropY = pixelCrop.y * scaleY;
+      const cropWidth = pixelCrop.width * scaleX;
+      const cropHeight = pixelCrop.height * scaleY;
 
-        if (!croppedCtx) {
-          reject(new Error('No 2d context'));
-          return;
-        }
+      // Calcular o centro da área de recorte
+      const centerX = cropX + cropWidth / 2;
+      const centerY = cropY + cropHeight / 2;
 
-        // Definir um tamanho fixo para o resultado final (300x300 é um bom tamanho para avatar)
-        const finalSize = 300;
-        croppedCanvas.width = finalSize;
-        croppedCanvas.height = finalSize;
+      // Salvar o estado atual do contexto
+      ctx.save();
 
-        // Desenhar um círculo e recortar
-        croppedCtx.beginPath();
-        croppedCtx.arc(finalSize / 2, finalSize / 2, finalSize / 2, 0, 2 * Math.PI);
-        croppedCtx.clip();
+      // Mover para o centro do canvas
+      ctx.translate(finalSize / 2, finalSize / 2);
+      
+      // Aplicar rotação
+      ctx.rotate((rotation * Math.PI) / 180);
+      
+      // Calcular a escala para ajustar a área recortada ao tamanho final
+      const scale = Math.max(
+        finalSize / cropWidth,
+        finalSize / cropHeight
+      );
 
-        // Calcular a escala para ajustar a área recortada ao tamanho final
-        const scale = Math.max(
-          finalSize / pixelCrop.width,
-          finalSize / pixelCrop.height
-        );
-        
-        // Desenhar a área recortada no canvas final
-        croppedCtx.drawImage(
-          canvas,
-          pixelCrop.x,
-          pixelCrop.y,
-          pixelCrop.width,
-          pixelCrop.height,
-          0,
-          0,
-          finalSize,
-          finalSize
-        );
+      // Desenhar a imagem centralizada na área recortada
+      ctx.drawImage(
+        image,
+        centerX - cropWidth / 2, // Centralizar horizontalmente
+        centerY - cropHeight / 2, // Centralizar verticalmente
+        cropWidth,
+        cropHeight,
+        -finalSize / 2, // Posição x no canvas
+        -finalSize / 2, // Posição y no canvas
+        finalSize, // Largura no canvas
+        finalSize // Altura no canvas
+      );
 
-        // Get the data URL of the cropped image
-        resolve(croppedCanvas.toDataURL('image/jpeg'));
-      };
+      // Restaurar o estado do contexto
+      ctx.restore();
 
-      image.onerror = () => {
-        reject(new Error('Could not load image'));
-      };
-    });
+      // Retornar a URL de dados da imagem recortada
+      return canvas.toDataURL('image/jpeg');
+    } catch (error) {
+      console.error('Erro ao recortar imagem:', error);
+      throw error;
+    }
   };
 
   return (

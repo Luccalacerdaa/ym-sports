@@ -84,19 +84,26 @@ export default function Profile() {
   
   const handleCropComplete = async (croppedImageUrl: string) => {
     try {
+      console.log("Recebendo imagem recortada:", croppedImageUrl.substring(0, 50) + "...");
+      
       // Converter a URL de dados para um Blob
-      const response = await fetch(croppedImageUrl);
-      const blob = await response.blob();
+      // Usamos dataURLtoBlob em vez de fetch para garantir que a URL de dados seja processada corretamente
+      const blob = dataURLtoBlob(croppedImageUrl);
       
       // Criar um arquivo a partir do Blob
       const file = new File([blob], "profile-image.jpg", { type: "image/jpeg" });
+      console.log("Arquivo criado:", file.name, file.type, file.size);
       
       // Fazer upload do arquivo
       const photoUrl = await uploadPhoto(file);
+      console.log("Upload concluído, URL:", photoUrl);
+      
       if (photoUrl) {
         // Atualizar o perfil com a nova foto
         await updateProfile({ avatar_url: photoUrl });
         toast.success("Foto atualizada com sucesso!");
+      } else {
+        throw new Error("Não foi possível obter a URL da foto após o upload");
       }
     } catch (error) {
       console.error("Erro ao processar imagem:", error);
@@ -108,6 +115,22 @@ export default function Profile() {
       }
       setSelectedImage(null);
     }
+  };
+  
+  // Função auxiliar para converter URL de dados para Blob
+  const dataURLtoBlob = (dataURL: string): Blob => {
+    // Separar o tipo MIME e os dados
+    const arr = dataURL.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    
+    return new Blob([u8arr], { type: mime });
   };
 
   const handleSave = async () => {
