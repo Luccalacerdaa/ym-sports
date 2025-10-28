@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRanking } from '@/hooks/useRanking';
+import { useAuth } from '@/contexts/AuthContext';
 import { MapPin, Trophy, Users, Target, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 
 // Tipos para Mapbox
@@ -25,6 +26,7 @@ export const MapRanking = ({ className, rankingType = 'all' }: MapRankingProps) 
   const [selectedRegion, setSelectedRegion] = useState<string>(rankingType || 'all');
   const [mapStyle, setMapStyle] = useState<string>('streets');
   const { nationalRanking, regionalRanking, localRanking, userLocation } = useRanking();
+  const { user } = useAuth();
 
   // Estados brasileiros com coordenadas aproximadas
   const stateCoordinates: { [key: string]: [number, number] } = {
