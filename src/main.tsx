@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import "./styles/bottombar-fix.css"; // Importar estilos para corrigir a barra inferior
 
 // Register service worker for PWA
 if ('serviceWorker' in navigator) {

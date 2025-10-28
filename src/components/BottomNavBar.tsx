@@ -10,7 +10,18 @@ const navItems = [
 
 export function BottomNavBar() {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[100] bg-black border-t border-border safe-area-bottom">
+    <div 
+      className="fixed bottom-0 left-0 right-0 z-[999] bg-black border-t border-border safe-area-bottom fixed-bottom-bar bottom-nav-exception"
+      style={{ 
+        position: 'fixed',
+        bottom: 0,
+        width: '100%',
+        zIndex: 9999,
+        transform: 'translateZ(0)', // Força aceleração de hardware
+        willChange: 'transform', // Melhora performance
+        backfaceVisibility: 'hidden' // Evita problemas de renderização
+      }}
+    >
       <nav className="flex justify-around items-center h-16 sm:h-20 max-w-screen-xl mx-auto">
         {navItems.map((item) => (
           <NavLink

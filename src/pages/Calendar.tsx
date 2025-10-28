@@ -353,10 +353,11 @@ export default function Calendar() {
           }
         }}>
           <DialogContent 
-              className="max-w-md max-h-[85vh] overflow-y-auto"
+              className="max-w-md max-h-[80vh] overflow-y-auto dialog-container"
               style={{ 
-                paddingBottom: `${dialogHeight > 0 ? dialogHeight + 20 : 0}px`,
-                marginBottom: '80px' // Espaço extra para garantir que o botão de submit esteja visível
+                paddingBottom: `${dialogHeight > 0 ? dialogHeight + 40 : 80}px`,
+                marginBottom: '100px', // Espaço extra para garantir que o botão de submit esteja visível
+                maxHeight: 'calc(100vh - 120px)' // Limitar altura para não cobrir a barra inferior
               }}
             >
             <DialogHeader>
