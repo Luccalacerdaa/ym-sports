@@ -286,43 +286,96 @@ export const MapRanking = ({ className, rankingType = 'all' }: MapRankingProps) 
       let coordinates: [number, number];
       let jitter = 0.05; // Adicionar um pequeno deslocamento aleatório para evitar sobreposição
       
-      // Determinar coordenadas baseado no tipo de ranking
-      if (athlete.ranking_type === 'national' || selectedRegion === 'national') {
-        // Para ranking nacional, usar coordenadas das capitais dos estados com mais atletas
-        const topStates = ['SP', 'RJ', 'MG', 'RS', 'PR', 'BA', 'SC', 'PE', 'CE', 'GO'];
-        const stateIndex = index % topStates.length;
-        const baseCoords = stateCoordinates[topStates[stateIndex]];
-        
-        if (baseCoords) {
-          // Adicionar pequena variação para evitar sobreposição
+      // Definir coordenadas fixas para cada tipo de ranking para evitar posições aleatórias
+      let baseCoords: [number, number] | undefined;
+      
+      // Se o jogador é o usuário atual, usar a localização real
+      if (athlete.user_id === user?.id && userLocation?.latitude_approximate && userLocation?.longitude_approximate) {
+        coordinates = [
+          userLocation.longitude_approximate,
+          userLocation.latitude_approximate
+        ];
+        console.log("Usando localização real do usuário:", coordinates);
+      } 
+      // Para jogadores fictícios, usar localização baseada no tipo de ranking
+      else if (athlete.user_id?.startsWith('dummy')) {
+        // Jogadores fictícios
+        if (selectedRegion === 'national' || athlete.ranking_type === 'national') {
+          // Para ranking nacional, usar coordenadas de Brasília com pequeno deslocamento
+          const brasiliaCoords: [number, number] = [-47.8825, -15.7942]; // Brasília
           coordinates = [
-            baseCoords[0] + (Math.random() - 0.5) * jitter,
-            baseCoords[1] + (Math.random() - 0.5) * jitter
+            brasiliaCoords[0] + (index * 0.01), // Deslocamento fixo baseado no índice
+            brasiliaCoords[1] + (index * 0.01)
           ];
+        } else if (selectedRegion === 'regional' || athlete.ranking_type === 'regional') {
+          // Para ranking regional, usar centro da região
+          const region = userLocation?.region || 'Sudeste';
+          baseCoords = regionCoordinates[region];
+          if (baseCoords) {
+            coordinates = [
+              baseCoords[0] + (index * 0.01),
+              baseCoords[1] + (index * 0.01)
+            ];
+          } else {
+            coordinates = [-47.8825 + (index * 0.01), -15.7942 + (index * 0.01)];
+          }
         } else {
-          coordinates = [-47.8825 + (Math.random() - 0.5) * jitter, -15.7942 + (Math.random() - 0.5) * jitter];
+          // Para ranking local, usar centro do estado
+          const state = userLocation?.state || 'MG';
+          baseCoords = stateCoordinates[state];
+          if (baseCoords) {
+            coordinates = [
+              baseCoords[0] + (index * 0.01),
+              baseCoords[1] + (index * 0.01)
+            ];
+          } else {
+            coordinates = [-47.8825 + (index * 0.01), -15.7942 + (index * 0.01)];
+          }
         }
-      } else if (athlete.ranking_type === 'regional' || selectedRegion === 'regional') {
-        // Para ranking regional, usar coordenadas da região
-        const baseCoords = regionCoordinates[athlete.region];
-        if (baseCoords) {
+      }
+      // Para jogadores reais, usar coordenadas fixas para cada posição
+      else {
+        // Jogadores reais
+        if (selectedRegion === 'national' || athlete.ranking_type === 'national') {
+          // Distribuir os jogadores em um círculo ao redor de Brasília
+          const brasiliaCoords: [number, number] = [-47.8825, -15.7942]; // Brasília
+          const radius = 5; // Raio em graus
+          const angle = (index / 10) * Math.PI * 2; // Distribuir em círculo
+          
           coordinates = [
-            baseCoords[0] + (Math.random() - 0.5) * jitter,
-            baseCoords[1] + (Math.random() - 0.5) * jitter
+            brasiliaCoords[0] + radius * Math.cos(angle),
+            brasiliaCoords[1] + radius * Math.sin(angle)
           ];
+        } else if (selectedRegion === 'regional' || athlete.ranking_type === 'regional') {
+          // Para ranking regional, usar centro da região com distribuição em círculo
+          const region = athlete.region || userLocation?.region || 'Sudeste';
+          baseCoords = regionCoordinates[region];
+          if (baseCoords) {
+            const radius = 2; // Raio menor para região
+            const angle = (index / 5) * Math.PI * 2;
+            
+            coordinates = [
+              baseCoords[0] + radius * Math.cos(angle),
+              baseCoords[1] + radius * Math.sin(angle)
+            ];
+          } else {
+            coordinates = [-47.8825, -15.7942]; // Fallback para Brasília
+          }
         } else {
-          coordinates = [-47.8825 + (Math.random() - 0.5) * jitter, -15.7942 + (Math.random() - 0.5) * jitter];
-        }
-      } else {
-        // Para ranking local, usar coordenadas do estado
-        const baseCoords = stateCoordinates[athlete.region];
-        if (baseCoords) {
-          coordinates = [
-            baseCoords[0] + (Math.random() - 0.5) * jitter,
-            baseCoords[1] + (Math.random() - 0.5) * jitter
-          ];
-        } else {
-          coordinates = [-47.8825 + (Math.random() - 0.5) * jitter, -15.7942 + (Math.random() - 0.5) * jitter];
+          // Para ranking local, usar centro do estado com distribuição em círculo menor
+          const state = athlete.region || userLocation?.state || 'MG';
+          baseCoords = stateCoordinates[state];
+          if (baseCoords) {
+            const radius = 1; // Raio ainda menor para local
+            const angle = (index / 3) * Math.PI * 2;
+            
+            coordinates = [
+              baseCoords[0] + radius * Math.cos(angle),
+              baseCoords[1] + radius * Math.sin(angle)
+            ];
+          } else {
+            coordinates = [-47.8825, -15.7942]; // Fallback para Brasília
+          }
         }
       }
 

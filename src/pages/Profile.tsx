@@ -99,8 +99,15 @@ export default function Profile() {
       console.log("Upload concluído, URL:", photoUrl);
       
       if (photoUrl) {
+        // Adicionar timestamp para evitar cache
+        const uniqueUrl = `${photoUrl}?t=${new Date().getTime()}`;
+        
         // Atualizar o perfil com a nova foto
-        await updateProfile({ avatar_url: photoUrl });
+        await updateProfile({ avatar_url: uniqueUrl });
+        
+        // Forçar atualização da página para mostrar a nova foto
+        window.location.reload();
+        
         toast.success("Foto atualizada com sucesso!");
       } else {
         throw new Error("Não foi possível obter a URL da foto após o upload");

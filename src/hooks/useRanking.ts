@@ -339,8 +339,13 @@ export const useRanking = () => {
         console.warn('Erro ao buscar perfis:', profilesError);
       }
 
+      // Log detalhado para debug
       console.log('Perfis encontrados:', profilesData?.length || 0);
-      console.log('Perfis encontrados (amostra):', profilesData?.slice(0, 3));
+      if (profilesData && profilesData.length > 0) {
+        console.log('Exemplo de perfil encontrado:', JSON.stringify(profilesData[0]));
+      } else {
+        console.log('Nenhum perfil encontrado!');
+      }
       
       // Buscar progresso para garantir pontuação correta
       const { data: progressData, error: progressError } = await supabase

@@ -246,14 +246,16 @@ export default function Ranking() {
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 overflow-hidden">
                       {entry.user_avatar ? (
                         <img 
-                          src={entry.user_avatar} 
+                          src={`${entry.user_avatar}?t=${new Date().getTime()}`} 
                           alt={entry.user_name}
                           className="w-10 h-10 rounded-full object-cover"
                           onError={(e) => {
+                            console.log("Erro ao carregar imagem de perfil:", entry.user_name);
                             // Se a imagem falhar ao carregar, mostrar a inicial
                             e.currentTarget.style.display = 'none';
                             e.currentTarget.parentElement!.innerHTML = `<span class="text-primary font-bold">${entry.user_name?.charAt(0) || 'U'}</span>`;
                           }}
+                          onLoad={() => console.log("Imagem carregada com sucesso:", entry.user_name)}
                         />
                       ) : (
                         <span className="text-primary font-bold">
