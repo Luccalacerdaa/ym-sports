@@ -18,6 +18,7 @@ import HeightProjection from "./pages/HeightProjection";
 import ExerciseLibrary from "./pages/ExerciseLibrary";
 import Achievements from "./pages/Achievements";
 import Ranking from "./pages/Ranking";
+import NewRanking from "./pages/NewRanking";
 import DashboardLayout from "./pages/DashboardLayout";
 import NotFound from "./pages/NotFound";
 
@@ -48,7 +49,7 @@ const AppContent = () => {
               <Route path="height-projection" element={<HeightProjection />} />
               <Route path="exercises" element={<ExerciseLibrary />} />
               <Route path="achievements" element={<Achievements />} />
-              <Route path="ranking" element={<Ranking />} />
+              <Route path="ranking" element={<NewRanking />} />
               <Route path="nutrition" element={<div className="p-6">Nutrição em construção</div>} />
               <Route path="settings" element={<div className="p-6">Configurações em construção</div>} />
             </Route>
