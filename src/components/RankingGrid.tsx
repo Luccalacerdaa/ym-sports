@@ -151,7 +151,7 @@ export const RankingGrid = ({ rankings, type, loading, className, title }: Ranki
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold truncate">
-                            {entry.user_name || 'Usuário'}
+                            {entry.user_name || `Jogador #${entry.position}`}
                           </h3>
                           {isCurrentUser && (
                             <Badge variant="secondary" className="text-xs">Você</Badge>

@@ -336,15 +336,26 @@ export const useRanking = () => {
         .in('id', userIds);
 
       if (profilesError) {
-        console.warn('Erro ao buscar perfis:', profilesError);
+        console.warn('❌ Erro ao buscar perfis:', profilesError);
+        console.warn('Detalhes do erro:', {
+          message: profilesError.message,
+          code: profilesError.code,
+          details: profilesError.details,
+          hint: profilesError.hint
+        });
       }
 
       // Log detalhado para debug
       console.log('Perfis encontrados:', profilesData?.length || 0);
       if (profilesData && profilesData.length > 0) {
         console.log('Exemplo de perfil encontrado:', JSON.stringify(profilesData[0]));
+        console.log('Lista completa de perfis:', JSON.stringify(profilesData.map(p => ({
+          id: p.id,
+          name: p.name,
+          has_avatar: !!p.avatar_url
+        }))));
       } else {
-        console.log('Nenhum perfil encontrado!');
+        console.log('⚠️ Nenhum perfil encontrado! IDs buscados:', JSON.stringify(userIds));
       }
       
       // Buscar progresso para garantir pontuação correta
@@ -362,22 +373,42 @@ export const useRanking = () => {
       const uniqueUserIds = new Set();
       const uniqueRankings = data.filter(entry => {
         if (uniqueUserIds.has(entry.user_id)) {
+          console.log(`⚠️ Usuário duplicado encontrado: ${entry.user_id} - Posição: ${entry.position} - Tipo: ${entry.ranking_type}`);
           return false; // Filtrar duplicatas
         }
         uniqueUserIds.add(entry.user_id);
         return true;
       });
       
+      console.log(`Rankings únicos após remoção de duplicatas: ${uniqueRankings.length}`);
+      
       // Agora mapear os rankings únicos para adicionar informações de usuário
       const rankingsWithUserInfo = uniqueRankings.map(entry => {
         const profile = profilesData?.find(p => p.id === entry.user_id);
         const progress = progressData?.find(p => p.user_id === entry.user_id);
         
-        // Usar nome do perfil ou "Usuário" como fallback
-        const displayName = profile?.name || `Usuário #${entry.position}`;
+        // Usar nome do perfil ou nome mais amigável como fallback
+        let displayName = profile?.name;
+        
+        if (!displayName) {
+          // Se não tiver nome, criar um nome mais amigável baseado no tipo de ranking
+          if (entry.ranking_type === 'national') {
+            displayName = `Atleta Nacional #${entry.position}`;
+          } else if (entry.ranking_type === 'regional') {
+            displayName = `Atleta ${entry.region || 'Regional'} #${entry.position}`;
+          } else {
+            displayName = `Jogador ${entry.region || 'Local'} #${entry.position}`;
+          }
+        }
         
         // Usar pontos do progresso se disponíveis (mais atualizados)
         const points = progress?.total_points || entry.total_points;
+        
+        // Log detalhado para cada entrada
+        console.log(`Processando ranking: ID=${entry.user_id}, Posição=${entry.position}, Tipo=${entry.ranking_type}`);
+        console.log(`  > Perfil encontrado: ${profile ? 'Sim' : 'Não'}, Nome: ${profile?.name || 'Não definido'}`);
+        console.log(`  > Progresso encontrado: ${progress ? 'Sim' : 'Não'}, Pontos: ${progress?.total_points || 'Não definido'}`);
+        console.log(`  > Nome final: ${displayName}, Pontos finais: ${points}`);
         
         return {
           ...entry,
@@ -471,7 +502,48 @@ export const useRanking = () => {
       const rankingsToInsert = [];
       
       // Ordenar progresso por pontos (decrescente) para garantir posições corretas
-      progressData.sort((a, b) => b.total_points - a.total_points);
+      console.log('Dados de progresso antes da ordenação:', JSON.stringify(progressData.map(p => ({
+        user_id: p.user_id, 
+        points: p.total_points,
+        profile: profilesData.find(profile => profile.id === p.user_id)?.name || 'Desconhecido'
+      }))));
+      
+      // Verificar se há valores nulos ou indefinidos nos pontos
+      const invalidPoints = progressData.filter(p => p.total_points === null || p.total_points === undefined);
+      if (invalidPoints.length > 0) {
+        console.error('⚠️ ALERTA: Encontrados registros com pontos nulos ou indefinidos:', invalidPoints);
+        
+        // Corrigir pontos nulos/indefinidos para evitar problemas na ordenação
+        invalidPoints.forEach(p => {
+          console.log(`Corrigindo pontos nulos para o usuário ${p.user_id}: 0 pontos`);
+          p.total_points = 0;
+        });
+      }
+      
+      // Verificar se há pontos não numéricos
+      const nonNumericPoints = progressData.filter(p => typeof p.total_points !== 'number');
+      if (nonNumericPoints.length > 0) {
+        console.error('⚠️ ALERTA: Encontrados registros com pontos não numéricos:', nonNumericPoints);
+        
+        // Corrigir pontos não numéricos
+        nonNumericPoints.forEach(p => {
+          console.log(`Corrigindo pontos não numéricos para o usuário ${p.user_id}: ${p.total_points} -> ${Number(p.total_points) || 0}`);
+          p.total_points = Number(p.total_points) || 0;
+        });
+      }
+      
+      // Ordenação segura com verificação de tipos
+      progressData.sort((a, b) => {
+        const pointsA = typeof a.total_points === 'number' ? a.total_points : 0;
+        const pointsB = typeof b.total_points === 'number' ? b.total_points : 0;
+        return pointsB - pointsA;
+      });
+      
+      console.log('Dados de progresso APÓS ordenação:', JSON.stringify(progressData.map(p => ({
+        user_id: p.user_id, 
+        points: p.total_points,
+        profile: profilesData.find(profile => profile.id === p.user_id)?.name || 'Desconhecido'
+      }))));
       
       // Ranking nacional
       const nationalRankings = progressData.map((progress, index) => {
@@ -522,13 +594,25 @@ export const useRanking = () => {
         
         // Calcular rankings regionais
         for (const region in regionGroups) {
-          const users = regionGroups[region].sort((a, b) => b.total_points - a.total_points);
+          // Ordenação segura com verificação de tipos
+          const users = regionGroups[region].sort((a, b) => {
+            const pointsA = typeof a.total_points === 'number' ? a.total_points : 0;
+            const pointsB = typeof b.total_points === 'number' ? b.total_points : 0;
+            return pointsB - pointsA;
+          });
+          
+          console.log(`Ranking regional ${region} (ordenado):`, JSON.stringify(users.map(u => ({
+            user_id: u.user_id,
+            points: u.total_points,
+            profile: profilesData.find(profile => profile.id === u.user_id)?.name || 'Desconhecido'
+          }))));
+          
           const regionalRankings = users.map((user, index) => ({
             user_id: user.user_id,
             ranking_type: 'regional',
             region,
             position: index + 1,
-            total_points: user.total_points,
+            total_points: typeof user.total_points === 'number' ? user.total_points : 0,
             period: 'all_time',
             calculated_at: now
           }));
@@ -537,13 +621,25 @@ export const useRanking = () => {
         
         // Calcular rankings locais (por estado)
         for (const state in stateGroups) {
-          const users = stateGroups[state].sort((a, b) => b.total_points - a.total_points);
+          // Ordenação segura com verificação de tipos
+          const users = stateGroups[state].sort((a, b) => {
+            const pointsA = typeof a.total_points === 'number' ? a.total_points : 0;
+            const pointsB = typeof b.total_points === 'number' ? b.total_points : 0;
+            return pointsB - pointsA;
+          });
+          
+          console.log(`Ranking local ${state} (ordenado):`, JSON.stringify(users.map(u => ({
+            user_id: u.user_id,
+            points: u.total_points,
+            profile: profilesData.find(profile => profile.id === u.user_id)?.name || 'Desconhecido'
+          }))));
+          
           const localRankings = users.map((user, index) => ({
             user_id: user.user_id,
             ranking_type: 'local',
             region: state,
             position: index + 1,
-            total_points: user.total_points,
+            total_points: typeof user.total_points === 'number' ? user.total_points : 0,
             period: 'all_time',
             calculated_at: now
           }));

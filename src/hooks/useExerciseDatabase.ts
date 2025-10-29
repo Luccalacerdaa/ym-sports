@@ -4,17 +4,28 @@ import { useExerciseAPI, ExerciseAPI } from './useExerciseAPI';
 
 export const useExerciseDatabase = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { fetchExercisesByName, loading: apiLoading } = useExerciseAPI();
+  const { searchExercisesByName, loading: apiLoading } = useExerciseAPI();
 
   // Função para buscar exercício na API da Ninjas
   const enrichExerciseWithAPI = async (exerciseName: string, originalExercise: any) => {
     try {
-      const apiExercises = await fetchExercisesByName(exerciseName);
+      console.log(`🔍 Tentando enriquecer exercício via API: "${exerciseName}"`);
+      console.log(`Exercício original:`, JSON.stringify(originalExercise));
+      
+      // Verificar se searchExercisesByName é uma função
+      if (typeof searchExercisesByName !== 'function') {
+        console.error('❌ ERRO CRÍTICO: searchExercisesByName não é uma função!', typeof searchExercisesByName);
+        throw new Error('searchExercisesByName não é uma função');
+      }
+      
+      const apiExercises = await searchExercisesByName(exerciseName);
+      console.log(`Resultado da API para "${exerciseName}":`, apiExercises);
       
       if (apiExercises && apiExercises.length > 0) {
         const apiExercise = apiExercises[0]; // Pegar o primeiro resultado
+        console.log(`✅ Exercício encontrado na API: ${apiExercise.name}`);
         
-        return {
+        const enrichedExercise = {
           ...originalExercise,
           name: apiExercise.name,
           description: originalExercise.description || apiExercise.instructions,
@@ -27,12 +38,19 @@ export const useExerciseDatabase = () => {
           equipment: apiExercise.equipment,
           type: apiExercise.type,
         };
+        
+        console.log(`✅ Exercício enriquecido com API:`, JSON.stringify(enrichedExercise));
+        return enrichedExercise;
+      } else {
+        console.log(`⚠️ Nenhum resultado da API para "${exerciseName}", usando base local`);
       }
     } catch (error) {
-      console.error('Erro ao buscar exercício na API:', error);
+      console.error('❌ Erro ao buscar exercício na API:', error);
+      console.error('Stack trace:', error instanceof Error ? error.stack : 'Sem stack trace disponível');
     }
     
     // Se não encontrar na API, usar função original
+    console.log(`Usando enriquecimento local para "${exerciseName}"`);
     return enrichExercise(exerciseName, originalExercise);
   };
 
@@ -93,23 +111,43 @@ export const useExerciseDatabase = () => {
 
   // Função para enriquecer treino completo com API
   const enrichTrainingWithAPI = async (training: any) => {
-    const enrichedExercises = await Promise.all(
-      training.exercises.map(async (exercise: any) => {
+    console.log(`🔍 Enriquecendo treino completo: "${training.title || 'Sem título'}"`);
+    console.log(`Número de exercícios: ${training.exercises?.length || 0}`);
+    
+    if (!training.exercises || !Array.isArray(training.exercises)) {
+      console.error('❌ Erro: exercises não é um array válido:', training.exercises);
+      return training;
+    }
+    
+    try {
+      // Processar os exercícios sequencialmente em vez de em paralelo para evitar problemas
+      const enrichedExercises = [];
+      for (const exercise of training.exercises) {
         try {
+          console.log(`Processando exercício: "${exercise.name}"`);
           // Tentar enriquecer com API primeiro
-          return await enrichExerciseWithAPI(exercise.name, exercise);
+          const enriched = await enrichExerciseWithAPI(exercise.name, exercise);
+          enrichedExercises.push(enriched);
         } catch (error) {
-          console.error('Erro ao enriquecer exercício com API:', error);
+          console.error(`❌ Erro ao enriquecer exercício "${exercise.name}":`, error);
           // Fallback para enriquecimento local
-          return enrichExercise(exercise.name, exercise);
+          const localEnriched = enrichExercise(exercise.name, exercise);
+          enrichedExercises.push(localEnriched);
         }
-      })
-    );
+      }
 
-    return {
-      ...training,
-      exercises: enrichedExercises
-    };
+      const result = {
+        ...training,
+        exercises: enrichedExercises
+      };
+      
+      console.log(`✅ Treino enriquecido com sucesso: ${enrichedExercises.length} exercícios`);
+      return result;
+    } catch (error) {
+      console.error('❌ Erro geral ao enriquecer treino:', error);
+      // Em caso de erro, retornar o treino original
+      return training;
+    }
   };
 
   // Função para enriquecer treino completo (versão local)

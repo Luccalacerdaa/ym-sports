@@ -72,25 +72,34 @@ export const useExerciseAPI = () => {
     setError(null);
 
     try {
+      console.log(`🔍 Buscando exercício por nome: "${name}"`);
       const url = `https://api.api-ninjas.com/v1/exercises?name=${encodeURIComponent(name)}`;
+      console.log(`URL da API: ${url}`);
 
+      // Verificar se a chave da API está definida
+      const apiKey = import.meta.env.VITE_API_NINJAS_KEY || '';
+      console.log(`Chave da API definida: ${apiKey ? 'Sim' : 'Não'}`);
+      
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          'X-Api-Key': import.meta.env.VITE_API_NINJAS_KEY || '',
+          'X-Api-Key': apiKey,
           'Content-Type': 'application/json',
         },
       });
 
+      console.log(`Status da resposta: ${response.status} ${response.statusText}`);
+      
       if (!response.ok) {
-        throw new Error(`Erro na API: ${response.status}`);
+        throw new Error(`Erro na API: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
+      console.log(`Dados recebidos da API:`, data);
       setExercises(data);
       return data;
     } catch (err: any) {
-      console.error('Erro ao buscar exercícios por nome:', err);
+      console.error('❌ Erro ao buscar exercícios por nome:', err);
       setError(err.message);
       return [];
     } finally {
