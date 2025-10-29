@@ -122,77 +122,152 @@ export const GeoVisualizer = ({ className, rankingType = 'all' }: GeoVisualizerP
                 )}
                 
                 {/* Jogadores */}
-                {players.map((player, index) => {
-                  // Calcular posição baseada no índice
-                  // Para criar um efeito visual de distribuição geográfica
-                  const isCurrentUser = player.user_id === user?.id;
-                  const position = isCurrentUser 
-                    ? { x: 50, y: 50 } // Usuário atual sempre no centro
-                    : {
-                        x: 30 + (index * 7) % 40, // Distribuir horizontalmente
-                        y: 30 + Math.floor((index * 13) / 40) * 10 % 40 // Distribuir verticalmente
-                      };
-                  
-                  return (
-                    <div 
-                      key={`${player.user_id}-${index}`}
-                      className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-in-out ${
-                        isCurrentUser ? 'z-10' : 'z-0'
-                      }`}
-                      style={{
-                        left: `${position.x}%`,
-                        top: `${position.y}%`
-                      }}
-                    >
-                      <div className="relative group">
-                        <Avatar className={`h-10 w-10 border-2 ${
-                          player.position === 1 ? 'border-yellow-500 shadow-glow-yellow' :
-                          player.position === 2 ? 'border-gray-300 shadow-glow-gray' :
-                          player.position === 3 ? 'border-amber-700 shadow-glow-amber' :
-                          'border-primary/50'
-                        } ${isCurrentUser ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
-                          <AvatarImage 
-                            src={`${player.user_avatar}?t=${new Date().getTime()}`} 
-                            alt={player.user_name}
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                          <AvatarFallback className="bg-primary text-primary-foreground">
-                            {(player.user_name || "U")[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        
-                        {/* Badge de posição */}
-                        <Badge 
-                          className={`absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center rounded-full ${
-                            player.position === 1 ? 'bg-yellow-500 text-yellow-950' :
-                            player.position === 2 ? 'bg-gray-300 text-gray-800' :
-                            player.position === 3 ? 'bg-amber-700 text-amber-50' :
-                            'bg-primary text-primary-foreground'
-                          }`}
-                        >
-                          {player.position}
-                        </Badge>
-                        
-                        {/* Tooltip com informações */}
-                        <div className="absolute left-1/2 bottom-full mb-2 transform -translate-x-1/2 w-max max-w-[200px] bg-background border border-border p-2 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                          <div className="flex flex-col items-center gap-1 text-center">
-                            <p className="font-semibold text-sm">{player.user_name || "Usuário"}</p>
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Trophy className="h-3 w-3" />
-                              <span>{player.total_points.toLocaleString()} pts</span>
+                {players.length > 0 ? (
+                  players.map((player, index) => {
+                    // Calcular posição baseada no índice
+                    // Para criar um efeito visual de distribuição geográfica
+                    const isCurrentUser = player.user_id === user?.id;
+                    
+                    // Distribuir jogadores em um padrão mais visível
+                    // Usuário atual no centro, outros em círculo ao redor
+                    let x, y;
+                    
+                    if (isCurrentUser) {
+                      // Usuário atual sempre no centro
+                      x = 50;
+                      y = 50;
+                    } else {
+                      // Distribuir outros jogadores em círculo
+                      const angle = (index * (360 / Math.max(players.length, 8))) * (Math.PI / 180);
+                      const radius = 35; // Distância do centro (%)
+                      x = 50 + radius * Math.cos(angle);
+                      y = 50 + radius * Math.sin(angle);
+                    }
+                    
+                    // Garantir que os jogadores fiquem dentro dos limites
+                    x = Math.max(10, Math.min(90, x));
+                    y = Math.max(10, Math.min(90, y));
+                    
+                    // Debug para verificar dados do jogador
+                    console.log(`Renderizando jogador #${index}:`, {
+                      id: player.user_id,
+                      name: player.user_name,
+                      avatar: player.user_avatar,
+                      position: player.position,
+                      points: player.total_points,
+                      isCurrentUser
+                    });
+                    
+                    return (
+                      <div 
+                        key={`${player.user_id || index}-${index}`}
+                        className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-in-out ${
+                          isCurrentUser ? 'z-20' : 'z-10'
+                        }`}
+                        style={{
+                          left: `${x}%`,
+                          top: `${y}%`
+                        }}
+                      >
+                        <div className="relative group">
+                          <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                            player.position === 1 ? 'bg-yellow-500/20 border-2 border-yellow-500 shadow-glow-yellow' :
+                            player.position === 2 ? 'bg-gray-300/20 border-2 border-gray-300 shadow-glow-gray' :
+                            player.position === 3 ? 'bg-amber-700/20 border-2 border-amber-700 shadow-glow-amber' :
+                            'bg-primary/10 border border-primary/50'
+                          } ${isCurrentUser ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+                            {player.user_avatar ? (
+                              <img 
+                                src={`${player.user_avatar}?t=${new Date().getTime()}`} 
+                                alt={player.user_name || "Jogador"}
+                                className="w-full h-full rounded-full object-cover"
+                                onError={(e) => {
+                                  console.log("Erro ao carregar avatar:", player.user_name);
+                                  e.currentTarget.style.display = 'none';
+                                  e.currentTarget.parentElement!.innerHTML = `<span class="text-primary font-bold text-lg">${(player.user_name || "U")[0]}</span>`;
+                                }}
+                                onLoad={() => console.log("Avatar carregado:", player.user_name)}
+                              />
+                            ) : (
+                              <span className="text-primary font-bold text-lg">
+                                {(player.user_name || "U")[0]}
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* Nome do jogador abaixo do avatar */}
+                          <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-background/80 px-2 py-0.5 rounded text-xs font-medium">
+                            {player.user_name || "Jogador"}
+                          </div>
+                          
+                          {/* Badge de posição */}
+                          <Badge 
+                            className={`absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center rounded-full ${
+                              player.position === 1 ? 'bg-yellow-500 text-yellow-950' :
+                              player.position === 2 ? 'bg-gray-300 text-gray-800' :
+                              player.position === 3 ? 'bg-amber-700 text-amber-50' :
+                              'bg-primary text-primary-foreground'
+                            }`}
+                          >
+                            {player.position}
+                          </Badge>
+                          
+                          {/* Tooltip com informações */}
+                          <div className="absolute left-1/2 bottom-full mb-2 transform -translate-x-1/2 w-max max-w-[200px] bg-background border border-border p-2 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-30">
+                            <div className="flex flex-col items-center gap-1 text-center">
+                              <p className="font-semibold text-sm">{player.user_name || "Jogador"}</p>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Trophy className="h-3 w-3" />
+                                <span>{player.total_points?.toLocaleString() || 0} pts</span>
+                              </div>
+                              <Badge variant="outline" className="text-xs mt-1">
+                                {player.ranking_type === 'national' ? 'Nacional' :
+                                 player.ranking_type === 'regional' ? 'Regional' : 'Local'}
+                              </Badge>
                             </div>
-                            <Badge variant="outline" className="text-xs mt-1">
-                              {player.ranking_type === 'national' ? 'Nacional' :
-                               player.ranking_type === 'regional' ? 'Regional' : 'Local'}
-                            </Badge>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                ) : (
+                  // Jogadores fictícios para demonstração quando não há dados
+                  Array.from({ length: 5 }).map((_, index) => {
+                    const angle = (index * (360 / 5)) * (Math.PI / 180);
+                    const radius = 35;
+                    const x = 50 + radius * Math.cos(angle);
+                    const y = 50 + radius * Math.sin(angle);
+                    
+                    return (
+                      <div 
+                        key={`dummy-${index}`}
+                        className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-in-out z-10"
+                        style={{
+                          left: `${x}%`,
+                          top: `${y}%`
+                        }}
+                      >
+                        <div className="relative group">
+                          <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center border border-muted-foreground/20">
+                            <span className="text-muted-foreground font-bold">
+                              {index + 1}
+                            </span>
+                          </div>
+                          
+                          <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-background/80 px-2 py-0.5 rounded text-xs font-medium">
+                            Jogador {index + 1}
+                          </div>
+                          
+                          <Badge 
+                            className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center rounded-full bg-muted text-muted-foreground"
+                          >
+                            {index + 1}
+                          </Badge>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
             
