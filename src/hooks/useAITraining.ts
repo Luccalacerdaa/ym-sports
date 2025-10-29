@@ -20,21 +20,52 @@ export const useAITraining = () => {
   const [error, setError] = useState<string | null>(null);
 
   const generatePersonalizedPrompt = (request: AITrainingRequest) => {
+    // Gerar um ID único para cada solicitação de treino
+    const requestId = Date.now().toString(36) + Math.random().toString(36).substring(2);
+    
+    // Calcular dados adicionais do perfil
+    const imc = profile?.weight && profile?.height ? (profile.weight / ((profile.height/100) ** 2)).toFixed(1) : 'Não calculado';
+    
+    const biotipo = profile?.age && profile?.height && profile?.weight ? 
+      (profile.age < 18 ? 'Em desenvolvimento' : 
+       profile.height > 180 && profile.weight < 80 ? 'Ectomorfo' :
+       profile.height < 175 && profile.weight > 80 ? 'Endomorfo' : 'Mesomorfo') : 'Não determinado';
+    
+    // Determinar necessidades específicas baseadas na posição
+    const posicaoNecessidades = {
+      'goleiro': 'reflexos, flexibilidade, explosão e força de membros superiores',
+      'zagueiro': 'força, jogo aéreo, resistência e poder de marcação',
+      'lateral': 'resistência aeróbica, velocidade, cruzamentos e marcação',
+      'volante': 'resistência, força, marcação e distribuição',
+      'meio-campo': 'resistência, visão de jogo, passes e finalizações',
+      'meia': 'agilidade, criatividade, passes e finalizações',
+      'atacante': 'velocidade, finalização, força e posicionamento',
+      'ponta': 'velocidade, dribles, cruzamentos e finalizações'
+    };
+    
+    // Obter necessidades específicas da posição ou valor padrão
+    const posicaoAtleta = profile?.position?.toLowerCase() || '';
+    const necessidadesEspecificas = Object.keys(posicaoNecessidades).find(pos => 
+      posicaoAtleta.includes(pos)
+    ) ? posicaoNecessidades[Object.keys(posicaoNecessidades).find(pos => 
+      posicaoAtleta.includes(pos)
+    ) as keyof typeof posicaoNecessidades] : 'habilidades gerais de futebol';
+    
     const userInfo = `
-PERFIL DETALHADO DO ATLETA:
+PERFIL DETALHADO DO ATLETA #${requestId}:
 - Nome: ${profile?.name || 'Não informado'}
 - Idade: ${profile?.age || 'Não informado'} anos
 - Altura: ${profile?.height || 'Não informado'} cm
 - Peso: ${profile?.weight || 'Não informado'} kg
-- IMC: ${profile?.weight && profile?.height ? (profile.weight / ((profile.height/100) ** 2)).toFixed(1) : 'Não calculado'}
+- IMC: ${imc} (${Number(imc) < 18.5 ? 'Abaixo do peso' : Number(imc) < 25 ? 'Peso normal' : Number(imc) < 30 ? 'Sobrepeso' : 'Obesidade'})
 - Posição: ${profile?.position || 'Não informado'}
+- Necessidades da posição: ${necessidadesEspecificas}
 - Time Atual: ${profile?.current_team || 'Não informado'}
 - Experiência: ${profile?.previous_teams?.length || 0} times anteriores
 - Localização: ${profile?.location || 'Não informado'}
-- Biotipo: ${profile?.age && profile?.height && profile?.weight ? 
-  (profile.age < 18 ? 'Em desenvolvimento' : 
-   profile.height > 180 && profile.weight < 80 ? 'Ectomorfo' :
-   profile.height < 175 && profile.weight > 80 ? 'Endomorfo' : 'Mesomorfo') : 'Não determinado'}
+- Biotipo: ${biotipo}
+- Data da solicitação: ${new Date().toLocaleDateString('pt-BR')}
+- ID da solicitação: ${requestId}
 `;
 
     const goalsText = request.goals.join(', ');
@@ -54,10 +85,19 @@ SOLICITAÇÃO DE TREINO PERSONALIZADO:
 - Foco do treino: ${focusText || "Geral"}
 
 INSTRUÇÕES:
-Você é um preparador físico especializado em futebol com 20+ anos de experiência. Crie um plano de treinos semanal ULTRA PERSONALIZADO baseado no perfil específico do atleta.
+Você é um preparador físico especializado em futebol com 20+ anos de experiência e PhD em Ciências do Esporte. Crie um plano de treinos semanal ULTRA PERSONALIZADO e ÚNICO baseado no perfil específico do atleta.
 
-IMPORTANTE - LEIA COM ATENÇÃO: 
-- Gere treinos para TODOS os dias disponíveis. Se ${request.availableDays.length} dias foram selecionados, crie ${request.availableDays.length} treinos diferentes.
+IMPORTANTE - LEIA COM MUITA ATENÇÃO: 
+- Gere treinos para TODOS os dias disponíveis. Se ${request.availableDays.length} dias foram selecionados, crie ${request.availableDays.length} treinos COMPLETAMENTE DIFERENTES.
+
+- PERSONALIZAÇÃO ABSOLUTA:
+  * Cada treino deve ser ÚNICO e PERSONALIZADO para este atleta específico
+  * NUNCA gere treinos genéricos ou padronizados
+  * Considere TODOS os detalhes do perfil (idade, altura, peso, posição, biotipo)
+  * Adapte os exercícios às necessidades específicas da posição do atleta
+  * Considere o ID da solicitação (#${Date.now().toString(36)}) para garantir treinos diferentes a cada vez
+  * Varie intensidade, volume e tipos de exercícios entre os dias da semana
+  * Crie nomes de treinos CRIATIVOS e ÚNICOS que reflitam o objetivo do treino
 
 - USO OBRIGATÓRIO DOS EQUIPAMENTOS INFORMADOS:
   * O atleta informou que tem disponível: ${equipmentText || "apenas peso corporal"}
@@ -68,10 +108,12 @@ IMPORTANTE - LEIA COM ATENÇÃO:
   * Se o atleta tem barras, OBRIGATORIAMENTE inclua exercícios com barras
   * Se o atleta tem elásticos, OBRIGATORIAMENTE inclua exercícios com elásticos
   * NUNCA inclua exercícios com equipamentos não disponíveis
+  * SEJA CRIATIVO com os equipamentos disponíveis (diferentes formas de uso)
 
 - DURAÇÃO EXATA: O treino completo deve durar exatamente ${request.sessionDuration} minutos, incluindo descansos
-- VARIEDADE: Cada dia deve ter exercícios diferentes, aproveitando os equipamentos disponíveis
-- PROGRESSÃO: Organize os exercícios em ordem lógica (aquecimento → parte principal → finalização)
+- VARIEDADE MÁXIMA: Cada dia deve ter exercícios COMPLETAMENTE diferentes, sem repetições na semana
+- PROGRESSÃO CIENTÍFICA: Organize os exercícios em ordem lógica (aquecimento → parte principal → finalização)
+- EXPLICAÇÕES DETALHADAS: Inclua o "porquê" de cada escolha de exercício para este atleta específico
 
 LIMITAÇÕES PARA EVITAR CORTE:
 - Máximo 3 exercícios por treino
@@ -116,23 +158,45 @@ DIRETRIZES CRÍTICAS - LEIA COM MUITA ATENÇÃO:
    * Se o atleta tem halteres, OBRIGATORIAMENTE use halteres em pelo menos um exercício por treino
    * Se o atleta tem bicicleta, OBRIGATORIAMENTE use a bicicleta em pelo menos um exercício por treino
    * Se o atleta tem barras, OBRIGATORIAMENTE use barras em pelo menos um exercício por treino
+   * SEJA CRIATIVO com os equipamentos - use de formas diferentes e inovadoras
 
-2. PERSONALIZAÇÃO FÍSICA:
+2. PERSONALIZAÇÃO FÍSICA AVANÇADA:
    * Use idade (${profile?.age || '?'}), altura (${profile?.height || '?'} cm) e peso (${profile?.weight || '?'} kg) para personalizar cada exercício
-   * Para atletas altos (>180cm): foco em estabilidade e agilidade
-   * Para atletas baixos (<175cm): foco em força e explosão
-   * Para jovens (<18): priorize desenvolvimento motor e prevenção de lesões
-   * Para atletas mais pesados: foco em condicionamento e mobilidade
-   * Para atletas mais leves: foco em força e resistência
+   * Para atletas altos (>180cm): foco em estabilidade, agilidade e trabalho de core
+   * Para atletas baixos (<175cm): foco em força, explosão e trabalho de potência
+   * Para jovens (<18): priorize desenvolvimento motor, prevenção de lesões e fundamentos técnicos
+   * Para atletas mais pesados: foco em condicionamento, mobilidade e resistência cardiovascular
+   * Para atletas mais leves: foco em força, resistência muscular e ganho de massa
+   * Para cada biotipo: ${biotipo === 'Ectomorfo' ? 'priorize exercícios de força e hipertrofia com maior volume' : 
+     biotipo === 'Endomorfo' ? 'inclua exercícios de alta intensidade para queima calórica' : 
+     biotipo === 'Mesomorfo' ? 'equilibre força e resistência para maximizar o potencial atlético' : 
+     'adapte os exercícios ao biotipo específico do atleta'}
 
-3. ESTRUTURA DO TREINO:
-   * Considere a posição específica no campo (${profile?.position || 'não informada'})
-   * Varie COMPLETAMENTE os treinos - cada dia deve ser único
-   * Inclua progressão semanal baseada no perfil
+3. ESPECIFICIDADE POR POSIÇÃO:
+   * Adapte cada exercício para a posição do atleta: ${profile?.position || 'jogador de futebol'}
+   * Necessidades específicas desta posição: ${necessidadesEspecificas}
+   * Inclua pelo menos um exercício por treino focado especificamente nas habilidades da posição
+   * Goleiros: trabalhe reflexos, explosão e membros superiores
+   * Defensores: priorize força, resistência e jogo aéreo
+   * Meio-campistas: foque em resistência, agilidade e coordenação
+   * Atacantes: desenvolva velocidade, explosão e finalização
+
+4. ESTRUTURA DO TREINO AVANÇADA:
+   * Crie nomes de treinos ÚNICOS e CRIATIVOS que reflitam o objetivo e o foco
+   * Varie COMPLETAMENTE os treinos - cada dia deve ser absolutamente único
+   * Inclua progressão semanal científica baseada no perfil
    * Distribua os exercícios para utilizar EXATAMENTE ${request.sessionDuration} minutos
    * Estruture os treinos com progressão lógica (aquecimento → parte principal → finalização)
-   * Inclua tempos de descanso realistas (30-90 segundos dependendo da intensidade)
-   * Considere o nível de dificuldade solicitado (${request.difficulty}) ao definir intensidade
+   * Inclua tempos de descanso precisos (30-90 segundos dependendo da intensidade)
+   * Adapte a intensidade ao nível solicitado (${request.difficulty})
+   * Inclua um elemento SURPRESA ou INOVADOR em cada treino
+   * Use o ID da solicitação (${requestId}) como semente para garantir treinos únicos
+
+5. EXPLICAÇÕES CIENTÍFICAS:
+   * Para cada exercício, explique EXATAMENTE por que ele foi escolhido para este atleta
+   * Detalhe os benefícios específicos para a posição e características físicas
+   * Explique como o exercício contribui para os objetivos informados: ${goalsText}
+   * Inclua dicas técnicas personalizadas baseadas no perfil do atleta
 
 TIPOS DE TREINO POR DIA:
 - Segunda: Força e Potência (adaptado ao biotipo)
