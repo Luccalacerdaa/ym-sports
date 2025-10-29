@@ -6,52 +6,97 @@ export const useExerciseDatabase = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { searchExercisesByName, loading: apiLoading } = useExerciseAPI();
 
-  // Função para buscar exercício na API da Ninjas
+  // Função para buscar exercício na base de dados local ou na API
   const enrichExerciseWithAPI = async (exerciseName: string, originalExercise: any) => {
     try {
-      console.log(`🔍 Tentando enriquecer exercício via API: "${exerciseName}"`);
+      console.log(`🔍 Tentando enriquecer exercício: "${exerciseName}"`);
       console.log(`Exercício original:`, JSON.stringify(originalExercise));
       
-      // Verificar se searchExercisesByName é uma função
-      if (typeof searchExercisesByName !== 'function') {
-        console.error('❌ ERRO CRÍTICO: searchExercisesByName não é uma função!', typeof searchExercisesByName);
-        throw new Error('searchExercisesByName não é uma função');
-      }
+      // Primeiro, tentar encontrar na base de dados local
+      const localExercise = findExerciseByName(exerciseName);
       
-      const apiExercises = await searchExercisesByName(exerciseName);
-      console.log(`Resultado da API para "${exerciseName}":`, apiExercises);
-      
-      if (apiExercises && apiExercises.length > 0) {
-        const apiExercise = apiExercises[0]; // Pegar o primeiro resultado
-        console.log(`✅ Exercício encontrado na API: ${apiExercise.name}`);
+      if (localExercise) {
+        console.log(`✅ Exercício encontrado na base local: ${localExercise.name}`);
         
         const enrichedExercise = {
           ...originalExercise,
-          name: apiExercise.name,
-          description: originalExercise.description || apiExercise.instructions,
-          benefits: originalExercise.benefits || `Exercício de ${apiExercise.muscle} para ${apiExercise.type}`,
-          video_url: originalExercise.video_url || '',
-          image_url: originalExercise.image_url || '',
-          difficulty: apiExercise.difficulty || originalExercise.difficulty || 'intermediate',
-          category: mapAPITypeToCategory(apiExercise.type),
-          muscle_groups: [apiExercise.muscle],
-          equipment: apiExercise.equipment,
-          type: apiExercise.type,
+          name: localExercise.name,
+          description: originalExercise.description || localExercise.description,
+          benefits: originalExercise.benefits || localExercise.benefits,
+          video_url: originalExercise.video_url || localExercise.video_url,
+          image_url: originalExercise.image_url || localExercise.image_url,
+          difficulty: originalExercise.difficulty || localExercise.difficulty,
+          category: localExercise.category,
+          muscle_groups: localExercise.muscle_groups,
+          // Manter dados originais se existirem
+          sets: originalExercise.sets,
+          reps: originalExercise.reps,
+          weight: originalExercise.weight,
+          rest_time: originalExercise.rest_time,
+          notes: originalExercise.notes,
         };
         
-        console.log(`✅ Exercício enriquecido com API:`, JSON.stringify(enrichedExercise));
+        console.log(`✅ Exercício enriquecido com base local:`, JSON.stringify(enrichedExercise));
         return enrichedExercise;
+      }
+      
+      // Se não encontrou na base local, tentar API (se disponível)
+      if (import.meta.env.VITE_API_NINJAS_KEY) {
+        try {
+          // Verificar se searchExercisesByName é uma função
+          if (typeof searchExercisesByName !== 'function') {
+            console.error('❌ ERRO: searchExercisesByName não é uma função!', typeof searchExercisesByName);
+            throw new Error('searchExercisesByName não é uma função');
+          }
+          
+          const apiExercises = await searchExercisesByName(exerciseName);
+          console.log(`Resultado da API para "${exerciseName}":`, apiExercises);
+          
+          if (apiExercises && apiExercises.length > 0) {
+            const apiExercise = apiExercises[0]; // Pegar o primeiro resultado
+            console.log(`✅ Exercício encontrado na API: ${apiExercise.name}`);
+            
+            const enrichedExercise = {
+              ...originalExercise,
+              name: apiExercise.name,
+              description: originalExercise.description || apiExercise.instructions,
+              benefits: originalExercise.benefits || `Exercício de ${apiExercise.muscle} para ${apiExercise.type}`,
+              video_url: originalExercise.video_url || '',
+              image_url: originalExercise.image_url || '',
+              difficulty: apiExercise.difficulty || originalExercise.difficulty || 'intermediate',
+              category: mapAPITypeToCategory(apiExercise.type),
+              muscle_groups: [apiExercise.muscle],
+              equipment: apiExercise.equipment,
+              type: apiExercise.type,
+            };
+            
+            console.log(`✅ Exercício enriquecido com API:`, JSON.stringify(enrichedExercise));
+            return enrichedExercise;
+          }
+        } catch (apiError) {
+          console.error('❌ Erro ao buscar exercício na API:', apiError);
+        }
       } else {
-        console.log(`⚠️ Nenhum resultado da API para "${exerciseName}", usando base local`);
+        console.log(`⚠️ Chave da API não configurada, pulando busca na API`);
       }
     } catch (error) {
-      console.error('❌ Erro ao buscar exercício na API:', error);
+      console.error('❌ Erro ao enriquecer exercício:', error);
       console.error('Stack trace:', error instanceof Error ? error.stack : 'Sem stack trace disponível');
     }
     
-    // Se não encontrar na API, usar função original
-    console.log(`Usando enriquecimento local para "${exerciseName}"`);
-    return enrichExercise(exerciseName, originalExercise);
+    // Se não encontrar na API nem na base local, usar dados originais com enriquecimento mínimo
+    console.log(`⚠️ Usando dados originais para "${exerciseName}" com enriquecimento mínimo`);
+    return {
+      ...originalExercise,
+      name: originalExercise.name,
+      description: originalExercise.description || 'Exercício personalizado',
+      benefits: originalExercise.benefits || 'Benefícios específicos para o atleta',
+      video_url: originalExercise.video_url || '',
+      image_url: originalExercise.image_url || '',
+      difficulty: originalExercise.difficulty || 'intermediate',
+      category: 'strength',
+      muscle_groups: originalExercise.muscle_groups || [],
+    };
   };
 
   // Função para mapear tipos da API para categorias

@@ -329,7 +329,8 @@ export const useRanking = () => {
       // ALTERAÇÃO: Buscar perfis separadamente com mais dados
       const userIds = data.map(entry => entry.user_id);
       
-      // Buscar perfis com mais detalhes (removido campo username que não existe)
+      // Buscar perfis com mais detalhes e forçar refresh
+      console.log(`Buscando perfis para ${userIds.length} usuários...`);
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, name, avatar_url')
@@ -536,6 +537,12 @@ export const useRanking = () => {
       progressData.sort((a, b) => {
         const pointsA = typeof a.total_points === 'number' ? a.total_points : 0;
         const pointsB = typeof b.total_points === 'number' ? b.total_points : 0;
+        
+        // Se os pontos são iguais, desempatar por ID para garantir ordem consistente
+        if (pointsB === pointsA) {
+          return a.user_id.localeCompare(b.user_id);
+        }
+        
         return pointsB - pointsA;
       });
       
@@ -594,10 +601,16 @@ export const useRanking = () => {
         
         // Calcular rankings regionais
         for (const region in regionGroups) {
-          // Ordenação segura com verificação de tipos
+          // Ordenação segura com verificação de tipos e desempate
           const users = regionGroups[region].sort((a, b) => {
             const pointsA = typeof a.total_points === 'number' ? a.total_points : 0;
             const pointsB = typeof b.total_points === 'number' ? b.total_points : 0;
+            
+            // Se os pontos são iguais, desempatar por ID para garantir ordem consistente
+            if (pointsB === pointsA) {
+              return a.user_id.localeCompare(b.user_id);
+            }
+            
             return pointsB - pointsA;
           });
           
@@ -621,10 +634,16 @@ export const useRanking = () => {
         
         // Calcular rankings locais (por estado)
         for (const state in stateGroups) {
-          // Ordenação segura com verificação de tipos
+          // Ordenação segura com verificação de tipos e desempate
           const users = stateGroups[state].sort((a, b) => {
             const pointsA = typeof a.total_points === 'number' ? a.total_points : 0;
             const pointsB = typeof b.total_points === 'number' ? b.total_points : 0;
+            
+            // Se os pontos são iguais, desempatar por ID para garantir ordem consistente
+            if (pointsB === pointsA) {
+              return a.user_id.localeCompare(b.user_id);
+            }
+            
             return pointsB - pointsA;
           });
           

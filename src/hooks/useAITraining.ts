@@ -56,13 +56,22 @@ SOLICITAÇÃO DE TREINO PERSONALIZADO:
 INSTRUÇÕES:
 Você é um preparador físico especializado em futebol com 20+ anos de experiência. Crie um plano de treinos semanal ULTRA PERSONALIZADO baseado no perfil específico do atleta.
 
-IMPORTANTE: 
+IMPORTANTE - LEIA COM ATENÇÃO: 
 - Gere treinos para TODOS os dias disponíveis. Se ${request.availableDays.length} dias foram selecionados, crie ${request.availableDays.length} treinos diferentes.
-- VOCÊ DEVE USAR OS EQUIPAMENTOS INFORMADOS! Se o atleta informou que tem ${equipmentText || "apenas peso corporal"}, TODOS os treinos devem utilizar esses equipamentos.
-- Cada treino deve ter pelo menos um exercício que utilize um dos equipamentos informados.
-- Se o atleta informou que tem halteres, barras ou kettlebell, inclua exercícios com pesos.
-- Se o atleta informou que tem bicicleta ou esteira, inclua exercícios cardiovasculares com esses equipamentos.
-- Adapte a duração dos exercícios para que o treino completo dure exatamente ${request.sessionDuration} minutos.
+
+- USO OBRIGATÓRIO DOS EQUIPAMENTOS INFORMADOS:
+  * O atleta informou que tem disponível: ${equipmentText || "apenas peso corporal"}
+  * CADA EXERCÍCIO DEVE USAR PELO MENOS UM dos equipamentos informados
+  * NÃO CRIE EXERCÍCIOS que exijam equipamentos não listados acima
+  * Se o atleta tem halteres, OBRIGATORIAMENTE inclua exercícios com halteres
+  * Se o atleta tem bicicleta, OBRIGATORIAMENTE inclua exercícios na bicicleta
+  * Se o atleta tem barras, OBRIGATORIAMENTE inclua exercícios com barras
+  * Se o atleta tem elásticos, OBRIGATORIAMENTE inclua exercícios com elásticos
+  * NUNCA inclua exercícios com equipamentos não disponíveis
+
+- DURAÇÃO EXATA: O treino completo deve durar exatamente ${request.sessionDuration} minutos, incluindo descansos
+- VARIEDADE: Cada dia deve ter exercícios diferentes, aproveitando os equipamentos disponíveis
+- PROGRESSÃO: Organize os exercícios em ordem lógica (aquecimento → parte principal → finalização)
 
 LIMITAÇÕES PARA EVITAR CORTE:
 - Máximo 3 exercícios por treino
@@ -100,22 +109,30 @@ FORMATO DE RESPOSTA (JSON):
   }
 }
 
-DIRETRIZES CRÍTICAS:
-1. SEMPRE use idade, altura e peso para personalizar cada exercício
-2. Para atletas altos (>180cm): foco em estabilidade e agilidade
-3. Para atletas baixos (<175cm): foco em força e explosão
-4. Para jovens (<18): priorize desenvolvimento motor e prevenção de lesões
-5. Para atletas mais pesados: foco em condicionamento e mobilidade
-6. Para atletas mais leves: foco em força e resistência
-7. Considere a posição específica no campo
-8. Varie COMPLETAMENTE os treinos - cada dia deve ser único
-9. Inclua progressão semanal baseada no perfil
-10. SEMPRE explique o "porquê" de cada escolha
-11. OBRIGATÓRIO: Utilize os equipamentos informados pelo atleta em TODOS os treinos
-12. Distribua os exercícios para utilizar o tempo total solicitado (${request.sessionDuration} minutos)
-13. Crie treinos profissionais com progressão lógica (aquecimento → parte principal → finalização)
-14. Inclua tempos de descanso realistas entre séries (30-90 segundos dependendo da intensidade)
-15. Considere o nível de dificuldade solicitado (${request.difficulty}) ao definir intensidade
+DIRETRIZES CRÍTICAS - LEIA COM MUITA ATENÇÃO:
+1. EQUIPAMENTOS: USE APENAS OS EQUIPAMENTOS INFORMADOS PELO ATLETA
+   * Cada exercício DEVE usar APENAS equipamentos da lista: ${request.equipment.join(', ') || "peso corporal"}
+   * NÃO inclua NENHUM exercício que exija equipamentos não listados acima
+   * Se o atleta tem halteres, OBRIGATORIAMENTE use halteres em pelo menos um exercício por treino
+   * Se o atleta tem bicicleta, OBRIGATORIAMENTE use a bicicleta em pelo menos um exercício por treino
+   * Se o atleta tem barras, OBRIGATORIAMENTE use barras em pelo menos um exercício por treino
+
+2. PERSONALIZAÇÃO FÍSICA:
+   * Use idade (${profile?.age || '?'}), altura (${profile?.height || '?'} cm) e peso (${profile?.weight || '?'} kg) para personalizar cada exercício
+   * Para atletas altos (>180cm): foco em estabilidade e agilidade
+   * Para atletas baixos (<175cm): foco em força e explosão
+   * Para jovens (<18): priorize desenvolvimento motor e prevenção de lesões
+   * Para atletas mais pesados: foco em condicionamento e mobilidade
+   * Para atletas mais leves: foco em força e resistência
+
+3. ESTRUTURA DO TREINO:
+   * Considere a posição específica no campo (${profile?.position || 'não informada'})
+   * Varie COMPLETAMENTE os treinos - cada dia deve ser único
+   * Inclua progressão semanal baseada no perfil
+   * Distribua os exercícios para utilizar EXATAMENTE ${request.sessionDuration} minutos
+   * Estruture os treinos com progressão lógica (aquecimento → parte principal → finalização)
+   * Inclua tempos de descanso realistas (30-90 segundos dependendo da intensidade)
+   * Considere o nível de dificuldade solicitado (${request.difficulty}) ao definir intensidade
 
 TIPOS DE TREINO POR DIA:
 - Segunda: Força e Potência (adaptado ao biotipo)
