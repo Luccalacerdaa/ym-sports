@@ -337,15 +337,80 @@ IMPORTANTE: Responda APENAS com o JSON válido, sem texto adicional. SEMPRE gere
     return allTrainings;
   };
 
-  // Função para chamar a API da OpenAI
+  // Função para chamar a API de IA (OpenAI ou ChatGPT)
   const callOpenAI = async (prompt: string) => {
-    // Verificar se a API key está configurada
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    // Verificar se deve usar ChatGPT ou OpenAI API
+    const useChatGPT = import.meta.env.VITE_USE_CHATGPT === 'true';
     
-    if (!apiKey) {
-      throw new Error('API key da OpenAI não configurada. Por favor, configure a variável VITE_OPENAI_API_KEY');
+    console.log(`Modo de geração de treinos: ${useChatGPT ? 'ChatGPT' : 'OpenAI API'}`);
+    
+    if (useChatGPT) {
+      return await callChatGPT(prompt);
+    } else {
+      // Verificar se a API key está configurada
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      
+      if (!apiKey) {
+        throw new Error('API key da OpenAI não configurada. Por favor, configure a variável VITE_OPENAI_API_KEY');
+      }
+      
+      return await callOpenAIAPI(prompt, apiKey);
     }
-
+  };
+  
+  // Função para chamar o ChatGPT via API personalizada
+  const callChatGPT = async (prompt: string) => {
+    try {
+      console.log('Chamando ChatGPT via API personalizada...');
+      
+      // URL da API personalizada que usa o ChatGPT
+      const apiUrl = import.meta.env.VITE_CHATGPT_API_URL || 'https://api.ymsports.com.br/api/generate-training';
+      
+      console.log(`URL da API do ChatGPT: ${apiUrl}`);
+      
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: prompt
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erro na API do ChatGPT: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data || !data.result) {
+        throw new Error('Resposta inválida da API do ChatGPT');
+      }
+      
+      console.log('Resposta recebida do ChatGPT:', data);
+      
+      // Tentar fazer parse do JSON retornado
+      try {
+        // Se data.result já for um objeto, retorná-lo diretamente
+        if (typeof data.result === 'object') {
+          return data.result;
+        }
+        
+        // Se for uma string, tentar fazer parse
+        return JSON.parse(data.result);
+      } catch (parseError) {
+        console.error('Erro ao fazer parse da resposta do ChatGPT:', data.result);
+        throw new Error('Resposta do ChatGPT não é um JSON válido');
+      }
+    } catch (error: any) {
+      console.error('Erro ao chamar API do ChatGPT:', error);
+      throw new Error(`Erro no ChatGPT: ${error.message}`);
+    }
+  };
+  
+  // Função para chamar a API da OpenAI diretamente
+  const callOpenAIAPI = async (prompt: string, apiKey: string) => {
     // Inicializar cliente OpenAI
     const openai = new OpenAI({
       apiKey: apiKey,

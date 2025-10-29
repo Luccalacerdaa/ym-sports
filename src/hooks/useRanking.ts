@@ -299,11 +299,13 @@ export const useRanking = () => {
       // Apenas recalcular se não houver rankings existentes
 
       // ALTERAÇÃO: Buscar rankings sem a junção direta com profiles
+      console.log(`Buscando rankings do tipo: ${type}`);
       let query = supabase
         .from('rankings')
         .select('*')
         .eq('period', 'all_time')
-        .order('position', { ascending: true });
+        .order('total_points', { ascending: false }) // Ordenar por pontos, não por posição
+        .order('position', { ascending: true }); // Usar posição como critério secundário
 
       if (type === 'regional' && userLocation) {
         query = query.eq('ranking_type', 'regional').eq('region', userLocation.region);
@@ -393,9 +395,24 @@ export const useRanking = () => {
       // Criar perfis temporários para usuários que não têm perfil
       const temporaryProfiles = missingProfileIds.map(id => {
         console.log(`Criando perfil temporário para usuário ${id}`);
+        
+        // Buscar informações do usuário no ranking para nome mais descritivo
+        const userRanking = data.find(entry => entry.user_id === id);
+        let namePrefix = "Jogador";
+        
+        if (userRanking) {
+          if (userRanking.ranking_type === 'national') {
+            namePrefix = "Atleta Nacional";
+          } else if (userRanking.ranking_type === 'regional') {
+            namePrefix = `Atleta ${userRanking.region || 'Regional'}`;
+          } else {
+            namePrefix = `Jogador ${userRanking.region || 'Local'}`;
+          }
+        }
+        
         return {
           id,
-          name: `Atleta #${id.substring(0, 4)}`,
+          name: `${namePrefix} #${userRanking?.position || ''}`,
           avatar_url: null
         };
       });
@@ -452,6 +469,23 @@ export const useRanking = () => {
       });
       
       console.log(`Rankings únicos após remoção de duplicatas: ${uniqueRankings.length}`);
+      
+      // Reordenar rankings por pontos e recalcular posições
+      uniqueRankings.sort((a, b) => {
+        // Ordenar por pontos (decrescente)
+        if (b.total_points !== a.total_points) {
+          return b.total_points - a.total_points;
+        }
+        // Se pontos iguais, desempatar por ID
+        return a.user_id.localeCompare(b.user_id);
+      });
+      
+      // Atualizar posições com base na nova ordenação
+      uniqueRankings.forEach((ranking, index) => {
+        ranking.position = index + 1;
+      });
+      
+      console.log(`Rankings reordenados e posições recalculadas: ${uniqueRankings.length}`);
       
       // Agora mapear os rankings únicos para adicionar informações de usuário
       const rankingsWithUserInfo = uniqueRankings.map(entry => {
