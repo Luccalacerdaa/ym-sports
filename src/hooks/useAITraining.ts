@@ -101,14 +101,17 @@ IMPORTANTE - LEIA COM MUITA ATENÇÃO:
 
 - USO OBRIGATÓRIO DOS EQUIPAMENTOS INFORMADOS:
   * O atleta informou que tem disponível: ${equipmentText || "apenas peso corporal"}
-  * CADA EXERCÍCIO DEVE USAR PELO MENOS UM dos equipamentos informados
+  * CADA TREINO DEVE USAR TODOS OS EQUIPAMENTOS INFORMADOS
+  * DISTRIBUA OS EQUIPAMENTOS entre os exercícios de cada treino
+  * CADA EXERCÍCIO deve usar pelo menos um dos equipamentos informados
   * NÃO CRIE EXERCÍCIOS que exijam equipamentos não listados acima
-  * Se o atleta tem halteres, OBRIGATORIAMENTE inclua exercícios com halteres
-  * Se o atleta tem bicicleta, OBRIGATORIAMENTE inclua exercícios na bicicleta
-  * Se o atleta tem barras, OBRIGATORIAMENTE inclua exercícios com barras
-  * Se o atleta tem elásticos, OBRIGATORIAMENTE inclua exercícios com elásticos
+  * Se o atleta tem halteres, OBRIGATORIAMENTE inclua 1-2 exercícios com halteres POR TREINO
+  * Se o atleta tem bicicleta, OBRIGATORIAMENTE inclua 1-2 exercícios com bicicleta POR TREINO
+  * Se o atleta tem barras, OBRIGATORIAMENTE inclua 1-2 exercícios com barras POR TREINO
+  * Se o atleta tem elásticos, OBRIGATORIAMENTE inclua 1-2 exercícios com elásticos POR TREINO
   * NUNCA inclua exercícios com equipamentos não disponíveis
   * SEJA CRIATIVO com os equipamentos disponíveis (diferentes formas de uso)
+  * EVITE USAR APENAS PESO CORPORAL quando outros equipamentos estiverem disponíveis
 
 - DURAÇÃO EXATA: O treino completo deve durar exatamente ${request.sessionDuration} minutos, incluindo descansos
 - VARIEDADE MÁXIMA: Cada dia deve ter exercícios COMPLETAMENTE diferentes, sem repetições na semana
@@ -116,10 +119,10 @@ IMPORTANTE - LEIA COM MUITA ATENÇÃO:
 - EXPLICAÇÕES DETALHADAS: Inclua o "porquê" de cada escolha de exercício para este atleta específico
 
 LIMITAÇÕES PARA EVITAR CORTE:
-- Máximo 3 exercícios por treino
+- Inclua 4-5 exercícios por treino
 - Descrições concisas mas informativas
 - Use vídeos apenas para exercícios complexos
-- Foque na qualidade, não na quantidade
+- Foque na qualidade e variedade dos exercícios
 
 FORMATO DE RESPOSTA (JSON):
 {
@@ -152,13 +155,17 @@ FORMATO DE RESPOSTA (JSON):
 }
 
 DIRETRIZES CRÍTICAS - LEIA COM MUITA ATENÇÃO:
-1. EQUIPAMENTOS: USE APENAS OS EQUIPAMENTOS INFORMADOS PELO ATLETA
-   * Cada exercício DEVE usar APENAS equipamentos da lista: ${request.equipment.join(', ') || "peso corporal"}
+1. EQUIPAMENTOS: USE TODOS OS EQUIPAMENTOS INFORMADOS PELO ATLETA
+   * CADA TREINO DEVE USAR TODOS OS EQUIPAMENTOS DISPONÍVEIS: ${request.equipment.join(', ') || "peso corporal"}
+   * DISTRIBUA OS EQUIPAMENTOS entre os diferentes exercícios de cada treino
    * NÃO inclua NENHUM exercício que exija equipamentos não listados acima
-   * Se o atleta tem halteres, OBRIGATORIAMENTE use halteres em pelo menos um exercício por treino
-   * Se o atleta tem bicicleta, OBRIGATORIAMENTE use a bicicleta em pelo menos um exercício por treino
-   * Se o atleta tem barras, OBRIGATORIAMENTE use barras em pelo menos um exercício por treino
+   * Se o atleta tem halteres, OBRIGATORIAMENTE use halteres em 1-2 exercícios por treino
+   * Se o atleta tem bicicleta, OBRIGATORIAMENTE use a bicicleta em 1-2 exercícios por treino
+   * Se o atleta tem barras, OBRIGATORIAMENTE use barras em 1-2 exercícios por treino
+   * Se o atleta tem elásticos, OBRIGATORIAMENTE use elásticos em 1-2 exercícios por treino
    * SEJA CRIATIVO com os equipamentos - use de formas diferentes e inovadoras
+   * EVITE USAR APENAS PESO CORPORAL quando outros equipamentos estiverem disponíveis
+   * INCLUA 4-5 EXERCÍCIOS POR TREINO para garantir variedade e uso de todos os equipamentos
 
 2. PERSONALIZAÇÃO FÍSICA AVANÇADA:
    * Use idade (${profile?.age || '?'}), altura (${profile?.height || '?'} cm) e peso (${profile?.weight || '?'} kg) para personalizar cada exercício
@@ -280,47 +287,397 @@ IMPORTANTE: Responda APENAS com o JSON válido, sem texto adicional. SEMPRE gere
         throw new Error('Resposta da IA não contém weeklyPlan');
       }
 
-      for (const [day, plan] of Object.entries(response.weeklyPlan)) {
-        console.log('Processando dia:', day, 'plan:', plan);
-        
-        if (plan) {
-          const planData = plan as any;
-          // Mapear dias da semana para valores válidos
-          const dayMapping: { [key: string]: string } = {
-            'monday': 'monday',
-            'tuesday': 'tuesday', 
-            'wednesday': 'wednesday',
-            'thursday': 'thursday',
-            'friday': 'friday',
-            'saturday': 'saturday',
-            'sunday': 'sunday',
-            'segunda': 'monday',
-            'terça': 'tuesday',
-            'quarta': 'wednesday', 
-            'quinta': 'thursday',
-            'sexta': 'friday',
-            'sábado': 'saturday',
-            'domingo': 'sunday'
-          };
-
-          const mappedDay = dayMapping[day.toLowerCase()] || day.toLowerCase();
+        // Função para verificar se os equipamentos solicitados estão sendo utilizados
+        const validateEquipmentUsage = (planData: any, requestedEquipment: string[]) => {
+          console.log('Validando uso de equipamentos:', requestedEquipment);
           
-          // Criar treino base
-          const baseTraining = {
-            id: '', // Será gerado pelo banco
-            user_id: '', // Será preenchido pelo hook useTrainings
-            title: planData.title || `Treino de ${day}`,
-            description: planData.description || '',
-            day_of_week: mappedDay as any,
-            exercises: planData.exercises || [],
-            duration_minutes: planData.duration_minutes || 60,
-            difficulty_level: planData.difficulty_level || 'intermediate',
-            muscle_groups: planData.muscle_groups || [],
-            is_ai_generated: true,
-            training_rationale: planData.training_rationale || '',
-            performance_benefits: planData.performance_benefits || '',
-            adaptation_notes: planData.adaptation_notes || '',
-          };
+          if (!planData.exercises || planData.exercises.length === 0) {
+            console.warn('Treino não contém exercícios!');
+            return false;
+          }
+          
+          // Verificar se o número de exercícios é suficiente (pelo menos 4)
+          if (planData.exercises.length < 4) {
+            console.warn(`Número insuficiente de exercícios: ${planData.exercises.length} (mínimo 4)`);
+            return false;
+          }
+          
+          // Verificar se há equipamentos específicos solicitados além de "Peso corporal"
+          const specificEquipments = requestedEquipment.filter(eq => 
+            eq.toLowerCase() !== 'peso corporal' && 
+            eq.toLowerCase() !== 'body weight'
+          );
+          
+          if (specificEquipments.length === 0) {
+            console.log('Apenas peso corporal solicitado, validação ok');
+            return true;
+          }
+          
+          // Verificar se os exercícios mencionam os equipamentos
+          const equipmentMentioned = requestedEquipment.map(eq => {
+            const eqLower = eq.toLowerCase();
+            
+            // Encontrar exercícios que mencionam este equipamento
+            const mentioningExercises = planData.exercises.filter((ex: any) => {
+              const nameContains = ex.name?.toLowerCase().includes(eqLower);
+              const descContains = ex.description?.toLowerCase().includes(eqLower);
+              const weightContains = ex.weight?.toLowerCase().includes(eqLower);
+              const notesContains = ex.notes?.toLowerCase().includes(eqLower);
+              
+              return nameContains || descContains || weightContains || notesContains;
+            });
+            
+            return { 
+              equipment: eq, 
+              mentioned: mentioningExercises.length > 0,
+              count: mentioningExercises.length,
+              exercises: mentioningExercises.map((ex: any) => ex.name)
+            };
+          });
+          
+          console.log('Verificação detalhada de equipamentos:', 
+            equipmentMentioned.map(e => `${e.equipment}: ${e.mentioned ? `${e.count} exercícios` : 'não usado'}`).join(', ')
+          );
+          
+          // Verificar se todos os equipamentos específicos foram mencionados
+          const allEquipmentUsed = specificEquipments.every(eq => {
+            const eqInfo = equipmentMentioned.find(e => e.equipment.toLowerCase() === eq.toLowerCase());
+            return eqInfo && eqInfo.mentioned;
+          });
+          
+          // Verificar se há pelo menos 1-2 exercícios para cada equipamento específico
+          const sufficientExercisesPerEquipment = specificEquipments.every(eq => {
+            const eqInfo = equipmentMentioned.find(e => e.equipment.toLowerCase() === eq.toLowerCase());
+            return eqInfo && eqInfo.count >= 1;
+          });
+          
+          if (!allEquipmentUsed) {
+            console.warn('Nem todos os equipamentos foram utilizados');
+            const unusedEquipments = equipmentMentioned
+              .filter(e => !e.mentioned && e.equipment.toLowerCase() !== 'peso corporal')
+              .map(e => e.equipment)
+              .join(', ');
+            console.warn(`Equipamentos não utilizados: ${unusedEquipments}`);
+            return false;
+          }
+          
+          if (!sufficientExercisesPerEquipment) {
+            console.warn('Alguns equipamentos têm menos de 1 exercício');
+            const insufficientEquipments = equipmentMentioned
+              .filter(e => e.count < 1 && e.equipment.toLowerCase() !== 'peso corporal')
+              .map(e => `${e.equipment} (${e.count})`)
+              .join(', ');
+            console.warn(`Equipamentos com exercícios insuficientes: ${insufficientEquipments}`);
+            return false;
+          }
+          
+          console.log('✅ Todos os equipamentos estão sendo utilizados adequadamente');
+          return true;
+        };
+        
+        // Função para adicionar exercícios específicos para equipamentos não utilizados
+        // e garantir que haja pelo menos 4-5 exercícios por treino
+        const addMissingEquipmentExercises = (planData: any, requestedEquipment: string[]) => {
+          console.log('Verificando equipamentos e número de exercícios');
+          
+          // Verificar quais equipamentos não foram utilizados
+          const equipmentMentioned = requestedEquipment.map(eq => {
+            const eqLower = eq.toLowerCase();
+            const isMentioned = planData.exercises.some((ex: any) => {
+              const nameContains = ex.name?.toLowerCase().includes(eqLower);
+              const descContains = ex.description?.toLowerCase().includes(eqLower);
+              const weightContains = ex.weight?.toLowerCase().includes(eqLower);
+              const notesContains = ex.notes?.toLowerCase().includes(eqLower);
+              
+              return nameContains || descContains || weightContains || notesContains;
+            });
+            
+            return { equipment: eq, mentioned: isMentioned };
+          });
+          
+          const missingEquipment = equipmentMentioned
+            .filter(eq => 
+              eq.equipment.toLowerCase() !== 'peso corporal' && 
+              eq.equipment.toLowerCase() !== 'body weight' && 
+              !eq.mentioned
+            )
+            .map(eq => eq.equipment);
+          
+          // Verificar se já temos exercícios suficientes (4-5)
+          const needMoreExercises = planData.exercises.length < 4;
+          
+          if (missingEquipment.length === 0 && !needMoreExercises) {
+            return planData;
+          }
+          
+          console.log('Equipamentos não utilizados:', missingEquipment);
+          console.log(`Número atual de exercícios: ${planData.exercises.length}, mínimo desejado: 4`);
+          
+          // Adicionar exercícios para equipamentos não utilizados
+          const exercisesForMissingEquipment: any[] = [];
+          
+          // Primeiro, adicionar exercícios para equipamentos não utilizados
+          missingEquipment.forEach(equipment => {
+            if (equipment.toLowerCase().includes('bicicleta')) {
+              exercisesForMissingEquipment.push({
+                name: `Ciclismo Intervalado com ${equipment}`,
+                sets: 3,
+                reps: "5 minutos",
+                weight: equipment,
+                rest_time: "60 segundos",
+                notes: `Alternar entre alta e baixa intensidade na ${equipment}`,
+                description: `Realize intervalos de alta intensidade (30 segundos) seguidos por recuperação ativa (90 segundos) na ${equipment}`,
+                benefits: "Melhora da capacidade cardiovascular, resistência muscular e queima calórica",
+                video_url: "https://www.youtube.com/watch?v=NCJj-vTLn_g",
+                image_url: ""
+              });
+            } else if (equipment.toLowerCase().includes('elástico')) {
+              exercisesForMissingEquipment.push({
+                name: `Agachamento com ${equipment}`,
+                sets: 3,
+                reps: "15",
+                weight: equipment,
+                rest_time: "45 segundos",
+                notes: `Use o ${equipment} posicionado logo acima dos joelhos`,
+                description: `Posicione o ${equipment} logo acima dos joelhos e realize agachamentos, mantendo tensão constante no elástico`,
+                benefits: "Fortalecimento de quadríceps, glúteos e estabilizadores do quadril",
+                video_url: "https://www.youtube.com/watch?v=UH3k-EUZkS4",
+                image_url: ""
+              });
+              
+              // Adicionar um segundo exercício com elástico para variedade
+              exercisesForMissingEquipment.push({
+                name: `Remada com ${equipment}`,
+                sets: 3,
+                reps: "15",
+                weight: equipment,
+                rest_time: "45 segundos",
+                notes: `Fixe o ${equipment} em um ponto estável na altura do peito`,
+                description: `Em pé, segure as extremidades do ${equipment} com os braços estendidos e puxe em direção ao corpo, contraindo as escápulas`,
+                benefits: "Fortalecimento dos músculos das costas, ombros e braços",
+                video_url: "https://www.youtube.com/watch?v=xbAymhHRpxY",
+                image_url: ""
+              });
+            } else if (equipment.toLowerCase().includes('halter')) {
+              exercisesForMissingEquipment.push({
+                name: `Rosca Alternada com ${equipment}`,
+                sets: 3,
+                reps: "12 (cada braço)",
+                weight: equipment,
+                rest_time: "45 segundos",
+                notes: `Use ${equipment}es de peso adequado ao seu nível`,
+                description: `Em pé, com os braços estendidos ao lado do corpo segurando os ${equipment}es, realize flexões de cotovelo alternando os braços`,
+                benefits: "Desenvolvimento dos músculos do bíceps e antebraço",
+                video_url: "https://www.youtube.com/watch?v=kwG2ipFRgfo",
+                image_url: ""
+              });
+              
+              // Adicionar um segundo exercício com halteres para variedade
+              exercisesForMissingEquipment.push({
+                name: `Elevação Lateral com ${equipment}`,
+                sets: 3,
+                reps: "12",
+                weight: equipment,
+                rest_time: "45 segundos",
+                notes: `Use ${equipment}es de peso leve a moderado`,
+                description: `Em pé, segure os ${equipment}es ao lado do corpo e eleve os braços lateralmente até a altura dos ombros`,
+                benefits: "Fortalecimento dos músculos deltoides e estabilizadores do ombro",
+                video_url: "https://www.youtube.com/watch?v=3VcKaXpzqRo",
+                image_url: ""
+              });
+            } else if (equipment.toLowerCase().includes('barra')) {
+              exercisesForMissingEquipment.push({
+                name: `Agachamento com ${equipment}`,
+                sets: 3,
+                reps: "12",
+                weight: `${equipment} (peso leve)`,
+                rest_time: "60 segundos",
+                notes: `Posicione a ${equipment} confortavelmente nos ombros`,
+                description: `Com a ${equipment} apoiada nos ombros, realize agachamentos mantendo a coluna ereta e descendo até formar um ângulo de 90° nos joelhos`,
+                benefits: "Fortalecimento dos músculos das pernas, glúteos e core",
+                video_url: "https://www.youtube.com/watch?v=ultWZbUMPL8",
+                image_url: ""
+              });
+              
+              // Adicionar um segundo exercício com barra para variedade
+              exercisesForMissingEquipment.push({
+                name: `Remada Curvada com ${equipment}`,
+                sets: 3,
+                reps: "12",
+                weight: `${equipment} (peso moderado)`,
+                rest_time: "60 segundos",
+                notes: `Mantenha as costas retas e o core contraído durante todo o movimento`,
+                description: `Com os joelhos levemente flexionados, incline o tronco para frente, segure a ${equipment} com as mãos e puxe em direção ao abdômen`,
+                benefits: "Fortalecimento dos músculos das costas, ombros e braços",
+                video_url: "https://www.youtube.com/watch?v=FWJR5Ve8bnQ",
+                image_url: ""
+              });
+            }
+          });
+          
+          // Adicionar exercícios adicionais se ainda não tivermos o mínimo de 4
+          if (planData.exercises.length + exercisesForMissingEquipment.length < 4) {
+            const currentCount = planData.exercises.length + exercisesForMissingEquipment.length;
+            const neededExercises = 4 - currentCount;
+            
+            console.log(`Adicionando ${neededExercises} exercícios extras para atingir o mínimo de 4`);
+            
+            // Adicionar exercícios extras com os equipamentos disponíveis
+            const availableEquipment = requestedEquipment.filter(eq => 
+              eq.toLowerCase() !== 'peso corporal' && 
+              eq.toLowerCase() !== 'body weight'
+            );
+            
+            // Se não houver equipamentos específicos, usar peso corporal
+            if (availableEquipment.length === 0) {
+              // Adicionar exercícios com peso corporal
+              const bodyWeightExercises = [
+                {
+                  name: "Prancha Abdominal",
+                  sets: 3,
+                  reps: "30 segundos",
+                  weight: "Peso corporal",
+                  rest_time: "30 segundos",
+                  notes: "Mantenha o corpo alinhado e o core contraído",
+                  description: "Apoie-se nos antebraços e nas pontas dos pés, mantendo o corpo em linha reta da cabeça aos calcanhares",
+                  benefits: "Fortalecimento do core, estabilidade e resistência muscular",
+                  video_url: "https://www.youtube.com/watch?v=ASdvN_XEl_c",
+                  image_url: ""
+                },
+                {
+                  name: "Afundo Alternado",
+                  sets: 3,
+                  reps: "10 (cada perna)",
+                  weight: "Peso corporal",
+                  rest_time: "45 segundos",
+                  notes: "Mantenha o joelho da frente alinhado com o tornozelo",
+                  description: "Dê um passo à frente com uma perna, flexionando ambos os joelhos até formar um ângulo de 90°, e retorne à posição inicial",
+                  benefits: "Fortalecimento das pernas, glúteos e melhora do equilíbrio",
+                  video_url: "https://www.youtube.com/watch?v=QF0BQS2W80k",
+                  image_url: ""
+                },
+                {
+                  name: "Mountain Climber",
+                  sets: 3,
+                  reps: "30 segundos",
+                  weight: "Peso corporal",
+                  rest_time: "30 segundos",
+                  notes: "Mantenha um ritmo constante e o core contraído",
+                  description: "Em posição de prancha, alterne os joelhos em direção ao peito de forma rápida e contínua",
+                  benefits: "Trabalho cardiovascular, fortalecimento do core e resistência muscular",
+                  video_url: "https://www.youtube.com/watch?v=nmwgirgXLYM",
+                  image_url: ""
+                }
+              ];
+              
+              // Adicionar apenas o número necessário de exercícios
+              for (let i = 0; i < neededExercises && i < bodyWeightExercises.length; i++) {
+                exercisesForMissingEquipment.push(bodyWeightExercises[i]);
+              }
+            } else {
+              // Usar um equipamento aleatório da lista disponível
+              const randomEquipment = availableEquipment[Math.floor(Math.random() * availableEquipment.length)];
+              
+              if (randomEquipment.toLowerCase().includes('elástico')) {
+                exercisesForMissingEquipment.push({
+                  name: `Puxada Alta com ${randomEquipment}`,
+                  sets: 3,
+                  reps: "15",
+                  weight: randomEquipment,
+                  rest_time: "45 segundos",
+                  notes: `Fixe o ${randomEquipment} em um ponto alto`,
+                  description: `Em pé, segure as extremidades do ${randomEquipment} com os braços estendidos acima da cabeça e puxe para baixo, contraindo as costas`,
+                  benefits: "Fortalecimento dos músculos das costas, ombros e braços",
+                  video_url: "https://www.youtube.com/watch?v=lPj14v0nUTI",
+                  image_url: ""
+                });
+              } else if (randomEquipment.toLowerCase().includes('halter')) {
+                exercisesForMissingEquipment.push({
+                  name: `Desenvolvimento com ${randomEquipment}`,
+                  sets: 3,
+                  reps: "12",
+                  weight: randomEquipment,
+                  rest_time: "45 segundos",
+                  notes: `Use ${randomEquipment}es de peso adequado ao seu nível`,
+                  description: `Sentado ou em pé, segure os ${randomEquipment}es na altura dos ombros e empurre-os para cima até estender completamente os braços`,
+                  benefits: "Fortalecimento dos músculos dos ombros, tríceps e estabilizadores do core",
+                  video_url: "https://www.youtube.com/watch?v=qEwKCR5JCog",
+                  image_url: ""
+                });
+              }
+            }
+          }
+          
+          // Adicionar os novos exercícios ao plano
+          planData.exercises = [...planData.exercises, ...exercisesForMissingEquipment];
+          
+          // Ajustar a descrição para mencionar os equipamentos adicionados
+          if (missingEquipment.length > 0) {
+            planData.description = `${planData.description} Inclui exercícios específicos com ${missingEquipment.join(', ')}.`;
+          }
+          
+          // Adicionar informação sobre o número de exercícios
+          if (needMoreExercises) {
+            planData.description = `${planData.description} Treino completo com ${planData.exercises.length} exercícios variados.`;
+          }
+          
+          console.log(`Treino final com ${planData.exercises.length} exercícios`);
+          
+          return planData;
+        };
+        
+        // Processar cada dia do plano
+        for (const [day, plan] of Object.entries(response.weeklyPlan)) {
+          console.log('Processando dia:', day, 'plan:', plan);
+          
+          if (plan) {
+            const planData = plan as any;
+            // Mapear dias da semana para valores válidos
+            const dayMapping: { [key: string]: string } = {
+              'monday': 'monday',
+              'tuesday': 'tuesday', 
+              'wednesday': 'wednesday',
+              'thursday': 'thursday',
+              'friday': 'friday',
+              'saturday': 'saturday',
+              'sunday': 'sunday',
+              'segunda': 'monday',
+              'terça': 'tuesday',
+              'quarta': 'wednesday', 
+              'quinta': 'thursday',
+              'sexta': 'friday',
+              'sábado': 'saturday',
+              'domingo': 'sunday'
+            };
+
+            const mappedDay = dayMapping[day.toLowerCase()] || day.toLowerCase();
+            
+            // Verificar se os equipamentos solicitados estão sendo utilizados
+            const equipmentsValid = validateEquipmentUsage(planData, request.equipment);
+            
+            // Se não estiverem, adicionar exercícios específicos
+            let processedPlanData = planData;
+            if (!equipmentsValid) {
+              console.log('Equipamentos não utilizados corretamente, adicionando exercícios específicos');
+              processedPlanData = addMissingEquipmentExercises(planData, request.equipment);
+            }
+            
+            // Criar treino base
+            const baseTraining = {
+              id: '', // Será gerado pelo banco
+              user_id: '', // Será preenchido pelo hook useTrainings
+              title: processedPlanData.title || `Treino de ${day}`,
+              description: processedPlanData.description || '',
+              day_of_week: mappedDay as any,
+              exercises: processedPlanData.exercises || [],
+              duration_minutes: processedPlanData.duration_minutes || 60,
+              difficulty_level: processedPlanData.difficulty_level || 'intermediate',
+              muscle_groups: processedPlanData.muscle_groups || [],
+              is_ai_generated: true,
+              training_rationale: processedPlanData.training_rationale || '',
+              performance_benefits: processedPlanData.performance_benefits || '',
+              adaptation_notes: processedPlanData.adaptation_notes || '',
+            };
 
           // Enriquecer com dados da base de exercícios e API
           const enrichedTraining = await enrichTrainingWithAPI(baseTraining);
