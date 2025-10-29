@@ -331,6 +331,30 @@ export const useRanking = () => {
       
       // Buscar perfis com mais detalhes e forçar refresh
       console.log(`Buscando perfis para ${userIds.length} usuários...`);
+      console.log(`IDs dos usuários para buscar perfis:`, JSON.stringify(userIds));
+      
+      // Verificar se há IDs válidos
+      if (userIds.length === 0) {
+        console.error('❌ Nenhum ID de usuário para buscar perfis!');
+        return [];
+      }
+      
+      // Buscar perfis individualmente para debug
+      console.log(`Tentando buscar perfis individualmente para debug...`);
+      for (const userId of userIds.slice(0, 3)) { // Limitar a 3 para não sobrecarregar os logs
+        const { data: singleProfile, error: singleError } = await supabase
+          .from('profiles')
+          .select('id, name, avatar_url')
+          .eq('id', userId)
+          .single();
+          
+        console.log(`Perfil para ID ${userId}:`, singleProfile ? JSON.stringify(singleProfile) : 'Não encontrado');
+        if (singleError) {
+          console.error(`Erro ao buscar perfil para ID ${userId}:`, singleError);
+        }
+      }
+      
+      // Buscar todos os perfis
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, name, avatar_url')
@@ -359,6 +383,52 @@ export const useRanking = () => {
         console.log('⚠️ Nenhum perfil encontrado! IDs buscados:', JSON.stringify(userIds));
       }
       
+      // Verificar se há usuários sem perfil e criar perfis temporários em memória
+      const missingProfileIds = userIds.filter(id => 
+        !profilesData || !profilesData.some(p => p.id === id)
+      );
+      
+      console.log(`Usuários sem perfil: ${missingProfileIds.length}`);
+      
+      // Criar perfis temporários para usuários que não têm perfil
+      const temporaryProfiles = missingProfileIds.map(id => {
+        console.log(`Criando perfil temporário para usuário ${id}`);
+        return {
+          id,
+          name: `Atleta #${id.substring(0, 4)}`,
+          avatar_url: null
+        };
+      });
+      
+      // Combinar perfis existentes com perfis temporários
+      const allProfiles = [
+        ...(profilesData || []),
+        ...temporaryProfiles
+      ];
+      
+      console.log(`Total de perfis após adicionar temporários: ${allProfiles.length}`);
+      
+      // Tentar criar perfis no banco de dados para futuros acessos
+      if (missingProfileIds.length > 0) {
+        console.log('Tentando criar perfis no banco de dados...');
+        try {
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .upsert(temporaryProfiles, { 
+              onConflict: 'id',
+              ignoreDuplicates: true
+            });
+            
+          if (insertError) {
+            console.error('Erro ao criar perfis temporários:', insertError);
+          } else {
+            console.log(`✅ Perfis temporários criados com sucesso!`);
+          }
+        } catch (err) {
+          console.error('Erro ao tentar criar perfis temporários:', err);
+        }
+      }
+      
       // Buscar progresso para garantir pontuação correta
       const { data: progressData, error: progressError } = await supabase
         .from('user_progress')
@@ -385,7 +455,7 @@ export const useRanking = () => {
       
       // Agora mapear os rankings únicos para adicionar informações de usuário
       const rankingsWithUserInfo = uniqueRankings.map(entry => {
-        const profile = profilesData?.find(p => p.id === entry.user_id);
+        const profile = allProfiles.find(p => p.id === entry.user_id);
         const progress = progressData?.find(p => p.user_id === entry.user_id);
         
         // Usar nome do perfil ou nome mais amigável como fallback
