@@ -26,6 +26,7 @@ export default function Nutrition() {
   const { todayIntake, dailyGoal, progress: waterProgress, addWaterIntake, generateHydrationTips } = useWaterIntake();
   const { achievements, checkAchievements } = useNutritionAchievements();
   const { isNotificationsDialogOpen, openNotificationsDialog, closeNotificationsDialog } = useNotificationsManager();
+  const { sendNotification, permissionGranted } = useSimpleNotifications();
   
   const [selectedTab, setSelectedTab] = useState("overview");
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
@@ -563,6 +564,15 @@ export default function Nutrition() {
             setIsGeneratorOpen(false);
             fetchNutritionPlans();
             toast.success("Plano nutricional criado com sucesso!");
+            
+            // Enviar notificação se permitido
+            if (permissionGranted) {
+              sendNotification(
+                '🍎 Plano Nutricional Criado!', 
+                `Seu plano "${plan?.title || 'Plano Personalizado'}" está pronto! Confira suas refeições e comece a seguir hoje mesmo.`
+              );
+            }
+            
             if (plan) {
               setSelectedPlan(plan);
               if (plan.days && plan.days.length > 0) {

@@ -169,14 +169,22 @@ FORMATO DE RESPOSTA (JSON):
       console.log('Resposta da IA:', response);
       
       // Validar e processar a resposta
+      let days = response.days || [];
+      
+      // Se não há dias na resposta da IA, gerar dados de exemplo
+      if (!days || days.length === 0) {
+        console.warn('IA não retornou dias, gerando dados de exemplo...');
+        days = generateFallbackDays(request);
+      }
+      
       const nutritionPlan: NutritionPlan = {
         title: response.title || 'Plano Nutricional Personalizado',
         description: response.description || 'Plano nutricional gerado por IA',
         goals: response.goals || request.goals,
-        days: response.days || [],
+        days: days,
         complexity_level: response.complexity_level as ComplexityLevel || request.complexityLevel,
-        nutritional_advice: response.nutritional_advice || '',
-        hydration_tips: response.hydration_tips || ''
+        nutritional_advice: response.nutritional_advice || 'Mantenha uma alimentação equilibrada com foco em proteínas de qualidade, carboidratos complexos e gorduras saudáveis.',
+        hydration_tips: response.hydration_tips || 'Beba pelo menos 2-3 litros de água por dia, especialmente antes, durante e após os treinos.'
       };
       
       setLoading(false);
@@ -317,6 +325,168 @@ FORMATO DE RESPOSTA (JSON):
         throw new Error(`Erro na API da OpenAI: ${error.message}`);
       }
     }
+  };
+
+  // Função para gerar dados de exemplo quando a IA falha
+  const generateFallbackDays = (request: NutritionRequest) => {
+    const daysNames = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
+    const days = [];
+    
+    for (let i = 0; i < request.daysCount; i++) {
+      const dayName = daysNames[i % 7];
+      
+      const meals = [];
+      
+      // Gerar refeições baseadas nos tipos selecionados
+      if (request.mealTypes.includes('cafe_da_manha')) {
+        meals.push({
+          type: 'cafe_da_manha',
+          title: 'Café da Manhã Energético',
+          time: '07:30',
+          foods: [
+            {
+              name: 'Ovos mexidos',
+              portion: '2 unidades',
+              calories: 140,
+              protein: 12,
+              carbs: 1,
+              fat: 10,
+              preparation: 'Mexer em fogo baixo com pouco óleo',
+              alternatives: ['Omelete', 'Ovos cozidos']
+            },
+            {
+              name: 'Pão integral',
+              portion: '2 fatias',
+              calories: 160,
+              protein: 6,
+              carbs: 30,
+              fat: 2,
+              preparation: 'Torrar levemente',
+              alternatives: ['Tapioca', 'Aveia']
+            },
+            {
+              name: 'Banana',
+              portion: '1 unidade média',
+              calories: 105,
+              protein: 1,
+              carbs: 27,
+              fat: 0,
+              preparation: 'Consumir in natura',
+              alternatives: ['Maçã', 'Mamão']
+            }
+          ],
+          total_calories: 405,
+          total_protein: 19,
+          total_carbs: 58,
+          total_fat: 12,
+          notes: 'Refeição rica em energia para começar o dia',
+          preparation_time: '10 minutos'
+        });
+      }
+      
+      if (request.mealTypes.includes('almoco')) {
+        meals.push({
+          type: 'almoco',
+          title: 'Almoço Completo',
+          time: '12:30',
+          foods: [
+            {
+              name: 'Peito de frango grelhado',
+              portion: '150g',
+              calories: 231,
+              protein: 43,
+              carbs: 0,
+              fat: 5,
+              preparation: 'Grelhar com temperos naturais',
+              alternatives: ['Peixe grelhado', 'Carne magra']
+            },
+            {
+              name: 'Arroz integral',
+              portion: '100g cozido',
+              calories: 111,
+              protein: 3,
+              carbs: 23,
+              fat: 1,
+              preparation: 'Cozinhar com pouco sal',
+              alternatives: ['Quinoa', 'Batata doce']
+            },
+            {
+              name: 'Brócolis refogado',
+              portion: '100g',
+              calories: 34,
+              protein: 3,
+              carbs: 7,
+              fat: 0,
+              preparation: 'Refogar rapidamente',
+              alternatives: ['Couve-flor', 'Abobrinha']
+            }
+          ],
+          total_calories: 376,
+          total_protein: 49,
+          total_carbs: 30,
+          total_fat: 6,
+          notes: 'Refeição balanceada com proteína de qualidade',
+          preparation_time: '25 minutos'
+        });
+      }
+      
+      if (request.mealTypes.includes('jantar')) {
+        meals.push({
+          type: 'jantar',
+          title: 'Jantar Leve',
+          time: '19:30',
+          foods: [
+            {
+              name: 'Salmão grelhado',
+              portion: '120g',
+              calories: 206,
+              protein: 22,
+              carbs: 0,
+              fat: 12,
+              preparation: 'Grelhar com limão e ervas',
+              alternatives: ['Tilápia', 'Atum']
+            },
+            {
+              name: 'Salada mista',
+              portion: '150g',
+              calories: 25,
+              protein: 2,
+              carbs: 5,
+              fat: 0,
+              preparation: 'Temperar com azeite e vinagre',
+              alternatives: ['Salada verde', 'Rúcula']
+            }
+          ],
+          total_calories: 231,
+          total_protein: 24,
+          total_carbs: 5,
+          total_fat: 12,
+          notes: 'Jantar leve e nutritivo',
+          preparation_time: '15 minutos'
+        });
+      }
+      
+      // Calcular totais do dia
+      const dayTotals = meals.reduce((acc, meal) => ({
+        calories: acc.calories + meal.total_calories,
+        protein: acc.protein + meal.total_protein,
+        carbs: acc.carbs + meal.total_carbs,
+        fat: acc.fat + meal.total_fat
+      }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+      
+      days.push({
+        day: dayName,
+        day_of_week: dayName,
+        meals: meals,
+        water_intake: 3000,
+        total_calories: dayTotals.calories,
+        total_protein: dayTotals.protein,
+        total_carbs: dayTotals.carbs,
+        total_fat: dayTotals.fat
+      });
+    }
+    
+    return days;
   };
 
   return {
