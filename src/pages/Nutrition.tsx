@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { NutritionPlanGenerator } from "@/components/NutritionPlanGenerator";
-import { NotificationManager } from "@/components/NotificationManager";
+import { SimpleNotificationManager } from "@/components/SimpleNotificationManager";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -510,7 +510,7 @@ export default function Nutrition() {
       )}
       
       {/* Gerenciador de Notificações */}
-      <NotificationManager 
+      <SimpleNotificationManager 
         open={isNotificationsDialogOpen} 
         onClose={closeNotificationsDialog} 
       />
