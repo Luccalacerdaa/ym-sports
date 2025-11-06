@@ -160,7 +160,9 @@ export const usePortfolio = () => {
         .from('club_history')
         .insert({
           ...clubData,
-          portfolio_id: portfolio.id
+          portfolio_id: portfolio.id,
+          // Garantir que datas vazias sejam null
+          end_date: clubData.end_date || null
         })
         .select()
         .single();

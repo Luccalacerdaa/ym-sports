@@ -11,6 +11,8 @@ export interface PlayerPortfolio {
   weight: number; // em kg
   preferred_foot: 'left' | 'right' | 'both';
   nationality: string;
+  city?: string;
+  state?: string;
   
   // Informações de Contato
   phone?: string;

@@ -54,8 +54,6 @@ export const useNutritionPlans = () => {
     setError(null);
     
     try {
-      console.log(`Buscando detalhes do plano: ${planId}`);
-      
       // Buscar plano base
       const { data: planData, error: planError } = await supabase
         .from('nutrition_plans')
@@ -67,8 +65,6 @@ export const useNutritionPlans = () => {
       if (planError) throw planError;
       if (!planData) throw new Error('Plano não encontrado');
       
-      console.log(`Plano encontrado: ${planData.title}`);
-      
       // Buscar dias do plano
       const { data: daysData, error: daysError } = await supabase
         .from('nutrition_days')
@@ -77,8 +73,6 @@ export const useNutritionPlans = () => {
         .order('day_of_week');
       
       if (daysError) throw daysError;
-      
-      console.log(`Encontrados ${daysData?.length || 0} dias para o plano`);
       
       const days: DailyPlan[] = [];
       
@@ -160,11 +154,8 @@ export const useNutritionPlans = () => {
       if (planError) throw planError;
       if (!planData) throw new Error('Erro ao criar plano nutricional');
       
-      console.log(`Salvando ${days.length} dias no banco de dados`);
-      
       // Inserir dias
       for (const day of days) {
-        console.log(`Processando dia: ${day.day || day.day_of_week}`);
         
         // Adicionar plan_id ao dia
         const dayWithPlanId = {
@@ -186,10 +177,7 @@ export const useNutritionPlans = () => {
         if (!dayData) throw new Error('Erro ao criar dia do plano');
         
         // Inserir refeições
-        console.log(`Inserindo ${meals?.length || 0} refeições para o dia ${dayData.id}`);
-        
         for (const meal of meals || []) {
-          console.log(`Processando refeição: ${meal.title || meal.type}`);
           
           // Adicionar day_id à refeição
           const mealWithDayId = {
@@ -211,10 +199,7 @@ export const useNutritionPlans = () => {
           if (!mealData) throw new Error('Erro ao criar refeição');
           
           // Inserir alimentos
-          console.log(`Inserindo ${foods?.length || 0} alimentos para a refeição ${mealData.id}`);
-          
           for (const food of foods || []) {
-            console.log(`Processando alimento: ${food.name}`);
             
             // Adicionar meal_id ao alimento
             const foodWithMealId = {
@@ -227,10 +212,7 @@ export const useNutritionPlans = () => {
               .from('nutrition_foods')
               .insert(foodWithMealId);
             
-            if (foodError) {
-              console.error('Erro ao inserir alimento:', foodError);
-              throw foodError;
-            }
+            if (foodError) throw foodError;
           }
         }
       }

@@ -33,6 +33,8 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
     weight: portfolio.weight,
     preferred_foot: portfolio.preferred_foot,
     nationality: portfolio.nationality,
+    city: portfolio.city || '',
+    state: portfolio.state || '',
     biography: portfolio.biography || '',
     phone: portfolio.phone || '',
     email: portfolio.email || ''
@@ -266,6 +268,27 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
                       id="nationality"
                       value={basicInfo.nationality}
                       onChange={(e) => setBasicInfo(prev => ({ ...prev, nationality: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="city">Cidade</Label>
+                    <Input
+                      id="city"
+                      value={basicInfo.city}
+                      onChange={(e) => setBasicInfo(prev => ({ ...prev, city: e.target.value }))}
+                      placeholder="Ex: São Paulo"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="state">Estado</Label>
+                    <Input
+                      id="state"
+                      value={basicInfo.state}
+                      onChange={(e) => setBasicInfo(prev => ({ ...prev, state: e.target.value }))}
+                      placeholder="Ex: SP"
                     />
                   </div>
                 </div>

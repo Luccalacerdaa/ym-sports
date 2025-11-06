@@ -181,25 +181,32 @@ export default function PublicPortfolio() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-yellow-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="container max-w-6xl mx-auto px-4 py-4">
+      <div className="bg-white/80 backdrop-blur-sm shadow-lg border-b border-white/20">
+        <div className="container max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg">
-                  {portfolio.full_name.charAt(0)}
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-2xl">
+                  YM
                 </span>
               </div>
               <div>
-                <h1 className="text-xl font-bold">YM Sports</h1>
-                <p className="text-sm text-muted-foreground">Portfólio do Jogador</p>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-yellow-500 bg-clip-text text-transparent">
+                  YM Sports
+                </h1>
+                <p className="text-sm text-gray-600">Portfólio Profissional do Jogador</p>
               </div>
             </div>
             
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => handleShare('link')}>
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleShare('link')}
+                className="bg-white/50 backdrop-blur-sm hover:bg-white/80 border-white/30"
+              >
                 <Share2 className="h-4 w-4 mr-2" />
                 Compartilhar
               </Button>
@@ -210,19 +217,22 @@ export default function PublicPortfolio() {
 
       <div className="container max-w-6xl mx-auto px-4 py-8">
         {/* Hero Section */}
-        <Card className="mb-8 overflow-hidden">
-          <div className="bg-gradient-to-r from-primary to-primary/80 text-white p-8">
-            <div className="flex flex-col md:flex-row items-center gap-6">
+        <Card className="mb-8 overflow-hidden shadow-2xl border-0">
+          <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-yellow-500 text-white p-8 relative">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+            
+            <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
               <div className="flex-shrink-0">
                 {portfolio.profile_photo ? (
                   <img 
                     src={portfolio.profile_photo} 
                     alt={portfolio.full_name}
-                    className="w-32 h-32 rounded-full object-cover border-4 border-white"
+                    className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-2xl"
                   />
                 ) : (
-                  <div className="w-32 h-32 rounded-full bg-white/20 flex items-center justify-center border-4 border-white">
-                    <User className="h-16 w-16 text-white" />
+                  <div className="w-40 h-40 rounded-full bg-white/20 flex items-center justify-center border-4 border-white shadow-2xl backdrop-blur-sm">
+                    <User className="h-20 w-20 text-white" />
                   </div>
                 )}
               </div>
@@ -232,19 +242,19 @@ export default function PublicPortfolio() {
                 <p className="text-xl mb-4">{portfolio.position}</p>
                 
                 <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm">
-                  <div className="flex items-center">
+                  <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
                     <MapPin className="h-4 w-4 mr-1" />
-                    {portfolio.nationality}
+                    {portfolio.city && portfolio.state ? `${portfolio.city}, ${portfolio.state}` : portfolio.nationality}
                   </div>
-                  <div className="flex items-center">
+                  <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
                     <Calendar className="h-4 w-4 mr-1" />
                     {portfolio.age} anos
                   </div>
-                  <div className="flex items-center">
+                  <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
                     <Ruler className="h-4 w-4 mr-1" />
                     {portfolio.height} cm
                   </div>
-                  <div className="flex items-center">
+                  <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
                     <Weight className="h-4 w-4 mr-1" />
                     {portfolio.weight} kg
                   </div>
@@ -271,46 +281,46 @@ export default function PublicPortfolio() {
           <div className="lg:col-span-2 space-y-8">
             {/* Biografia */}
             {portfolio.biography && (
-              <Card>
+              <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle>Sobre</CardTitle>
+                  <CardTitle className="text-gray-800">Sobre</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground leading-relaxed">{portfolio.biography}</p>
+                  <p className="text-gray-600 leading-relaxed">{portfolio.biography}</p>
                 </CardContent>
               </Card>
             )}
 
             {/* Estatísticas de Carreira */}
             {portfolio.career_stats && (
-              <Card>
+              <Card className="shadow-lg border-0 bg-gradient-to-br from-white/90 to-blue-50/80 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Trophy className="h-5 w-5 mr-2" />
+                  <CardTitle className="flex items-center text-gray-800">
+                    <Trophy className="h-5 w-5 mr-2 text-yellow-500" />
                     Estatísticas de Carreira
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-                    <div className="text-center">
-                      <p className="text-3xl font-bold text-blue-500">{portfolio.career_stats.total_games}</p>
-                      <p className="text-sm text-muted-foreground">Jogos</p>
+                    <div className="text-center p-4 bg-blue-50/50 rounded-lg">
+                      <p className="text-3xl font-bold text-blue-600">{portfolio.career_stats.total_games}</p>
+                      <p className="text-sm text-gray-600">Jogos</p>
                     </div>
-                    <div className="text-center">
-                      <p className="text-3xl font-bold text-green-500">{portfolio.career_stats.total_goals}</p>
-                      <p className="text-sm text-muted-foreground">Gols</p>
+                    <div className="text-center p-4 bg-green-50/50 rounded-lg">
+                      <p className="text-3xl font-bold text-green-600">{portfolio.career_stats.total_goals}</p>
+                      <p className="text-sm text-gray-600">Gols</p>
                     </div>
-                    <div className="text-center">
-                      <p className="text-3xl font-bold text-purple-500">{portfolio.career_stats.total_assists}</p>
-                      <p className="text-sm text-muted-foreground">Assistências</p>
+                    <div className="text-center p-4 bg-purple-50/50 rounded-lg">
+                      <p className="text-3xl font-bold text-purple-600">{portfolio.career_stats.total_assists}</p>
+                      <p className="text-sm text-gray-600">Assistências</p>
                     </div>
-                    <div className="text-center">
-                      <p className="text-3xl font-bold text-yellow-500">{portfolio.career_stats.yellow_cards}</p>
-                      <p className="text-sm text-muted-foreground">Amarelos</p>
+                    <div className="text-center p-4 bg-yellow-50/50 rounded-lg">
+                      <p className="text-3xl font-bold text-yellow-600">{portfolio.career_stats.yellow_cards}</p>
+                      <p className="text-sm text-gray-600">Amarelos</p>
                     </div>
-                    <div className="text-center">
-                      <p className="text-3xl font-bold text-red-500">{portfolio.career_stats.red_cards}</p>
-                      <p className="text-sm text-muted-foreground">Vermelhos</p>
+                    <div className="text-center p-4 bg-red-50/50 rounded-lg">
+                      <p className="text-3xl font-bold text-red-600">{portfolio.career_stats.red_cards}</p>
+                      <p className="text-sm text-gray-600">Vermelhos</p>
                     </div>
                   </div>
                 </CardContent>
