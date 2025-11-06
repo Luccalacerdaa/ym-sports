@@ -1,0 +1,479 @@
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { usePortfolio } from "@/hooks/usePortfolio";
+import { PlayerPortfolio } from "@/types/portfolio";
+import { 
+  User, 
+  MapPin, 
+  Calendar, 
+  Ruler, 
+  Weight, 
+  Phone, 
+  Mail, 
+  Instagram, 
+  Twitter, 
+  Youtube,
+  Trophy,
+  Target,
+  Star,
+  Share2,
+  Download
+} from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { toast } from "sonner";
+
+export default function PublicPortfolio() {
+  const { slug } = useParams<{ slug: string }>();
+  const { fetchPortfolioBySlug, registerShare } = usePortfolio();
+  const [portfolio, setPortfolio] = useState<PlayerPortfolio | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (slug) {
+      loadPortfolio();
+    }
+  }, [slug]);
+
+  const loadPortfolio = async () => {
+    if (!slug) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const data = await fetchPortfolioBySlug(slug);
+      if (data) {
+        setPortfolio(data);
+      } else {
+        setError('Portfólio não encontrado');
+      }
+    } catch (err: any) {
+      console.error('Erro ao carregar portfólio:', err);
+      setError('Erro ao carregar portfólio');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Compartilhar portfólio
+  const handleShare = async (platform: 'link' | 'whatsapp' | 'email') => {
+    if (!portfolio) return;
+
+    const shareUrl = window.location.href;
+    
+    try {
+      if (platform === 'link') {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success('Link copiado!');
+      } else if (platform === 'whatsapp') {
+        const message = `Confira o portfólio de ${portfolio.full_name}: ${shareUrl}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+      } else if (platform === 'email') {
+        const subject = `Portfólio de ${portfolio.full_name}`;
+        const body = `Confira o portfólio de ${portfolio.full_name}: ${shareUrl}`;
+        window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+      }
+      
+      await registerShare(portfolio.id, platform);
+    } catch (error) {
+      toast.error('Erro ao compartilhar');
+    }
+  };
+
+  // Renderizar habilidades com radar
+  const renderSkills = () => {
+    if (!portfolio?.skills) return null;
+
+    const skillCategories = [
+      {
+        title: 'Técnicas',
+        skills: [
+          { key: 'ball_control', label: 'Controle' },
+          { key: 'passing', label: 'Passe' },
+          { key: 'shooting', label: 'Finalização' },
+          { key: 'dribbling', label: 'Drible' }
+        ]
+      },
+      {
+        title: 'Físicas',
+        skills: [
+          { key: 'speed', label: 'Velocidade' },
+          { key: 'strength', label: 'Força' },
+          { key: 'stamina', label: 'Resistência' },
+          { key: 'agility', label: 'Agilidade' }
+        ]
+      },
+      {
+        title: 'Mentais',
+        skills: [
+          { key: 'vision', label: 'Visão' },
+          { key: 'decision_making', label: 'Decisão' },
+          { key: 'leadership', label: 'Liderança' },
+          { key: 'teamwork', label: 'Equipe' }
+        ]
+      },
+      {
+        title: 'Defensivas',
+        skills: [
+          { key: 'marking', label: 'Marcação' },
+          { key: 'tackling', label: 'Desarme' },
+          { key: 'interceptions', label: 'Interceptação' },
+          { key: 'heading', label: 'Aéreo' }
+        ]
+      }
+    ];
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {skillCategories.map((category) => (
+          <Card key={category.title}>
+            <CardHeader>
+              <CardTitle className="text-lg">{category.title}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {category.skills.map((skill) => {
+                const value = portfolio.skills?.[skill.key as keyof typeof portfolio.skills] || 0;
+                return (
+                  <div key={skill.key} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span>{skill.label}</span>
+                      <span className="font-medium">{value}/10</span>
+                    </div>
+                    <Progress value={value * 10} className="h-2" />
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error || !portfolio) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="max-w-md mx-auto text-center">
+          <CardContent className="py-12">
+            <User className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Portfólio não encontrado</h3>
+            <p className="text-muted-foreground">
+              O portfólio que você está procurando não existe ou não está público.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="container max-w-6xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-lg">
+                  {portfolio.full_name.charAt(0)}
+                </span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold">YM Sports</h1>
+                <p className="text-sm text-muted-foreground">Portfólio do Jogador</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => handleShare('link')}>
+                <Share2 className="h-4 w-4 mr-2" />
+                Compartilhar
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container max-w-6xl mx-auto px-4 py-8">
+        {/* Hero Section */}
+        <Card className="mb-8 overflow-hidden">
+          <div className="bg-gradient-to-r from-primary to-primary/80 text-white p-8">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="flex-shrink-0">
+                {portfolio.profile_photo ? (
+                  <img 
+                    src={portfolio.profile_photo} 
+                    alt={portfolio.full_name}
+                    className="w-32 h-32 rounded-full object-cover border-4 border-white"
+                  />
+                ) : (
+                  <div className="w-32 h-32 rounded-full bg-white/20 flex items-center justify-center border-4 border-white">
+                    <User className="h-16 w-16 text-white" />
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex-1 text-center md:text-left">
+                <h1 className="text-3xl md:text-4xl font-bold mb-2">{portfolio.full_name}</h1>
+                <p className="text-xl mb-4">{portfolio.position}</p>
+                
+                <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm">
+                  <div className="flex items-center">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    {portfolio.nationality}
+                  </div>
+                  <div className="flex items-center">
+                    <Calendar className="h-4 w-4 mr-1" />
+                    {portfolio.age} anos
+                  </div>
+                  <div className="flex items-center">
+                    <Ruler className="h-4 w-4 mr-1" />
+                    {portfolio.height} cm
+                  </div>
+                  <div className="flex items-center">
+                    <Weight className="h-4 w-4 mr-1" />
+                    {portfolio.weight} kg
+                  </div>
+                </div>
+                
+                <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-4">
+                  <Badge variant="secondary" className="bg-white/20 text-white">
+                    Pé {portfolio.preferred_foot === 'left' ? 'Esquerdo' : portfolio.preferred_foot === 'right' ? 'Direito' : 'Ambidestro'}
+                  </Badge>
+                  {portfolio.is_seeking_club && (
+                    <Badge variant="secondary" className="bg-green-500 text-white">
+                      <Target className="h-3 w-3 mr-1" />
+                      Procurando Clube
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Coluna Principal */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Biografia */}
+            {portfolio.biography && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Sobre</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground leading-relaxed">{portfolio.biography}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Estatísticas de Carreira */}
+            {portfolio.career_stats && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Trophy className="h-5 w-5 mr-2" />
+                    Estatísticas de Carreira
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-blue-500">{portfolio.career_stats.total_games}</p>
+                      <p className="text-sm text-muted-foreground">Jogos</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-green-500">{portfolio.career_stats.total_goals}</p>
+                      <p className="text-sm text-muted-foreground">Gols</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-purple-500">{portfolio.career_stats.total_assists}</p>
+                      <p className="text-sm text-muted-foreground">Assistências</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-yellow-500">{portfolio.career_stats.yellow_cards}</p>
+                      <p className="text-sm text-muted-foreground">Amarelos</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-red-500">{portfolio.career_stats.red_cards}</p>
+                      <p className="text-sm text-muted-foreground">Vermelhos</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Habilidades */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Star className="h-5 w-5 mr-2" />
+                  Habilidades
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {renderSkills()}
+              </CardContent>
+            </Card>
+
+            {/* Histórico de Clubes */}
+            {portfolio.club_history && portfolio.club_history.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Histórico de Clubes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {portfolio.club_history.map((club) => (
+                      <div key={club.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center">
+                          {club.club_logo && (
+                            <img src={club.club_logo} alt={club.club_name} className="w-12 h-12 rounded mr-4" />
+                          )}
+                          <div>
+                            <p className="font-semibold text-lg">{club.club_name}</p>
+                            <p className="text-muted-foreground">{club.position}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {format(new Date(club.start_date), 'MMM yyyy', { locale: ptBR })} - 
+                              {club.end_date ? format(new Date(club.end_date), 'MMM yyyy', { locale: ptBR }) : 'Atual'}
+                            </p>
+                            {(club.games_played || club.goals_scored || club.assists) && (
+                              <div className="flex gap-4 text-xs text-muted-foreground mt-1">
+                                {club.games_played > 0 && <span>{club.games_played} jogos</span>}
+                                {club.goals_scored > 0 && <span>{club.goals_scored} gols</span>}
+                                {club.assists > 0 && <span>{club.assists} assistências</span>}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        {club.is_current && (
+                          <Badge variant="default">Atual</Badge>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Contato */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Contato</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {portfolio.phone && (
+                  <div className="flex items-center">
+                    <Phone className="h-4 w-4 mr-3 text-muted-foreground" />
+                    <span className="text-sm">{portfolio.phone}</span>
+                  </div>
+                )}
+                {portfolio.email && (
+                  <div className="flex items-center">
+                    <Mail className="h-4 w-4 mr-3 text-muted-foreground" />
+                    <span className="text-sm">{portfolio.email}</span>
+                  </div>
+                )}
+                
+                {portfolio.social_media && (
+                  <div className="pt-3 border-t">
+                    <p className="text-sm font-medium mb-3">Redes Sociais</p>
+                    <div className="space-y-2">
+                      {portfolio.social_media.instagram && (
+                        <a 
+                          href={`https://instagram.com/${portfolio.social_media.instagram}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center text-sm text-blue-500 hover:underline"
+                        >
+                          <Instagram className="h-4 w-4 mr-2" />
+                          @{portfolio.social_media.instagram}
+                        </a>
+                      )}
+                      {portfolio.social_media.twitter && (
+                        <a 
+                          href={`https://twitter.com/${portfolio.social_media.twitter}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center text-sm text-blue-500 hover:underline"
+                        >
+                          <Twitter className="h-4 w-4 mr-2" />
+                          @{portfolio.social_media.twitter}
+                        </a>
+                      )}
+                      {portfolio.social_media.youtube && (
+                        <a 
+                          href={`https://youtube.com/${portfolio.social_media.youtube}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center text-sm text-blue-500 hover:underline"
+                        >
+                          <Youtube className="h-4 w-4 mr-2" />
+                          {portfolio.social_media.youtube}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Compartilhar */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Compartilhar</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button variant="outline" className="w-full" onClick={() => handleShare('whatsapp')}>
+                  WhatsApp
+                </Button>
+                <Button variant="outline" className="w-full" onClick={() => handleShare('email')}>
+                  Email
+                </Button>
+                <Button variant="outline" className="w-full" onClick={() => handleShare('link')}>
+                  Copiar Link
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Conquistas */}
+            {portfolio.achievements && portfolio.achievements.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Conquistas</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {portfolio.achievements.map((achievement, index) => (
+                      <div key={index} className="flex items-center">
+                        <Trophy className="h-4 w-4 mr-2 text-yellow-500" />
+                        <span className="text-sm">{achievement}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

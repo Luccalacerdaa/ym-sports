@@ -22,6 +22,8 @@ import Achievements from "./pages/Achievements";
 import Ranking from "./pages/Ranking";
 import NewRanking from "./pages/NewRanking";
 import Nutrition from "./pages/Nutrition";
+import Portfolio from "./pages/Portfolio";
+import PublicPortfolio from "./pages/PublicPortfolio";
 import DashboardLayout from "./pages/DashboardLayout";
 import NotFound from "./pages/NotFound";
 
@@ -58,8 +60,10 @@ const AppContent = () => {
               <Route path="achievements" element={<Achievements />} />
               <Route path="ranking" element={<NewRanking />} />
               <Route path="nutrition" element={<Nutrition />} />
+              <Route path="portfolio" element={<Portfolio />} />
               <Route path="settings" element={<div className="p-6">Configurações em construção</div>} />
             </Route>
+            <Route path="/portfolio/:slug" element={<PublicPortfolio />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

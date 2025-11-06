@@ -1,4 +1,4 @@
-import { User, Settings, LogOut, Apple, TrendingUp, Dumbbell, Trophy } from "lucide-react";
+import { User, Settings, LogOut, Apple, TrendingUp, Dumbbell, Trophy, FileUser } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
@@ -65,6 +65,10 @@ export function TopNavBar() {
             <DropdownMenuItem onClick={() => navigate("/dashboard/nutrition")}>
               <Apple className="mr-2 h-4 w-4 text-yellow-500" />
               <span>Nutrição</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/dashboard/portfolio")}>
+              <FileUser className="mr-2 h-4 w-4 text-yellow-500" />
+              <span>Portfólio</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/dashboard/settings")}>
               <Settings className="mr-2 h-4 w-4 text-yellow-500" />
