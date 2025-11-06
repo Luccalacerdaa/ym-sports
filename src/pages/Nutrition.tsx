@@ -350,6 +350,7 @@ export default function Nutrition() {
                 </Button>
               ))}
             </div>
+          </div>
         ) : (
           <Card>
             <CardContent className="text-center py-8">
