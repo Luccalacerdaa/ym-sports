@@ -290,10 +290,11 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
                 </Label>
                 <Textarea 
                   id="favorites" 
-                  placeholder="Ex: frango, arroz, batata doce" 
+                  placeholder="Ex: frango grelhado, arroz integral, batata doce assada, brócolis no vapor" 
                   value={foodPreferences.favorites.join(', ')}
                   onChange={(e) => handleFoodPreferenceChange('favorites', e.target.value)}
                   className="mt-1"
+                  rows={3}
                 />
               </div>
               
@@ -303,10 +304,11 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
                 </Label>
                 <Textarea 
                   id="avoid" 
-                  placeholder="Ex: peixe, cogumelos, berinjela" 
+                  placeholder="Ex: fast food, refrigerante, doces industrializados, frituras em geral" 
                   value={foodPreferences.avoid.join(', ')}
                   onChange={(e) => handleFoodPreferenceChange('avoid', e.target.value)}
                   className="mt-1"
+                  rows={3}
                 />
               </div>
               
@@ -316,10 +318,11 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
                 </Label>
                 <Textarea 
                   id="allergies" 
-                  placeholder="Ex: glúten, amendoim, leite" 
+                  placeholder="Ex: glúten, lactose, amendoim, frutos do mar, ovos" 
                   value={foodPreferences.allergies.join(', ')}
                   onChange={(e) => handleFoodPreferenceChange('allergies', e.target.value)}
                   className="mt-1"
+                  rows={2}
                 />
               </div>
             </div>
