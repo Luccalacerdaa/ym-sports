@@ -7,6 +7,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useUpdateNotification } from "./hooks/useUpdateNotification";
 import { useEventNotifications } from "./hooks/useEventNotifications";
+import { useScheduledNotifications } from "./hooks/useScheduledNotifications";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -31,6 +32,9 @@ const AppContent = () => {
   
   // Hook para notificar sobre eventos próximos
   useEventNotifications();
+  
+  // Hook para gerenciar notificações programadas
+  const { fetchNotifications } = useScheduledNotifications();
 
   return (
     <BrowserRouter>

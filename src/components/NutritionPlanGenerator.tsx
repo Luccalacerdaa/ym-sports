@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { useAINutrition } from "@/hooks/useAINutrition";
 import { useNutritionPlans } from "@/hooks/useNutritionPlans";
 import { useProfile } from "@/hooks/useProfile";
@@ -99,13 +100,27 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
   };
   
   const handleFoodPreferenceChange = (type: keyof FoodPreference, value: string) => {
-    // Separar por vírgulas e remover espaços em branco
-    const items = value.split(',').map(item => item.trim()).filter(item => item);
+    // Verificar se o valor é uma string válida
+    if (typeof value !== 'string') {
+      console.error(`Valor inválido para ${type}:`, value);
+      return;
+    }
     
-    setFoodPreferences({
-      ...foodPreferences,
-      [type]: items
-    });
+    try {
+      // Separar por vírgulas e remover espaços em branco
+      const items = value.split(',')
+        .map(item => item.trim())
+        .filter(item => item.length > 0);
+      
+      console.log(`Processando ${type}:`, items);
+      
+      setFoodPreferences(prev => ({
+        ...prev,
+        [type]: items
+      }));
+    } catch (error) {
+      console.error(`Erro ao processar ${type}:`, error);
+    }
   };
   
   // Gerar plano nutricional

@@ -7,13 +7,15 @@ import { useNutritionPlans } from "@/hooks/useNutritionPlans";
 import { useWaterIntake } from "@/hooks/useWaterIntake";
 import { useNutritionAchievements } from "@/hooks/useNutritionAchievements";
 import { useProfile } from "@/hooks/useProfile";
+import { useNotificationsManager } from "@/hooks/useNotificationsManager";
 import { NutritionPlan, DailyPlan, Meal, FoodItem } from "@/types/nutrition";
-import { Loader2, Plus, Droplet, Award, Utensils, Calendar, ChevronRight, Apple, Trash2 } from "lucide-react";
+import { Loader2, Plus, Droplet, Award, Utensils, Calendar, ChevronRight, Apple, Trash2, Bell } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { NutritionPlanGenerator } from "@/components/NutritionPlanGenerator";
+import { NotificationManager } from "@/components/NotificationManager";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -23,6 +25,7 @@ export default function Nutrition() {
   const { nutritionPlans, currentPlan, loading, fetchNutritionPlans, fetchNutritionPlanDetails, deleteNutritionPlan } = useNutritionPlans();
   const { todayIntake, dailyGoal, progress: waterProgress, addWaterIntake, generateHydrationTips } = useWaterIntake();
   const { achievements, checkAchievements } = useNutritionAchievements();
+  const { isNotificationsDialogOpen, openNotificationsDialog, closeNotificationsDialog } = useNotificationsManager();
   
   const [selectedTab, setSelectedTab] = useState("overview");
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
@@ -450,14 +453,24 @@ export default function Nutrition() {
     <div className="container max-w-4xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Nutrição</h1>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => setIsGeneratorOpen(true)}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Plano
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={openNotificationsDialog}
+          >
+            <Bell className="h-4 w-4 mr-2" />
+            Notificações
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setIsGeneratorOpen(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Plano
+          </Button>
+        </div>
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
@@ -495,6 +508,12 @@ export default function Nutrition() {
           }}
         />
       )}
+      
+      {/* Gerenciador de Notificações */}
+      <NotificationManager 
+        open={isNotificationsDialogOpen} 
+        onClose={closeNotificationsDialog} 
+      />
     </div>
   );
 }
