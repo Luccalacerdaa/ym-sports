@@ -361,111 +361,102 @@ export default function Nutrition() {
           </Card>
         )}
 
-            {/* Detalhes do Dia */}
-            {selectedDay ? (
-              <Card>
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-lg">{selectedDay.day || selectedDay.day_of_week || 'Dia sem nome'}</CardTitle>
-                    <div className="flex gap-2">
-                      <Badge variant="outline">
-                        {selectedDay.total_calories || 0} kcal
-                      </Badge>
-                      <Badge variant="outline" className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20">
-                        {selectedDay.water_intake || 0}ml água
-                      </Badge>
-                    </div>
-                  </div>
-                  <CardDescription>
-                    <div className="flex gap-3 text-xs mt-1">
-                      <span>Proteínas: {selectedDay.total_protein || 0}g</span>
-                      <span>Carboidratos: {selectedDay.total_carbs || 0}g</span>
-                      <span>Gorduras: {selectedDay.total_fat || 0}g</span>
-                    </div>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {selectedDay.meals && selectedDay.meals.length > 0 ? (
-                    <div className="space-y-6">
-                      {selectedDay.meals.map((meal, mealIndex) => (
-                        <div key={meal.id || mealIndex} className="space-y-3">
-                          <div className="flex justify-between items-center">
-                            <h3 className="font-medium flex items-center">
-                              <span className="w-3 h-3 rounded-full bg-primary mr-2"></span>
-                              {meal.title || 'Refeição'} ({meal.time || 'Sem horário'})
-                            </h3>
-                            <Badge variant="outline">
-                              {meal.total_calories || 0} kcal
-                            </Badge>
-                          </div>
-                          
-                          {meal.foods && meal.foods.length > 0 ? (
-                            <div className="pl-5 space-y-3">
-                              {meal.foods.map((food, foodIndex) => (
-                                <div key={food.id || foodIndex} className="flex justify-between items-start border-b border-border pb-2 last:border-0 last:pb-0">
-                                  <div className="flex-1">
-                                    <div className="font-medium text-sm">{food.name || 'Alimento'}</div>
-                                    <div className="text-xs text-muted-foreground">{food.portion || 'Porção não especificada'}</div>
-                                    {food.preparation && (
-                                      <div className="text-xs text-blue-600 mt-1">
-                                        <span className="font-medium">Preparo:</span> {food.preparation}
-                                      </div>
-                                    )}
-                                    {food.alternatives && food.alternatives.length > 0 && (
-                                      <div className="text-xs text-green-600 mt-1">
-                                        <span className="font-medium">Alternativas:</span> {food.alternatives.join(', ')}
-                                      </div>
-                                    )}
+        {/* Detalhes do Dia */}
+        {selectedPlan.days && selectedPlan.days.length > 0 && selectedDay && (
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-lg">{selectedDay.day || selectedDay.day_of_week || 'Dia sem nome'}</CardTitle>
+                <div className="flex gap-2">
+                  <Badge variant="outline">
+                    {selectedDay.total_calories || 0} kcal
+                  </Badge>
+                  <Badge variant="outline" className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20">
+                    {selectedDay.water_intake || 0}ml água
+                  </Badge>
+                </div>
+              </div>
+              <CardDescription>
+                <div className="flex gap-3 text-xs mt-1">
+                  <span>Proteínas: {selectedDay.total_protein || 0}g</span>
+                  <span>Carboidratos: {selectedDay.total_carbs || 0}g</span>
+                  <span>Gorduras: {selectedDay.total_fat || 0}g</span>
+                </div>
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {selectedDay.meals && selectedDay.meals.length > 0 ? (
+                <div className="space-y-6">
+                  {selectedDay.meals.map((meal, mealIndex) => (
+                    <div key={meal.id || mealIndex} className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-medium flex items-center">
+                          <span className="w-3 h-3 rounded-full bg-primary mr-2"></span>
+                          {meal.title || 'Refeição'} ({meal.time || 'Sem horário'})
+                        </h3>
+                        <Badge variant="outline">
+                          {meal.total_calories || 0} kcal
+                        </Badge>
+                      </div>
+                      
+                      {meal.foods && meal.foods.length > 0 ? (
+                        <div className="pl-5 space-y-3">
+                          {meal.foods.map((food, foodIndex) => (
+                            <div key={food.id || foodIndex} className="flex justify-between items-start border-b border-border pb-2 last:border-0 last:pb-0">
+                              <div className="flex-1">
+                                <div className="font-medium text-sm">{food.name || 'Alimento'}</div>
+                                <div className="text-xs text-muted-foreground">{food.portion || 'Porção não especificada'}</div>
+                                {food.preparation && (
+                                  <div className="text-xs text-blue-600 mt-1">
+                                    <span className="font-medium">Preparo:</span> {food.preparation}
                                   </div>
-                                  <div className="text-xs text-right ml-4">
-                                    <div className="font-medium">{food.calories || 0} kcal</div>
-                                    <div className="text-muted-foreground">
-                                      P: {food.protein || 0}g | C: {food.carbs || 0}g | G: {food.fat || 0}g
-                                    </div>
+                                )}
+                                {food.alternatives && food.alternatives.length > 0 && (
+                                  <div className="text-xs text-green-600 mt-1">
+                                    <span className="font-medium">Alternativas:</span> {food.alternatives.join(', ')}
                                   </div>
+                                )}
+                              </div>
+                              <div className="text-xs text-right ml-4">
+                                <div className="font-medium">{food.calories || 0} kcal</div>
+                                <div className="text-muted-foreground">
+                                  P: {food.protein || 0}g | C: {food.carbs || 0}g | G: {food.fat || 0}g
                                 </div>
-                              ))}
+                              </div>
                             </div>
-                          ) : (
-                            <div className="pl-5 text-sm text-muted-foreground">
-                              Nenhum alimento encontrado nesta refeição
-                            </div>
-                          )}
-                          
-                          {meal.notes && (
-                            <div className="pl-5 text-sm text-muted-foreground bg-gray-50 p-2 rounded">
-                              <span className="font-medium">Observações:</span> {meal.notes}
-                            </div>
-                          )}
-                          
-                          {meal.preparation_time && (
-                            <div className="pl-5 text-xs text-blue-600">
-                              <span className="font-medium">Tempo de preparo:</span> {meal.preparation_time}
-                            </div>
-                          )}
+                          ))}
                         </div>
-                      ))}
+                      ) : (
+                        <div className="pl-5 text-sm text-muted-foreground">
+                          Nenhum alimento encontrado nesta refeição
+                        </div>
+                      )}
+                      
+                      {meal.notes && (
+                        <div className="pl-5 text-sm text-muted-foreground bg-gray-50 p-2 rounded">
+                          <span className="font-medium">Observações:</span> {meal.notes}
+                        </div>
+                      )}
+                      
+                      {meal.preparation_time && (
+                        <div className="pl-5 text-xs text-blue-600">
+                          <span className="font-medium">Tempo de preparo:</span> {meal.preparation_time}
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <Utensils className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">Nenhuma refeição encontrada neste dia</p>
-                      <p className="text-xs text-red-500 mt-2">
-                        Debug: {JSON.stringify(selectedDay, null, 2)}
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Selecione um dia para ver as refeições</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Utensils className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">Nenhuma refeição encontrada neste dia</p>
+                  <p className="text-xs text-red-500 mt-2">
+                    Debug: {JSON.stringify(selectedDay, null, 2)}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         )}
       </div>
     );
