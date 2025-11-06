@@ -332,6 +332,8 @@ FORMATO DE RESPOSTA (JSON):
     const daysNames = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
     const days = [];
     
+    console.log(`Gerando ${request.daysCount} dias de fallback para o plano nutricional`);
+    
     for (let i = 0; i < request.daysCount; i++) {
       const dayName = daysNames[i % 7];
       
