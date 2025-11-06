@@ -1,0 +1,327 @@
+import { useState } from 'react';
+import { useProfile } from '@/hooks/useProfile';
+import { 
+  NutritionRequest, 
+  NutritionPlan, 
+  ComplexityLevel 
+} from '@/types/nutrition';
+import OpenAI from 'openai';
+
+export const useAINutrition = () => {
+  const { profile } = useProfile();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const generatePersonalizedPrompt = (request: NutritionRequest) => {
+    // Calcular IMC se altura e peso estiverem disponíveis
+    const imc = profile?.weight && profile?.height 
+      ? (profile.weight / ((profile.height/100) ** 2)).toFixed(1) 
+      : 'Não calculado';
+    
+    // Classificação do IMC
+    let classificacaoIMC = 'Não calculado';
+    if (imc !== 'Não calculado') {
+      const imcNum = parseFloat(imc);
+      if (imcNum < 18.5) classificacaoIMC = 'Abaixo do peso';
+      else if (imcNum < 25) classificacaoIMC = 'Peso normal';
+      else if (imcNum < 30) classificacaoIMC = 'Sobrepeso';
+      else classificacaoIMC = 'Obesidade';
+    }
+    
+    // Determinar necessidades específicas baseadas na posição
+    const posicaoNecessidades: Record<string, string> = {
+      'goleiro': 'reflexos, flexibilidade, explosão e força de membros superiores',
+      'zagueiro': 'força, jogo aéreo, resistência e poder de marcação',
+      'lateral': 'resistência aeróbica, velocidade, cruzamentos e marcação',
+      'volante': 'resistência, força, marcação e distribuição',
+      'meio-campo': 'resistência, visão de jogo, passes e finalizações',
+      'meia': 'agilidade, criatividade, passes e finalizações',
+      'atacante': 'velocidade, finalização, força e posicionamento',
+      'ponta': 'velocidade, dribles, cruzamentos e finalizações'
+    };
+    
+    // Obter necessidades específicas da posição ou valor padrão
+    const posicaoAtleta = profile?.position?.toLowerCase() || '';
+    const necessidadesEspecificas = Object.keys(posicaoNecessidades).find(pos => 
+      posicaoAtleta.includes(pos)
+    ) ? posicaoNecessidades[Object.keys(posicaoNecessidades).find(pos => 
+      posicaoAtleta.includes(pos)
+    ) as keyof typeof posicaoNecessidades] : 'habilidades gerais de futebol';
+    
+    // Converter arrays para texto
+    const goalsText = request.goals.join(', ');
+    const mealTypesText = request.mealTypes.join(', ');
+    const favoritesText = request.preferences.favorites.join(', ') || 'Não informado';
+    const avoidText = request.preferences.avoid.join(', ') || 'Não informado';
+    const allergiesText = request.preferences.allergies.join(', ') || 'Não informado';
+    
+    // Gerar ID único para esta solicitação
+    const requestId = Date.now().toString(36) + Math.random().toString(36).substring(2);
+    
+    return `
+PERFIL DETALHADO DO ATLETA #${requestId}:
+- Nome: ${profile?.name || 'Não informado'}
+- Idade: ${profile?.age || 'Não informado'} anos
+- Altura: ${profile?.height || 'Não informado'} cm
+- Peso: ${profile?.weight || 'Não informado'} kg
+- IMC: ${imc} (${classificacaoIMC})
+- Posição: ${profile?.position || 'Não informado'}
+- Necessidades específicas: ${necessidadesEspecificas}
+- Time Atual: ${profile?.current_team || 'Não informado'}
+- Data da solicitação: ${new Date().toLocaleDateString('pt-BR')}
+
+SOLICITAÇÃO DE PLANO NUTRICIONAL:
+- Objetivos: ${goalsText}
+- Tipos de refeição: ${mealTypesText}
+- Nível de complexidade: ${request.complexityLevel}
+- Alimentos favoritos: ${favoritesText}
+- Alimentos a evitar: ${avoidText}
+- Alergias: ${allergiesText}
+- Duração do plano: ${request.daysCount} dias
+
+INSTRUÇÕES:
+Você é um nutricionista esportivo especializado em futebol com 15+ anos de experiência. Crie um plano nutricional ULTRA PERSONALIZADO baseado no perfil específico do atleta.
+
+IMPORTANTE - LEIA COM MUITA ATENÇÃO:
+- Gere planos para TODOS os dias solicitados (${request.daysCount} dias)
+- Cada dia deve ter TODAS as refeições solicitadas (${mealTypesText})
+- Adapte as refeições ao nível de complexidade solicitado (${request.complexityLevel})
+- NUNCA inclua alimentos listados como "a evitar" ou "alergias"
+- PRIORIZE os alimentos listados como "favoritos"
+- Calcule com precisão as calorias e macronutrientes de cada refeição
+- Inclua dicas de hidratação específicas para o perfil do atleta
+
+NÍVEL DE COMPLEXIDADE:
+- "simples": Receitas rápidas e práticas, poucos ingredientes, preparo fácil
+- "intermediario": Equilíbrio entre praticidade e variedade, preparo moderado
+- "avancado": Receitas elaboradas, maior variedade de alimentos, preparo mais complexo
+
+ADAPTAÇÕES POR PERFIL:
+- Para atletas jovens (<18 anos): Foco em crescimento e desenvolvimento
+- Para atletas com IMC baixo: Priorize calorias e proteínas para ganho de massa
+- Para atletas com IMC elevado: Foque em nutrição densa, controle calórico
+- Para cada posição: Adapte macronutrientes às necessidades específicas
+
+HIDRATAÇÃO:
+- Calcule a necessidade diária de água baseada no peso (30-35ml/kg)
+- Distribua a ingestão ao longo do dia
+- Inclua recomendações específicas para antes, durante e após treinos/jogos
+- Sugira alternativas para melhorar a hidratação (água com limão, água de coco, etc.)
+
+FORMATO DE RESPOSTA (JSON):
+{
+  "title": "Título personalizado do plano nutricional",
+  "description": "Descrição detalhada do plano",
+  "goals": ["Objetivo 1", "Objetivo 2"],
+  "days": [
+    {
+      "day_of_week": "Segunda-feira",
+      "meals": [
+        {
+          "type": "cafe_da_manha",
+          "title": "Nome da refeição",
+          "time": "07:00",
+          "foods": [
+            {
+              "name": "Nome do alimento",
+              "portion": "100g",
+              "calories": 200,
+              "protein": 15,
+              "carbs": 20,
+              "fat": 5,
+              "preparation": "Modo de preparo simples",
+              "alternatives": ["Alternativa 1", "Alternativa 2"],
+              "image_url": "https://exemplo.com/imagem.jpg"
+            }
+          ],
+          "total_calories": 450,
+          "total_protein": 25,
+          "total_carbs": 40,
+          "total_fat": 15,
+          "notes": "Observações sobre a refeição",
+          "preparation_time": "10 minutos"
+        }
+      ],
+      "water_intake": 3000,
+      "total_calories": 2500,
+      "total_protein": 150,
+      "total_carbs": 300,
+      "total_fat": 70
+    }
+  ],
+  "complexity_level": "${request.complexityLevel}",
+  "nutritional_advice": "Conselhos nutricionais gerais para este atleta",
+  "hydration_tips": "Dicas específicas de hidratação para este atleta"
+}
+`;
+  };
+
+  const generateNutritionPlan = async (request: NutritionRequest): Promise<NutritionPlan> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const prompt = generatePersonalizedPrompt(request);
+      
+      // Usar API real da OpenAI ou ChatGPT
+      const response = await callOpenAI(prompt);
+      
+      console.log('Resposta da IA:', response);
+      
+      // Validar e processar a resposta
+      const nutritionPlan: NutritionPlan = {
+        title: response.title || 'Plano Nutricional Personalizado',
+        description: response.description || 'Plano nutricional gerado por IA',
+        goals: response.goals || request.goals,
+        days: response.days || [],
+        complexity_level: response.complexity_level as ComplexityLevel || request.complexityLevel,
+        nutritional_advice: response.nutritional_advice || '',
+        hydration_tips: response.hydration_tips || ''
+      };
+      
+      setLoading(false);
+      return nutritionPlan;
+    } catch (err: any) {
+      console.error('Erro ao gerar plano nutricional:', err);
+      setError(err.message || 'Erro ao gerar plano nutricional');
+      setLoading(false);
+      throw err;
+    }
+  };
+
+  // Função para chamar a API de IA (OpenAI ou ChatGPT)
+  const callOpenAI = async (prompt: string) => {
+    // Verificar se deve usar ChatGPT ou OpenAI API
+    const useChatGPT = import.meta.env.VITE_USE_CHATGPT === 'true';
+    
+    console.log(`Modo de geração de nutrição: ${useChatGPT ? 'ChatGPT' : 'OpenAI API'}`);
+    
+    if (useChatGPT) {
+      return await callChatGPT(prompt);
+    } else {
+      // Verificar se a API key está configurada
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      
+      if (!apiKey) {
+        throw new Error('API key da OpenAI não configurada. Por favor, configure a variável VITE_OPENAI_API_KEY');
+      }
+      
+      return await callOpenAIAPI(prompt, apiKey);
+    }
+  };
+  
+  // Função para chamar o ChatGPT via API personalizada
+  const callChatGPT = async (prompt: string) => {
+    try {
+      console.log('Chamando ChatGPT via API personalizada para nutrição...');
+      
+      // URL da API personalizada que usa o ChatGPT
+      const apiUrl = import.meta.env.VITE_CHATGPT_API_URL || 'https://api.ymsports.com.br/api/generate-nutrition';
+      
+      console.log(`URL da API do ChatGPT: ${apiUrl}`);
+      
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: prompt
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erro na API do ChatGPT: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data || !data.result) {
+        throw new Error('Resposta inválida da API do ChatGPT');
+      }
+      
+      console.log('Resposta recebida do ChatGPT:', data);
+      
+      // Tentar fazer parse do JSON retornado
+      try {
+        // Se data.result já for um objeto, retorná-lo diretamente
+        if (typeof data.result === 'object') {
+          return data.result;
+        }
+        
+        // Se for uma string, tentar fazer parse
+        return JSON.parse(data.result);
+      } catch (parseError) {
+        console.error('Erro ao fazer parse da resposta do ChatGPT:', data.result);
+        throw new Error('Resposta do ChatGPT não é um JSON válido');
+      }
+    } catch (error: any) {
+      console.error('Erro ao chamar API do ChatGPT para nutrição:', error);
+      throw new Error(`Erro no ChatGPT: ${error.message}`);
+    }
+  };
+  
+  // Função para chamar a API da OpenAI diretamente
+  const callOpenAIAPI = async (prompt: string, apiKey: string) => {
+    // Inicializar cliente OpenAI
+    const openai = new OpenAI({
+      apiKey: apiKey,
+      dangerouslyAllowBrowser: true // Apenas para desenvolvimento
+    });
+
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "Você é um nutricionista esportivo especializado em futebol. Responda SEMPRE com JSON válido seguindo exatamente o formato solicitado. NUNCA corte a resposta no meio. Se precisar, use menos refeições ou alimentos para garantir que a resposta seja completa."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 4000,
+      });
+
+      const responseText = completion.choices[0]?.message?.content;
+      
+      if (!responseText) {
+        throw new Error('Resposta vazia da OpenAI');
+      }
+
+      // Tentar fazer parse do JSON
+      try {
+        return JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Erro ao fazer parse da resposta:', responseText);
+        console.error('Erro de parse:', parseError);
+        
+        // Verificar se a resposta foi cortada
+        if (!responseText.trim().endsWith('}')) {
+          throw new Error('Resposta da IA foi cortada no meio. Tente novamente com menos dias ou refeições.');
+        }
+        
+        throw new Error('Resposta da IA não é um JSON válido. Verifique o console para mais detalhes.');
+      }
+    } catch (error: any) {
+      console.error('Erro na chamada da OpenAI para nutrição:', error);
+      
+      if (error.code === 'insufficient_quota') {
+        throw new Error('Cota da API da OpenAI esgotada. Verifique sua conta.');
+      } else if (error.code === 'invalid_api_key') {
+        throw new Error('API key da OpenAI inválida. Verifique a configuração.');
+      } else {
+        throw new Error(`Erro na API da OpenAI: ${error.message}`);
+      }
+    }
+  };
+
+  return {
+    generateNutritionPlan,
+    loading,
+    error,
+  };
+};

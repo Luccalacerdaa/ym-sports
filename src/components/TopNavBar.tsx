@@ -47,32 +47,32 @@ export function TopNavBar() {
             <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
-              <User className="mr-2 h-4 w-4" />
+              <User className="mr-2 h-4 w-4 text-yellow-500" />
               <span>Perfil</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/dashboard/height-projection")}>
-              <TrendingUp className="mr-2 h-4 w-4" />
+              <TrendingUp className="mr-2 h-4 w-4 text-yellow-500" />
               <span>Altura e Projeção</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/dashboard/exercises")}>
-              <Dumbbell className="mr-2 h-4 w-4" />
+              <Dumbbell className="mr-2 h-4 w-4 text-yellow-500" />
               <span>Biblioteca de Exercícios</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/dashboard/achievements")}>
-              <Trophy className="mr-2 h-4 w-4" />
+              <Trophy className="mr-2 h-4 w-4 text-yellow-500" />
               <span>Conquistas</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/dashboard/nutrition")}>
-              <Apple className="mr-2 h-4 w-4" />
+              <Apple className="mr-2 h-4 w-4 text-yellow-500" />
               <span>Nutrição</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/dashboard/settings")}>
-              <Settings className="mr-2 h-4 w-4" />
+              <Settings className="mr-2 h-4 w-4 text-yellow-500" />
               <span>Configurações</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut className="mr-2 h-4 w-4 text-yellow-500" />
               <span>Sair</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
