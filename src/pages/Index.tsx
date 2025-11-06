@@ -29,12 +29,18 @@ const Index = () => {
       videoRef.current.volume = volume;
       videoRef.current.muted = isMuted;
       
-      // Forçar play do vídeo
+      // Forçar play do vídeo com verificação se ainda está no DOM
       const playVideo = async () => {
         try {
-          await videoRef.current?.play();
+          // Verificar se o elemento ainda está no DOM antes de tentar reproduzir
+          if (videoRef.current && document.contains(videoRef.current)) {
+            await videoRef.current.play();
+          }
         } catch (error) {
-          console.log('Erro ao reproduzir vídeo:', error);
+          // Só logar se não for um erro de AbortError (elemento removido do DOM)
+          if (error instanceof DOMException && error.name !== 'AbortError') {
+            console.log('Erro ao reproduzir vídeo:', error);
+          }
         }
       };
       
