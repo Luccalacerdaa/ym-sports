@@ -19,6 +19,7 @@ import ExerciseLibrary from "./pages/ExerciseLibrary";
 import Achievements from "./pages/Achievements";
 import Ranking from "./pages/Ranking";
 import NewRanking from "./pages/NewRanking";
+import Nutrition from "./pages/Nutrition";
 import DashboardLayout from "./pages/DashboardLayout";
 import NotFound from "./pages/NotFound";
 
@@ -50,7 +51,7 @@ const AppContent = () => {
               <Route path="exercises" element={<ExerciseLibrary />} />
               <Route path="achievements" element={<Achievements />} />
               <Route path="ranking" element={<NewRanking />} />
-              <Route path="nutrition" element={<div className="p-6">Nutrição em construção</div>} />
+              <Route path="nutrition" element={<Nutrition />} />
               <Route path="settings" element={<div className="p-6">Configurações em construção</div>} />
             </Route>
             <Route path="*" element={<NotFound />} />
