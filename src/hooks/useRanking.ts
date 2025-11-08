@@ -987,7 +987,7 @@ export const useRanking = () => {
       console.log(`Progresso do usuário: ${total_points} pontos, nível ${current_level}`);
 
       // Buscar posições nos rankings
-      const { data: rankings, error: rankingsError } = await supabase
+      let { data: rankings, error: rankingsError } = await supabase
         .from('rankings')
         .select('ranking_type, position, region')
         .eq('user_id', user.id)
