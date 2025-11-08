@@ -175,6 +175,21 @@ FORMATO DE RESPOSTA (JSON):
       if (!days || days.length === 0) {
         console.warn('IA não retornou dias, gerando dados de exemplo...');
         days = generateFallbackDays(request);
+      } else if (days.length < request.daysCount) {
+        console.warn(`IA retornou apenas ${days.length} dias, mas foram solicitados ${request.daysCount}. Completando com dados de exemplo...`);
+        const missingDays = request.daysCount - days.length;
+        const additionalDays = generateFallbackDays({
+          ...request,
+          daysCount: missingDays
+        });
+        // Ajustar nomes dos dias para não repetir
+        const dayNames = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
+        additionalDays.forEach((day, index) => {
+          const dayIndex = (days.length + index) % 7;
+          day.day = dayNames[dayIndex];
+          day.day_of_week = dayNames[dayIndex];
+        });
+        days = [...days, ...additionalDays];
       }
       
       const nutritionPlan: NutritionPlan = {

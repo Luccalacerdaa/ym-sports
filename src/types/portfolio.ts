@@ -28,6 +28,8 @@ export interface PlayerPortfolio {
   profile_photo?: string;
   action_photos?: string[];
   highlight_video?: string;
+  gallery_photos?: string[];
+  skill_videos?: string[];
   
   // Histórico de Clubes
   club_history: ClubHistory[];

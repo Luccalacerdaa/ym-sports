@@ -37,7 +37,11 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
     state: portfolio.state || '',
     biography: portfolio.biography || '',
     phone: portfolio.phone || '',
-    email: portfolio.email || ''
+    email: portfolio.email || '',
+    profile_photo: portfolio.profile_photo || '',
+    highlight_video: portfolio.highlight_video || '',
+    gallery_photos: portfolio.gallery_photos || [],
+    skill_videos: portfolio.skill_videos || []
   });
 
   const [socialMedia, setSocialMedia] = useState({
@@ -171,9 +175,10 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
         </DialogHeader>
 
         <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="basic">Básico</TabsTrigger>
             <TabsTrigger value="contact">Contato</TabsTrigger>
+            <TabsTrigger value="media">Mídia</TabsTrigger>
             <TabsTrigger value="stats">Estatísticas</TabsTrigger>
             <TabsTrigger value="skills">Habilidades</TabsTrigger>
             <TabsTrigger value="clubs">Clubes</TabsTrigger>
@@ -321,6 +326,81 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
                     />
                     <Label htmlFor="is_seeking_club">Procurando clube</Label>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Mídia - Fotos e Vídeos */}
+          <TabsContent value="media" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Fotos e Vídeos</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="profile_photo">Foto de Perfil (URL)</Label>
+                  <Input
+                    id="profile_photo"
+                    value={basicInfo.profile_photo || ''}
+                    onChange={(e) => setBasicInfo(prev => ({ ...prev, profile_photo: e.target.value }))}
+                    placeholder="https://exemplo.com/foto-perfil.jpg"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="highlight_video">Vídeo de Destaque (URL)</Label>
+                  <Input
+                    id="highlight_video"
+                    value={basicInfo.highlight_video || ''}
+                    onChange={(e) => setBasicInfo(prev => ({ ...prev, highlight_video: e.target.value }))}
+                    placeholder="https://exemplo.com/video-destaque.mp4"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="gallery_photos">Galeria de Fotos (URLs separadas por vírgula)</Label>
+                  <Textarea
+                    id="gallery_photos"
+                    value={basicInfo.gallery_photos?.join(', ') || ''}
+                    onChange={(e) => setBasicInfo(prev => ({ 
+                      ...prev, 
+                      gallery_photos: e.target.value.split(',').map(url => url.trim()).filter(url => url)
+                    }))}
+                    placeholder="https://exemplo.com/foto1.jpg, https://exemplo.com/foto2.jpg"
+                    rows={3}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Cole as URLs das fotos separadas por vírgula
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="skill_videos">Vídeos de Habilidades (URLs separadas por vírgula)</Label>
+                  <Textarea
+                    id="skill_videos"
+                    value={basicInfo.skill_videos?.join(', ') || ''}
+                    onChange={(e) => setBasicInfo(prev => ({ 
+                      ...prev, 
+                      skill_videos: e.target.value.split(',').map(url => url.trim()).filter(url => url)
+                    }))}
+                    placeholder="https://exemplo.com/video1.mp4, https://exemplo.com/video2.mp4"
+                    rows={3}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Cole as URLs dos vídeos separadas por vírgula
+                  </p>
+                </div>
+
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <h4 className="font-medium text-yellow-800 mb-2">💡 Dicas para Mídia</h4>
+                  <ul className="text-sm text-yellow-700 space-y-1">
+                    <li>• Use serviços como Imgur, Google Drive ou Dropbox para hospedar fotos</li>
+                    <li>• Para vídeos, use YouTube, Vimeo ou Google Drive</li>
+                    <li>• Certifique-se de que os links são públicos e acessíveis</li>
+                    <li>• Fotos devem estar em formato JPG, PNG ou WebP</li>
+                    <li>• Vídeos devem estar em formato MP4 para melhor compatibilidade</li>
+                  </ul>
                 </div>
               </CardContent>
             </Card>

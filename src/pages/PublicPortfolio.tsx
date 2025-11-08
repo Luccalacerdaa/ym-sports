@@ -187,13 +187,11 @@ export default function PublicPortfolio() {
         <div className="container max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg overflow-hidden">
-                <img 
-                  src="/icons/logo.png" 
-                  alt="YM Sports" 
-                  className="w-12 h-12 object-contain"
-                />
-              </div>
+              <img 
+                src="/icons/logo.png" 
+                alt="YM Sports" 
+                className="w-12 h-12 object-contain"
+              />
               <div>
                 <h1 className="text-2xl font-bold text-yellow-500">
                   YM Sports
@@ -234,12 +232,16 @@ export default function PublicPortfolio() {
                     src={portfolio.profile_photo} 
                     alt={portfolio.full_name}
                     className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-2xl"
+                    onError={(e) => {
+                      console.log('Erro ao carregar foto de perfil:', portfolio.profile_photo);
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    }}
                   />
-                ) : (
-                  <div className="w-40 h-40 rounded-full bg-white/20 flex items-center justify-center border-4 border-white shadow-2xl backdrop-blur-sm">
-                    <User className="h-20 w-20 text-white" />
-                  </div>
-                )}
+                ) : null}
+                <div className={`w-40 h-40 rounded-full bg-white/20 flex items-center justify-center border-4 border-white shadow-2xl backdrop-blur-sm ${portfolio.profile_photo ? 'hidden' : ''}`}>
+                  <User className="h-20 w-20 text-white" />
+                </div>
               </div>
               
               <div className="flex-1 text-center md:text-left">
@@ -345,11 +347,87 @@ export default function PublicPortfolio() {
               </CardContent>
             </Card>
 
+            {/* Galeria de Fotos e Vídeos */}
+            {((portfolio.gallery_photos && portfolio.gallery_photos.length > 0) || 
+              (portfolio.skill_videos && portfolio.skill_videos.length > 0) || 
+              portfolio.highlight_video) && (
+              <Card className="shadow-lg border border-yellow-500/20 bg-gray-900/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-yellow-500">Galeria</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {/* Vídeo de Destaque */}
+                  {portfolio.highlight_video && (
+                    <div className="mb-6">
+                      <h4 className="text-yellow-500 font-medium mb-3">Vídeo de Destaque</h4>
+                      <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden">
+                        <video 
+                          controls 
+                          className="w-full h-full object-cover"
+                          poster="/icons/logo.png"
+                        >
+                          <source src={portfolio.highlight_video} type="video/mp4" />
+                          Seu navegador não suporta vídeos.
+                        </video>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Vídeos de Habilidades */}
+                  {portfolio.skill_videos && portfolio.skill_videos.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-yellow-500 font-medium mb-3">Vídeos de Habilidades</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {portfolio.skill_videos.slice(0, 4).map((video, index) => (
+                          <div key={index} className="aspect-video bg-gray-800 rounded-lg overflow-hidden">
+                            <video 
+                              controls 
+                              className="w-full h-full object-cover"
+                              poster="/icons/logo.png"
+                            >
+                              <source src={video} type="video/mp4" />
+                              Seu navegador não suporta vídeos.
+                            </video>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Galeria de Fotos */}
+                  {portfolio.gallery_photos && portfolio.gallery_photos.length > 0 && (
+                    <div>
+                      <h4 className="text-yellow-500 font-medium mb-3">Fotos de Ação</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {portfolio.gallery_photos.slice(0, 8).map((photo, index) => (
+                          <div key={index} className="aspect-square bg-gray-800 rounded-lg overflow-hidden group cursor-pointer">
+                            <img 
+                              src={photo} 
+                              alt={`Foto ${index + 1}`}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              onError={(e) => {
+                                e.currentTarget.src = '/icons/logo.png';
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      {portfolio.gallery_photos.length > 8 && (
+                        <p className="text-center text-gray-400 text-sm mt-4">
+                          E mais {portfolio.gallery_photos.length - 8} fotos...
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Histórico de Clubes */}
             {portfolio.club_history && portfolio.club_history.length > 0 && (
-              <Card>
+              <Card className="shadow-lg border border-yellow-500/20 bg-gray-900/80 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle>Histórico de Clubes</CardTitle>
+                  <CardTitle className="text-yellow-500">Histórico de Clubes</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
