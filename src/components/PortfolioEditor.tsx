@@ -12,7 +12,8 @@ import { Slider } from "@/components/ui/slider";
 import { PlayerPortfolio, ClubHistory } from "@/types/portfolio";
 import { usePortfolio } from "@/hooks/usePortfolio";
 import { toast } from "sonner";
-import { Plus, Trash2, Save } from "lucide-react";
+import { Plus, Trash2, Save, Upload, Image, Video, X } from "lucide-react";
+import FileUpload from "@/components/FileUpload";
 
 interface PortfolioEditorProps {
   portfolio: PlayerPortfolio;
@@ -333,75 +334,203 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
 
           {/* Mídia - Fotos e Vídeos */}
           <TabsContent value="media" className="space-y-4">
+            {/* Foto de Perfil */}
             <Card>
               <CardHeader>
-                <CardTitle>Fotos e Vídeos</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Image className="h-5 w-5" />
+                  Foto de Perfil
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="profile_photo">Foto de Perfil (URL)</Label>
-                  <Input
-                    id="profile_photo"
-                    value={basicInfo.profile_photo || ''}
-                    onChange={(e) => setBasicInfo(prev => ({ ...prev, profile_photo: e.target.value }))}
-                    placeholder="https://exemplo.com/foto-perfil.jpg"
-                  />
-                </div>
+                {basicInfo.profile_photo && (
+                  <div className="flex items-center gap-4">
+                    <img 
+                      src={basicInfo.profile_photo} 
+                      alt="Foto de perfil atual"
+                      className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setBasicInfo(prev => ({ ...prev, profile_photo: '' }))}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Remover
+                    </Button>
+                  </div>
+                )}
+                
+                <FileUpload
+                  accept="images"
+                  multiple={false}
+                  maxFiles={1}
+                  bucket="portfolio-photos"
+                  folder="profile"
+                  onUploadComplete={(urls) => {
+                    if (urls[0]) {
+                      setBasicInfo(prev => ({ ...prev, profile_photo: urls[0] }));
+                    }
+                  }}
+                />
+              </CardContent>
+            </Card>
 
-                <div>
-                  <Label htmlFor="highlight_video">Vídeo de Destaque (URL)</Label>
-                  <Input
-                    id="highlight_video"
-                    value={basicInfo.highlight_video || ''}
-                    onChange={(e) => setBasicInfo(prev => ({ ...prev, highlight_video: e.target.value }))}
-                    placeholder="https://exemplo.com/video-destaque.mp4"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="gallery_photos">Galeria de Fotos (URLs separadas por vírgula)</Label>
-                  <Textarea
-                    id="gallery_photos"
-                    value={basicInfo.gallery_photos?.join(', ') || ''}
-                    onChange={(e) => setBasicInfo(prev => ({ 
+            {/* Galeria de Fotos */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Image className="h-5 w-5" />
+                  Galeria de Fotos
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {basicInfo.gallery_photos && basicInfo.gallery_photos.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {basicInfo.gallery_photos.map((photo, index) => (
+                      <div key={index} className="relative group">
+                        <img 
+                          src={photo} 
+                          alt={`Foto ${index + 1}`}
+                          className="w-full h-20 object-cover rounded border"
+                        />
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-6 w-6"
+                          onClick={() => {
+                            const newPhotos = [...(basicInfo.gallery_photos || [])];
+                            newPhotos.splice(index, 1);
+                            setBasicInfo(prev => ({ ...prev, gallery_photos: newPhotos }));
+                          }}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <FileUpload
+                  accept="images"
+                  multiple={true}
+                  maxFiles={8}
+                  bucket="portfolio-photos"
+                  folder="gallery"
+                  onUploadComplete={(urls) => {
+                    setBasicInfo(prev => ({ 
                       ...prev, 
-                      gallery_photos: e.target.value.split(',').map(url => url.trim()).filter(url => url)
-                    }))}
-                    placeholder="https://exemplo.com/foto1.jpg, https://exemplo.com/foto2.jpg"
-                    rows={3}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Cole as URLs das fotos separadas por vírgula
-                  </p>
-                </div>
+                      gallery_photos: [...(prev.gallery_photos || []), ...urls]
+                    }));
+                  }}
+                />
+              </CardContent>
+            </Card>
 
-                <div>
-                  <Label htmlFor="skill_videos">Vídeos de Habilidades (URLs separadas por vírgula)</Label>
-                  <Textarea
-                    id="skill_videos"
-                    value={basicInfo.skill_videos?.join(', ') || ''}
-                    onChange={(e) => setBasicInfo(prev => ({ 
+            {/* Vídeo de Destaque */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Video className="h-5 w-5" />
+                  Vídeo de Destaque
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {basicInfo.highlight_video && (
+                  <div className="space-y-2">
+                    <video 
+                      src={basicInfo.highlight_video} 
+                      controls
+                      className="w-full h-40 object-cover rounded border"
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setBasicInfo(prev => ({ ...prev, highlight_video: '' }))}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Remover Vídeo
+                    </Button>
+                  </div>
+                )}
+                
+                <FileUpload
+                  accept="videos"
+                  multiple={false}
+                  maxFiles={1}
+                  bucket="portfolio-videos"
+                  folder="highlights"
+                  onUploadComplete={(urls) => {
+                    if (urls[0]) {
+                      setBasicInfo(prev => ({ ...prev, highlight_video: urls[0] }));
+                    }
+                  }}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Vídeos de Habilidades */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Video className="h-5 w-5" />
+                  Vídeos de Habilidades
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {basicInfo.skill_videos && basicInfo.skill_videos.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2">
+                    {basicInfo.skill_videos.map((video, index) => (
+                      <div key={index} className="relative group">
+                        <video 
+                          src={video} 
+                          className="w-full h-20 object-cover rounded border"
+                          muted
+                        />
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-6 w-6"
+                          onClick={() => {
+                            const newVideos = [...(basicInfo.skill_videos || [])];
+                            newVideos.splice(index, 1);
+                            setBasicInfo(prev => ({ ...prev, skill_videos: newVideos }));
+                          }}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <FileUpload
+                  accept="videos"
+                  multiple={true}
+                  maxFiles={4}
+                  bucket="portfolio-videos"
+                  folder="skills"
+                  onUploadComplete={(urls) => {
+                    setBasicInfo(prev => ({ 
                       ...prev, 
-                      skill_videos: e.target.value.split(',').map(url => url.trim()).filter(url => url)
-                    }))}
-                    placeholder="https://exemplo.com/video1.mp4, https://exemplo.com/video2.mp4"
-                    rows={3}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Cole as URLs dos vídeos separadas por vírgula
-                  </p>
-                </div>
+                      skill_videos: [...(prev.skill_videos || []), ...urls]
+                    }));
+                  }}
+                />
+              </CardContent>
+            </Card>
 
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <h4 className="font-medium text-yellow-800 mb-2">💡 Dicas para Mídia</h4>
-                  <ul className="text-sm text-yellow-700 space-y-1">
-                    <li>• Use serviços como Imgur, Google Drive ou Dropbox para hospedar fotos</li>
-                    <li>• Para vídeos, use YouTube, Vimeo ou Google Drive</li>
-                    <li>• Certifique-se de que os links são públicos e acessíveis</li>
-                    <li>• Fotos devem estar em formato JPG, PNG ou WebP</li>
-                    <li>• Vídeos devem estar em formato MP4 para melhor compatibilidade</li>
-                  </ul>
-                </div>
+            {/* Informações sobre Upload */}
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-4">
+                <h4 className="font-medium text-blue-800 mb-2">📤 Sistema de Upload</h4>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  <li>• <strong>Fotos:</strong> Compressão automática, máximo 10MB</li>
+                  <li>• <strong>Vídeos:</strong> Máximo 100MB, formato MP4 recomendado</li>
+                  <li>• <strong>Armazenamento:</strong> Seguro no Supabase Storage</li>
+                  <li>• <strong>URLs:</strong> Geradas automaticamente após upload</li>
+                  <li>• <strong>Acesso:</strong> Público para visualização no portfólio</li>
+                </ul>
               </CardContent>
             </Card>
           </TabsContent>
