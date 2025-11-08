@@ -335,6 +335,21 @@ export default function Nutrition() {
           </CardContent>
         </Card>
 
+        {/* Debug - Dados do Plano */}
+        <Card className="bg-gray-50 border-gray-200">
+          <CardContent className="p-4">
+            <h4 className="font-medium text-gray-900 mb-2">Debug - Dados do Plano</h4>
+            <div className="text-sm text-gray-600 space-y-1">
+              <p><strong>Plano ID:</strong> {selectedPlan.id}</p>
+              <p><strong>Título:</strong> {selectedPlan.title}</p>
+              <p><strong>Dias disponíveis:</strong> {selectedPlan.days?.length || 0}</p>
+              <p><strong>Dia selecionado:</strong> {selectedDay?.id || 'Nenhum'}</p>
+              <p><strong>Refeições no dia:</strong> {selectedDay?.meals?.length || 0}</p>
+              <p><strong>Estrutura dos dias:</strong> {selectedPlan.days?.map(d => `${d.day_of_week} (${d.meals?.length || 0} refeições)`).join(', ') || 'Nenhum'}</p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Seleção de Dias */}
         {selectedPlan.days && selectedPlan.days.length > 0 ? (
           <div className="space-y-4">
@@ -357,9 +372,6 @@ export default function Nutrition() {
           <Card>
             <CardContent className="text-center py-8">
               <p className="text-muted-foreground">Nenhum dia encontrado neste plano</p>
-              <p className="text-xs text-red-500 mt-2">
-                Dados do plano: {JSON.stringify(selectedPlan, null, 2)}
-              </p>
             </CardContent>
           </Card>
         )}
