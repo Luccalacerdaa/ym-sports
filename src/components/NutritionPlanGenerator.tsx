@@ -295,6 +295,8 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
                   onChange={(e) => handleFoodPreferenceChange('favorites', e.target.value)}
                   className="mt-1"
                   rows={3}
+                  spellCheck={false}
+                  autoComplete="off"
                 />
               </div>
               
@@ -309,6 +311,8 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
                   onChange={(e) => handleFoodPreferenceChange('avoid', e.target.value)}
                   className="mt-1"
                   rows={3}
+                  spellCheck={false}
+                  autoComplete="off"
                 />
               </div>
               
@@ -323,6 +327,8 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
                   onChange={(e) => handleFoodPreferenceChange('allergies', e.target.value)}
                   className="mt-1"
                   rows={2}
+                  spellCheck={false}
+                  autoComplete="off"
                 />
               </div>
             </div>

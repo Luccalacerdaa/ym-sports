@@ -73,12 +73,6 @@ export const useNutritionPlans = () => {
       
       if (daysError) throw daysError;
       
-      console.log(`Dias encontrados para o plano ${planId}:`, daysData?.length || 0);
-      console.log('Estrutura dos dias:', daysData?.map(d => ({ 
-        id: d.id, 
-        day_of_week: d.day_of_week,
-        total_calories: d.total_calories 
-      })));
       
       const days: DailyPlan[] = [];
       
@@ -161,9 +155,7 @@ export const useNutritionPlans = () => {
       if (!planData) throw new Error('Erro ao criar plano nutricional');
       
       // Inserir dias
-      console.log(`Salvando ${days.length} dias para o plano ${planData.id}`);
       for (const day of days) {
-        console.log('Salvando dia:', day.day_of_week, 'com', day.meals?.length || 0, 'refeições');
         
         // Adicionar plan_id ao dia
         const dayWithPlanId = {
