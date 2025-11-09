@@ -69,8 +69,7 @@ export const useNutritionPlans = () => {
       const { data: daysData, error: daysError } = await supabase
         .from('nutrition_days')
         .select('*')
-        .eq('plan_id', planId)
-        .order('created_at');
+        .eq('plan_id', planId);
       
       if (daysError) throw daysError;
       

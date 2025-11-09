@@ -363,7 +363,7 @@ export default function Nutrition() {
                   className="whitespace-nowrap"
                 >
                   <Calendar className="h-4 w-4 mr-2" />
-                  {day.day || day.day_of_week || `Dia ${index + 1}`}
+                  {day.day_of_week || `Dia ${index + 1}`}
                 </Button>
               ))}
             </div>

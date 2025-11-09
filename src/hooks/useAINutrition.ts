@@ -186,7 +186,6 @@ FORMATO DE RESPOSTA (JSON):
         const dayNames = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
         additionalDays.forEach((day, index) => {
           const dayIndex = (days.length + index) % 7;
-          day.day = dayNames[dayIndex];
           day.day_of_week = dayNames[dayIndex];
         });
         days = [...days, ...additionalDays];
@@ -491,7 +490,6 @@ FORMATO DE RESPOSTA (JSON):
       }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
       
       days.push({
-        day: dayName,
         day_of_week: dayName,
         meals: meals,
         water_intake: 3000,
