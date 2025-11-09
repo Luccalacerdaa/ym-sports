@@ -314,26 +314,6 @@ export default function Nutrition() {
           </CardContent>
         </Card>
 
-        {/* Debug Info */}
-        <Card className="bg-yellow-50 border-yellow-200">
-          <CardHeader>
-            <CardTitle className="text-sm text-yellow-800">Debug - Dados do Plano</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xs text-yellow-700 space-y-1">
-              <div>Plano ID: {selectedPlan.id}</div>
-              <div>Título: {selectedPlan.title}</div>
-              <div>Dias disponíveis: {selectedPlan.days?.length || 0}</div>
-              <div>Dia selecionado: {selectedDay?.id || 'Nenhum'}</div>
-              <div>Refeições no dia: {selectedDay?.meals?.length || 0}</div>
-              {selectedPlan.days && selectedPlan.days.length > 0 && (
-                <div>
-                  Estrutura dos dias: {selectedPlan.days.map(d => `${d.day || d.day_of_week || 'Sem nome'} (${d.meals?.length || 0} refeições)`).join(', ')}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
 
 
         {/* Seleção de Dias */}

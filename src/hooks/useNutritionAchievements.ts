@@ -3,12 +3,10 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProgress } from '@/hooks/useProgress';
 import { NutritionAchievement, NUTRITION_ACHIEVEMENTS } from '@/types/nutrition';
-import { useWaterIntake } from './useWaterIntake';
 
 export const useNutritionAchievements = () => {
   const { user } = useAuth();
   const { addPoints } = useProgress();
-  const { checkWaterStreak } = useWaterIntake();
   const [achievements, setAchievements] = useState<NutritionAchievement[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,31 +55,55 @@ export const useNutritionAchievements = () => {
       // Buscar dados necessários para verificar conquistas
       const [
         nutritionPlansCount,
-        waterStreak,
-        // Outros dados necessários...
+        waterRegistrations,
+        plansBy7Days,
+        plansByComplexity,
+        plansByGoals
       ] = await Promise.all([
         countNutritionPlans(),
-        checkWaterStreak(),
-        // Outras funções de verificação...
+        countWaterRegistrations(),
+        countPlansBy7Days(),
+        countPlansByComplexity(),
+        countPlansByGoals()
       ]);
       
       // Lista de conquistas a conceder
       const achievementsToGrant: string[] = [];
       
       // Verificar cada conquista
-      if (nutritionPlansCount > 0) {
+      if (nutritionPlansCount >= 1) {
         achievementsToGrant.push('nutrition_beginner');
       }
       
-      if (waterStreak >= 7) {
-        achievementsToGrant.push('hydration_aware');
+      if (plansBy7Days >= 1) {
+        achievementsToGrant.push('meal_planner_7days');
       }
       
-      if (waterStreak >= 14) {
-        achievementsToGrant.push('perfect_hydration');
+      if (nutritionPlansCount >= 3) {
+        achievementsToGrant.push('nutrition_explorer');
       }
       
-      if (waterStreak >= 30) {
+      if (waterRegistrations >= 1) {
+        achievementsToGrant.push('hydration_starter');
+      }
+      
+      if (waterRegistrations >= 3) {
+        achievementsToGrant.push('hydration_consistent');
+      }
+      
+      if (plansByComplexity >= 3) {
+        achievementsToGrant.push('nutrition_variety');
+      }
+      
+      if (plansByGoals >= 3) {
+        achievementsToGrant.push('goal_oriented');
+      }
+      
+      if (nutritionPlansCount >= 5) {
+        achievementsToGrant.push('nutrition_dedicated');
+      }
+      
+      if (waterRegistrations >= 7) {
         achievementsToGrant.push('hydration_master');
       }
       
@@ -167,11 +189,95 @@ export const useNutritionAchievements = () => {
     }
   };
 
-  // Verificar se o usuário seguiu um plano por X dias consecutivos
-  const checkPlanAdherence = async (days: number) => {
-    // Esta função seria implementada com base em um sistema de registro
-    // de acompanhamento de planos nutricionais que ainda será desenvolvido
-    return false;
+  // Contar registros de água do usuário
+  const countWaterRegistrations = async () => {
+    if (!user) return 0;
+    
+    try {
+      const { count, error } = await supabase
+        .from('water_intake_logs')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      return count || 0;
+    } catch (err) {
+      console.error('Erro ao contar registros de água:', err);
+      return 0;
+    }
+  };
+
+  // Contar planos de 7 dias
+  const countPlansBy7Days = async () => {
+    if (!user) return 0;
+    
+    try {
+      const { data, error } = await supabase
+        .from('nutrition_plans')
+        .select('id, nutrition_days(id)')
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      // Contar planos que têm 7 ou mais dias
+      const plansBy7Days = (data || []).filter(plan => 
+        plan.nutrition_days && plan.nutrition_days.length >= 7
+      ).length;
+      
+      return plansBy7Days;
+    } catch (err) {
+      console.error('Erro ao contar planos de 7 dias:', err);
+      return 0;
+    }
+  };
+
+  // Contar planos por diferentes complexidades
+  const countPlansByComplexity = async () => {
+    if (!user) return 0;
+    
+    try {
+      const { data, error } = await supabase
+        .from('nutrition_plans')
+        .select('complexity_level')
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      // Contar quantos níveis diferentes de complexidade o usuário já criou
+      const uniqueComplexities = new Set((data || []).map(plan => plan.complexity_level));
+      return uniqueComplexities.size;
+    } catch (err) {
+      console.error('Erro ao contar planos por complexidade:', err);
+      return 0;
+    }
+  };
+
+  // Contar planos por diferentes objetivos
+  const countPlansByGoals = async () => {
+    if (!user) return 0;
+    
+    try {
+      const { data, error } = await supabase
+        .from('nutrition_plans')
+        .select('goals')
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      // Contar quantos objetivos diferentes o usuário já criou
+      const allGoals = new Set();
+      (data || []).forEach(plan => {
+        if (plan.goals && Array.isArray(plan.goals)) {
+          plan.goals.forEach(goal => allGoals.add(goal));
+        }
+      });
+      
+      return allGoals.size;
+    } catch (err) {
+      console.error('Erro ao contar planos por objetivos:', err);
+      return 0;
+    }
   };
 
   // Carregar dados iniciais

@@ -37,8 +37,8 @@ export interface PlayerPortfolio {
   // Estatísticas
   career_stats: CareerStats;
   
-  // Habilidades e Características
-  skills: PlayerSkills;
+  // Conquistas e Destaques
+  achievements_data: PlayerAchievements;
   
   // Informações Adicionais
   biography?: string;
@@ -82,35 +82,46 @@ export interface CareerStats {
   goals_conceded?: number; // para goleiros
 }
 
-export interface PlayerSkills {
-  // Habilidades Técnicas (1-10)
-  ball_control: number;
-  passing: number;
-  shooting: number;
-  dribbling: number;
-  crossing: number;
-  finishing: number;
+export interface PlayerAchievements {
+  // Medalhas e Troféus
+  medals: Medal[];
   
-  // Habilidades Físicas (1-10)
-  speed: number;
-  acceleration: number;
-  strength: number;
-  jumping: number;
-  stamina: number;
-  agility: number;
+  // Campeonatos
+  championships: Championship[];
   
-  // Habilidades Mentais (1-10)
-  vision: number;
-  decision_making: number;
-  concentration: number;
-  leadership: number;
-  teamwork: number;
-  
-  // Habilidades Defensivas (1-10)
-  marking: number;
-  tackling: number;
-  interceptions: number;
-  heading: number;
+  // Destaques Individuais
+  individual_awards: IndividualAward[];
+}
+
+export interface Medal {
+  id: string;
+  name: string;
+  description: string;
+  category: 'gold' | 'silver' | 'bronze';
+  competition: string;
+  date_received: string;
+  image_url?: string;
+}
+
+export interface Championship {
+  id: string;
+  name: string;
+  competition: string;
+  year: number;
+  position: 'champion' | 'runner_up' | 'third_place' | 'participant';
+  club_name: string;
+  description?: string;
+  image_url?: string;
+}
+
+export interface IndividualAward {
+  id: string;
+  name: string;
+  description: string;
+  category: 'top_scorer' | 'best_player' | 'best_goalkeeper' | 'best_defender' | 'best_midfielder' | 'best_forward' | 'other';
+  competition: string;
+  year: number;
+  image_url?: string;
 }
 
 export interface PortfolioView {

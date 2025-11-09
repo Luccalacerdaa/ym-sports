@@ -365,13 +365,14 @@ export default function Portfolio() {
   return (
     <div className="container max-w-4xl mx-auto px-4 py-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold">Meu Portfólio</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button 
             variant="outline" 
             size="sm"
             onClick={() => window.open(generateShareLink(portfolio.slug), '_blank')}
+            className="flex-1 sm:flex-none"
           >
             <ExternalLink className="h-4 w-4 mr-2" />
             Visualizar
@@ -380,6 +381,7 @@ export default function Portfolio() {
             variant="outline" 
             size="sm"
             onClick={() => handleShare('link')}
+            className="flex-1 sm:flex-none"
           >
             <Copy className="h-4 w-4 mr-2" />
             Copiar Link
@@ -388,6 +390,7 @@ export default function Portfolio() {
             variant="outline" 
             size="sm"
             onClick={() => setIsEditing(true)}
+            className="flex-1 sm:flex-none"
           >
             <Edit className="h-4 w-4 mr-2" />
             Editar

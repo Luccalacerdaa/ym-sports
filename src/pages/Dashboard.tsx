@@ -30,6 +30,7 @@ export default function Dashboard() {
   const userAge = profile?.age || 'Não informado';
   const userHeight = profile?.height ? `${profile.height}cm` : 'Não informado';
   const userWeight = profile?.weight ? `${profile.weight}kg` : 'Não informado';
+  const userPosition = profile?.position || 'Não informado';
 
   // Se ainda está carregando o perfil
   if (profileLoading) {
@@ -75,7 +76,7 @@ export default function Dashboard() {
                 </Avatar>
                 <div>
                   <div className="font-bold">{displayName}</div>
-                  <div className="text-sm text-muted-foreground">{user?.email}</div>
+                  <div className="text-sm text-muted-foreground">{userPosition}</div>
                 </div>
               </CardTitle>
             </CardHeader>

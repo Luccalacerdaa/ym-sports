@@ -8,8 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Slider } from "@/components/ui/slider";
-import { PlayerPortfolio, ClubHistory } from "@/types/portfolio";
+import { PlayerPortfolio, ClubHistory, Medal, Championship, IndividualAward } from "@/types/portfolio";
 import { usePortfolio } from "@/hooks/usePortfolio";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, Upload, Image, Video, X } from "lucide-react";
@@ -59,28 +58,10 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
     red_cards: 0
   });
 
-  const [skills, setSkills] = useState(portfolio.skills || {
-    ball_control: 5,
-    passing: 5,
-    shooting: 5,
-    dribbling: 5,
-    crossing: 5,
-    finishing: 5,
-    speed: 5,
-    acceleration: 5,
-    strength: 5,
-    jumping: 5,
-    stamina: 5,
-    agility: 5,
-    vision: 5,
-    decision_making: 5,
-    concentration: 5,
-    leadership: 5,
-    teamwork: 5,
-    marking: 5,
-    tackling: 5,
-    interceptions: 5,
-    heading: 5
+  const [achievements, setAchievements] = useState(portfolio.achievements_data || {
+    medals: [],
+    championships: [],
+    individual_awards: []
   });
 
   const [settings, setSettings] = useState({
@@ -109,7 +90,7 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
         ...basicInfo,
         social_media: socialMedia,
         career_stats: careerStats,
-        skills: skills,
+        achievements_data: achievements,
         ...settings
       });
       
@@ -150,23 +131,6 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
     }
   };
 
-  // Renderizar seção de habilidades
-  const renderSkillSlider = (skillKey: keyof typeof skills, label: string) => (
-    <div key={skillKey} className="space-y-2">
-      <div className="flex justify-between">
-        <Label className="text-sm">{label}</Label>
-        <span className="text-sm text-muted-foreground">{skills[skillKey]}/10</span>
-      </div>
-      <Slider
-        value={[skills[skillKey]]}
-        onValueChange={([value]) => setSkills(prev => ({ ...prev, [skillKey]: value }))}
-        max={10}
-        min={1}
-        step={1}
-        className="w-full"
-      />
-    </div>
-  );
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -176,13 +140,13 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
         </DialogHeader>
 
         <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="basic">Básico</TabsTrigger>
-            <TabsTrigger value="contact">Contato</TabsTrigger>
-            <TabsTrigger value="media">Mídia</TabsTrigger>
-            <TabsTrigger value="stats">Estatísticas</TabsTrigger>
-            <TabsTrigger value="skills">Habilidades</TabsTrigger>
-            <TabsTrigger value="clubs">Clubes</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1">
+            <TabsTrigger value="basic" className="text-xs sm:text-sm">Básico</TabsTrigger>
+            <TabsTrigger value="contact" className="text-xs sm:text-sm">Contato</TabsTrigger>
+            <TabsTrigger value="media" className="text-xs sm:text-sm">Mídia</TabsTrigger>
+            <TabsTrigger value="stats" className="text-xs sm:text-sm">Estatísticas</TabsTrigger>
+            <TabsTrigger value="achievements" className="text-xs sm:text-sm">Conquistas</TabsTrigger>
+            <TabsTrigger value="clubs" className="text-xs sm:text-sm">Clubes</TabsTrigger>
           </TabsList>
 
           {/* Informações Básicas */}
@@ -657,59 +621,440 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
             </Card>
           </TabsContent>
 
-          {/* Habilidades */}
-          <TabsContent value="skills" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Conquistas */}
+          <TabsContent value="achievements" className="space-y-4">
+            <div className="grid grid-cols-1 gap-6">
+              {/* Medalhas */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Habilidades Técnicas</CardTitle>
+                  <CardTitle className="flex items-center justify-between">
+                    Medalhas e Troféus
+                    <Button 
+                      size="sm" 
+                      onClick={() => {
+                        const newMedal: Medal = {
+                          id: Date.now().toString(),
+                          name: '',
+                          description: '',
+                          category: 'gold',
+                          competition: '',
+                          date_received: new Date().toISOString().split('T')[0]
+                        };
+                        setAchievements(prev => ({
+                          ...prev,
+                          medals: [...prev.medals, newMedal]
+                        }));
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {renderSkillSlider('ball_control', 'Controle de Bola')}
-                  {renderSkillSlider('passing', 'Passe')}
-                  {renderSkillSlider('shooting', 'Finalização')}
-                  {renderSkillSlider('dribbling', 'Drible')}
-                  {renderSkillSlider('crossing', 'Cruzamento')}
-                  {renderSkillSlider('finishing', 'Definição')}
+                  {achievements.medals.map((medal, index) => (
+                    <div key={medal.id} className="p-4 border rounded-lg space-y-3">
+                      <div className="flex justify-between items-start">
+                        <h4 className="font-semibold">Medalha {index + 1}</h4>
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          onClick={() => {
+                            setAchievements(prev => ({
+                              ...prev,
+                              medals: prev.medals.filter(m => m.id !== medal.id)
+                            }));
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>Nome da Medalha</Label>
+                          <Input 
+                            value={medal.name}
+                            onChange={(e) => {
+                              setAchievements(prev => ({
+                                ...prev,
+                                medals: prev.medals.map(m => 
+                                  m.id === medal.id ? { ...m, name: e.target.value } : m
+                                )
+                              }));
+                            }}
+                            placeholder="Ex: Medalha de Ouro"
+                          />
+                        </div>
+                        <div>
+                          <Label>Categoria</Label>
+                          <Select 
+                            value={medal.category}
+                            onValueChange={(value: 'gold' | 'silver' | 'bronze') => {
+                              setAchievements(prev => ({
+                                ...prev,
+                                medals: prev.medals.map(m => 
+                                  m.id === medal.id ? { ...m, category: value } : m
+                                )
+                              }));
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="gold">Ouro</SelectItem>
+                              <SelectItem value="silver">Prata</SelectItem>
+                              <SelectItem value="bronze">Bronze</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>Competição</Label>
+                          <Input 
+                            value={medal.competition}
+                            onChange={(e) => {
+                              setAchievements(prev => ({
+                                ...prev,
+                                medals: prev.medals.map(m => 
+                                  m.id === medal.id ? { ...m, competition: e.target.value } : m
+                                )
+                              }));
+                            }}
+                            placeholder="Ex: Campeonato Estadual"
+                          />
+                        </div>
+                        <div>
+                          <Label>Data</Label>
+                          <Input 
+                            type="date"
+                            value={medal.date_received}
+                            onChange={(e) => {
+                              setAchievements(prev => ({
+                                ...prev,
+                                medals: prev.medals.map(m => 
+                                  m.id === medal.id ? { ...m, date_received: e.target.value } : m
+                                )
+                              }));
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Descrição</Label>
+                        <Textarea 
+                          value={medal.description}
+                          onChange={(e) => {
+                            setAchievements(prev => ({
+                              ...prev,
+                              medals: prev.medals.map(m => 
+                                m.id === medal.id ? { ...m, description: e.target.value } : m
+                              )
+                            }));
+                          }}
+                          placeholder="Descreva a conquista..."
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  {achievements.medals.length === 0 && (
+                    <p className="text-muted-foreground text-center py-4">
+                      Nenhuma medalha adicionada. Clique no botão + para adicionar.
+                    </p>
+                  )}
                 </CardContent>
               </Card>
 
+              {/* Campeonatos */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Habilidades Físicas</CardTitle>
+                  <CardTitle className="flex items-center justify-between">
+                    Campeonatos
+                    <Button 
+                      size="sm" 
+                      onClick={() => {
+                        const newChampionship: Championship = {
+                          id: Date.now().toString(),
+                          name: '',
+                          competition: '',
+                          year: new Date().getFullYear(),
+                          position: 'champion',
+                          club_name: ''
+                        };
+                        setAchievements(prev => ({
+                          ...prev,
+                          championships: [...prev.championships, newChampionship]
+                        }));
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {renderSkillSlider('speed', 'Velocidade')}
-                  {renderSkillSlider('acceleration', 'Aceleração')}
-                  {renderSkillSlider('strength', 'Força')}
-                  {renderSkillSlider('jumping', 'Salto')}
-                  {renderSkillSlider('stamina', 'Resistência')}
-                  {renderSkillSlider('agility', 'Agilidade')}
+                  {achievements.championships.map((championship, index) => (
+                    <div key={championship.id} className="p-4 border rounded-lg space-y-3">
+                      <div className="flex justify-between items-start">
+                        <h4 className="font-semibold">Campeonato {index + 1}</h4>
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          onClick={() => {
+                            setAchievements(prev => ({
+                              ...prev,
+                              championships: prev.championships.filter(c => c.id !== championship.id)
+                            }));
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>Nome do Campeonato</Label>
+                          <Input 
+                            value={championship.name}
+                            onChange={(e) => {
+                              setAchievements(prev => ({
+                                ...prev,
+                                championships: prev.championships.map(c => 
+                                  c.id === championship.id ? { ...c, name: e.target.value } : c
+                                )
+                              }));
+                            }}
+                            placeholder="Ex: Copa do Brasil"
+                          />
+                        </div>
+                        <div>
+                          <Label>Competição</Label>
+                          <Input 
+                            value={championship.competition}
+                            onChange={(e) => {
+                              setAchievements(prev => ({
+                                ...prev,
+                                championships: prev.championships.map(c => 
+                                  c.id === championship.id ? { ...c, competition: e.target.value } : c
+                                )
+                              }));
+                            }}
+                            placeholder="Ex: Nacional"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <Label>Ano</Label>
+                          <Input 
+                            type="number"
+                            value={championship.year}
+                            onChange={(e) => {
+                              setAchievements(prev => ({
+                                ...prev,
+                                championships: prev.championships.map(c => 
+                                  c.id === championship.id ? { ...c, year: parseInt(e.target.value) } : c
+                                )
+                              }));
+                            }}
+                            min="1900"
+                            max={new Date().getFullYear()}
+                          />
+                        </div>
+                        <div>
+                          <Label>Posição</Label>
+                          <Select 
+                            value={championship.position}
+                            onValueChange={(value: 'champion' | 'runner_up' | 'third_place' | 'participant') => {
+                              setAchievements(prev => ({
+                                ...prev,
+                                championships: prev.championships.map(c => 
+                                  c.id === championship.id ? { ...c, position: value } : c
+                                )
+                              }));
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="champion">Campeão</SelectItem>
+                              <SelectItem value="runner_up">Vice-campeão</SelectItem>
+                              <SelectItem value="third_place">3º Lugar</SelectItem>
+                              <SelectItem value="participant">Participante</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Clube</Label>
+                          <Input 
+                            value={championship.club_name}
+                            onChange={(e) => {
+                              setAchievements(prev => ({
+                                ...prev,
+                                championships: prev.championships.map(c => 
+                                  c.id === championship.id ? { ...c, club_name: e.target.value } : c
+                                )
+                              }));
+                            }}
+                            placeholder="Nome do clube"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {achievements.championships.length === 0 && (
+                    <p className="text-muted-foreground text-center py-4">
+                      Nenhum campeonato adicionado. Clique no botão + para adicionar.
+                    </p>
+                  )}
                 </CardContent>
               </Card>
 
+              {/* Prêmios Individuais */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Habilidades Mentais</CardTitle>
+                  <CardTitle className="flex items-center justify-between">
+                    Prêmios Individuais
+                    <Button 
+                      size="sm" 
+                      onClick={() => {
+                        const newAward: IndividualAward = {
+                          id: Date.now().toString(),
+                          name: '',
+                          description: '',
+                          category: 'best_player',
+                          competition: '',
+                          year: new Date().getFullYear()
+                        };
+                        setAchievements(prev => ({
+                          ...prev,
+                          individual_awards: [...prev.individual_awards, newAward]
+                        }));
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {renderSkillSlider('vision', 'Visão de Jogo')}
-                  {renderSkillSlider('decision_making', 'Tomada de Decisão')}
-                  {renderSkillSlider('concentration', 'Concentração')}
-                  {renderSkillSlider('leadership', 'Liderança')}
-                  {renderSkillSlider('teamwork', 'Trabalho em Equipe')}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Habilidades Defensivas</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {renderSkillSlider('marking', 'Marcação')}
-                  {renderSkillSlider('tackling', 'Desarme')}
-                  {renderSkillSlider('interceptions', 'Interceptação')}
-                  {renderSkillSlider('heading', 'Jogo Aéreo')}
+                  {achievements.individual_awards.map((award, index) => (
+                    <div key={award.id} className="p-4 border rounded-lg space-y-3">
+                      <div className="flex justify-between items-start">
+                        <h4 className="font-semibold">Prêmio {index + 1}</h4>
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          onClick={() => {
+                            setAchievements(prev => ({
+                              ...prev,
+                              individual_awards: prev.individual_awards.filter(a => a.id !== award.id)
+                            }));
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>Nome do Prêmio</Label>
+                          <Input 
+                            value={award.name}
+                            onChange={(e) => {
+                              setAchievements(prev => ({
+                                ...prev,
+                                individual_awards: prev.individual_awards.map(a => 
+                                  a.id === award.id ? { ...a, name: e.target.value } : a
+                                )
+                              }));
+                            }}
+                            placeholder="Ex: Melhor Jogador"
+                          />
+                        </div>
+                        <div>
+                          <Label>Categoria</Label>
+                          <Select 
+                            value={award.category}
+                            onValueChange={(value: any) => {
+                              setAchievements(prev => ({
+                                ...prev,
+                                individual_awards: prev.individual_awards.map(a => 
+                                  a.id === award.id ? { ...a, category: value } : a
+                                )
+                              }));
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="best_player">Melhor Jogador</SelectItem>
+                              <SelectItem value="top_scorer">Artilheiro</SelectItem>
+                              <SelectItem value="best_goalkeeper">Melhor Goleiro</SelectItem>
+                              <SelectItem value="best_defender">Melhor Defensor</SelectItem>
+                              <SelectItem value="best_midfielder">Melhor Meio-campo</SelectItem>
+                              <SelectItem value="best_forward">Melhor Atacante</SelectItem>
+                              <SelectItem value="other">Outro</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>Competição</Label>
+                          <Input 
+                            value={award.competition}
+                            onChange={(e) => {
+                              setAchievements(prev => ({
+                                ...prev,
+                                individual_awards: prev.individual_awards.map(a => 
+                                  a.id === award.id ? { ...a, competition: e.target.value } : a
+                                )
+                              }));
+                            }}
+                            placeholder="Ex: Campeonato Estadual"
+                          />
+                        </div>
+                        <div>
+                          <Label>Ano</Label>
+                          <Input 
+                            type="number"
+                            value={award.year}
+                            onChange={(e) => {
+                              setAchievements(prev => ({
+                                ...prev,
+                                individual_awards: prev.individual_awards.map(a => 
+                                  a.id === award.id ? { ...a, year: parseInt(e.target.value) } : a
+                                )
+                              }));
+                            }}
+                            min="1900"
+                            max={new Date().getFullYear()}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Descrição</Label>
+                        <Textarea 
+                          value={award.description}
+                          onChange={(e) => {
+                            setAchievements(prev => ({
+                              ...prev,
+                              individual_awards: prev.individual_awards.map(a => 
+                                a.id === award.id ? { ...a, description: e.target.value } : a
+                              )
+                            }));
+                          }}
+                          placeholder="Descreva o prêmio..."
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  {achievements.individual_awards.length === 0 && (
+                    <p className="text-muted-foreground text-center py-4">
+                      Nenhum prêmio individual adicionado. Clique no botão + para adicionar.
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             </div>

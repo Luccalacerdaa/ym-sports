@@ -112,75 +112,75 @@ export const NUTRITION_ACHIEVEMENTS: NutritionAchievement[] = [
     requirement: 'Criar um plano nutricional'
   },
   {
-    id: 'hydration_aware',
-    title: 'Hidratação Consciente',
-    description: 'Registrar consumo de água por 7 dias consecutivos',
-    icon: 'Droplet',
-    points: 20,
-    requirement: 'Registrar água por 7 dias consecutivos'
-  },
-  {
-    id: 'meal_planner',
-    title: 'Planejador',
+    id: 'meal_planner_7days',
+    title: 'Planejador Semanal',
     description: 'Criar um plano nutricional para 7 dias',
     icon: 'Calendar',
     points: 25,
     requirement: 'Criar plano para 7 dias'
   },
   {
-    id: 'culinary_master',
-    title: 'Mestre Culinário',
-    description: 'Experimentar 10 receitas diferentes',
-    icon: 'ChefHat',
+    id: 'nutrition_explorer',
+    title: 'Explorador Nutricional',
+    description: 'Criar 3 planos nutricionais diferentes',
+    icon: 'Compass',
     points: 30,
-    requirement: 'Marcar 10 receitas como experimentadas'
+    requirement: 'Criar 3 planos diferentes'
   },
   {
-    id: 'nutrition_consistent',
-    title: 'Consistência Alimentar',
-    description: 'Seguir o plano nutricional por 7 dias consecutivos',
-    icon: 'CheckSquare',
+    id: 'hydration_starter',
+    title: 'Hidratação Iniciante',
+    description: 'Registrar consumo de água pela primeira vez',
+    icon: 'Droplet',
+    points: 15,
+    requirement: 'Registrar água uma vez'
+  },
+  {
+    id: 'hydration_consistent',
+    title: 'Hidratação Consistente',
+    description: 'Registrar consumo de água por 3 dias',
+    icon: 'Droplets',
+    points: 20,
+    requirement: 'Registrar água por 3 dias'
+  },
+  {
+    id: 'nutrition_variety',
+    title: 'Variedade Alimentar',
+    description: 'Criar planos com diferentes níveis de complexidade',
+    icon: 'Shuffle',
+    points: 35,
+    requirement: 'Criar planos básico, intermediário e avançado'
+  },
+  {
+    id: 'goal_oriented',
+    title: 'Focado em Objetivos',
+    description: 'Criar planos para diferentes objetivos',
+    icon: 'Target',
     points: 40,
-    requirement: 'Seguir plano por 7 dias'
+    requirement: 'Criar planos com 3 objetivos diferentes'
   },
   {
-    id: 'perfect_hydration',
-    title: 'Hidratação Perfeita',
-    description: 'Atingir a meta de água por 14 dias consecutivos',
-    icon: 'Award',
-    points: 50,
-    requirement: 'Atingir meta de água por 14 dias'
-  },
-  {
-    id: 'balanced_nutrition',
-    title: 'Nutrição Balanceada',
-    description: 'Manter equilíbrio de macronutrientes por 10 dias',
-    icon: 'BarChart2',
-    points: 60,
-    requirement: 'Manter macros balanceados por 10 dias'
-  },
-  {
-    id: 'amateur_nutritionist',
-    title: 'Nutricionista Amador',
-    description: 'Criar e seguir 5 planos nutricionais diferentes',
+    id: 'nutrition_dedicated',
+    title: 'Dedicado à Nutrição',
+    description: 'Criar 5 planos nutricionais',
     icon: 'BookOpen',
-    points: 75,
-    requirement: 'Criar e seguir 5 planos diferentes'
+    points: 50,
+    requirement: 'Criar 5 planos nutricionais'
   },
   {
     id: 'hydration_master',
     title: 'Mestre da Hidratação',
-    description: 'Consumir a quantidade ideal de água por 30 dias',
+    description: 'Registrar consumo de água por 7 dias',
     icon: 'Zap',
-    points: 100,
-    requirement: 'Meta de água por 30 dias'
+    points: 60,
+    requirement: 'Registrar água por 7 dias'
   },
   {
     id: 'nutrition_guru',
     title: 'Guru Nutricional',
     description: 'Completar todas as outras conquistas nutricionais',
     icon: 'Award',
-    points: 200,
+    points: 100,
     requirement: 'Completar todas as outras conquistas'
   }
 ];
