@@ -88,8 +88,8 @@ IMPORTANTE - LEIA COM MUITA ATENÇÃO:
 - Adapte as refeições ao nível de complexidade solicitado (${request.complexityLevel})
 - NUNCA inclua alimentos listados como "a evitar" ou "alergias"
 - PRIORIZE os alimentos listados como "favoritos"
-- Calcule com precisão as calorias e macronutrientes de cada refeição
-- Inclua dicas de hidratação específicas para o perfil do atleta
+- Use MÁXIMO 2-3 alimentos por refeição para garantir resposta completa
+- Calcule calorias e macronutrientes básicos
 
 NÍVEL DE COMPLEXIDADE:
 - "simples": Receitas rápidas e práticas, poucos ingredientes, preparo fácil
@@ -297,7 +297,7 @@ FORMATO DE RESPOSTA (JSON):
         messages: [
           {
             role: "system",
-            content: "Você é um nutricionista esportivo especializado em futebol. Responda SEMPRE com JSON válido seguindo exatamente o formato solicitado. NUNCA corte a resposta no meio. Se precisar, use menos refeições ou alimentos para garantir que a resposta seja completa."
+            content: "Você é um nutricionista esportivo especializado em futebol. Responda SEMPRE com JSON válido seguindo exatamente o formato solicitado. CRÍTICO: NUNCA corte a resposta no meio - termine sempre com } válido. Se necessário, use menos alimentos por refeição (máximo 2-3) para garantir resposta completa. Priorize completude sobre quantidade."
           },
           {
             role: "user",
@@ -305,7 +305,7 @@ FORMATO DE RESPOSTA (JSON):
           }
         ],
         temperature: 0.7,
-        max_tokens: 4000,
+        max_tokens: 6000,
       });
 
       const responseText = completion.choices[0]?.message?.content;
@@ -322,11 +322,25 @@ FORMATO DE RESPOSTA (JSON):
         console.error('Erro de parse:', parseError);
         
         // Verificar se a resposta foi cortada
-        if (!responseText.trim().endsWith('}')) {
+        const trimmedResponse = responseText.trim();
+        if (!trimmedResponse.endsWith('}')) {
+          console.warn('Resposta parece estar truncada, tentando usar fallback...');
           throw new Error('Resposta da IA foi cortada no meio. Tente novamente com menos dias ou refeições.');
         }
         
-        throw new Error('Resposta da IA não é um JSON válido. Verifique o console para mais detalhes.');
+        // Tentar limpar caracteres inválidos
+        try {
+          // Remover possíveis caracteres de controle ou quebras de linha problemáticas
+          const cleanedResponse = responseText
+            .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove caracteres de controle
+            .replace(/,\s*}/g, '}') // Remove vírgulas antes de }
+            .replace(/,\s*]/g, ']'); // Remove vírgulas antes de ]
+          
+          return JSON.parse(cleanedResponse);
+        } catch (secondParseError) {
+          console.error('Erro no segundo parse:', secondParseError);
+          throw new Error('Resposta da IA não é um JSON válido. Tente novamente.');
+        }
       }
     } catch (error: any) {
       console.error('Erro na chamada da OpenAI para nutrição:', error);
