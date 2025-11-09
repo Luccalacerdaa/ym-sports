@@ -100,27 +100,12 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
   };
   
   const handleFoodPreferenceChange = (type: keyof FoodPreference, value: string) => {
-    // Verificar se o valor é uma string válida
-    if (typeof value !== 'string') {
-      console.error(`Valor inválido para ${type}:`, value);
-      return;
-    }
-    
-    try {
-      // Separar por vírgulas e remover espaços em branco
-      const items = value.split(',')
-        .map(item => item.trim())
-        .filter(item => item.length > 0);
-      
-      console.log(`Processando ${type}:`, items);
-      
-      setFoodPreferences(prev => ({
-        ...prev,
-        [type]: items
-      }));
-    } catch (error) {
-      console.error(`Erro ao processar ${type}:`, error);
-    }
+    // Atualizar diretamente o valor como string
+    // A separação por vírgulas será feita apenas quando enviar o formulário
+    setFoodPreferences(prev => ({
+      ...prev,
+      [type]: [value] // Manter como array com um elemento para compatibilidade
+    }));
   };
   
   // Gerar plano nutricional
@@ -136,15 +121,28 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
       return;
     }
     
+    // Processar preferências alimentares (separar por vírgulas)
+    const processedPreferences = {
+      favorites: foodPreferences.favorites[0] 
+        ? foodPreferences.favorites[0].split(',').map(item => item.trim()).filter(item => item.length > 0)
+        : [],
+      avoid: foodPreferences.avoid[0] 
+        ? foodPreferences.avoid[0].split(',').map(item => item.trim()).filter(item => item.length > 0)
+        : [],
+      allergies: foodPreferences.allergies[0] 
+        ? foodPreferences.allergies[0].split(',').map(item => item.trim()).filter(item => item.length > 0)
+        : []
+    };
+
     // Salvar preferências alimentares
-    await saveFoodPreferences(foodPreferences);
+    await saveFoodPreferences(processedPreferences);
     
     // Preparar solicitação
     const request: NutritionRequest = {
       goals,
       mealTypes,
       complexityLevel,
-      preferences: foodPreferences,
+      preferences: processedPreferences,
       daysCount,
       waterReminder
     };
@@ -291,7 +289,7 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
                 <Textarea 
                   id="favorites" 
                   placeholder="Ex: frango grelhado, arroz integral, batata doce assada, brócolis no vapor" 
-                  value={foodPreferences.favorites.join(', ')}
+                  value={foodPreferences.favorites[0] || ''}
                   onChange={(e) => handleFoodPreferenceChange('favorites', e.target.value)}
                   className="mt-1"
                   rows={3}
@@ -307,7 +305,7 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
                 <Textarea 
                   id="avoid" 
                   placeholder="Ex: fast food, refrigerante, doces industrializados, frituras em geral" 
-                  value={foodPreferences.avoid.join(', ')}
+                  value={foodPreferences.avoid[0] || ''}
                   onChange={(e) => handleFoodPreferenceChange('avoid', e.target.value)}
                   className="mt-1"
                   rows={3}
@@ -323,7 +321,7 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
                 <Textarea 
                   id="allergies" 
                   placeholder="Ex: glúten, lactose, amendoim, frutos do mar, ovos" 
-                  value={foodPreferences.allergies.join(', ')}
+                  value={foodPreferences.allergies[0] || ''}
                   onChange={(e) => handleFoodPreferenceChange('allergies', e.target.value)}
                   className="mt-1"
                   rows={2}

@@ -22,7 +22,6 @@ const designPortfolio = [
     id: 1,
     title: "Arte Profissional - João Silva",
     category: "Foto Profissional",
-    image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=600&fit=crop",
     description: "Design profissional para jogador de futebol com efeitos modernos e logo do clube.",
     tags: ["Profissional", "Futebol", "Moderno"],
     rating: 5
@@ -31,7 +30,6 @@ const designPortfolio = [
     id: 2,
     title: "Card de Apresentação - Pedro Santos",
     category: "Card Pessoal",
-    image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=600&fit=crop",
     description: "Card personalizado com estatísticas e informações do atleta.",
     tags: ["Card", "Estatísticas", "Personalizado"],
     rating: 5
@@ -40,7 +38,6 @@ const designPortfolio = [
     id: 3,
     title: "Banner para Redes Sociais - Maria Costa",
     category: "Social Media",
-    image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=600&fit=crop",
     description: "Banner dinâmico para Instagram e Facebook com cores vibrantes.",
     tags: ["Social Media", "Instagram", "Vibrante"],
     rating: 5
@@ -49,7 +46,6 @@ const designPortfolio = [
     id: 4,
     title: "Montagem Artística - Carlos Lima",
     category: "Arte Digital",
-    image: "https://images.unsplash.com/photo-1579952363873-27d3bfad9c0d?w=400&h=600&fit=crop",
     description: "Montagem artística com efeitos especiais e composição única.",
     tags: ["Arte Digital", "Efeitos", "Criativo"],
     rating: 5
@@ -58,7 +54,6 @@ const designPortfolio = [
     id: 5,
     title: "Logo Personalizada - Time Águias",
     category: "Branding",
-    image: "https://images.unsplash.com/photo-1614632537190-23e4b2e0c6b4?w=400&h=600&fit=crop",
     description: "Criação de logo exclusiva para time amador com identidade visual completa.",
     tags: ["Logo", "Branding", "Time"],
     rating: 5
@@ -67,7 +62,6 @@ const designPortfolio = [
     id: 6,
     title: "Poster Motivacional - Ana Rodrigues",
     category: "Poster",
-    image: "https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=400&h=600&fit=crop",
     description: "Poster inspiracional com frase motivacional e design impactante.",
     tags: ["Motivacional", "Poster", "Inspiração"],
     rating: 5
@@ -123,49 +117,45 @@ export default function Design() {
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3 mb-4">
-          <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full">
-            <Palette className="h-8 w-8 text-white" />
+          <div className="p-3 bg-yellow-500 rounded-full">
+            <Palette className="h-8 w-8 text-black" />
           </div>
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold text-yellow-500">
               YM DESIGN
             </h1>
-            <p className="text-lg text-muted-foreground">Por Yago - Designer Especialista em Esportes</p>
+            <p className="text-lg text-gray-400">Por Yago - Designer Especialista em Esportes</p>
           </div>
         </div>
         
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+        <p className="text-xl text-gray-300 max-w-3xl mx-auto">
           Transforme sua imagem esportiva com designs profissionais e criativos. 
           Especializados em fotos, artes digitais e branding para atletas e times.
         </p>
         
         <div className="flex flex-wrap justify-center gap-2 mt-4">
-          <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+          <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-500 border border-yellow-500/30">
             <Star className="h-3 w-3 mr-1" />
             5.0 Estrelas
           </Badge>
-          <Badge variant="secondary" className="bg-green-100 text-green-800">
+          <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-500 border border-yellow-500/30">
             <Zap className="h-3 w-3 mr-1" />
             Entrega Rápida
-          </Badge>
-          <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-            <Heart className="h-3 w-3 mr-1" />
-            +200 Clientes Satisfeitos
           </Badge>
         </div>
       </div>
 
       {/* CTA Principal */}
-      <Card className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
+      <Card className="bg-black border border-yellow-500/30 text-white">
         <CardContent className="p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4">Pronto para destacar seu talento?</h2>
-          <p className="text-lg mb-6 opacity-90">
+          <h2 className="text-2xl font-bold mb-4 text-yellow-500">Pronto para destacar seu talento?</h2>
+          <p className="text-lg mb-6 text-gray-300">
             Entre em contato agora e receba um orçamento personalizado para seu projeto!
           </p>
           <Button 
             size="lg" 
             onClick={handleWhatsAppContact}
-            className="bg-white text-purple-600 hover:bg-gray-100 font-semibold"
+            className="bg-yellow-500 text-black hover:bg-yellow-400 font-semibold"
           >
             <MessageCircle className="h-5 w-5 mr-2" />
             Falar com Yago no WhatsApp
@@ -178,16 +168,16 @@ export default function Design() {
         <h2 className="text-3xl font-bold text-center">Nossos Serviços</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {services.map((service, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow">
+            <Card key={index} className="hover:shadow-lg transition-shadow border border-yellow-500/20 bg-gray-900/50">
               <CardHeader className="text-center">
-                <div className="mx-auto p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full w-fit">
-                  <service.icon className="h-6 w-6 text-white" />
+                <div className="mx-auto p-3 bg-yellow-500 rounded-full w-fit">
+                  <service.icon className="h-6 w-6 text-black" />
                 </div>
-                <CardTitle className="text-lg">{service.title}</CardTitle>
+                <CardTitle className="text-lg text-yellow-500">{service.title}</CardTitle>
               </CardHeader>
               <CardContent className="text-center space-y-3">
-                <p className="text-sm text-muted-foreground">{service.description}</p>
-                <p className="font-semibold text-purple-600">{service.price}</p>
+                <p className="text-sm text-gray-300">{service.description}</p>
+                <p className="font-semibold text-yellow-400">{service.price}</p>
               </CardContent>
             </Card>
           ))}
@@ -205,7 +195,7 @@ export default function Design() {
               variant={selectedCategory === category ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory(category)}
-              className={selectedCategory === category ? "bg-purple-600 hover:bg-purple-700" : ""}
+              className={selectedCategory === category ? "bg-yellow-500 text-black hover:bg-yellow-400" : "border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10"}
             >
               {category === "all" ? "Todos" : category}
             </Button>
@@ -216,25 +206,29 @@ export default function Design() {
       {/* Grid do Portfólio */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPortfolio.map((item) => (
-          <Card key={item.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
+          <Card key={item.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group border border-yellow-500/20 bg-gray-900/50">
             <div className="relative overflow-hidden">
-              <img 
-                src={item.image} 
-                alt={item.title}
-                className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute bottom-4 left-4 right-4">
-                  <Badge className="bg-purple-600 text-white mb-2">
-                    {item.category}
-                  </Badge>
+              {/* Proporção 1080x1920 (9:16) */}
+              <div 
+                className="w-full bg-gray-800 flex items-center justify-center group-hover:bg-gray-700 transition-colors duration-300"
+                style={{ aspectRatio: '9/16' }}
+              >
+                <div className="text-center text-gray-400">
+                  <Image className="h-12 w-12 mx-auto mb-2" />
+                  <p className="text-sm">1080 x 1920 px</p>
+                  <p className="text-xs">Design Preview</p>
                 </div>
+              </div>
+              <div className="absolute top-4 left-4">
+                <Badge className="bg-yellow-500 text-black">
+                  {item.category}
+                </Badge>
               </div>
             </div>
             
             <CardContent className="p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-lg">{item.title}</h3>
+                <h3 className="font-semibold text-lg text-yellow-500">{item.title}</h3>
                 <div className="flex items-center gap-1">
                   {[...Array(item.rating)].map((_, i) => (
                     <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -242,18 +236,18 @@ export default function Design() {
                 </div>
               </div>
               
-              <p className="text-sm text-muted-foreground">{item.description}</p>
+              <p className="text-sm text-gray-300">{item.description}</p>
               
               <div className="flex flex-wrap gap-1">
                 {item.tags.map((tag, tagIndex) => (
-                  <Badge key={tagIndex} variant="secondary" className="text-xs">
+                  <Badge key={tagIndex} variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-500 border border-yellow-500/30">
                     {tag}
                   </Badge>
                 ))}
               </div>
               
               <Button 
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                className="w-full bg-yellow-500 text-black hover:bg-yellow-400"
                 onClick={handleWhatsAppContact}
               >
                 <Eye className="h-4 w-4 mr-2" />
@@ -264,51 +258,12 @@ export default function Design() {
         ))}
       </div>
 
-      {/* Depoimentos */}
-      <Card className="bg-gray-50">
-        <CardHeader>
-          <CardTitle className="text-center text-2xl">O que nossos clientes dizem</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center space-y-3">
-              <div className="flex justify-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                ))}
-              </div>
-              <p className="text-sm italic">"Trabalho excepcional! O Yago captou exatamente o que eu queria para minha apresentação profissional."</p>
-              <p className="font-semibold">- João Silva, Atacante</p>
-            </div>
-            
-            <div className="text-center space-y-3">
-              <div className="flex justify-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                ))}
-              </div>
-              <p className="text-sm italic">"Design incrível e entrega super rápida. Recomendo para todos os atletas!"</p>
-              <p className="font-semibold">- Maria Costa, Meio-campo</p>
-            </div>
-            
-            <div className="text-center space-y-3">
-              <div className="flex justify-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                ))}
-              </div>
-              <p className="text-sm italic">"Profissionalismo e criatividade em cada detalhe. Nosso time ficou com uma identidade única!"</p>
-              <p className="font-semibold">- Carlos Lima, Técnico</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* CTA Final */}
-      <Card className="bg-gradient-to-r from-gray-900 to-purple-900 text-white border-0">
+      <Card className="bg-black border border-yellow-500/30 text-white">
         <CardContent className="p-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">Vamos criar algo incrível juntos?</h2>
-          <p className="text-lg mb-6 opacity-90">
+          <h2 className="text-3xl font-bold mb-4 text-yellow-500">Vamos criar algo incrível juntos?</h2>
+          <p className="text-lg mb-6 text-gray-300">
             Seja para fotos profissionais, designs para redes sociais ou identidade visual completa, 
             estamos prontos para elevar sua imagem no esporte!
           </p>
@@ -324,7 +279,7 @@ export default function Design() {
             <Button 
               size="lg" 
               variant="outline"
-              className="border-white text-white hover:bg-white hover:text-purple-900"
+              className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black"
               onClick={handleWhatsAppContact}
             >
               <ExternalLink className="h-5 w-5 mr-2" />
