@@ -12,10 +12,10 @@ const navItems = [
 export function BottomNavBar() {
   return (
     <div 
-      className="fixed bottom-0 left-0 right-0 z-[999] bg-black border-t border-border safe-area-bottom fixed-bottom-bar bottom-nav-exception"
+      className="fixed left-0 right-0 z-[999] bg-black border-t border-border safe-area-bottom fixed-bottom-bar bottom-nav-exception"
       style={{ 
         position: 'fixed',
-        bottom: 0,
+        bottom: '8px',
         width: '100%',
         zIndex: 9999,
         transform: 'translateZ(0)', // Força aceleração de hardware

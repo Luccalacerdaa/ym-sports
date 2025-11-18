@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { NutritionPlanGenerator } from "@/components/NutritionPlanGenerator";
 import { SimpleNotificationManager } from "@/components/SimpleNotificationManager";
 import { useSimpleNotifications } from "@/hooks/useSimpleNotifications";
+import { useDailyNotifications } from "@/hooks/useDailyNotifications";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 

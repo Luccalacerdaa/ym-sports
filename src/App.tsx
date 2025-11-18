@@ -9,6 +9,7 @@ import { useUpdateNotification } from "./hooks/useUpdateNotification";
 import { useEventNotifications } from "./hooks/useEventNotifications";
 import { useAutoNotificationPermission } from "./hooks/useAutoNotificationPermission";
 import { useScheduledNotifications } from "./hooks/useScheduledNotifications";
+import { useDailyNotifications } from "./hooks/useDailyNotifications";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -26,6 +27,7 @@ import Portfolio from "./pages/Portfolio";
 import PublicPortfolio from "./pages/PublicPortfolio";
 import Design from "./pages/Design";
 import Motivational from "./pages/Motivational";
+import Settings from "./pages/Settings";
 import DashboardLayout from "./pages/DashboardLayout";
 import NotFound from "./pages/NotFound";
 
@@ -40,6 +42,9 @@ const AppContent = () => {
   
   // Hook para solicitar permissão de notificação automaticamente
   useAutoNotificationPermission();
+  
+  // Hook para notificações diárias motivacionais e do app
+  useDailyNotifications();
   
 
   return (
@@ -65,7 +70,7 @@ const AppContent = () => {
                 <Route path="portfolio" element={<Portfolio />} />
                 <Route path="design" element={<Design />} />
                 <Route path="motivational" element={<Motivational />} />
-                <Route path="settings" element={<div className="p-6">Configurações em construção</div>} />
+                <Route path="settings" element={<Settings />} />
             </Route>
             <Route path="/portfolio/:slug" element={<PublicPortfolio />} />
             <Route path="*" element={<NotFound />} />

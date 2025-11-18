@@ -1,195 +1,366 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { usePushNotifications } from '@/hooks/usePushNotifications';
-import { Bell, BellOff, AlertCircle, CheckCircle2, Info } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { useDailyNotifications } from "@/hooks/useDailyNotifications";
+import { 
+  Bell, 
+  BellOff, 
+  Zap, 
+  Apple, 
+  Trophy, 
+  Dumbbell, 
+  Heart,
+  Clock,
+  Settings
+} from "lucide-react";
+import { toast } from "sonner";
 
-export function NotificationSettings() {
-  const {
-    isSupported,
-    permission,
-    subscription,
-    loading,
-    subscribe,
-    unsubscribe,
-    testNotification
-  } = usePushNotifications();
-
-  // Verificar se está inscrito
-  const isSubscribed = !!subscription && permission === 'granted';
-
-  // Navegador não suporta
-  if (!isSupported) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-orange-500" />
-            Notificações Não Suportadas
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Seu navegador não suporta notificações push. Para receber notificações, tente usar:
-            </p>
-            <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-              <li>Google Chrome (Desktop ou Android)</li>
-              <li>Microsoft Edge</li>
-              <li>Firefox</li>
-              <li>Opera</li>
-            </ul>
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mt-4">
-              <p className="text-xs text-orange-800">
-                <strong>Nota:</strong> Safari no iOS só suporta notificações push quando o app é instalado como PWA.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {isSubscribed ? (
-              <Bell className="h-5 w-5 text-green-500" />
-            ) : (
-              <BellOff className="h-5 w-5 text-gray-400" />
-            )}
-            <CardTitle>Notificações Push</CardTitle>
-          </div>
-          
-          {isSubscribed && (
-            <CheckCircle2 className="h-5 w-5 text-green-500" />
-          )}
-        </div>
-        <CardDescription>
-          Receba alertas sobre treinos, conquistas e eventos mesmo com o app fechado
-        </CardDescription>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        {/* Switch principal */}
-        <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-          <div className="space-y-0.5">
-            <Label className="text-base">Ativar Notificações</Label>
-            <p className="text-sm text-muted-foreground">
-              {isSubscribed 
-                ? 'Você receberá notificações em tempo real' 
-                : 'Ative para receber atualizações importantes'
-              }
-            </p>
-          </div>
-          <Switch
-            checked={isSubscribed}
-            onCheckedChange={(checked) => {
-              if (checked) {
-                subscribe();
-              } else {
-                unsubscribe();
-              }
-            }}
-            disabled={loading}
-          />
-        </div>
-
-        {/* Estado: Permissão Negada */}
-        {permission === 'denied' && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-red-900">
-                  Notificações Bloqueadas
-                </p>
-                <p className="text-sm text-red-800">
-                  Você bloqueou as notificações para este site. Para ativá-las:
-                </p>
-                <ol className="text-sm text-red-800 list-decimal list-inside space-y-1">
-                  <li>Clique no ícone de <strong>cadeado</strong> na barra de endereço</li>
-                  <li>Procure por <strong>"Notificações"</strong></li>
-                  <li>Altere para <strong>"Permitir"</strong></li>
-                  <li>Recarregue a página</li>
-                </ol>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Estado: Ativado */}
-        {isSubscribed && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <div className="space-y-2 flex-1">
-                <p className="text-sm font-medium text-green-900">
-                  Notificações Ativadas!
-                </p>
-                <p className="text-sm text-green-800">
-                  Você receberá alertas mesmo com o app fechado.
-                </p>
-                
-                {/* Botão de teste */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={testNotification}
-                  className="mt-2"
-                >
-                  🧪 Testar Notificação
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Informações sobre tipos de notificações */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-blue-900">
-                O que você receberá:
-              </p>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li className="flex items-center gap-2">
-                  <span className="text-lg">🏆</span>
-                  <span>Novas conquistas desbloqueadas</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-lg">📈</span>
-                  <span>Subidas de nível e marcos</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-lg">⚽</span>
-                  <span>Lembretes de treinos e jogos</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-lg">🎯</span>
-                  <span>Novos planos de treino gerados</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-lg">👥</span>
-                  <span>Competidores próximos no ranking</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Informações sobre privacidade */}
-        <div className="text-xs text-muted-foreground space-y-1">
-          <p>🔒 <strong>Privacidade:</strong> Suas notificações são criptografadas e seguras.</p>
-          <p>📱 <strong>Dispositivos:</strong> Você pode receber notificações em todos os dispositivos onde fizer login.</p>
-          <p>🔕 <strong>Controle:</strong> Você pode desativar a qualquer momento.</p>
-        </div>
-      </CardContent>
-    </Card>
-  );
+interface NotificationPreferences {
+  motivational: boolean;
+  nutrition: boolean;
+  training: boolean;
+  achievements: boolean;
+  app: boolean;
+  enabled: boolean;
 }
 
+export function NotificationSettings() {
+  const { setupNotifications, sendImmediateNotification } = useDailyNotifications();
+  const [preferences, setPreferences] = useState<NotificationPreferences>({
+    motivational: true,
+    nutrition: true,
+    training: true,
+    achievements: true,
+    app: true,
+    enabled: false
+  });
+  
+  const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>('default');
+
+  // Verificar status da permissão
+  useEffect(() => {
+    if ('Notification' in window) {
+      setPermissionStatus(Notification.permission);
+      setPreferences(prev => ({
+        ...prev,
+        enabled: Notification.permission === 'granted'
+      }));
+    }
+  }, []);
+
+  // Carregar preferências do localStorage
+  useEffect(() => {
+    const savedPreferences = localStorage.getItem('ym-sports-notification-preferences');
+    if (savedPreferences) {
+      try {
+        const parsed = JSON.parse(savedPreferences);
+        setPreferences(prev => ({ ...prev, ...parsed }));
+      } catch (error) {
+        console.error('Erro ao carregar preferências:', error);
+      }
+    }
+  }, []);
+
+  // Salvar preferências no localStorage
+  const savePreferences = (newPreferences: NotificationPreferences) => {
+    localStorage.setItem('ym-sports-notification-preferences', JSON.stringify(newPreferences));
+    setPreferences(newPreferences);
+  };
+
+  // Solicitar permissão de notificação
+  const handleEnableNotifications = async () => {
+    const success = await setupNotifications();
+    if (success) {
+      setPermissionStatus('granted');
+      const newPreferences = { ...preferences, enabled: true };
+      savePreferences(newPreferences);
+      toast.success('Notificações ativadas com sucesso!');
+      
+      // Enviar notificação de teste
+      sendImmediateNotification(
+        '🔔 Notificações Ativadas!',
+        'Você receberá notificações motivacionais durante o dia!'
+      );
+    } else {
+      toast.error('Não foi possível ativar as notificações');
+    }
+  };
+
+  // Desativar notificações
+  const handleDisableNotifications = () => {
+    const newPreferences = { ...preferences, enabled: false };
+    savePreferences(newPreferences);
+    toast.info('Notificações desativadas');
+  };
+
+  // Alterar preferência específica
+  const handlePreferenceChange = (key: keyof NotificationPreferences, value: boolean) => {
+    const newPreferences = { ...preferences, [key]: value };
+    savePreferences(newPreferences);
+    
+    if (value) {
+      toast.success(`Notificações de ${getPreferenceName(key)} ativadas`);
+    } else {
+      toast.info(`Notificações de ${getPreferenceName(key)} desativadas`);
+    }
+  };
+
+  // Obter nome da preferência
+  const getPreferenceName = (key: keyof NotificationPreferences) => {
+    const names = {
+      motivational: 'Motivação',
+      nutrition: 'Nutrição',
+      training: 'Treinos',
+      achievements: 'Conquistas',
+      app: 'App',
+      enabled: 'Geral'
+    };
+    return names[key];
+  };
+
+  // Enviar notificação de teste
+  const handleTestNotification = () => {
+    const messages = [
+      { title: '💪 Teste de Motivação', body: 'Você é mais forte do que imagina!' },
+      { title: '🔥 Foco no Objetivo', body: 'Cada dia é uma nova oportunidade!' },
+      { title: '⚡ Energia Positiva', body: 'Sua dedicação fará a diferença!' }
+    ];
+    
+    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+    sendImmediateNotification(randomMessage.title, randomMessage.body);
+    toast.success('Notificação de teste enviada!');
+  };
+
+  const getStatusBadge = () => {
+    if (permissionStatus === 'granted' && preferences.enabled) {
+      return <Badge className="bg-green-500 text-white">Ativo</Badge>;
+    } else if (permissionStatus === 'denied') {
+      return <Badge variant="destructive">Bloqueado</Badge>;
+    } else {
+      return <Badge variant="outline">Inativo</Badge>;
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Status das Notificações */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              Notificações
+            </div>
+            {getStatusBadge()}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {permissionStatus === 'denied' && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-800 text-sm">
+                As notificações foram bloqueadas. Para ativar, vá nas configurações do navegador e permita notificações para este site.
+              </p>
+            </div>
+          )}
+          
+          {permissionStatus !== 'granted' && permissionStatus !== 'denied' && (
+            <div className="text-center space-y-4">
+              <p className="text-muted-foreground">
+                Receba notificações motivacionais durante o dia para manter seu foco e disciplina!
+              </p>
+              <Button onClick={handleEnableNotifications} size="lg" className="w-full">
+                <Bell className="mr-2 h-4 w-4" />
+                Ativar Notificações
+              </Button>
+            </div>
+          )}
+          
+          {permissionStatus === 'granted' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="notifications-enabled" className="text-base font-medium">
+                    Notificações Gerais
+                  </Label>
+                </div>
+                <Switch
+                  id="notifications-enabled"
+                  checked={preferences.enabled}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      handleEnableNotifications();
+                    } else {
+                      handleDisableNotifications();
+                    }
+                  }}
+                />
+              </div>
+              
+              {preferences.enabled && (
+                <>
+                  <Separator />
+                  
+                  <div className="space-y-4">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <Settings className="h-4 w-4" />
+                      Tipos de Notificação
+                    </h4>
+                    
+                    {/* Notificações Motivacionais */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Zap className="h-4 w-4 text-yellow-500" />
+                        <div>
+                          <Label className="text-sm font-medium">Motivação</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Frases inspiradoras e mensagens motivacionais
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={preferences.motivational}
+                        onCheckedChange={(checked) => handlePreferenceChange('motivational', checked)}
+                      />
+                    </div>
+                    
+                    {/* Notificações de Nutrição */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Apple className="h-4 w-4 text-green-500" />
+                        <div>
+                          <Label className="text-sm font-medium">Nutrição</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Lembretes sobre alimentação e hidratação
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={preferences.nutrition}
+                        onCheckedChange={(checked) => handlePreferenceChange('nutrition', checked)}
+                      />
+                    </div>
+                    
+                    {/* Notificações de Treino */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Dumbbell className="h-4 w-4 text-blue-500" />
+                        <div>
+                          <Label className="text-sm font-medium">Treinos</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Lembretes para treinar e exercitar-se
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={preferences.training}
+                        onCheckedChange={(checked) => handlePreferenceChange('training', checked)}
+                      />
+                    </div>
+                    
+                    {/* Notificações de Conquistas */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Trophy className="h-4 w-4 text-yellow-600" />
+                        <div>
+                          <Label className="text-sm font-medium">Conquistas</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Novas conquistas e progresso
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={preferences.achievements}
+                        onCheckedChange={(checked) => handlePreferenceChange('achievements', checked)}
+                      />
+                    </div>
+                    
+                    {/* Notificações do App */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Heart className="h-4 w-4 text-red-500" />
+                        <div>
+                          <Label className="text-sm font-medium">App</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Atualizações e novidades do app
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={preferences.app}
+                        onCheckedChange={(checked) => handlePreferenceChange('app', checked)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={handleTestNotification}
+                      className="flex-1"
+                    >
+                      <Clock className="mr-2 h-4 w-4" />
+                      Testar Notificação
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      
+      {/* Informações sobre Horários */}
+      {preferences.enabled && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Horários das Notificações
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <h5 className="font-medium mb-2">Manhã</h5>
+                <ul className="space-y-1 text-muted-foreground">
+                  <li>07:00 - Hora de Treinar</li>
+                  <li>08:00 - Motivação Matinal</li>
+                  <li>09:30 - Lembre do Sonho</li>
+                </ul>
+              </div>
+              <div>
+                <h5 className="font-medium mb-2">Tarde</h5>
+                <ul className="space-y-1 text-muted-foreground">
+                  <li>12:00 - Nutrição</li>
+                  <li>14:00 - Hidratação</li>
+                  <li>16:00 - Energia da Tarde</li>
+                </ul>
+              </div>
+              <div>
+                <h5 className="font-medium mb-2">Noite</h5>
+                <ul className="space-y-1 text-muted-foreground">
+                  <li>19:00 - Jantar Inteligente</li>
+                  <li>21:00 - Mentalidade Noturna</li>
+                </ul>
+              </div>
+              <div>
+                <h5 className="font-medium mb-2">Aleatórios</h5>
+                <ul className="space-y-1 text-muted-foreground">
+                  <li>Conquistas</li>
+                  <li>Progresso</li>
+                  <li>Dicas do App</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
