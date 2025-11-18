@@ -115,27 +115,41 @@ export default function Design() {
   return (
     <div className="container mx-auto p-6 space-y-8">
       {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-3 mb-4">
+      <div className="text-center space-y-6">
+        <div className="flex items-center justify-center gap-4 mb-6">
           <img 
             src="/icons/logo.png" 
             alt="YM Sports" 
-            className="h-12 w-12 object-contain"
+            className="h-20 w-20 object-contain"
           />
           <div>
-            <h1 className="text-4xl font-bold text-yellow-500">
+            <h1 className="text-5xl font-bold text-yellow-500">
               YM DESIGN
             </h1>
-            <p className="text-lg text-gray-400">Por Yago - Designer Especialista em Esportes</p>
+            <p className="text-xl text-gray-400">Por Yago - Designer Especialista em Esportes</p>
           </div>
         </div>
         
-        <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-          Transforme sua imagem esportiva com designs profissionais e criativos. 
-          Especializados em fotos, artes digitais e branding para atletas e times.
-        </p>
+        <div className="space-y-4">
+          <h2 className="text-3xl font-bold text-white">
+            Crie seu material de divulgação agora mesmo!
+          </h2>
+          
+          <p className="text-lg text-gray-300 max-w-4xl mx-auto leading-relaxed">
+            Designer profissional a sua disposição para produzir sua arte pré jogo, edição de vídeo com melhores momentos para portfólio online e divulgação para clubes.
+          </p>
+          
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6 max-w-2xl mx-auto">
+            <h3 className="text-2xl font-bold text-yellow-500 mb-2">
+              20% OFF em duas artes mensais
+            </h3>
+            <p className="text-yellow-400 font-semibold">
+              CONDIÇÃO EXCLUSIVA A ASSINANTES DO APP
+            </p>
+          </div>
+        </div>
         
-        <div className="flex flex-wrap justify-center gap-2 mt-4">
+        <div className="flex flex-wrap justify-center gap-2 mt-6">
           <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-500 border border-yellow-500/30">
             <Star className="h-3 w-3 mr-1" />
             5.0 Estrelas
@@ -165,26 +179,66 @@ export default function Design() {
         </CardContent>
       </Card>
 
-      {/* Serviços */}
-      <div className="space-y-6">
-        <h2 className="text-3xl font-bold text-center">Nossos Serviços</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {services.map((service, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow border border-yellow-500/20 bg-gray-900/50">
-              <CardHeader className="text-center">
-                <div className="mx-auto p-3 bg-yellow-500 rounded-full w-fit">
-                  <service.icon className="h-6 w-6 text-black" />
+      {/* Post de Vídeo */}
+      <Card className="bg-gradient-to-r from-gray-900 to-black border border-yellow-500/30 overflow-hidden">
+        <CardContent className="p-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+            {/* Vídeo */}
+            <div className="relative aspect-video lg:aspect-square">
+              <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
+                <div className="text-center text-gray-400">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-yellow-500 rounded-full flex items-center justify-center">
+                    <svg className="w-8 h-8 text-black" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <p className="text-lg font-semibold">Vídeo Promocional</p>
+                  <p className="text-sm">Confira nossos trabalhos em ação</p>
                 </div>
-                <CardTitle className="text-lg text-yellow-500">{service.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-center space-y-3">
-                <p className="text-sm text-gray-300">{service.description}</p>
-                <p className="font-semibold text-yellow-400">{service.price}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
+              </div>
+            </div>
+            
+            {/* Conteúdo */}
+            <div className="p-8 flex flex-col justify-center">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-yellow-500 text-black">Novo</Badge>
+                  <Badge variant="outline" className="border-yellow-500/30 text-yellow-500">Vídeo</Badge>
+                </div>
+                
+                <h3 className="text-2xl font-bold text-yellow-500">
+                  Veja Nossos Trabalhos em Ação
+                </h3>
+                
+                <p className="text-gray-300 leading-relaxed">
+                  Assista ao vídeo e descubra como transformamos ideias em designs incríveis. 
+                  Veja exemplos reais de artes criadas para jogadores e times.
+                </p>
+                
+                <div className="flex items-center gap-4 text-sm text-gray-400">
+                  <div className="flex items-center gap-1">
+                    <Eye className="h-4 w-4" />
+                    <span>2.5K visualizações</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Heart className="h-4 w-4" />
+                    <span>180 curtidas</span>
+                  </div>
+                </div>
+                
+                <Button 
+                  size="lg" 
+                  onClick={handleWhatsAppContact}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold w-full"
+                >
+                  <MessageCircle className="mr-2 h-5 w-5" />
+                  Solicitar Orçamento
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Filtros do Portfólio */}
       <div className="space-y-6">

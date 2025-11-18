@@ -43,44 +43,44 @@ export function TopNavBar() {
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-72 p-2">
+            <DropdownMenuLabel className="text-lg font-semibold py-3">Minha Conta</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
-              <User className="mr-2 h-4 w-4 text-yellow-500" />
+            <DropdownMenuItem onClick={() => navigate("/dashboard/profile")} className="py-3 px-4 text-base">
+              <User className="mr-3 h-5 w-5 text-yellow-500" />
               <span>Perfil</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/dashboard/height-projection")}>
-              <TrendingUp className="mr-2 h-4 w-4 text-yellow-500" />
+            <DropdownMenuItem onClick={() => navigate("/dashboard/height-projection")} className="py-3 px-4 text-base">
+              <TrendingUp className="mr-3 h-5 w-5 text-yellow-500" />
               <span>Altura e Projeção</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/dashboard/exercises")}>
-              <Dumbbell className="mr-2 h-4 w-4 text-yellow-500" />
+            <DropdownMenuItem onClick={() => navigate("/dashboard/exercises")} className="py-3 px-4 text-base">
+              <Dumbbell className="mr-3 h-5 w-5 text-yellow-500" />
               <span>Biblioteca de Exercícios</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/dashboard/achievements")}>
-              <Trophy className="mr-2 h-4 w-4 text-yellow-500" />
+            <DropdownMenuItem onClick={() => navigate("/dashboard/achievements")} className="py-3 px-4 text-base">
+              <Trophy className="mr-3 h-5 w-5 text-yellow-500" />
               <span>Conquistas</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/dashboard/nutrition")}>
-              <Apple className="mr-2 h-4 w-4 text-yellow-500" />
+            <DropdownMenuItem onClick={() => navigate("/dashboard/nutrition")} className="py-3 px-4 text-base">
+              <Apple className="mr-3 h-5 w-5 text-yellow-500" />
               <span>Nutrição</span>
             </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate("/dashboard/portfolio")}>
-          <FileUser className="mr-2 h-4 w-4 text-yellow-500" />
-          <span>Portfólio</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate("/dashboard/design")}>
-          <Palette className="mr-2 h-4 w-4 text-yellow-500" />
-          <span>YM Design</span>
-        </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/dashboard/settings")}>
-              <Settings className="mr-2 h-4 w-4 text-yellow-500" />
+            <DropdownMenuItem onClick={() => navigate("/dashboard/portfolio")} className="py-3 px-4 text-base">
+              <FileUser className="mr-3 h-5 w-5 text-yellow-500" />
+              <span>Portfólio</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/dashboard/design")} className="py-3 px-4 text-base">
+              <Palette className="mr-3 h-5 w-5 text-yellow-500" />
+              <span>YM Design</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/dashboard/settings")} className="py-3 px-4 text-base">
+              <Settings className="mr-3 h-5 w-5 text-yellow-500" />
               <span>Configurações</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4 text-yellow-500" />
+            <DropdownMenuItem onClick={handleLogout} className="py-3 px-4 text-base">
+              <LogOut className="mr-3 h-5 w-5 text-yellow-500" />
               <span>Sair</span>
             </DropdownMenuItem>
           </DropdownMenuContent>

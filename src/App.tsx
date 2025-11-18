@@ -25,6 +25,7 @@ import Nutrition from "./pages/Nutrition";
 import Portfolio from "./pages/Portfolio";
 import PublicPortfolio from "./pages/PublicPortfolio";
 import Design from "./pages/Design";
+import Motivational from "./pages/Motivational";
 import DashboardLayout from "./pages/DashboardLayout";
 import NotFound from "./pages/NotFound";
 
@@ -63,6 +64,7 @@ const AppContent = () => {
                 <Route path="nutrition" element={<Nutrition />} />
                 <Route path="portfolio" element={<Portfolio />} />
                 <Route path="design" element={<Design />} />
+                <Route path="motivational" element={<Motivational />} />
                 <Route path="settings" element={<div className="p-6">Configurações em construção</div>} />
             </Route>
             <Route path="/portfolio/:slug" element={<PublicPortfolio />} />

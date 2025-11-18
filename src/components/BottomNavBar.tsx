@@ -1,4 +1,4 @@
-import { Home, Calendar, Trophy, Dumbbell } from "lucide-react";
+import { Home, Calendar, Trophy, Dumbbell, Zap } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 const navItems = [
@@ -6,6 +6,7 @@ const navItems = [
   { title: "Ranking", url: "/dashboard/ranking", icon: Trophy },
   { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Treinos", url: "/dashboard/training", icon: Dumbbell },
+  { title: "Motivação", url: "/dashboard/motivational", icon: Zap },
 ];
 
 export function BottomNavBar() {
@@ -22,7 +23,7 @@ export function BottomNavBar() {
         backfaceVisibility: 'hidden' // Evita problemas de renderização
       }}
     >
-      <nav className="flex justify-around items-center h-16 sm:h-20 max-w-screen-xl mx-auto">
+      <nav className="flex justify-around items-center h-20 sm:h-24 max-w-screen-xl mx-auto">
         {navItems.map((item) => (
           <NavLink
             key={item.title}
