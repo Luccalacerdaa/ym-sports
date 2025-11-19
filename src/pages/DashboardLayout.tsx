@@ -1,8 +1,16 @@
 import { Outlet } from "react-router-dom";
 import { TopNavBar } from "@/components/TopNavBar";
 import { BottomNavBar } from "@/components/BottomNavBar";
+import { PWAInstallTooltip } from "@/components/PWAInstallTooltip";
+import { usePWAInstallPrompt } from "@/hooks/usePWAInstallPrompt";
 
 export default function DashboardLayout() {
+  const { 
+    showInstallPrompt, 
+    handlePromptDismiss, 
+    handleDontShowAgain 
+  } = usePWAInstallPrompt();
+
   return (
     <div className="min-h-screen flex flex-col w-full bg-black">
       <TopNavBar />
@@ -10,6 +18,12 @@ export default function DashboardLayout() {
         <Outlet />
       </main>
       <BottomNavBar />
+      
+      {/* PWA Install Tooltip */}
+      <PWAInstallTooltip 
+        isOpen={showInstallPrompt}
+        onClose={handlePromptDismiss}
+      />
     </div>
   );
 }

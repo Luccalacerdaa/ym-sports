@@ -1,4 +1,5 @@
 import { NotificationSettings } from "@/components/NotificationSettings";
+import { NotificationSchedule } from "@/components/NotificationSchedule";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,9 @@ export default function Settings() {
           <h2 className="text-xl font-semibold">Notificações</h2>
         </div>
         <NotificationSettings />
+        
+        {/* Cronograma de Notificações */}
+        <NotificationSchedule compact={true} />
       </div>
 
       <Separator />
