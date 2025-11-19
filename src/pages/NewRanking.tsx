@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -95,6 +95,7 @@ export default function NewRanking() {
   });
   const [userPosition, setUserPosition] = useState<any>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const isInitializingRef = useRef(false);
 
   // Buscar posição do usuário
   useEffect(() => {
@@ -115,28 +116,53 @@ export default function NewRanking() {
   // Forçar recálculo de rankings ao carregar (apenas uma vez)
   useEffect(() => {
     const recalculateRankings = async () => {
-      if (!loading && user && !hasInitializedRankings) {
+      if (!loading && user && !hasInitializedRankings && !isInitializingRef.current) {
         try {
           console.log('Recalculando rankings...');
+          isInitializingRef.current = true;
           setHasInitializedRankings(true);
+          
           await calculateRankings();
           await fetchRankings('national');
+          
+          // Buscar rankings regionais/locais se houver localização
           if (userLocation) {
             await fetchRankings('regional');
             await fetchRankings('local');
           }
+          
           const position = await getUserPosition();
           setUserPosition(position);
           console.log('Rankings recalculados com sucesso!');
         } catch (error) {
           console.error('Erro ao recalcular rankings:', error);
           setHasInitializedRankings(false); // Permitir nova tentativa em caso de erro
+        } finally {
+          isInitializingRef.current = false;
         }
       }
     };
     
     recalculateRankings();
-  }, [user, loading, hasInitializedRankings, userLocation]);
+  }, [user, loading, hasInitializedRankings]);
+
+  // Carregar rankings regionais/locais quando localização for obtida
+  useEffect(() => {
+    const loadRegionalRankings = async () => {
+      if (userLocation && hasInitializedRankings && !isInitializingRef.current) {
+        try {
+          console.log('Carregando rankings regionais/locais...');
+          await fetchRankings('regional');
+          await fetchRankings('local');
+          console.log('Rankings regionais/locais carregados!');
+        } catch (error) {
+          console.error('Erro ao carregar rankings regionais/locais:', error);
+        }
+      }
+    };
+
+    loadRegionalRankings();
+  }, [userLocation, hasInitializedRankings]);
 
   const handleUpdateLocation = async () => {
     if (!locationForm.state || !locationForm.region) {

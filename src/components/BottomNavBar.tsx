@@ -15,7 +15,7 @@ export function BottomNavBar() {
       className="fixed left-0 right-0 z-[999] bg-black border-t border-border safe-area-bottom fixed-bottom-bar bottom-nav-exception"
       style={{ 
         position: 'fixed',
-        bottom: '20px',
+        bottom: '35px',
         width: '100%',
         zIndex: 9999,
         transform: 'translateZ(0)', // Força aceleração de hardware

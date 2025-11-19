@@ -32,14 +32,21 @@ const Index = () => {
       // Forçar play do vídeo com verificação se ainda está no DOM
       const playVideo = async () => {
         try {
-          // Verificar se o elemento ainda está no DOM antes de tentar reproduzir
-          if (videoRef.current && document.contains(videoRef.current)) {
+          // Verificar se o elemento ainda está no DOM e está pronto antes de tentar reproduzir
+          if (videoRef.current && 
+              document.contains(videoRef.current) && 
+              videoRef.current.readyState >= 2) { // HAVE_CURRENT_DATA ou maior
             await videoRef.current.play();
           }
         } catch (error) {
-          // Só logar se não for um erro de AbortError (elemento removido do DOM)
-          if (error instanceof DOMException && error.name !== 'AbortError') {
-            console.log('Erro ao reproduzir vídeo:', error);
+          // Só logar se não for um erro conhecido de reprodução de vídeo
+          if (error instanceof DOMException) {
+            // Ignorar erros comuns de reprodução de vídeo
+            if (!['AbortError', 'NotAllowedError', 'NotSupportedError'].includes(error.name)) {
+              console.warn('Erro ao reproduzir vídeo:', error.name);
+            }
+          } else {
+            console.warn('Erro inesperado ao reproduzir vídeo:', error);
           }
         }
       };
