@@ -121,11 +121,20 @@ const achievementNotifications = [
 export const useDailyNotifications = () => {
   const { user } = useAuth();
 
+  // Verificar se as notificações são suportadas
+  const isNotificationSupported = useCallback(() => {
+    return typeof window !== 'undefined' && 
+           'Notification' in window && 
+           'serviceWorker' in navigator;
+  }, []);
+
   // Função para agendar uma notificação
   const scheduleNotification = useCallback((notification: any, delay: number) => {
-    if ('serviceWorker' in navigator && 'Notification' in window) {
+    if (!isNotificationSupported()) return;
+    
+    try {
       setTimeout(() => {
-        if (Notification.permission === 'granted') {
+        if (window.Notification && window.Notification.permission === 'granted') {
           navigator.serviceWorker.ready.then((registration) => {
             registration.showNotification(notification.title, {
               body: notification.body,
@@ -154,8 +163,10 @@ export const useDailyNotifications = () => {
           });
         }
       }, delay);
+    } catch (error) {
+      console.warn('Erro ao agendar notificação:', error);
     }
-  }, []);
+  }, [isNotificationSupported]);
 
   // Função para calcular delay até um horário específico
   const calculateDelay = useCallback((timeString: string) => {
@@ -175,7 +186,10 @@ export const useDailyNotifications = () => {
 
   // Função para agendar todas as notificações do dia
   const scheduleDailyNotifications = useCallback(() => {
-    if (!user || Notification.permission !== 'granted') return;
+    if (!user || !isNotificationSupported()) return;
+    
+    try {
+      if (!window.Notification || window.Notification.permission !== 'granted') return;
 
     // Limpar notificações anteriores
     if ('serviceWorker' in navigator) {
@@ -217,51 +231,64 @@ export const useDailyNotifications = () => {
       }
     });
 
-    console.log('✅ Notificações diárias agendadas com sucesso!');
-  }, [user, calculateDelay, scheduleNotification]);
+      console.log('✅ Notificações diárias agendadas com sucesso!');
+    } catch (error) {
+      console.warn('Erro ao agendar notificações diárias:', error);
+    }
+  }, [user, calculateDelay, scheduleNotification, isNotificationSupported]);
 
   // Função para solicitar permissão e configurar notificações
   const setupNotifications = useCallback(async () => {
-    if (!('Notification' in window)) {
+    if (!isNotificationSupported()) {
       console.log('Este navegador não suporta notificações');
       return false;
     }
 
-    if (Notification.permission === 'granted') {
-      scheduleDailyNotifications();
-      return true;
-    }
-
-    if (Notification.permission !== 'denied') {
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
+    try {
+      if (window.Notification.permission === 'granted') {
         scheduleDailyNotifications();
         return true;
       }
+
+      if (window.Notification.permission !== 'denied') {
+        const permission = await window.Notification.requestPermission();
+        if (permission === 'granted') {
+          scheduleDailyNotifications();
+          return true;
+        }
+      }
+    } catch (error) {
+      console.warn('Erro ao configurar notificações:', error);
     }
 
     return false;
-  }, [scheduleDailyNotifications]);
+  }, [scheduleDailyNotifications, isNotificationSupported]);
 
   // Função para enviar notificação imediata
   const sendImmediateNotification = useCallback((title: string, body: string) => {
-    if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then((registration) => {
-        registration.showNotification(title, {
-          body,
-          icon: '/icons/logo.png',
-          badge: '/icons/logo.png',
-          tag: `ym-sports-immediate-${Date.now()}`,
-          requireInteraction: true,
-          vibrate: [200, 100, 200],
-          data: {
-            url: '/dashboard',
-            timestamp: Date.now()
-          }
+    if (!isNotificationSupported()) return;
+    
+    try {
+      if (window.Notification && window.Notification.permission === 'granted' && 'serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then((registration) => {
+          registration.showNotification(title, {
+            body,
+            icon: '/icons/logo.png',
+            badge: '/icons/logo.png',
+            tag: `ym-sports-immediate-${Date.now()}`,
+            requireInteraction: true,
+            vibrate: [200, 100, 200],
+            data: {
+              url: '/dashboard',
+              timestamp: Date.now()
+            }
+          });
         });
-      });
+      }
+    } catch (error) {
+      console.warn('Erro ao enviar notificação imediata:', error);
     }
-  }, []);
+  }, [isNotificationSupported]);
 
   // Configurar notificações quando o usuário fizer login
   useEffect(() => {
@@ -277,7 +304,7 @@ export const useDailyNotifications = () => {
 
   // Reagendar notificações diariamente
   useEffect(() => {
-    if (user && Notification.permission === 'granted') {
+    if (user && isNotificationSupported() && window.Notification && window.Notification.permission === 'granted') {
       const now = new Date();
       const tomorrow = new Date(now);
       tomorrow.setDate(tomorrow.getDate() + 1);
@@ -298,7 +325,7 @@ export const useDailyNotifications = () => {
 
       return () => clearTimeout(dailyTimer);
     }
-  }, [user, scheduleDailyNotifications]);
+  }, [user, scheduleDailyNotifications, isNotificationSupported]);
 
   return {
     setupNotifications,

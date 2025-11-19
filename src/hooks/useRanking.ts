@@ -71,6 +71,7 @@ export const useRanking = () => {
   const [userRegionalAchievements, setUserRegionalAchievements] = useState<UserRegionalAchievement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isRequestingLocation, setIsRequestingLocation] = useState(false);
 
   // Buscar localização do usuário
   const fetchUserLocation = async () => {
@@ -136,8 +137,9 @@ export const useRanking = () => {
 
   // Atualizar localização do usuário a partir do GPS
   const updateUserLocationFromGPS = async () => {
-    if (!user) return { success: false, error: 'Usuário não autenticado' };
+    if (!user || isRequestingLocation) return { success: false, error: 'Usuário não autenticado ou já solicitando localização' };
 
+    setIsRequestingLocation(true);
     try {
       const position = await getCurrentLocation();
       const { latitude, longitude } = position.coords;
@@ -272,7 +274,9 @@ export const useRanking = () => {
     } catch (err: any) {
       console.error('Erro ao atualizar localização do usuário:', err);
       setError(err.message);
-      throw err;
+      return { success: false, error: err.message };
+    } finally {
+      setIsRequestingLocation(false);
     }
   };
 
@@ -1068,12 +1072,12 @@ export const useRanking = () => {
 
   // Solicitar localização GPS se não estiver definida
   useEffect(() => {
-    if (user && !loading && !userLocation) {
+    if (user && !loading && !userLocation && !isRequestingLocation) {
       updateUserLocationFromGPS().catch(err => {
         console.warn('Não foi possível obter localização automática:', err);
       });
     }
-  }, [user, loading, userLocation]);
+  }, [user, loading, userLocation, isRequestingLocation]);
 
   return {
     userLocation,

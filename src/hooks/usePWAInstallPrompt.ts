@@ -38,6 +38,9 @@ export const usePWAInstallPrompt = () => {
   }, [user]);
 
   const checkShouldShowPrompt = (): boolean => {
+    // Verificar se está no ambiente do navegador
+    if (typeof window === 'undefined') return false;
+    
     // Não mostrar se já foi dispensado
     const dismissed = localStorage.getItem('ym-sports-pwa-tooltip-dismissed');
     if (dismissed === 'true') {
@@ -45,8 +48,12 @@ export const usePWAInstallPrompt = () => {
     }
 
     // Não mostrar se já está instalado
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      return false;
+    try {
+      if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+        return false;
+      }
+    } catch (error) {
+      console.warn('Erro ao verificar display-mode:', error);
     }
 
     // Não mostrar se já foi mostrado hoje
@@ -115,7 +122,14 @@ export const usePWAInstallPrompt = () => {
 
   // Verificar se o PWA está instalado
   const isPWAInstalled = () => {
-    return window.matchMedia('(display-mode: standalone)').matches;
+    try {
+      return typeof window !== 'undefined' && 
+             window.matchMedia && 
+             window.matchMedia('(display-mode: standalone)').matches;
+    } catch (error) {
+      console.warn('Erro ao verificar se PWA está instalado:', error);
+      return false;
+    }
   };
 
   // Verificar se o dispositivo suporta instalação

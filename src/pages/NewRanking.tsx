@@ -87,6 +87,7 @@ export default function NewRanking() {
   
   const [selectedTab, setSelectedTab] = useState('national');
   const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
+  const [hasInitializedRankings, setHasInitializedRankings] = useState(false);
   const [locationForm, setLocationForm] = useState({
     state: '',
     region: '',
@@ -111,12 +112,13 @@ export default function NewRanking() {
     }
   }, [loading, selectedTab]);
 
-  // Forçar recálculo de rankings ao carregar
+  // Forçar recálculo de rankings ao carregar (apenas uma vez)
   useEffect(() => {
     const recalculateRankings = async () => {
-      if (!loading && user) {
+      if (!loading && user && !hasInitializedRankings) {
         try {
           console.log('Recalculando rankings...');
+          setHasInitializedRankings(true);
           await calculateRankings();
           await fetchRankings('national');
           if (userLocation) {
@@ -128,12 +130,13 @@ export default function NewRanking() {
           console.log('Rankings recalculados com sucesso!');
         } catch (error) {
           console.error('Erro ao recalcular rankings:', error);
+          setHasInitializedRankings(false); // Permitir nova tentativa em caso de erro
         }
       }
     };
     
     recalculateRankings();
-  }, [user, loading]);
+  }, [user, loading, hasInitializedRankings, userLocation]);
 
   const handleUpdateLocation = async () => {
     if (!locationForm.state || !locationForm.region) {
