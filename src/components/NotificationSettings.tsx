@@ -15,6 +15,7 @@ import {
   Dumbbell, 
   Heart,
   Clock,
+  RefreshCw,
   Settings
 } from "lucide-react";
 import { toast } from "sonner";
@@ -29,7 +30,7 @@ interface NotificationPreferences {
 }
 
 export function NotificationSettings() {
-  const { setupNotifications, sendImmediateNotification } = useDailyNotifications();
+  const { setupNotifications, sendImmediateNotification, forceReschedule } = useDailyNotifications();
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     motivational: true,
     nutrition: true,
@@ -133,6 +134,16 @@ export function NotificationSettings() {
     const randomMessage = messages[Math.floor(Math.random() * messages.length)];
     sendImmediateNotification(randomMessage.title, randomMessage.body);
     toast.success('Notificação de teste enviada!');
+  };
+
+  // Forçar reagendamento das notificações
+  const handleForceReschedule = () => {
+    try {
+      forceReschedule();
+      toast.success("Notificações reagendadas com sucesso!");
+    } catch (error) {
+      toast.error("Erro ao reagendar notificações");
+    }
   };
 
   const getStatusBadge = () => {
@@ -306,6 +317,15 @@ export function NotificationSettings() {
                     >
                       <Clock className="mr-2 h-4 w-4" />
                       Testar Notificação
+                    </Button>
+                    
+                    <Button 
+                      variant="outline" 
+                      onClick={handleForceReschedule}
+                      className="flex-1 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black"
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Reagendar
                     </Button>
                   </div>
                 </>

@@ -1,82 +1,68 @@
 import { useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
-// Notificações motivacionais
+// Notificações motivacionais - NOVO CRONOGRAMA
 const motivationalNotifications = [
+  // 🌅 MANHÃ (4 notificações)
   {
-    title: "💪 Hora de Treinar!",
-    body: "Seu corpo é seu templo. Que tal um treino hoje?",
+    title: "💪 Motivação Matinal",
+    body: "Seu futuro agradece o esforço de hoje.",
     time: "07:00"
   },
   {
-    title: "🔥 Motivação Matinal",
-    body: "Cristiano Ronaldo treina todos os dias. E você?",
-    time: "08:00"
-  },
-  {
-    title: "⚽ Lembre-se do Seu Sonho",
-    body: "Cada treino te aproxima do seu objetivo!",
+    title: "💦 Hidratação Matinal", 
+    body: "Comece o dia tomando água",
     time: "09:30"
   },
-  {
-    title: "🏆 Mentalidade Vencedora",
-    body: "Messi não desistiu aos 13 anos. Você também não deve!",
-    time: "11:00"
-  },
+  
+  // 🌞 TARDE (3 notificações)
   {
     title: "🥗 Hora da Nutrição",
-    body: "Seu corpo precisa de combustível de qualidade!",
+    body: "Cuide da sua alimentação para ter energia!",
     time: "12:00"
   },
   {
     title: "💧 Hidratação é Fundamental",
-    body: "Já bebeu água suficiente hoje? Seu desempenho agradece!",
+    body: "Mantenha-se hidratado durante o dia!",
     time: "14:00"
   },
   {
     title: "🎯 Foco no Objetivo",
-    body: "Pelé disse: 'Sucesso é 99% transpiração e 1% inspiração'",
+    body: "Mantenha o foco nos seus sonhos!",
     time: "15:30"
   },
+  
+  // 🌙 NOITE (2 notificações)
   {
-    title: "⚡ Energia da Tarde",
-    body: "Que tal assistir um vídeo motivacional?",
-    time: "16:00"
-  },
-  {
-    title: "🌟 Você é Único",
-    body: "Ronaldinho mostrou que ser diferente é ser especial!",
-    time: "17:30"
-  },
-  {
-    title: "📊 Acompanhe Seu Progresso",
-    body: "Veja suas conquistas no app e celebre cada vitória!",
-    time: "18:00"
+    title: "🌟 Motivação Noturna",
+    body: "Orgulhe-se do que você fez hoje.",
+    time: "18:30"
   },
   {
     title: "🍽️ Jantar Inteligente",
-    body: "Confira seu plano nutricional para uma refeição perfeita!",
+    body: "Termine o dia com uma refeição saudável!",
     time: "19:00"
-  },
-  {
-    title: "🧠 Mentalidade Noturna",
-    body: "Visualize seus objetivos antes de dormir. Sonhe grande!",
-    time: "21:00"
   }
 ];
 
-// Notificações específicas do app
+// Notificações específicas do app - NOVO CRONOGRAMA
 const appNotifications = [
+  {
+    title: "🏃‍♂️ Treino Disponível",
+    body: "Seu treino personalizado está te esperando!",
+    time: "08:30",
+    frequency: "daily"
+  },
   {
     title: "📈 Atualize Seu Perfil",
     body: "Complete suas informações para um portfólio mais atrativo!",
-    time: "10:00",
+    time: "10:30",
     frequency: "weekly"
   },
   {
-    title: "🏃‍♂️ Novo Treino Disponível",
-    body: "Criamos um treino personalizado para você!",
-    time: "08:30",
+    title: "📱 Portfólio Online",
+    body: "Divulgue sua marca e seja descoberto!",
+    time: "16:30",
     frequency: "daily"
   },
   {
@@ -84,37 +70,15 @@ const appNotifications = [
     body: "Veja sua posição no ranking nacional!",
     time: "20:00",
     frequency: "weekly"
-  },
-  {
-    title: "🎨 YM Design",
-    body: "Que tal criar uma arte profissional para suas redes?",
-    time: "13:00",
-    frequency: "weekly"
-  },
-  {
-    title: "📱 Portfólio em Destaque",
-    body: "Seu portfólio teve novas visualizações!",
-    time: "16:30",
-    frequency: "weekly"
   }
 ];
 
-// Notificações de conquistas
+// Notificações de conquistas - NOVO CRONOGRAMA
 const achievementNotifications = [
   {
     title: "🏆 Nova Conquista Disponível",
-    body: "Complete mais treinos para desbloquear uma nova conquista!",
-    time: "12:30"
-  },
-  {
-    title: "⭐ Sequência de Treinos",
-    body: "Você está em uma boa sequência! Continue assim!",
-    time: "18:30"
-  },
-  {
-    title: "📊 Meta de Nutrição",
-    body: "Que tal criar um novo plano nutricional?",
-    time: "11:30"
+    body: "Você tem conquistas esperando para serem desbloqueadas!",
+    time: "13:00"
   }
 ];
 
@@ -130,11 +94,18 @@ export const useDailyNotifications = () => {
 
   // Função para agendar uma notificação
   const scheduleNotification = useCallback((notification: any, delay: number) => {
-    if (!isNotificationSupported()) return;
+    if (!isNotificationSupported()) {
+      console.log('🔔 Notificações não suportadas neste navegador');
+      return;
+    }
     
     try {
-      setTimeout(() => {
+      console.log(`🔔 Agendando notificação: "${notification.title}" para ${Math.round(delay/1000/60)} minutos`);
+      
+      const timeoutId = setTimeout(() => {
         if (window.Notification && window.Notification.permission === 'granted') {
+          console.log(`🔔 Enviando notificação: "${notification.title}"`);
+          
           navigator.serviceWorker.ready.then((registration) => {
             registration.showNotification(notification.title, {
               body: notification.body,
@@ -160,9 +131,16 @@ export const useDailyNotifications = () => {
                 }
               ]
             });
+          }).catch(error => {
+            console.error('Erro ao mostrar notificação:', error);
           });
+        } else {
+          console.warn('🔔 Permissão de notificação não concedida');
         }
       }, delay);
+      
+      // Salvar o ID do timeout para possível cancelamento
+      return timeoutId;
     } catch (error) {
       console.warn('Erro ao agendar notificação:', error);
     }
@@ -186,52 +164,67 @@ export const useDailyNotifications = () => {
 
   // Função para agendar todas as notificações do dia
   const scheduleDailyNotifications = useCallback(() => {
-    if (!user || !isNotificationSupported()) return;
+    if (!user || !isNotificationSupported()) {
+      console.log('🔔 Não é possível agendar notificações - usuário ou suporte não disponível');
+      return;
+    }
     
     try {
-      if (!window.Notification || window.Notification.permission !== 'granted') return;
+      if (!window.Notification || window.Notification.permission !== 'granted') {
+        console.log('🔔 Permissão de notificação não concedida');
+        return;
+      }
 
-    // Limpar notificações anteriores
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then((registration) => {
-        registration.getNotifications().then((notifications) => {
-          notifications.forEach((notification) => {
-            if (notification.tag?.startsWith('ym-sports-')) {
-              notification.close();
-            }
+      console.log('🔔 Iniciando agendamento de notificações diárias...');
+
+      // Limpar notificações anteriores
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then((registration) => {
+          registration.getNotifications().then((notifications) => {
+            notifications.forEach((notification) => {
+              if (notification.tag?.startsWith('ym-sports-')) {
+                notification.close();
+              }
+            });
           });
         });
-      });
-    }
-
-    // Agendar notificações motivacionais
-    motivationalNotifications.forEach((notification) => {
-      const delay = calculateDelay(notification.time);
-      scheduleNotification(notification, delay);
-    });
-
-    // Agendar notificações de conquistas (aleatórias)
-    achievementNotifications.forEach((notification, index) => {
-      const randomHour = Math.floor(Math.random() * 12) + 9; // Entre 9h e 21h
-      const randomMinute = Math.floor(Math.random() * 60);
-      const timeString = `${randomHour.toString().padStart(2, '0')}:${randomMinute.toString().padStart(2, '0')}`;
-      
-      const delay = calculateDelay(timeString);
-      scheduleNotification(notification, delay);
-    });
-
-    // Agendar notificações do app
-    appNotifications.forEach((notification) => {
-      const shouldSchedule = notification.frequency === 'daily' || 
-        (notification.frequency === 'weekly' && new Date().getDay() === 1); // Segunda-feira
-      
-      if (shouldSchedule) {
-        const delay = calculateDelay(notification.time);
-        scheduleNotification(notification, delay);
       }
-    });
 
-      console.log('✅ Notificações diárias agendadas com sucesso!');
+      let scheduledCount = 0;
+
+      // Agendar notificações motivacionais
+      motivationalNotifications.forEach((notification) => {
+        const delay = calculateDelay(notification.time);
+        if (delay > 0) { // Só agendar se for no futuro
+          scheduleNotification(notification, delay);
+          scheduledCount++;
+        }
+      });
+
+      // Agendar notificações de conquistas (horário fixo)
+      achievementNotifications.forEach((notification) => {
+        const delay = calculateDelay(notification.time);
+        if (delay > 0) {
+          scheduleNotification(notification, delay);
+          scheduledCount++;
+        }
+      });
+
+      // Agendar notificações do app
+      appNotifications.forEach((notification) => {
+        const shouldSchedule = notification.frequency === 'daily' || 
+          (notification.frequency === 'weekly' && new Date().getDay() === 1); // Segunda-feira
+        
+        if (shouldSchedule) {
+          const delay = calculateDelay(notification.time);
+          if (delay > 0) {
+            scheduleNotification(notification, delay);
+            scheduledCount++;
+          }
+        }
+      });
+
+      console.log(`✅ ${scheduledCount} notificações agendadas com sucesso para hoje!`);
     } catch (error) {
       console.warn('Erro ao agendar notificações diárias:', error);
     }
@@ -293,6 +286,7 @@ export const useDailyNotifications = () => {
   // Configurar notificações quando o usuário fizer login
   useEffect(() => {
     if (user) {
+      console.log('🔔 Usuário logado, configurando notificações...');
       // Aguardar um pouco para garantir que o service worker está pronto
       const timer = setTimeout(() => {
         setupNotifications();
@@ -305,18 +299,23 @@ export const useDailyNotifications = () => {
   // Reagendar notificações diariamente
   useEffect(() => {
     if (user && isNotificationSupported() && window.Notification && window.Notification.permission === 'granted') {
+      console.log('🔔 Configurando reagendamento diário de notificações...');
+      
       const now = new Date();
       const tomorrow = new Date(now);
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(0, 0, 0, 0);
       
       const msUntilMidnight = tomorrow.getTime() - now.getTime();
+      console.log(`🔔 Próximo reagendamento em ${Math.round(msUntilMidnight/1000/60/60)} horas`);
       
       const dailyTimer = setTimeout(() => {
+        console.log('🔔 Reagendando notificações para o novo dia...');
         scheduleDailyNotifications();
         
         // Configurar intervalo diário
         const dailyInterval = setInterval(() => {
+          console.log('🔔 Reagendamento diário automático...');
           scheduleDailyNotifications();
         }, 24 * 60 * 60 * 1000); // 24 horas
         
@@ -327,9 +326,16 @@ export const useDailyNotifications = () => {
     }
   }, [user, scheduleDailyNotifications, isNotificationSupported]);
 
+  // Função para forçar reagendamento (para debug/teste)
+  const forceReschedule = useCallback(() => {
+    console.log('🔔 Forçando reagendamento de todas as notificações...');
+    scheduleDailyNotifications();
+  }, [scheduleDailyNotifications]);
+
   return {
     setupNotifications,
     sendImmediateNotification,
-    scheduleDailyNotifications
+    scheduleDailyNotifications,
+    forceReschedule
   };
 };

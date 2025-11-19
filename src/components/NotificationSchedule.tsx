@@ -15,33 +15,28 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
-// Lista completa de notificações (extraída do hook)
+// Lista completa de notificações - NOVO CRONOGRAMA ATUALIZADO
 const notificationSchedule = {
   motivational: [
-    { time: "07:00", title: "💪 Hora de Treinar!", body: "Seu corpo é seu templo. Que tal um treino hoje?" },
-    { time: "08:00", title: "🔥 Motivação Matinal", body: "Cristiano Ronaldo treina todos os dias. E você?" },
-    { time: "09:30", title: "⚽ Lembre-se do Seu Sonho", body: "Cada treino te aproxima do seu objetivo!" },
-    { time: "11:00", title: "🏆 Mentalidade Vencedora", body: "Messi não desistiu aos 13 anos. Você também não deve!" },
-    { time: "12:00", title: "🥗 Hora da Nutrição", body: "Seu corpo precisa de combustível de qualidade!" },
-    { time: "14:00", title: "💧 Hidratação é Fundamental", body: "Já bebeu água suficiente hoje? Seu desempenho agradece!" },
-    { time: "15:30", title: "🎯 Foco no Objetivo", body: "Pelé disse: 'Sucesso é 99% transpiração e 1% inspiração'" },
-    { time: "16:00", title: "⚡ Energia da Tarde", body: "Que tal assistir um vídeo motivacional?" },
-    { time: "17:30", title: "🌟 Você é Único", body: "Ronaldinho mostrou que ser diferente é ser especial!" },
-    { time: "18:00", title: "📊 Acompanhe Seu Progresso", body: "Veja suas conquistas no app e celebre cada vitória!" },
-    { time: "19:00", title: "🍽️ Jantar Inteligente", body: "Confira seu plano nutricional para uma refeição perfeita!" },
-    { time: "21:00", title: "🧠 Mentalidade Noturna", body: "Visualize seus objetivos antes de dormir. Sonhe grande!" }
+    // 🌅 MANHÃ
+    { time: "07:00", title: "💪 Motivação Matinal", body: "Seu futuro agradece o esforço de hoje." },
+    { time: "09:30", title: "💦 Hidratação Matinal", body: "Comece o dia tomando água" },
+    // 🌞 TARDE
+    { time: "12:00", title: "🥗 Hora da Nutrição", body: "Cuide da sua alimentação para ter energia!" },
+    { time: "14:00", title: "💧 Hidratação é Fundamental", body: "Mantenha-se hidratado durante o dia!" },
+    { time: "15:30", title: "🎯 Foco no Objetivo", body: "Mantenha o foco nos seus sonhos!" },
+    // 🌙 NOITE
+    { time: "18:30", title: "🌟 Motivação Noturna", body: "Orgulhe-se do que você fez hoje." },
+    { time: "19:00", title: "🍽️ Jantar Inteligente", body: "Termine o dia com uma refeição saudável!" }
   ],
   app: [
-    { time: "10:00", title: "📈 Atualize Seu Perfil", body: "Complete suas informações para um portfólio mais atrativo!", frequency: "semanal" },
-    { time: "08:30", title: "🏃‍♂️ Novo Treino Disponível", body: "Criamos um treino personalizado para você!", frequency: "diário" },
-    { time: "20:00", title: "🥇 Ranking Atualizado", body: "Veja sua posição no ranking nacional!", frequency: "semanal" },
-    { time: "13:00", title: "🎨 YM Design", body: "Que tal criar uma arte profissional para suas redes?", frequency: "semanal" },
-    { time: "16:30", title: "📱 Portfólio em Destaque", body: "Seu portfólio teve novas visualizações!", frequency: "semanal" }
+    { time: "08:30", title: "🏃‍♂️ Treino Disponível", body: "Seu treino personalizado está te esperando!", frequency: "diário" },
+    { time: "10:30", title: "📈 Atualize Seu Perfil", body: "Complete suas informações para um portfólio mais atrativo!", frequency: "semanal" },
+    { time: "16:30", title: "📱 Portfólio Online", body: "Divulgue sua marca e seja descoberto!", frequency: "diário" },
+    { time: "20:00", title: "🥇 Ranking Atualizado", body: "Veja sua posição no ranking nacional!", frequency: "semanal" }
   ],
   achievements: [
-    { time: "12:30", title: "🏆 Nova Conquista Disponível", body: "Complete mais treinos para desbloquear uma nova conquista!" },
-    { time: "18:30", title: "⭐ Sequência de Treinos", body: "Você está em uma boa sequência! Continue assim!" },
-    { time: "11:30", title: "📊 Meta de Nutrição", body: "Que tal criar um novo plano nutricional?" }
+    { time: "13:00", title: "🏆 Nova Conquista Disponível", body: "Você tem conquistas esperando para serem desbloqueadas!" }
   ]
 };
 
@@ -51,243 +46,185 @@ interface NotificationScheduleProps {
 
 export function NotificationSchedule({ compact = false }: NotificationScheduleProps) {
   const navigate = useNavigate();
-  const getTimeOfDay = (time: string) => {
-    const hour = parseInt(time.split(':')[0]);
-    if (hour >= 5 && hour < 12) return 'Manhã';
-    if (hour >= 12 && hour < 18) return 'Tarde';
-    return 'Noite';
-  };
 
-  const groupNotificationsByTime = () => {
-    const allNotifications = [
-      ...notificationSchedule.motivational.map(n => ({ ...n, type: 'motivational' })),
-      ...notificationSchedule.app.map(n => ({ ...n, type: 'app' })),
-      ...notificationSchedule.achievements.map(n => ({ ...n, type: 'achievements' }))
-    ];
-
-    const grouped = allNotifications.reduce((acc, notification) => {
-      const timeOfDay = getTimeOfDay(notification.time);
-      if (!acc[timeOfDay]) acc[timeOfDay] = [];
-      acc[timeOfDay].push(notification);
-      return acc;
-    }, {} as Record<string, any[]>);
-
-    // Ordenar por horário dentro de cada período
-    Object.keys(grouped).forEach(period => {
-      grouped[period].sort((a, b) => a.time.localeCompare(b.time));
-    });
-
-    return grouped;
-  };
+  // Combinar todas as notificações em uma lista única ordenada por horário
+  const allNotifications = [
+    ...notificationSchedule.motivational.map(n => ({ ...n, type: 'motivational' as const })),
+    ...notificationSchedule.app.map(n => ({ ...n, type: 'app' as const })),
+    ...notificationSchedule.achievements.map(n => ({ ...n, type: 'achievements' as const }))
+  ].sort((a, b) => a.time.localeCompare(b.time));
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'motivational': return <Zap className="h-4 w-4 text-yellow-500" />;
-      case 'app': return <Heart className="h-4 w-4 text-red-500" />;
-      case 'achievements': return <Trophy className="h-4 w-4 text-yellow-600" />;
-      default: return <Bell className="h-4 w-4" />;
+      case 'motivational': return <Heart className="w-4 h-4" />;
+      case 'app': return <Bell className="w-4 h-4" />;
+      case 'achievements': return <Trophy className="w-4 h-4" />;
+      default: return <Clock className="w-4 h-4" />;
     }
   };
 
-  const getTypeBadge = (type: string) => {
+  const getTypeColor = (type: string) => {
     switch (type) {
-      case 'motivational': return <Badge variant="outline" className="text-xs">Motivação</Badge>;
-      case 'app': return <Badge variant="outline" className="text-xs">App</Badge>;
-      case 'achievements': return <Badge variant="outline" className="text-xs">Conquistas</Badge>;
-      default: return null;
+      case 'motivational': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      case 'app': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      case 'achievements': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     }
   };
 
-  if (compact) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Clock className="h-5 w-5" />
-            Horários das Notificações
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <h5 className="font-medium mb-2">Manhã (5h-12h)</h5>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>07:00 - Hora de Treinar</li>
-                <li>08:00 - Motivação Matinal</li>
-                <li>08:30 - Novo Treino (diário)</li>
-                <li>09:30 - Lembre do Sonho</li>
-                <li>10:00 - Atualize Perfil (semanal)</li>
-                <li>11:00 - Mentalidade Vencedora</li>
-                <li>11:30 - Meta de Nutrição</li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="font-medium mb-2">Tarde (12h-18h)</h5>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>12:00 - Hora da Nutrição</li>
-                <li>12:30 - Nova Conquista</li>
-                <li>13:00 - YM Design (semanal)</li>
-                <li>14:00 - Hidratação</li>
-                <li>15:30 - Foco no Objetivo</li>
-                <li>16:00 - Energia da Tarde</li>
-                <li>16:30 - Portfólio (semanal)</li>
-                <li>17:30 - Você é Único</li>
-              </ul>
-            </div>
-            <div className="col-span-2">
-              <h5 className="font-medium mb-2">Noite (18h-5h)</h5>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>18:00 - Acompanhe Progresso</li>
-                <li>18:30 - Sequência de Treinos</li>
-                <li>19:00 - Jantar Inteligente</li>
-                <li>20:00 - Ranking Atualizado (semanal)</li>
-                <li>21:00 - Mentalidade Noturna</li>
-              </ul>
-            </div>
-          </div>
-          
-          <Separator className="my-4" />
-          
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-2 justify-center">
-              <Badge variant="outline" className="text-xs">
-                <Zap className="mr-1 h-3 w-3" />
-                12 Motivacionais
-              </Badge>
-              <Badge variant="outline" className="text-xs">
-                <Heart className="mr-1 h-3 w-3" />
-                5 do App
-              </Badge>
-              <Badge variant="outline" className="text-xs">
-                <Trophy className="mr-1 h-3 w-3" />
-                3 de Conquistas
-              </Badge>
-            </div>
-            
-            <div className="text-center">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/dashboard/notifications-schedule')}
-                className="text-xs"
-              >
-                <ExternalLink className="mr-2 h-3 w-3" />
-                Ver Cronograma Completo
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const getTypeName = (type: string) => {
+    switch (type) {
+      case 'motivational': return 'Motivação';
+      case 'app': return 'App';
+      case 'achievements': return 'Conquistas';
+      default: return 'Geral';
+    }
+  };
 
-  const groupedNotifications = groupNotificationsByTime();
+  const displayNotifications = compact ? allNotifications.slice(0, 6) : allNotifications;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Calendar className="h-6 w-6 text-primary" />
-        <div>
-          <h2 className="text-2xl font-bold">Cronograma de Notificações</h2>
-          <p className="text-muted-foreground">
-            Todas as notificações que você receberá durante o dia
-          </p>
+    <Card className="bg-gray-900/50 border-gray-800">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-white flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-yellow-500" />
+            {compact ? "Próximas Notificações" : "Cronograma Completo"}
+          </CardTitle>
+          {compact && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/dashboard/settings/notifications')}
+              className="text-yellow-500 hover:text-yellow-400 hover:bg-yellow-500/10"
+            >
+              Ver Tudo
+              <ExternalLink className="w-4 h-4 ml-1" />
+            </Button>
+          )}
         </div>
-      </div>
-
-      {/* Resumo */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold text-yellow-500">12</div>
-              <div className="text-sm text-muted-foreground">Motivacionais</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-red-500">5</div>
-              <div className="text-sm text-muted-foreground">Do App</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-yellow-600">3</div>
-              <div className="text-sm text-muted-foreground">Conquistas</div>
-            </div>
+        
+        {!compact && (
+          <div className="text-sm text-gray-400 mt-2">
+            📋 <strong>12 notificações por dia</strong> - Motivação, App e Conquistas
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </CardHeader>
 
-      {/* Notificações por período */}
-      {Object.entries(groupedNotifications).map(([period, notifications]) => (
-        <Card key={period}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              {period}
-              <Badge variant="outline">{notifications.length} notificações</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {notifications.map((notification, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 rounded-lg border">
-                  <div className="flex items-center gap-2 min-w-0">
-                    {getTypeIcon(notification.type)}
-                    <div className="font-mono text-sm font-medium">
-                      {notification.time}
-                    </div>
+      <CardContent className="space-y-3">
+        {!compact && (
+          <>
+            {/* Resumo por período */}
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="text-center p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                <div className="text-orange-400 font-semibold">🌅 MANHÃ</div>
+                <div className="text-sm text-gray-400">4 notificações</div>
+                <div className="text-xs text-gray-500">07:00 - 10:30</div>
+              </div>
+              <div className="text-center p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                <div className="text-yellow-400 font-semibold">🌞 TARDE</div>
+                <div className="text-sm text-gray-400">5 notificações</div>
+                <div className="text-xs text-gray-500">12:00 - 16:30</div>
+              </div>
+              <div className="text-center p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                <div className="text-purple-400 font-semibold">🌙 NOITE</div>
+                <div className="text-sm text-gray-400">3 notificações</div>
+                <div className="text-xs text-gray-500">18:30 - 20:00</div>
+              </div>
+            </div>
+            
+            <Separator className="bg-gray-800" />
+          </>
+        )}
+
+        {/* Lista de notificações */}
+        <div className="space-y-2">
+          {displayNotifications.map((notification, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg border border-gray-700/50 hover:border-gray-600/50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 min-w-[60px]">
+                  <Clock className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm font-mono text-gray-300">
+                    {notification.time}
+                  </span>
+                </div>
+                
+                <div className="flex-1">
+                  <div className="text-white font-medium text-sm">
+                    {notification.title}
                   </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium text-sm truncate">
-                        {notification.title}
-                      </h4>
-                      {getTypeBadge(notification.type)}
-                      {notification.frequency && (
-                        <Badge variant="secondary" className="text-xs">
-                          {notification.frequency}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {notification.body}
-                    </p>
+                  <div className="text-gray-400 text-xs mt-1">
+                    {notification.body}
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+              </div>
 
-      {/* Informações adicionais */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5" />
-            Informações Importantes
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <h5 className="font-medium mb-2">Frequências:</h5>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>• <strong>Diário:</strong> Todos os dias</li>
-                <li>• <strong>Semanal:</strong> Segundas-feiras</li>
-                <li>• <strong>Conquistas:</strong> Horários aleatórios</li>
-              </ul>
+              <div className="flex items-center gap-2">
+                {notification.frequency && (
+                  <Badge variant="outline" className="text-xs bg-gray-700/50 border-gray-600">
+                    {notification.frequency}
+                  </Badge>
+                )}
+                
+                <Badge 
+                  variant="outline" 
+                  className={`text-xs ${getTypeColor(notification.type)}`}
+                >
+                  {getTypeIcon(notification.type)}
+                  <span className="ml-1">{getTypeName(notification.type)}</span>
+                </Badge>
+              </div>
             </div>
-            <div>
-              <h5 className="font-medium mb-2">Configurações:</h5>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>• Você pode desativar por categoria</li>
-                <li>• Configurações salvas automaticamente</li>
-                <li>• Teste de notificações disponível</li>
-              </ul>
+          ))}
+        </div>
+
+        {compact && allNotifications.length > 6 && (
+          <div className="text-center pt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/dashboard/settings/notifications')}
+              className="text-yellow-500 hover:text-yellow-400 hover:bg-yellow-500/10"
+            >
+              +{allNotifications.length - 6} notificações restantes
+            </Button>
+          </div>
+        )}
+
+        {!compact && (
+          <div className="mt-6 p-4 bg-gray-800/30 rounded-lg border border-gray-700/50">
+            <div className="text-sm text-gray-300 font-medium mb-2">
+              📊 Resumo das Categorias:
+            </div>
+            <div className="grid grid-cols-3 gap-4 text-xs">
+              <div className="text-center">
+                <div className="text-red-400 font-semibold">{notificationSchedule.motivational.length}</div>
+                <div className="text-gray-400">Motivacionais</div>
+              </div>
+              <div className="text-center">
+                <div className="text-blue-400 font-semibold">{notificationSchedule.app.length}</div>
+                <div className="text-gray-400">do App</div>
+              </div>
+              <div className="text-center">
+                <div className="text-yellow-400 font-semibold">{notificationSchedule.achievements.length}</div>
+                <div className="text-gray-400">de Conquistas</div>
+              </div>
+            </div>
+            
+            <Separator className="bg-gray-700 my-3" />
+            
+            <div className="text-xs text-gray-400">
+              <div className="mb-1"><strong>⚙️ Frequências:</strong></div>
+              <div>• <strong>Diário:</strong> Todos os dias</div>
+              <div>• <strong>Semanal:</strong> Segundas-feiras</div>
+              <div>• <strong>Conquistas:</strong> Horários fixos</div>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
