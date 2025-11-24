@@ -287,20 +287,45 @@ export const useDailyNotifications = () => {
   useEffect(() => {
     if (user) {
       console.log('🔔 Usuário logado, configurando notificações...');
+      
+      // Função para tentar configurar notificações
+      const trySetupNotifications = async () => {
+        try {
+          // Verificar se já tem permissão
+          if (window.Notification && window.Notification.permission === 'granted') {
+            console.log('🔔 Permissão já concedida, agendando notificações imediatamente...');
+            scheduleDailyNotifications();
+          } else {
+            console.log('🔔 Permissão não concedida ainda, aguardando...');
+          }
+        } catch (error) {
+          console.warn('Erro ao configurar notificações:', error);
+        }
+      };
+
       // Aguardar um pouco para garantir que o service worker está pronto
       const timer = setTimeout(() => {
-        setupNotifications();
-      }, 2000);
+        trySetupNotifications();
+      }, 1000);
 
       return () => clearTimeout(timer);
     }
-  }, [user, setupNotifications]);
+  }, [user, scheduleDailyNotifications]);
 
-  // Reagendar notificações diariamente
+  // Reagendar notificações diariamente e verificar periodicamente
   useEffect(() => {
-    if (user && isNotificationSupported() && window.Notification && window.Notification.permission === 'granted') {
+    if (user && isNotificationSupported()) {
       console.log('🔔 Configurando reagendamento diário de notificações...');
       
+      // Verificar e reagendar a cada 30 minutos
+      const checkInterval = setInterval(() => {
+        if (window.Notification && window.Notification.permission === 'granted') {
+          console.log('🔔 Verificação periódica - reagendando notificações...');
+          scheduleDailyNotifications();
+        }
+      }, 30 * 60 * 1000); // 30 minutos
+      
+      // Reagendamento diário à meia-noite
       const now = new Date();
       const tomorrow = new Date(now);
       tomorrow.setDate(tomorrow.getDate() + 1);
@@ -322,7 +347,10 @@ export const useDailyNotifications = () => {
         return () => clearInterval(dailyInterval);
       }, msUntilMidnight);
 
-      return () => clearTimeout(dailyTimer);
+      return () => {
+        clearTimeout(dailyTimer);
+        clearInterval(checkInterval);
+      };
     }
   }, [user, scheduleDailyNotifications, isNotificationSupported]);
 
