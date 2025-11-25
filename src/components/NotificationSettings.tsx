@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useDailyNotifications } from "@/hooks/useDailyNotifications";
 import { useRobustNotifications } from "@/hooks/useRobustNotifications";
+import { useBackgroundNotifications } from "@/hooks/useBackgroundNotifications";
 import { 
   Bell, 
   BellOff, 
@@ -38,6 +39,13 @@ export function NotificationSettings() {
     forceReschedule: forceRobustReschedule,
     checkPendingNotifications 
   } = useRobustNotifications();
+  
+  const {
+    scheduleAllNotifications,
+    scheduleNextNotification,
+    sendTestNotification,
+    requestPermission
+  } = useBackgroundNotifications();
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     motivational: true,
     nutrition: true,
@@ -348,7 +356,7 @@ export function NotificationSettings() {
                     </div>
                     
                     <div className="text-xs text-center text-gray-400 mb-2">
-                      Sistema Robusto (Novo)
+                      Sistema Robusto (Verificação Contínua)
                     </div>
                     
                     <div className="flex gap-2">
@@ -382,6 +390,52 @@ export function NotificationSettings() {
                       >
                         <RefreshCw className="mr-2 h-4 w-4" />
                         Reset Robusto
+                      </Button>
+                    </div>
+                    
+                    <div className="text-xs text-center text-gray-400 mb-2 mt-4">
+                      Sistema Background (Funciona com App Fechado)
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={async () => {
+                          try {
+                            const success = await sendTestNotification("🚀 Teste Background", "Notificação funcionando com app fechado!");
+                            if (success) {
+                              toast.success("Notificação background enviada!");
+                            } else {
+                              toast.error("Erro: Permissão não concedida");
+                            }
+                          } catch (error) {
+                            toast.error("Erro ao testar sistema background");
+                          }
+                        }}
+                        className="flex-1 border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-black"
+                      >
+                        <Bell className="mr-2 h-4 w-4" />
+                        Teste Background
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          try {
+                            const next = scheduleNextNotification();
+                            if (next) {
+                              toast.success(`Próxima notificação: ${next.notification.title} às ${next.time}`);
+                            } else {
+                              toast.error("Erro ao agendar próxima notificação");
+                            }
+                          } catch (error) {
+                            toast.error("Erro ao agendar próxima notificação");
+                          }
+                        }}
+                        className="flex-1 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black"
+                      >
+                        <Clock className="mr-2 h-4 w-4" />
+                        Próxima
                       </Button>
                     </div>
                   </div>

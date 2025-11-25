@@ -12,6 +12,7 @@ import { useAutoNotificationPermission } from "./hooks/useAutoNotificationPermis
 import { useScheduledNotifications } from "./hooks/useScheduledNotifications";
 import { useDailyNotifications } from "./hooks/useDailyNotifications";
 import { useRobustNotifications } from "./hooks/useRobustNotifications";
+import { useBackgroundNotifications } from "./hooks/useBackgroundNotifications";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -51,6 +52,9 @@ const AppContent = () => {
   
   // Hook para sistema robusto de notificações (novo)
   useRobustNotifications();
+  
+  // Hook para notificações em segundo plano (funciona com app fechado)
+  useBackgroundNotifications();
   
 
   return (

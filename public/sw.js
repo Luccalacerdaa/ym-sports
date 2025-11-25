@@ -2,10 +2,104 @@
 // Este arquivo gerencia as notificações push mesmo quando o app está fechado
 
 const APP_URL = 'https://ym-sports.vercel.app';
-const SW_VERSION = '7.0.0'; // Incrementar para forçar atualização
+const SW_VERSION = '8.0.0'; // Incrementar para forçar atualização
 const CACHE_NAME = `ym-sports-v${SW_VERSION}`;
 
 console.log(`[SW] 🚀 Service Worker YM Sports v${SW_VERSION} carregado!`);
+
+// Cronograma de notificações
+const NOTIFICATION_SCHEDULE = [
+  { time: "07:00", title: "💪 Motivação Matinal", body: "Seu futuro agradece o esforço de hoje." },
+  { time: "08:30", title: "🏃‍♂️ Treino Disponível", body: "Seu treino personalizado está te esperando!" },
+  { time: "09:30", title: "💦 Hidratação Matinal", body: "Comece o dia tomando água" },
+  { time: "10:30", title: "📈 Atualize Seu Perfil", body: "Complete suas informações!", frequency: "weekly" },
+  { time: "12:00", title: "🥗 Hora da Nutrição", body: "Cuide da sua alimentação para ter energia!" },
+  { time: "13:00", title: "🏆 Nova Conquista Disponível", body: "Você tem conquistas esperando!" },
+  { time: "14:00", title: "💧 Hidratação é Fundamental", body: "Mantenha-se hidratado durante o dia!" },
+  { time: "15:30", title: "🎯 Foco no Objetivo", body: "Mantenha o foco nos seus sonhos!" },
+  { time: "16:30", title: "📱 Portfólio Online", body: "Divulgue sua marca e seja descoberto!" },
+  { time: "18:30", title: "🌟 Motivação Noturna", body: "Orgulhe-se do que você fez hoje." },
+  { time: "19:00", title: "🍽️ Jantar Inteligente", body: "Termine o dia com uma refeição saudável!" },
+  { time: "20:00", title: "🥇 Ranking Atualizado", body: "Veja sua posição no ranking!", frequency: "weekly" }
+];
+
+// Função para verificar e enviar notificações
+function checkAndSendNotifications() {
+  const now = new Date();
+  const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+  const currentDay = now.getDay(); // 0 = domingo, 1 = segunda
+  const today = now.toDateString();
+  
+  console.log(`[SW] 🔔 Verificando notificações para ${currentTime}...`);
+
+  // Recuperar notificações já enviadas hoje
+  const sentTodayKey = `notificationsSentToday_${today}`;
+  let sentToday = [];
+  
+  try {
+    const stored = localStorage.getItem(sentTodayKey);
+    sentToday = stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    sentToday = [];
+  }
+
+  NOTIFICATION_SCHEDULE.forEach(notification => {
+    const notificationKey = `${notification.time}-${notification.title}`;
+    
+    // Verificar se já foi enviada hoje
+    if (sentToday.includes(notificationKey)) {
+      return;
+    }
+
+    // Verificar frequência semanal (apenas segundas-feiras)
+    if (notification.frequency === 'weekly' && currentDay !== 1) {
+      return;
+    }
+
+    // Verificar se é o horário certo
+    if (currentTime === notification.time) {
+      console.log(`[SW] 🔔 Enviando notificação: ${notification.title}`);
+      
+      // Enviar notificação
+      self.registration.showNotification(notification.title, {
+        body: notification.body,
+        icon: `${APP_URL}/icons/icon-192.png`,
+        badge: `${APP_URL}/icons/icon-96.png`,
+        tag: `ym-sports-${Date.now()}`,
+        requireInteraction: false,
+        silent: false,
+        vibrate: [200, 100, 200],
+        data: {
+          url: `${APP_URL}/dashboard`,
+          timestamp: Date.now()
+        },
+        actions: [
+          {
+            action: 'open',
+            title: 'Abrir App'
+          },
+          {
+            action: 'dismiss',
+            title: 'Dispensar'
+          }
+        ]
+      });
+      
+      // Marcar como enviada
+      sentToday.push(notificationKey);
+      try {
+        localStorage.setItem(sentTodayKey, JSON.stringify(sentToday));
+      } catch (e) {
+        console.warn('[SW] Erro ao salvar notificações enviadas:', e);
+      }
+    }
+  });
+}
+
+// Verificar notificações a cada minuto
+setInterval(() => {
+  checkAndSendNotifications();
+}, 60000); // 1 minuto
 
 // Listener para mensagens de SKIP_WAITING
 self.addEventListener('message', (event) => {
