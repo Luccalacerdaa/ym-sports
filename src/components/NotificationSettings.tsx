@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useDailyNotifications } from "@/hooks/useDailyNotifications";
+import { useRobustNotifications } from "@/hooks/useRobustNotifications";
 import { 
   Bell, 
   BellOff, 
@@ -30,7 +31,13 @@ interface NotificationPreferences {
 }
 
 export function NotificationSettings() {
-  const { setupNotifications, sendImmediateNotification, forceReschedule } = useDailyNotifications();
+  const { setupNotifications, sendImmediateNotification, forceReschedule, testNotificationSystem } = useDailyNotifications();
+  const { 
+    setupNotifications: setupRobustNotifications, 
+    sendImmediateNotification: sendRobustNotification, 
+    forceReschedule: forceRobustReschedule,
+    checkPendingNotifications 
+  } = useRobustNotifications();
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     motivational: true,
     nutrition: true,
@@ -140,9 +147,19 @@ export function NotificationSettings() {
   const handleForceReschedule = () => {
     try {
       forceReschedule();
-      toast.success("Notificações reagendadas com sucesso!");
+      toast.success("Sistema de notificações reiniciado!");
     } catch (error) {
-      toast.error("Erro ao reagendar notificações");
+      toast.error("Erro ao reiniciar sistema de notificações");
+    }
+  };
+
+  // Testar sistema de notificações
+  const handleTestSystem = () => {
+    try {
+      const testTime = testNotificationSystem();
+      toast.success(`Teste agendado para ${testTime} (próximo minuto)!`);
+    } catch (error) {
+      toast.error("Erro ao agendar teste");
     }
   };
 
@@ -309,23 +326,74 @@ export function NotificationSettings() {
                   
                   <Separator />
                   
-                  <div className="flex gap-2">
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={handleTestNotification}
+                        className="flex-1"
+                      >
+                        <Clock className="mr-2 h-4 w-4" />
+                        Testar Notificação
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        onClick={handleForceReschedule}
+                        className="flex-1 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black"
+                      >
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Reiniciar
+                      </Button>
+                    </div>
+                    
+                    <div className="text-xs text-center text-gray-400 mb-2">
+                      Sistema Robusto (Novo)
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          try {
+                            sendRobustNotification("🔔 Teste Sistema Robusto", "Sistema de notificações robusto funcionando!");
+                            toast.success("Notificação robusta enviada!");
+                          } catch (error) {
+                            toast.error("Erro ao testar sistema robusto");
+                          }
+                        }}
+                        className="flex-1 border-green-500 text-green-500 hover:bg-green-500 hover:text-black"
+                      >
+                        <Bell className="mr-2 h-4 w-4" />
+                        Teste Robusto
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          try {
+                            forceRobustReschedule();
+                            toast.success("Sistema robusto reagendado!");
+                          } catch (error) {
+                            toast.error("Erro ao reagendar sistema robusto");
+                          }
+                        }}
+                        className="flex-1 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-black"
+                      >
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Reset Robusto
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2 mt-2">
                     <Button 
                       variant="outline" 
-                      onClick={handleTestNotification}
-                      className="flex-1"
+                      onClick={handleTestSystem}
+                      className="flex-1 border-green-500 text-green-500 hover:bg-green-500 hover:text-black"
                     >
                       <Clock className="mr-2 h-4 w-4" />
-                      Testar Notificação
-                    </Button>
-                    
-                    <Button 
-                      variant="outline" 
-                      onClick={handleForceReschedule}
-                      className="flex-1 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black"
-                    >
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                      Reagendar
+                      Teste (1min)
                     </Button>
                   </div>
                 </>

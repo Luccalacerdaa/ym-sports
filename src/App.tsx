@@ -11,6 +11,7 @@ import { useEventNotifications } from "./hooks/useEventNotifications";
 import { useAutoNotificationPermission } from "./hooks/useAutoNotificationPermission";
 import { useScheduledNotifications } from "./hooks/useScheduledNotifications";
 import { useDailyNotifications } from "./hooks/useDailyNotifications";
+import { useRobustNotifications } from "./hooks/useRobustNotifications";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -47,6 +48,9 @@ const AppContent = () => {
   
   // Hook para notificações diárias motivacionais e do app
   useDailyNotifications();
+  
+  // Hook para sistema robusto de notificações (novo)
+  useRobustNotifications();
   
 
   return (
