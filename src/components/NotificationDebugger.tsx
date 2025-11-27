@@ -283,7 +283,8 @@ export const NotificationDebugger: React.FC = () => {
                     )}
                   </div>
                 ))}
-              </div>
+                </div>
+              )
             )}
           </ScrollArea>
         </CardContent>
