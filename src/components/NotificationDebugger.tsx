@@ -19,13 +19,17 @@ import {
 
 export const NotificationDebugger: React.FC = () => {
   const [logs, setLogs] = useState<any[]>([]);
+  const [criticalLogs, setCriticalLogs] = useState<any[]>([]);
   const [isVisible, setIsVisible] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [showCritical, setShowCritical] = useState(false);
 
   // Carregar logs
   const loadLogs = () => {
     const currentLogs = NotificationLogger.getLogs();
+    const currentCriticalLogs = NotificationLogger.getCriticalLogs();
     setLogs(currentLogs);
+    setCriticalLogs(currentCriticalLogs);
   };
 
   // Auto-refresh dos logs
@@ -149,6 +153,15 @@ export const NotificationDebugger: React.FC = () => {
             </Button>
             
             <Button
+              onClick={() => setShowCritical(!showCritical)}
+              variant={showCritical ? "default" : "outline"}
+              size="sm"
+            >
+              <AlertCircle className="h-3 w-3 mr-1" />
+              Críticos ({criticalLogs.length})
+            </Button>
+            
+            <Button
               onClick={exportLogs}
               variant="outline"
               size="sm"
@@ -184,14 +197,60 @@ export const NotificationDebugger: React.FC = () => {
         
         <CardContent className="pt-0">
           <ScrollArea className="h-96">
-            {logs.length === 0 ? (
-              <div className="text-center text-muted-foreground text-sm py-8">
-                <Bug className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                Nenhum log disponível
-              </div>
+            {showCritical ? (
+              // Mostrar logs críticos
+              criticalLogs.length === 0 ? (
+                <div className="text-center text-muted-foreground text-sm py-8">
+                  <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  Nenhum log crítico disponível
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {criticalLogs.map((log, index) => (
+                    <div
+                      key={index}
+                      className="border rounded-lg p-3 text-xs bg-red-900/20 border-red-500/30"
+                    >
+                      <div className="flex items-start justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <AlertCircle className="h-4 w-4 text-red-500" />
+                          <Badge variant="destructive" className="text-xs">
+                            CRÍTICO
+                          </Badge>
+                        </div>
+                        <span className="text-muted-foreground text-xs">
+                          {log.timestamp}
+                        </span>
+                      </div>
+                      
+                      <div className="font-medium mb-1 text-red-400">
+                        {log.message}
+                      </div>
+                      
+                      {log.data && (
+                        <details className="mt-2">
+                          <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                            Ver dados
+                          </summary>
+                          <pre className="mt-1 p-2 bg-muted rounded text-xs overflow-x-auto">
+                            {JSON.stringify(log.data, null, 2)}
+                          </pre>
+                        </details>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )
             ) : (
-              <div className="space-y-2">
-                {logs.map((log, index) => (
+              // Mostrar logs normais
+              logs.length === 0 ? (
+                <div className="text-center text-muted-foreground text-sm py-8">
+                  <Bug className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  Nenhum log disponível
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {logs.map((log, index) => (
                   <div
                     key={index}
                     className="border rounded-lg p-3 text-xs bg-card/50"

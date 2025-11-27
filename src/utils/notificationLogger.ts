@@ -8,7 +8,7 @@ export class NotificationLogger {
     data?: any;
   }> = [];
 
-  private static readonly MAX_LOGS = 100;
+  private static readonly MAX_LOGS = 500; // Aumentar para mais logs
 
   static log(level: 'info' | 'warn' | 'error' | 'success', source: string, message: string, data?: any) {
     const timestamp = new Date().toLocaleString('pt-BR');
@@ -69,8 +69,44 @@ export class NotificationLogger {
     this.logs = [];
     try {
       localStorage.removeItem('ym-sports-notification-logs');
+      this.info('SYSTEM', '🗑️ Logs limpos pelo usuário');
     } catch (e) {
       console.warn('Erro ao limpar logs:', e);
+    }
+  }
+
+  // Salvar logs críticos permanentemente
+  static saveCriticalLog(message: string, data?: any) {
+    const criticalLog = {
+      timestamp: new Date().toLocaleString('pt-BR'),
+      message,
+      data
+    };
+    
+    try {
+      const existingCritical = localStorage.getItem('ym-sports-critical-logs');
+      const criticalLogs = existingCritical ? JSON.parse(existingCritical) : [];
+      
+      criticalLogs.unshift(criticalLog);
+      
+      // Manter apenas os últimos 50 logs críticos
+      if (criticalLogs.length > 50) {
+        criticalLogs.splice(50);
+      }
+      
+      localStorage.setItem('ym-sports-critical-logs', JSON.stringify(criticalLogs));
+    } catch (e) {
+      console.warn('Erro ao salvar log crítico:', e);
+    }
+  }
+
+  // Recuperar logs críticos
+  static getCriticalLogs() {
+    try {
+      const stored = localStorage.getItem('ym-sports-critical-logs');
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
     }
   }
 

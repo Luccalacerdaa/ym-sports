@@ -270,6 +270,16 @@ export const usePersistentNotifications = () => {
       if (success) {
         NotificationLogger.success('PERSISTENT', `✅ Notificação persistente entregue: ${notification.title}`);
         
+        // Salvar log crítico de entrega
+        NotificationLogger.saveCriticalLog(
+          `🔔 NOTIFICAÇÃO ENTREGUE: ${notification.title}`, 
+          {
+            horario: notification.time,
+            entregueEm: new Date().toLocaleString('pt-BR'),
+            appFechado: document.hidden
+          }
+        );
+        
         // Remover do localStorage após envio
         try {
           localStorage.removeItem(scheduledKey);
@@ -279,6 +289,16 @@ export const usePersistentNotifications = () => {
         }
       } else {
         NotificationLogger.error('PERSISTENT', `❌ Falha na entrega persistente: ${notification.title}`);
+        
+        // Salvar log crítico de falha
+        NotificationLogger.saveCriticalLog(
+          `❌ FALHA NA ENTREGA: ${notification.title}`, 
+          {
+            horario: notification.time,
+            tentativaEm: new Date().toLocaleString('pt-BR'),
+            appFechado: document.hidden
+          }
+        );
       }
     }, delay);
     
