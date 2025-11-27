@@ -14,6 +14,7 @@ import { useDailyNotifications } from "./hooks/useDailyNotifications";
 import { useRobustNotifications } from "./hooks/useRobustNotifications";
 import { useBackgroundNotifications } from "./hooks/useBackgroundNotifications";
 import { useWebPushNotifications } from "./hooks/useWebPushNotifications";
+import { usePersistentNotifications } from "./hooks/usePersistentNotifications";
 import { NotificationDebugger } from "./components/NotificationDebugger";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -60,6 +61,9 @@ const AppContent = () => {
   
   // Hook para Web Push (sistema mais robusto)
   useWebPushNotifications();
+  
+  // Hook para notificações persistentes (solução definitiva)
+  usePersistentNotifications();
   
 
   return (

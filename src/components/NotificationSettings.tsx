@@ -9,6 +9,7 @@ import { useDailyNotifications } from "@/hooks/useDailyNotifications";
 import { useRobustNotifications } from "@/hooks/useRobustNotifications";
 import { useBackgroundNotifications } from "@/hooks/useBackgroundNotifications";
 import { useWebPushNotifications } from "@/hooks/useWebPushNotifications";
+import { usePersistentNotifications } from "@/hooks/usePersistentNotifications";
 import { 
   Bell, 
   BellOff, 
@@ -54,6 +55,14 @@ export function NotificationSettings() {
     sendTestNotification: sendWebPushTest,
     requestPermission: requestWebPushPermission
   } = useWebPushNotifications();
+  
+  const {
+    scheduleAllPersistent,
+    scheduleNextPersistent,
+    sendTestNotificationPersistent,
+    requestPermissionRobust,
+    checkPermissionStatus
+  } = usePersistentNotifications();
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     motivational: true,
     nutrition: true,
@@ -490,6 +499,97 @@ export function NotificationSettings() {
                       >
                         <Clock className="mr-2 h-4 w-4" />
                         Agendar WP
+                      </Button>
+                    </div>
+                    
+                    <div className="text-xs text-center text-gray-400 mb-2 mt-4">
+                      Sistema Persistente (Solução Definitiva)
+                    </div>
+                    
+                    <div className="flex gap-2 mb-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={async () => {
+                          try {
+                            const status = await checkPermissionStatus();
+                            toast.info(`Status da permissão: ${status}`);
+                            
+                            if (status !== 'granted') {
+                              const granted = await requestPermissionRobust();
+                              if (granted) {
+                                toast.success("✅ Permissão concedida com sucesso!");
+                              } else {
+                                toast.error("❌ Permissão negada - verifique configurações do navegador");
+                              }
+                            } else {
+                              toast.success("✅ Permissão já concedida");
+                            }
+                          } catch (error) {
+                            toast.error("Erro ao verificar permissão");
+                          }
+                        }}
+                        className="flex-1 border-emerald-500 text-emerald-500 hover:bg-emerald-500 hover:text-black"
+                      >
+                        <Bell className="mr-2 h-4 w-4" />
+                        Verificar Permissão
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        onClick={async () => {
+                          try {
+                            const success = await sendTestNotificationPersistent("🔥 Teste Persistente", "Sistema definitivo funcionando!");
+                            if (success) {
+                              toast.success("Notificação persistente enviada! Veja os logs.");
+                            } else {
+                              toast.error("Erro no sistema persistente - verifique logs");
+                            }
+                          } catch (error) {
+                            toast.error("Erro ao testar sistema persistente");
+                          }
+                        }}
+                        className="flex-1 border-lime-500 text-lime-500 hover:bg-lime-500 hover:text-black"
+                      >
+                        <Bell className="mr-2 h-4 w-4" />
+                        Teste Persistente
+                      </Button>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          try {
+                            const next = scheduleNextPersistent();
+                            if (next) {
+                              toast.success(`Persistente agendado para ${next.scheduledFor}. FECHE O APP e aguarde!`);
+                            } else {
+                              toast.error("Erro ao agendar persistente");
+                            }
+                          } catch (error) {
+                            toast.error("Erro ao agendar persistente");
+                          }
+                        }}
+                        className="flex-1 border-green-600 text-green-400 hover:bg-green-600 hover:text-black"
+                      >
+                        <Clock className="mr-2 h-4 w-4" />
+                        Próxima (1min)
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        onClick={async () => {
+                          try {
+                            const count = await scheduleAllPersistent();
+                            toast.success(`${count} notificações persistentes agendadas!`);
+                          } catch (error) {
+                            toast.error("Erro ao agendar todas as persistentes");
+                          }
+                        }}
+                        className="flex-1 border-emerald-600 text-emerald-400 hover:bg-emerald-600 hover:text-black"
+                      >
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Agendar Todas
                       </Button>
                     </div>
                   </div>
