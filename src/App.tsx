@@ -13,6 +13,8 @@ import { useScheduledNotifications } from "./hooks/useScheduledNotifications";
 import { useDailyNotifications } from "./hooks/useDailyNotifications";
 import { useRobustNotifications } from "./hooks/useRobustNotifications";
 import { useBackgroundNotifications } from "./hooks/useBackgroundNotifications";
+import { useWebPushNotifications } from "./hooks/useWebPushNotifications";
+import { NotificationDebugger } from "./components/NotificationDebugger";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -55,6 +57,9 @@ const AppContent = () => {
   
   // Hook para notificações em segundo plano (funciona com app fechado)
   useBackgroundNotifications();
+  
+  // Hook para Web Push (sistema mais robusto)
+  useWebPushNotifications();
   
 
   return (
@@ -99,6 +104,8 @@ const App = () => (
           <Sonner />
           <ErrorBoundary>
             <AppContent />
+            {/* Debugger de notificações (sempre disponível) */}
+            <NotificationDebugger />
           </ErrorBoundary>
         </TooltipProvider>
       </AuthProvider>

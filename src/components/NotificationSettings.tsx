@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useDailyNotifications } from "@/hooks/useDailyNotifications";
 import { useRobustNotifications } from "@/hooks/useRobustNotifications";
 import { useBackgroundNotifications } from "@/hooks/useBackgroundNotifications";
+import { useWebPushNotifications } from "@/hooks/useWebPushNotifications";
 import { 
   Bell, 
   BellOff, 
@@ -46,6 +47,13 @@ export function NotificationSettings() {
     sendTestNotification,
     requestPermission
   } = useBackgroundNotifications();
+  
+  const {
+    scheduleAllNotifications: scheduleWebPushNotifications,
+    scheduleNextNotification: scheduleWebPushNext,
+    sendTestNotification: sendWebPushTest,
+    requestPermission: requestWebPushPermission
+  } = useWebPushNotifications();
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     motivational: true,
     nutrition: true,
@@ -436,6 +444,52 @@ export function NotificationSettings() {
                       >
                         <Clock className="mr-2 h-4 w-4" />
                         Próxima
+                      </Button>
+                    </div>
+                    
+                    <div className="text-xs text-center text-gray-400 mb-2 mt-4">
+                      Sistema Web Push (Logs Detalhados)
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={async () => {
+                          try {
+                            const success = await sendWebPushTest("🔍 Teste Web Push", "Sistema com logs detalhados funcionando!");
+                            if (success) {
+                              toast.success("Notificação Web Push enviada! Veja os logs no debugger.");
+                            } else {
+                              toast.error("Erro no Web Push - verifique os logs");
+                            }
+                          } catch (error) {
+                            toast.error("Erro ao testar Web Push");
+                          }
+                        }}
+                        className="flex-1 border-cyan-500 text-cyan-500 hover:bg-cyan-500 hover:text-black"
+                      >
+                        <Bell className="mr-2 h-4 w-4" />
+                        Teste Web Push
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          try {
+                            const next = scheduleWebPushNext();
+                            if (next) {
+                              toast.success(`Web Push agendado: ${next.notification.title} para ${next.scheduledFor}`);
+                            } else {
+                              toast.error("Erro ao agendar Web Push");
+                            }
+                          } catch (error) {
+                            toast.error("Erro ao agendar Web Push");
+                          }
+                        }}
+                        className="flex-1 border-teal-500 text-teal-500 hover:bg-teal-500 hover:text-black"
+                      >
+                        <Clock className="mr-2 h-4 w-4" />
+                        Agendar WP
                       </Button>
                     </div>
                   </div>
