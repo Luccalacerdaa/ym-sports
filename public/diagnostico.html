@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔍 Diagnóstico de Notificações - YM Sports</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+      color: #667eea;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 1.1em;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+
+    .card h2 {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      color: #667eea;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border-left: 4px solid #ddd;
+    }
+
+    .status-item.success {
+      border-left-color: #10b981;
+      background: #ecfdf5;
+    }
+
+    .status-item.error {
+      border-left-color: #ef4444;
+      background: #fef2f2;
+    }
+
+    .status-item.warning {
+      border-left-color: #f59e0b;
+      background: #fffbeb;
+    }
+
+    .status-label {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .status-value {
+      font-family: 'Courier New', monospace;
+      padding: 5px 10px;
+      background: white;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    .button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom: 10px;
+      transition: all 0.3s;
+    }
+
+    .button:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .button:active {
+      transform: translateY(0);
+    }
+
+    .button.secondary {
+      background: #10b981;
+    }
+
+    .button.secondary:hover {
+      background: #059669;
+    }
+
+    .button.danger {
+      background: #ef4444;
+    }
+
+    .button.danger:hover {
+      background: #dc2626;
+    }
+
+    .logs-container {
+      max-height: 400px;
+      overflow-y: auto;
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85em;
+    }
+
+    .log-entry {
+      padding: 8px;
+      margin-bottom: 5px;
+      border-radius: 4px;
+      border-left: 3px solid #64748b;
+    }
+
+    .log-entry.INFO {
+      border-left-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+      color: #93c5fd;
+    }
+
+    .log-entry.SUCCESS {
+      border-left-color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+      color: #6ee7b7;
+    }
+
+    .log-entry.ERROR {
+      border-left-color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+      color: #fca5a5;
+    }
+
+    .log-entry.WARNING {
+      border-left-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.1);
+      color: #fcd34d;
+    }
+
+    .log-entry.DEBUG {
+      border-left-color: #8b5cf6;
+      background: rgba(139, 92, 246, 0.1);
+      color: #c4b5fd;
+    }
+
+    .log-time {
+      color: #94a3b8;
+      margin-right: 10px;
+    }
+
+    .log-message {
+      color: inherit;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+
+    .badge.success {
+      background: #10b981;
+      color: white;
+    }
+
+    .badge.error {
+      background: #ef4444;
+      color: white;
+    }
+
+    .badge.warning {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .device-info {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      font-size: 0.9em;
+      color: #666;
+      word-break: break-all;
+    }
+
+    .test-section {
+      background: #fffbeb;
+      border: 2px dashed #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .test-section h3 {
+      color: #f59e0b;
+      margin-bottom: 15px;
+    }
+
+    .countdown {
+      font-size: 2em;
+      font-weight: bold;
+      text-align: center;
+      color: #667eea;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔍 Diagnóstico de Notificações</h1>
+      <p>Sistema completo de análise e debug</p>
+    </div>
+
+    <div class="card">
+      <h2>📊 Status do Sistema</h2>
+      <div id="system-status"></div>
+      <div class="device-info" id="device-info"></div>
+    </div>
+
+    <div class="card">
+      <h2>🧪 Testes Rápidos</h2>
+      <button class="button" onclick="testNotification()">🔔 Testar Notificação Agora</button>
+      <button class="button secondary" onclick="testIn1Minute()">⏱️ Testar em 1 Minuto</button>
+      <button class="button secondary" onclick="requestPermission()">🔐 Solicitar Permissão</button>
+      <button class="button danger" onclick="clearCache()">🗑️ Limpar Cache</button>
+      <div id="countdown" class="countdown" style="display: none;"></div>
+    </div>
+
+    <div class="card">
+      <h2>📋 Logs do Service Worker</h2>
+      <button class="button" onclick="loadSWLogs()">🔄 Atualizar Logs</button>
+      <button class="button secondary" onclick="exportLogs()">💾 Exportar Logs</button>
+      <div class="logs-container" id="sw-logs">
+        <div style="color: #94a3b8; text-align: center; padding: 20px;">
+          Clique em "Atualizar Logs" para carregar os logs do Service Worker
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📱 Instruções por Plataforma</h2>
+      <div id="platform-instructions"></div>
+    </div>
+  </div>
+
+  <script>
+    // Detectar plataforma
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                  window.navigator.standalone === true;
+
+    // Atualizar status do sistema
+    async function updateSystemStatus() {
+      const statusDiv = document.getElementById('system-status');
+      const deviceDiv = document.getElementById('device-info');
+      
+      const checks = [
+        {
+          label: 'Notification API',
+          value: 'Notification' in window,
+          type: 'Notification' in window ? 'success' : 'error'
+        },
+        {
+          label: 'Service Worker',
+          value: 'serviceWorker' in navigator,
+          type: 'serviceWorker' in navigator ? 'success' : 'error'
+        },
+        {
+          label: 'Permissão',
+          value: Notification.permission,
+          type: Notification.permission === 'granted' ? 'success' : 
+                Notification.permission === 'denied' ? 'error' : 'warning'
+        },
+        {
+          label: 'HTTPS',
+          value: location.protocol === 'https:',
+          type: location.protocol === 'https:' ? 'success' : 'error'
+        },
+        {
+          label: 'PWA Instalado',
+          value: isPWA,
+          type: isPWA ? 'success' : 'warning'
+        },
+        {
+          label: 'Plataforma',
+          value: isIOS ? 'iOS' : isSafari ? 'Safari' : 'Outro',
+          type: 'success'
+        }
+      ];
+
+      // Verificar SW ativo
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.getRegistration();
+        checks.push({
+          label: 'SW Ativo',
+          value: registration?.active ? 'Sim' : 'Não',
+          type: registration?.active ? 'success' : 'error'
+        });
+      }
+
+      statusDiv.innerHTML = checks.map(check => `
+        <div class="status-item ${check.type}">
+          <span class="status-label">${check.label}</span>
+          <span class="status-value">${check.value}</span>
+        </div>
+      `).join('');
+
+      // Informações do dispositivo
+      deviceDiv.innerHTML = `
+        <strong>User Agent:</strong><br>
+        ${navigator.userAgent}
+      `;
+    }
+
+    // Instruções por plataforma
+    function showPlatformInstructions() {
+      const instructionsDiv = document.getElementById('platform-instructions');
+      
+      if (isIOS) {
+        instructionsDiv.innerHTML = `
+          <div class="test-section">
+            <h3>📱 iOS Safari - Limitações Importantes</h3>
+            <p style="margin-bottom: 15px;">⚠️ <strong>ATENÇÃO:</strong> O iOS Safari tem limitações severas para notificações em background:</p>
+            <ul style="margin-left: 20px; line-height: 1.8;">
+              <li>✅ Notificações funcionam <strong>apenas com o app aberto</strong></li>
+              <li>❌ Notificações <strong>NÃO funcionam</strong> com o app fechado/background</li>
+              <li>✅ Para notificações em background, é necessário <strong>instalar como PWA</strong></li>
+              <li>⚠️ Mesmo como PWA, as notificações podem ser limitadas</li>
+              <li>📱 Recomendamos usar o <strong>Chrome ou Firefox</strong> no iOS para melhor suporte</li>
+            </ul>
+            <p style="margin-top: 15px;"><strong>Como instalar como PWA:</strong></p>
+            <ol style="margin-left: 20px; line-height: 1.8;">
+              <li>Abra o Safari</li>
+              <li>Toque no botão "Compartilhar" (ícone de seta para cima)</li>
+              <li>Role para baixo e toque em "Adicionar à Tela de Início"</li>
+              <li>Toque em "Adicionar"</li>
+              <li>Abra o app pela tela inicial (não pelo Safari)</li>
+            </ol>
+          </div>
+        `;
+      } else if (isSafari) {
+        instructionsDiv.innerHTML = `
+          <div class="test-section">
+            <h3>🖥️ Safari Desktop</h3>
+            <p style="margin-bottom: 15px;">O Safari Desktop tem melhor suporte para notificações:</p>
+            <ul style="margin-left: 20px; line-height: 1.8;">
+              <li>✅ Notificações funcionam em background</li>
+              <li>✅ Service Worker mantém-se ativo</li>
+              <li>⚠️ Certifique-se de permitir notificações nas configurações do macOS</li>
+            </ul>
+          </div>
+        `;
+      } else {
+        instructionsDiv.innerHTML = `
+          <div class="test-section">
+            <h3>🌐 Chrome/Firefox/Edge</h3>
+            <p style="margin-bottom: 15px;">Estes navegadores têm excelente suporte para notificações:</p>
+            <ul style="margin-left: 20px; line-height: 1.8;">
+              <li>✅ Notificações funcionam perfeitamente em background</li>
+              <li>✅ Service Worker permanece ativo</li>
+              <li>✅ Suporte completo para PWA</li>
+              <li>✅ Notificações chegam mesmo com o navegador fechado</li>
+            </ul>
+          </div>
+        `;
+      }
+    }
+
+    // Testar notificação
+    async function testNotification() {
+      if (Notification.permission !== 'granted') {
+        alert('❌ Permissão não concedida! Clique em "Solicitar Permissão" primeiro.');
+        return;
+      }
+
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        await registration.showNotification('🧪 Teste de Notificação', {
+          body: 'Se você viu isso, as notificações estão funcionando!',
+          icon: '/icons/logo.png',
+          badge: '/icons/logo.png',
+          tag: 'test-notification',
+          requireInteraction: false,
+          vibrate: [200, 100, 200]
+        });
+        alert('✅ Notificação enviada! Verifique se apareceu.');
+      } catch (error) {
+        alert(`❌ Erro: ${error.message}`);
+      }
+    }
+
+    // Testar em 1 minuto
+    async function testIn1Minute() {
+      if (Notification.permission !== 'granted') {
+        alert('❌ Permissão não concedida! Clique em "Solicitar Permissão" primeiro.');
+        return;
+      }
+
+      const countdownDiv = document.getElementById('countdown');
+      countdownDiv.style.display = 'block';
+      
+      let seconds = 60;
+      const interval = setInterval(() => {
+        seconds--;
+        countdownDiv.textContent = `⏱️ ${seconds}s`;
+        
+        if (seconds <= 0) {
+          clearInterval(interval);
+          countdownDiv.textContent = '🔔 Enviando notificação...';
+        }
+      }, 1000);
+
+      setTimeout(async () => {
+        try {
+          const registration = await navigator.serviceWorker.ready;
+          await registration.showNotification('⏰ Teste de 1 Minuto', {
+            body: 'A notificação chegou após 1 minuto!',
+            icon: '/icons/logo.png',
+            badge: '/icons/logo.png',
+            tag: 'test-1min',
+            requireInteraction: true,
+            vibrate: [200, 100, 200, 100, 200]
+          });
+          countdownDiv.textContent = '✅ Notificação enviada!';
+          setTimeout(() => {
+            countdownDiv.style.display = 'none';
+          }, 3000);
+        } catch (error) {
+          countdownDiv.textContent = `❌ Erro: ${error.message}`;
+        }
+      }, 60000);
+
+      alert('⏱️ Notificação agendada para 1 minuto!\n\n⚠️ IMPORTANTE: Feche o app agora para testar se a notificação chega com o app fechado.');
+    }
+
+    // Solicitar permissão
+    async function requestPermission() {
+      try {
+        const permission = await Notification.requestPermission();
+        alert(permission === 'granted' ? 
+          '✅ Permissão concedida!' : 
+          '❌ Permissão negada!');
+        updateSystemStatus();
+      } catch (error) {
+        alert(`❌ Erro: ${error.message}`);
+      }
+    }
+
+    // Limpar cache
+    async function clearCache() {
+      if (!confirm('⚠️ Isso vai limpar todos os dados do Service Worker. Continuar?')) {
+        return;
+      }
+
+      try {
+        // Limpar localStorage
+        localStorage.clear();
+        
+        // Desregistrar SW
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (let registration of registrations) {
+          await registration.unregister();
+        }
+        
+        // Limpar cache
+        const cacheNames = await caches.keys();
+        for (let cacheName of cacheNames) {
+          await caches.delete(cacheName);
+        }
+        
+        alert('✅ Cache limpo! Recarregue a página.');
+        location.reload();
+      } catch (error) {
+        alert(`❌ Erro: ${error.message}`);
+      }
+    }
+
+    // Carregar logs do SW
+    async function loadSWLogs() {
+      const logsDiv = document.getElementById('sw-logs');
+      logsDiv.innerHTML = '<div style="color: #94a3b8; text-align: center; padding: 20px;">Carregando logs...</div>';
+
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        
+        // Solicitar logs via postMessage
+        const messageChannel = new MessageChannel();
+        
+        messageChannel.port1.onmessage = (event) => {
+          if (event.data.type === 'LOGS') {
+            const logs = event.data.logs;
+            
+            if (logs.length === 0) {
+              logsDiv.innerHTML = '<div style="color: #94a3b8; text-align: center; padding: 20px;">Nenhum log encontrado</div>';
+              return;
+            }
+
+            logsDiv.innerHTML = logs.map(log => `
+              <div class="log-entry ${log.level}">
+                <span class="log-time">${new Date(log.timestamp).toLocaleTimeString()}</span>
+                <span class="log-message">[${log.level}] ${log.message}</span>
+                ${log.data ? `<pre style="margin-top: 5px; color: #64748b;">${log.data}</pre>` : ''}
+              </div>
+            `).join('');
+          }
+        };
+
+        registration.active.postMessage(
+          { type: 'GET_LOGS', limit: 100 },
+          [messageChannel.port2]
+        );
+      } catch (error) {
+        logsDiv.innerHTML = `<div style="color: #ef4444; text-align: center; padding: 20px;">❌ Erro: ${error.message}</div>`;
+      }
+    }
+
+    // Exportar logs
+    async function exportLogs() {
+      const logsDiv = document.getElementById('sw-logs');
+      const text = logsDiv.innerText;
+      
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ym-sports-logs-${Date.now()}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      alert('✅ Logs exportados!');
+    }
+
+    // Inicializar
+    updateSystemStatus();
+    showPlatformInstructions();
+
+    // Atualizar status a cada 5 segundos
+    setInterval(updateSystemStatus, 5000);
+  </script>
+</body>
+</html>
+
