@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { TopNavBar } from "@/components/TopNavBar";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { PWAInstallTooltip } from "@/components/PWAInstallTooltip";
+import ChatbotButton from "@/components/ChatbotButton";
 import { usePWAInstallPrompt } from "@/hooks/usePWAInstallPrompt";
 
 export default function DashboardLayout() {
@@ -24,6 +25,9 @@ export default function DashboardLayout() {
         isOpen={showInstallPrompt}
         onClose={handlePromptDismiss}
       />
+      
+      {/* Chatbot */}
+      <ChatbotButton />
     </div>
   );
 }

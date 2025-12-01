@@ -17,6 +17,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { YouTubeService, YouTubeVideo } from '@/services/youtubeService';
+import VideoThumbnail from '@/components/VideoThumbnail';
 import { toast } from 'sonner';
 
 export default function Motivational() {
@@ -229,10 +230,9 @@ export default function Motivational() {
             {filteredVideos.map(video => (
               <Card key={video.id} className="bg-gray-900 border-gray-800 hover:border-yellow-500/50 transition-all duration-300 group">
                 <CardHeader className="p-0">
-                  <div className="relative aspect-[9/16] overflow-hidden rounded-t-lg">
-                    <img
-                      src={video.thumbnail}
-                      alt={video.title}
+                  <div className="relative aspect-[9/16] overflow-hidden rounded-t-lg bg-gray-800">
+                    <VideoThumbnail 
+                      video={video}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     
