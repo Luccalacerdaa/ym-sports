@@ -181,15 +181,19 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
         isMinimized ? 'h-16' : 'h-[600px]'
       }`}>
         {/* Header */}
-        <CardHeader className="pb-3 border-b bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+        <CardHeader className="pb-3 border-b bg-gradient-to-r from-yellow-500 to-yellow-600 text-black rounded-t-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <Bot className="w-6 h-6" />
+              <div className="w-10 h-10 bg-black/20 rounded-full flex items-center justify-center p-1">
+                <img 
+                  src="/icons/logo.png" 
+                  alt="YM Sports" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div>
-                <CardTitle className="text-lg">YM Assistant</CardTitle>
-                <p className="text-sm text-blue-100">Assistente IA do YM Sports</p>
+                <CardTitle className="text-lg font-bold">YM Assistant</CardTitle>
+                <p className="text-sm text-black/70">Assistente IA do YM Sports</p>
               </div>
             </div>
             
@@ -198,7 +202,7 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsMinimized(!isMinimized)}
-                className="text-white hover:bg-white/20"
+                className="text-black hover:bg-black/20"
               >
                 {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
               </Button>
@@ -207,7 +211,7 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowSettings(!showSettings)}
-                className="text-white hover:bg-white/20"
+                className="text-black hover:bg-black/20"
               >
                 <Settings className="w-4 h-4" />
               </Button>
@@ -216,7 +220,7 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                 variant="ghost"
                 size="sm"
                 onClick={onClose}
-                className="text-white hover:bg-white/20"
+                className="text-black hover:bg-black/20"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -225,13 +229,13 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
         </CardHeader>
 
         {!isMinimized && (
-          <CardContent className="p-0 flex flex-col h-full">
+          <CardContent className="p-0 flex flex-col h-full bg-black">
             {/* Configurações */}
             {showSettings && (
-              <div className="p-4 border-b bg-gray-50">
+              <div className="p-4 border-b bg-gray-800 border-gray-700">
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-yellow-500 mb-1">
                       API Key da OpenAI
                     </label>
                     <div className="flex gap-2">
@@ -240,19 +244,23 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                         placeholder="sk-..."
                         value={apiKey}
                         onChange={(e) => setApiKey(e.target.value)}
-                        className="flex-1"
+                        className="flex-1 bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                       />
-                      <Button onClick={saveApiKey} size="sm">
+                      <Button 
+                        onClick={saveApiKey} 
+                        size="sm"
+                        className="bg-yellow-500 hover:bg-yellow-600 text-black"
+                      >
                         <Key className="w-4 h-4" />
                       </Button>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-400 mt-1">
                       Necessária para usar o chatbot com IA. 
                       <a 
                         href="https://platform.openai.com/api-keys" 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline ml-1"
+                        className="text-yellow-500 hover:underline ml-1"
                       >
                         Obter API key <ExternalLink className="w-3 h-3 inline" />
                       </a>
@@ -263,7 +271,7 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                     variant="outline"
                     size="sm"
                     onClick={clearConversation}
-                    className="w-full"
+                    className="w-full border-gray-600 text-white hover:bg-gray-700"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
                     Limpar Conversa
@@ -283,16 +291,20 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                     }`}
                   >
                     {message.role === 'assistant' && (
-                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Bot className="w-4 h-4 text-white" />
+                      <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center flex-shrink-0 p-1">
+                        <img 
+                          src="/icons/logo.png" 
+                          alt="YM" 
+                          className="w-full h-full object-contain"
+                        />
                       </div>
                     )}
                     
                     <div
                       className={`max-w-[80%] p-3 rounded-lg ${
                         message.role === 'user'
-                          ? 'bg-blue-600 text-white ml-auto'
-                          : 'bg-gray-100 text-gray-800'
+                          ? 'bg-yellow-500 text-black ml-auto font-medium'
+                          : 'bg-gray-900 text-white border border-gray-700'
                       }`}
                     >
                       <div
@@ -310,8 +322,8 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                     </div>
                     
                     {message.role === 'user' && (
-                      <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <User className="w-4 h-4 text-white" />
+                      <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-yellow-500">
+                        <User className="w-4 h-4 text-yellow-500" />
                       </div>
                     )}
                   </div>
@@ -319,15 +331,19 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                 
                 {isLoading && (
                   <div className="flex gap-3 justify-start">
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                      <Bot className="w-4 h-4 text-white" />
+                    <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center p-1">
+                      <img 
+                        src="/icons/logo.png" 
+                        alt="YM" 
+                        className="w-full h-full object-contain animate-pulse"
+                      />
                     </div>
-                    <div className="bg-gray-100 p-3 rounded-lg">
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                        <span className="text-sm ml-2">Pensando...</span>
+                    <div className="bg-gray-900 border border-gray-700 p-3 rounded-lg">
+                      <div className="flex items-center gap-2 text-yellow-500">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <span className="text-sm ml-2 text-white">Pensando...</span>
                       </div>
                     </div>
                   </div>
@@ -339,8 +355,8 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
 
             {/* Perguntas Frequentes */}
             {messages.length <= 1 && (
-              <div className="p-4 border-t bg-gray-50">
-                <p className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+              <div className="p-4 border-t bg-gray-900 border-gray-700">
+                <p className="text-sm font-medium text-yellow-500 mb-3 flex items-center gap-2">
                   <HelpCircle className="w-4 h-4" />
                   Perguntas Frequentes:
                 </p>
@@ -351,7 +367,7 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => sendFrequentQuestion(question)}
-                      className="text-xs h-8"
+                      className="text-xs h-8 border-yellow-500/30 text-white hover:bg-yellow-500/20 hover:border-yellow-500"
                     >
                       {question}
                     </Button>
@@ -361,7 +377,7 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
             )}
 
             {/* Input */}
-            <div className="p-4 border-t">
+            <div className="p-4 border-t border-gray-700 bg-gray-900">
               <div className="flex gap-2">
                 <Input
                   placeholder="Digite sua pergunta..."
@@ -369,19 +385,19 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                   disabled={isLoading}
-                  className="flex-1"
+                  className="flex-1 bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-yellow-500"
                 />
                 <Button
                   onClick={sendMessage}
                   disabled={isLoading || !inputMessage.trim()}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-medium"
                 >
                   <Send className="w-4 h-4" />
                 </Button>
               </div>
               
               {!chatbotService.hasApiKey() && (
-                <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+                <p className="text-xs text-yellow-500 mt-2 flex items-center gap-1">
                   <Zap className="w-3 h-3" />
                   Configure sua API key da OpenAI para usar a IA completa
                 </p>
