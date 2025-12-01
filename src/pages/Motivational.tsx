@@ -226,11 +226,11 @@ export default function Motivational() {
 
         {/* Grid de Vídeos */}
         {!loading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredVideos.map(video => (
               <Card key={video.id} className="bg-gray-900 border-gray-800 hover:border-yellow-500/50 transition-all duration-300 group">
                 <CardHeader className="p-0">
-                  <div className="relative aspect-[9/16] overflow-hidden rounded-t-lg bg-gray-800">
+                  <div className="relative aspect-video overflow-hidden rounded-t-lg bg-gray-800">
                     <VideoThumbnail 
                       video={video}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

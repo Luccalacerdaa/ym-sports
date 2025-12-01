@@ -12,10 +12,10 @@ export default function ChatbotButton() {
       <div className="fixed bottom-24 right-4 z-40">
         <Button
           onClick={() => setIsChatOpen(true)}
-          className={`w-14 h-14 rounded-full shadow-lg transition-all duration-300 p-2 ${
+          className={`w-14 h-14 rounded-full shadow-lg transition-all duration-300 p-3 ${
             isChatOpen 
               ? 'bg-gray-600 hover:bg-gray-700' 
-              : 'bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 animate-pulse shadow-yellow-500/50'
+              : 'bg-black hover:bg-gray-900 border-2 border-yellow-500 hover:border-yellow-400 shadow-yellow-500/30'
           }`}
           style={{ display: isChatOpen ? 'none' : 'flex' }}
         >
