@@ -3,7 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState } from "react";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { SplashScreen } from "./components/SplashScreen";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useUpdateNotification } from "./hooks/useUpdateNotification";
@@ -41,6 +43,7 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
+  const [showSplash, setShowSplash] = useState(true);
   // Hook para detectar e notificar sobre atualizações do PWA
   useUpdateNotification();
   
@@ -65,6 +68,15 @@ const AppContent = () => {
   // Hook para notificações persistentes (solução definitiva)
   usePersistentNotifications();
   
+
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+  };
+
+  // Mostrar splash screen primeiro
+  if (showSplash) {
+    return <SplashScreen onComplete={handleSplashComplete} />;
+  }
 
   return (
     <BrowserRouter>
