@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useSimpleNotifications } from "@/hooks/useSimpleNotifications";
+import { toast } from "sonner";
 import { 
   Settings as SettingsIcon, 
   Bell, 
@@ -11,12 +13,15 @@ import {
   Shield, 
   Smartphone,
   Info,
-  ExternalLink
+  ExternalLink,
+  TestTube,
+  Zap
 } from "lucide-react";
 
 export default function Settings() {
   const appVersion = "1.0.0";
   const buildDate = new Date().toLocaleDateString('pt-BR');
+  const { sendTestNotification, forceCheck, hasPermission, requestPermission } = useSimpleNotifications();
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -36,6 +41,71 @@ export default function Settings() {
           <h2 className="text-xl font-semibold">Notificações</h2>
         </div>
         <NotificationSettings />
+        
+        {/* Teste de Notificações */}
+        <Card className="bg-gray-900 border-gray-800">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-yellow-500">
+              <TestTube className="h-5 w-5" />
+              Teste de Notificações
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-300">Status das Permissões:</span>
+              <Badge variant={hasPermission ? "default" : "destructive"}>
+                {hasPermission ? "✅ Permitido" : "❌ Negado"}
+              </Badge>
+            </div>
+            
+            <div className="flex gap-2">
+              {!hasPermission && (
+                <Button 
+                  onClick={async () => {
+                    const granted = await requestPermission();
+                    if (granted) {
+                      toast.success("Permissão concedida!");
+                    } else {
+                      toast.error("Permissão negada");
+                    }
+                  }}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  <Bell className="mr-2 h-4 w-4" />
+                  Solicitar Permissão
+                </Button>
+              )}
+              
+              <Button 
+                onClick={() => {
+                  sendTestNotification();
+                  toast.success("Teste enviado!");
+                }}
+                disabled={!hasPermission}
+                className="flex-1 bg-green-600 hover:bg-green-700"
+              >
+                <TestTube className="mr-2 h-4 w-4" />
+                Teste Imediato
+              </Button>
+              
+              <Button 
+                onClick={() => {
+                  forceCheck();
+                  toast.success("Verificação forçada!");
+                }}
+                disabled={!hasPermission}
+                className="flex-1 bg-purple-600 hover:bg-purple-700"
+              >
+                <Zap className="mr-2 h-4 w-4" />
+                Forçar Verificação
+              </Button>
+            </div>
+            
+            <p className="text-xs text-gray-400">
+              Use estes botões para testar se as notificações estão funcionando corretamente.
+            </p>
+          </CardContent>
+        </Card>
         
         {/* Cronograma de Notificações */}
         <NotificationSchedule compact={true} />

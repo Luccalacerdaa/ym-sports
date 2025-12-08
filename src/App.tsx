@@ -9,14 +9,7 @@ import { SplashScreen } from "./components/SplashScreen";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useUpdateNotification } from "./hooks/useUpdateNotification";
-import { useEventNotifications } from "./hooks/useEventNotifications";
-import { useAutoNotificationPermission } from "./hooks/useAutoNotificationPermission";
-import { useScheduledNotifications } from "./hooks/useScheduledNotifications";
-import { useDailyNotifications } from "./hooks/useDailyNotifications";
-import { useRobustNotifications } from "./hooks/useRobustNotifications";
-import { useBackgroundNotifications } from "./hooks/useBackgroundNotifications";
-import { useWebPushNotifications } from "./hooks/useWebPushNotifications";
-import { usePersistentNotifications } from "./hooks/usePersistentNotifications";
+import { useSimpleNotifications } from "./hooks/useSimpleNotifications";
 import { NotificationDebugger } from "./components/NotificationDebugger";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -47,26 +40,8 @@ const AppContent = () => {
   // Hook para detectar e notificar sobre atualizações do PWA
   useUpdateNotification();
   
-  // Hook para notificar sobre eventos próximos
-  useEventNotifications();
-  
-  // Hook para solicitar permissão de notificação automaticamente
-  useAutoNotificationPermission();
-  
-  // Hook para notificações diárias motivacionais e do app
-  useDailyNotifications();
-  
-  // Hook para sistema robusto de notificações (novo)
-  useRobustNotifications();
-  
-  // Hook para notificações em segundo plano (funciona com app fechado)
-  useBackgroundNotifications();
-  
-  // Hook para Web Push (sistema mais robusto)
-  useWebPushNotifications();
-  
-  // Hook para notificações persistentes (solução definitiva)
-  usePersistentNotifications();
+  // Sistema simplificado de notificações
+  useSimpleNotifications();
   
 
   const handleSplashComplete = () => {

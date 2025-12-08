@@ -184,7 +184,7 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
         <CardHeader className="pb-3 border-b bg-gradient-to-r from-yellow-500 to-yellow-600 text-black rounded-t-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-black/20 rounded-full flex items-center justify-center p-1">
+              <div className="w-10 h-10 bg-black border-2 border-black rounded-full flex items-center justify-center p-1">
                 <img 
                   src="/icons/logo.png" 
                   alt="YM Sports" 
@@ -291,7 +291,7 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                     }`}
                   >
                     {message.role === 'assistant' && (
-                      <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center flex-shrink-0 p-1">
+                      <div className="w-8 h-8 bg-black border-2 border-yellow-500 rounded-full flex items-center justify-center flex-shrink-0 p-1">
                         <img 
                           src="/icons/logo.png" 
                           alt="YM" 
