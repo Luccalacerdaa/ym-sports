@@ -1,9 +1,8 @@
 // Web Push Utilities para YM Sports
 // Sistema de Push Notifications que funciona com app fechado
 
-// VAPID Keys (você precisará gerar suas próprias em produção)
-// Execute: npx web-push generate-vapid-keys
-export const VAPID_PUBLIC_KEY = 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvRuwNdsxmJsS9eX0x0lJOzMfSLI5MGVS7Ij0EBSQ8SnQGrGTgkJ4c';
+// VAPID Keys geradas automaticamente
+export const VAPID_PUBLIC_KEY = 'BDccAmSWepZa8p4veXdgB1lHFqbe8rYAES_CgFX30H-So64CED0YyLLqUAHuVP4lNk05aad5GqN6vWfZwrjQAqw';
 
 // Converte base64 para Uint8Array
 function urlBase64ToUint8Array(base64String: string): Uint8Array {

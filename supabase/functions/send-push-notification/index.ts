@@ -4,8 +4,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const VAPID_PUBLIC_KEY = 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvRuwNdsxmJsS9eX0x0lJOzMfSLI5MGVS7Ij0EBSQ8SnQGrGTgkJ4c';
-const VAPID_PRIVATE_KEY = 'YOUR_VAPID_PRIVATE_KEY_HERE'; // Gerar com: npx web-push generate-vapid-keys
+const VAPID_PUBLIC_KEY = 'BDccAmSWepZa8p4veXdgB1lHFqbe8rYAES_CgFX30H-So64CED0YyLLqUAHuVP4lNk05aad5GqN6vWfZwrjQAqw';
+const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY') || 'V6oYbeMc7mPO4f7nGc_KnK9DhxoIU0Seeoj7g1qeDy0';
 
 // Importar web-push
 // @ts-ignore

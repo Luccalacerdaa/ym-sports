@@ -1,0 +1,37 @@
+name: 🔔 Push Notifications Automáticas
+
+on:
+  schedule:
+    # Horários em UTC (Brasília = UTC-3)
+    # 07:00 BRT = 10:00 UTC
+    - cron: '0 10 * * *'
+    # 08:30 BRT = 11:30 UTC
+    - cron: '30 11 * * *'
+    # 12:00 BRT = 15:00 UTC
+    - cron: '0 15 * * *'
+    # 15:30 BRT = 18:30 UTC
+    - cron: '30 18 * * *'
+    # 18:30 BRT = 21:30 UTC
+    - cron: '30 21 * * *'
+    # 20:00 BRT = 23:00 UTC
+    - cron: '0 23 * * *'
+  
+  # Permitir execução manual
+  workflow_dispatch:
+
+jobs:
+  send-notifications:
+    name: Enviar Notificações Agendadas
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📤 Chamar endpoint de notificações
+        run: |
+          curl -X POST \
+            https://ym-sports.vercel.app/api/scheduled-push \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -d '{"secret": "${{ secrets.CRON_SECRET }}"}'
+      
+      - name: ✅ Notificação enviada
+        run: echo "Notificação agendada enviada com sucesso!"
