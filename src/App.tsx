@@ -10,6 +10,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useUpdateNotification } from "./hooks/useUpdateNotification";
 import { useSimpleNotifications } from "./hooks/useSimpleNotifications";
+import { useWebPush } from "./hooks/useWebPush";
 import { NotificationDebugger } from "./components/NotificationDebugger";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -42,6 +43,9 @@ const AppContent = () => {
   
   // Sistema simplificado de notificações
   useSimpleNotifications();
+  
+  // Sistema de Web Push (funciona com app fechado)
+  useWebPush();
   
 
   const handleSplashComplete = () => {

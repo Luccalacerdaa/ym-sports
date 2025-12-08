@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useSimpleNotifications } from "@/hooks/useSimpleNotifications";
+import { useWebPush } from "@/hooks/useWebPush";
 import { toast } from "sonner";
 import { 
   Settings as SettingsIcon, 
@@ -22,6 +23,7 @@ export default function Settings() {
   const appVersion = "1.0.0";
   const buildDate = new Date().toLocaleDateString('pt-BR');
   const { sendTestNotification, forceCheck, hasPermission, requestPermission } = useSimpleNotifications();
+  const { isSubscribed, isLoading, subscribe, unsubscribe } = useWebPush();
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -104,6 +106,76 @@ export default function Settings() {
             <p className="text-xs text-gray-400">
               Use estes botões para testar se as notificações estão funcionando corretamente.
             </p>
+          </CardContent>
+        </Card>
+        
+        {/* Web Push (App Fechado) */}
+        <Card className="bg-gradient-to-br from-purple-900/50 to-blue-900/50 border-purple-700">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-purple-300">
+              <Smartphone className="h-5 w-5" />
+              Push Notifications (App Fechado)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="bg-purple-900/30 p-4 rounded-lg border border-purple-700/50">
+              <p className="text-sm text-purple-200 mb-2">
+                🚀 Sistema de notificações que funciona mesmo com o app completamente fechado!
+              </p>
+              <p className="text-xs text-purple-300/70">
+                As notificações serão enviadas pelo servidor nos horários programados.
+              </p>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-300">Status da Inscrição:</span>
+              <Badge variant={isSubscribed ? "default" : "secondary"} className={isSubscribed ? "bg-green-600" : ""}>
+                {isSubscribed ? "✅ Inscrito" : "⭕ Não Inscrito"}
+              </Badge>
+            </div>
+            
+            <div className="flex gap-2">
+              {!isSubscribed ? (
+                <Button 
+                  onClick={async () => {
+                    const success = await subscribe();
+                    if (success) {
+                      toast.success("✅ Inscrito! Notificações funcionarão com app fechado!");
+                    } else {
+                      toast.error("❌ Falha ao inscrever");
+                    }
+                  }}
+                  disabled={isLoading || !hasPermission}
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                >
+                  {isLoading ? "Inscrevendo..." : "🔔 Ativar Push Notifications"}
+                </Button>
+              ) : (
+                <Button 
+                  onClick={async () => {
+                    const success = await unsubscribe();
+                    if (success) {
+                      toast.success("Push notifications desativadas");
+                    } else {
+                      toast.error("Erro ao desativar");
+                    }
+                  }}
+                  disabled={isLoading}
+                  variant="outline"
+                  className="flex-1 border-purple-600 text-purple-300 hover:bg-purple-900/50"
+                >
+                  {isLoading ? "Cancelando..." : "🔕 Desativar Push"}
+                </Button>
+              )}
+            </div>
+            
+            {!hasPermission && (
+              <div className="bg-yellow-900/30 p-3 rounded-lg border border-yellow-700/50">
+                <p className="text-xs text-yellow-300">
+                  ⚠️ Você precisa permitir notificações primeiro (use o botão acima)
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
         

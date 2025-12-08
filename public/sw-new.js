@@ -131,48 +131,4 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Push Notification (funciona com app FECHADO!)
-self.addEventListener('push', (event) => {
-  console.log('[SW] 📨 Push notification recebido!');
-  
-  let data = {
-    title: '🏆 YM Sports',
-    body: 'Você tem uma nova notificação!',
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-96.png',
-    tag: 'push-notification',
-    requireInteraction: false,
-    vibrate: [200, 100, 200],
-    data: { url: '/dashboard' }
-  };
-  
-  // Se o push trouxe dados, usar eles
-  if (event.data) {
-    try {
-      const pushData = event.data.json();
-      data = { ...data, ...pushData };
-      console.log('[SW] 📦 Dados do push:', pushData);
-    } catch (error) {
-      console.log('[SW] ⚠️ Push sem dados JSON, usando padrão');
-    }
-  }
-  
-  event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: data.icon,
-      badge: data.badge,
-      tag: data.tag,
-      requireInteraction: data.requireInteraction,
-      vibrate: data.vibrate,
-      data: data.data,
-      actions: [
-        { action: 'open', title: 'Abrir App' }
-      ]
-    }).then(() => {
-      console.log('[SW] ✅ Push notification exibida!');
-    })
-  );
-});
-
 console.log('[SW] 🎯 Service Worker configurado e pronto!');
