@@ -15,15 +15,16 @@ export function BottomNavBar() {
       className="fixed left-0 right-0 z-[999] bg-black border-t border-border safe-area-bottom fixed-bottom-bar bottom-nav-exception"
       style={{ 
         position: 'fixed',
-        bottom: '50px',
+        bottom: '0px',
+        paddingBottom: '20px',
         width: '100%',
         zIndex: 9999,
-        transform: 'translateZ(0)', // Força aceleração de hardware
-        willChange: 'transform', // Melhora performance
-        backfaceVisibility: 'hidden' // Evita problemas de renderização
+        transform: 'translateZ(0)',
+        willChange: 'transform',
+        backfaceVisibility: 'hidden'
       }}
     >
-      <nav className="flex justify-around items-center h-20 sm:h-24 max-w-screen-xl mx-auto">
+      <nav className="flex justify-around items-center h-24 sm:h-28 max-w-screen-xl mx-auto px-2">
         {navItems.map((item) => (
           <NavLink
             key={item.title}
@@ -37,8 +38,8 @@ export function BottomNavBar() {
               }`
             }
           >
-            <item.icon className="h-7 w-7 mb-1" />
-            <span className="text-sm font-medium">{item.title}</span>
+            <item.icon className="h-6 w-6 mb-1" />
+            <span className="text-xs font-medium">{item.title}</span>
           </NavLink>
         ))}
       </nav>
