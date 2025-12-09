@@ -55,21 +55,21 @@ export default function ExerciseLibrary() {
 
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
-      'strength': 'bg-orange-500 text-black',
-      'cardio': 'bg-orange-500 text-black',
-      'flexibility': 'bg-orange-500 text-black',
-      'sports_specific': 'bg-orange-500 text-black'
+      'strength': 'bg-yellow-500 text-black',
+      'cardio': 'bg-yellow-500 text-black',
+      'flexibility': 'bg-yellow-500 text-black',
+      'sports_specific': 'bg-yellow-500 text-black'
     };
-    return colors[category] || 'bg-orange-500 text-black';
+    return colors[category] || 'bg-yellow-500 text-black';
   };
 
   const getDifficultyColor = (difficulty: string) => {
     const colors: { [key: string]: string } = {
-      'beginner': 'bg-orange-500 text-black',
-      'intermediate': 'bg-orange-500 text-black',
-      'advanced': 'bg-orange-500 text-black'
+      'beginner': 'bg-yellow-500 text-black',
+      'intermediate': 'bg-yellow-500 text-black',
+      'advanced': 'bg-yellow-500 text-black'
     };
-    return colors[difficulty] || 'bg-orange-500 text-black';
+    return colors[difficulty] || 'bg-yellow-500 text-black';
   };
 
   const getDifficultyLabel = (difficulty: string) => {
@@ -99,49 +99,49 @@ export default function ExerciseLibrary() {
 
         {/* Estatísticas */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-black border-orange-500">
+          <Card className="bg-black border-yellow-500">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <Dumbbell className="h-6 w-6 text-orange-500" />
+                <Dumbbell className="h-6 w-6 text-yellow-500" />
                 <div>
-                  <p className="text-2xl font-bold text-orange-500">{stats.totalExercises}</p>
-                  <p className="text-sm text-orange-400">Exercícios</p>
+                  <p className="text-2xl font-bold text-yellow-500">{stats.totalExercises}</p>
+                  <p className="text-sm text-yellow-400">Exercícios</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-black border-orange-500">
+          <Card className="bg-black border-yellow-500">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <Target className="h-6 w-6 text-orange-500" />
+                <Target className="h-6 w-6 text-yellow-500" />
                 <div>
-                  <p className="text-2xl font-bold text-orange-500">{stats.categories}</p>
-                  <p className="text-sm text-orange-400">Categorias</p>
+                  <p className="text-2xl font-bold text-yellow-500">{stats.categories}</p>
+                  <p className="text-sm text-yellow-400">Categorias</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-black border-orange-500">
+          <Card className="bg-black border-yellow-500">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <Play className="h-6 w-6 text-orange-500" />
+                <Play className="h-6 w-6 text-yellow-500" />
                 <div>
-                  <p className="text-2xl font-bold text-orange-500">{stats.exercisesWithVideos}</p>
-                  <p className="text-sm text-orange-400">Com Vídeos</p>
+                  <p className="text-2xl font-bold text-yellow-500">{stats.exercisesWithVideos}</p>
+                  <p className="text-sm text-yellow-400">Com Vídeos</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-black border-orange-500">
+          <Card className="bg-black border-yellow-500">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <Image className="h-6 w-6 text-orange-500" />
+                <Image className="h-6 w-6 text-yellow-500" />
                 <div>
-                  <p className="text-2xl font-bold text-orange-500">{stats.exercisesWithImages}</p>
-                  <p className="text-sm text-orange-400">Com Imagens</p>
+                  <p className="text-2xl font-bold text-yellow-500">{stats.exercisesWithImages}</p>
+                  <p className="text-sm text-yellow-400">Com Imagens</p>
                 </div>
               </div>
             </CardContent>
@@ -149,10 +149,10 @@ export default function ExerciseLibrary() {
         </div>
 
         {/* Filtros */}
-        <Card className="bg-black border-orange-500">
+        <Card className="bg-black border-yellow-500">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-orange-500">
-              <Filter className="h-5 w-5 text-orange-500" />
+            <CardTitle className="flex items-center gap-2 text-yellow-500">
+              <Filter className="h-5 w-5 text-yellow-500" />
               Filtros
             </CardTitle>
           </CardHeader>
@@ -160,24 +160,24 @@ export default function ExerciseLibrary() {
             <div className="flex items-center gap-4">
               <div className="flex-1">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-orange-500" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-yellow-500" />
                   <Input
                     placeholder="Buscar exercícios..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-black border-orange-500 text-orange-400 placeholder:text-orange-500"
+                    className="pl-10 bg-black border-yellow-500 text-yellow-400 placeholder:text-yellow-500"
                   />
                 </div>
               </div>
               
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-40 bg-black border-orange-500 text-orange-400">
+                <SelectTrigger className="w-40 bg-black border-yellow-500 text-yellow-400">
                   <SelectValue placeholder="Categoria" />
                 </SelectTrigger>
-                <SelectContent className="bg-black border-orange-500">
-                  <SelectItem value="all" className="text-orange-400">Todas</SelectItem>
+                <SelectContent className="bg-black border-yellow-500">
+                  <SelectItem value="all" className="text-yellow-400">Todas</SelectItem>
                   {categories.slice(1).map(category => (
-                    <SelectItem key={category} value={category} className="text-orange-400">
+                    <SelectItem key={category} value={category} className="text-yellow-400">
                       {getCategoryLabel(category)}
                     </SelectItem>
                   ))}
@@ -185,13 +185,13 @@ export default function ExerciseLibrary() {
               </Select>
               
               <Select value={selectedMuscleGroup} onValueChange={setSelectedMuscleGroup}>
-                <SelectTrigger className="w-40 bg-black border-orange-500 text-orange-400">
+                <SelectTrigger className="w-40 bg-black border-yellow-500 text-yellow-400">
                   <SelectValue placeholder="Grupo Muscular" />
                 </SelectTrigger>
-                <SelectContent className="bg-black border-orange-500">
-                  <SelectItem value="all" className="text-orange-400">Todos</SelectItem>
+                <SelectContent className="bg-black border-yellow-500">
+                  <SelectItem value="all" className="text-yellow-400">Todos</SelectItem>
                   {muscleGroups.slice(1).map(group => (
-                    <SelectItem key={group} value={group} className="text-orange-400">
+                    <SelectItem key={group} value={group} className="text-yellow-400">
                       {group.charAt(0).toUpperCase() + group.slice(1)}
                     </SelectItem>
                   ))}
@@ -204,10 +204,10 @@ export default function ExerciseLibrary() {
         {/* Lista de Exercícios */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredExercises.map((exercise, index) => (
-            <Card key={index} className="hover-scale transition-all hover:shadow-lg bg-black border-orange-500">
+            <Card key={index} className="hover-scale transition-all hover:shadow-lg bg-black border-yellow-500">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg text-orange-500">{exercise.name}</CardTitle>
+                  <CardTitle className="text-lg text-yellow-500">{exercise.name}</CardTitle>
                   <div className="flex gap-1">
                     <Badge className={getCategoryColor(exercise.category)}>
                       {getCategoryLabel(exercise.category)}
@@ -235,26 +235,26 @@ export default function ExerciseLibrary() {
                 )}
 
                 {/* Descrição */}
-                <p className="text-sm text-orange-300 line-clamp-3">
+                <p className="text-sm text-yellow-300 line-clamp-3">
                   {exercise.description}
                 </p>
 
                 {/* Grupos Musculares */}
                 <div className="flex flex-wrap gap-1">
                   {exercise.muscle_groups.map((group, idx) => (
-                    <Badge key={idx} variant="outline" className="text-xs border-orange-400 text-orange-300 bg-orange-500/10">
+                    <Badge key={idx} variant="outline" className="text-xs border-yellow-400 text-yellow-300 bg-yellow-500/10">
                       {group}
                     </Badge>
                   ))}
                 </div>
 
                 {/* Benefícios */}
-                <div className="p-3 bg-orange-500/20 rounded-lg border border-orange-400">
-                  <h4 className="text-sm font-medium mb-1 flex items-center gap-1 text-orange-200">
+                <div className="p-3 bg-yellow-500/20 rounded-lg border border-yellow-400">
+                  <h4 className="text-sm font-medium mb-1 flex items-center gap-1 text-yellow-200">
                     <TrendingUp className="h-3 w-3" />
                     Benefícios:
                   </h4>
-                  <p className="text-xs text-orange-100 line-clamp-2">
+                  <p className="text-xs text-yellow-100 line-clamp-2">
                     {exercise.benefits}
                   </p>
                 </div>
@@ -262,7 +262,7 @@ export default function ExerciseLibrary() {
                 {/* Botões de Ação */}
                 <div className="flex gap-2">
                   {exercise.video_url && (
-                    <Button size="sm" variant="outline" asChild className="flex-1 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black">
+                    <Button size="sm" variant="outline" asChild className="flex-1 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black">
                       <a href={exercise.video_url} target="_blank" rel="noopener noreferrer">
                         <Play className="h-3 w-3 mr-1" />
                         Vídeo
@@ -270,7 +270,7 @@ export default function ExerciseLibrary() {
                     </Button>
                   )}
                   {exercise.image_url && (
-                    <Button size="sm" variant="outline" asChild className="flex-1 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black">
+                    <Button size="sm" variant="outline" asChild className="flex-1 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black">
                       <a href={exercise.image_url} target="_blank" rel="noopener noreferrer">
                         <Image className="h-3 w-3 mr-1" />
                         Imagem
@@ -281,8 +281,8 @@ export default function ExerciseLibrary() {
 
                 {/* Aliases */}
                 {exercise.aliases.length > 1 && (
-                  <div className="text-xs text-orange-200">
-                    <span className="font-medium text-orange-300">Também conhecido como:</span> {exercise.aliases.slice(1).join(', ')}
+                  <div className="text-xs text-yellow-200">
+                    <span className="font-medium text-yellow-300">Também conhecido como:</span> {exercise.aliases.slice(1).join(', ')}
                   </div>
                 )}
               </CardContent>

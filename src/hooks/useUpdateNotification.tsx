@@ -35,16 +35,12 @@ export const useUpdateNotification = () => {
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       console.log('🆕 Nova versão do app detectada!');
       
+      // Apenas mostrar notificação, sem reload automático
       toast({
         title: '🆕 Nova versão disponível!',
-        description: 'O app será atualizado automaticamente.',
-        duration: 3000,
+        description: 'Recarregue a página para atualizar.',
+        duration: 5000,
       });
-
-      // Recarregar após 2 segundos
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
     });
 
     // Detectar Service Worker aguardando

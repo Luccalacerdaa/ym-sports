@@ -108,9 +108,9 @@ export default function Motivational() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <Youtube className="w-8 h-8 text-red-500" />
+              <Play className="w-8 h-8 text-yellow-500" />
               <h1 className="text-3xl font-bold text-white">
-                Motivação <span className="text-yellow-500">YouTube</span>
+                Motivação
               </h1>
             </div>
             
@@ -126,7 +126,7 @@ export default function Motivational() {
           </div>
           
           <p className="text-gray-400">
-            Vídeos motivacionais direto do YouTube para inspirar sua jornada
+            Vídeos motivacionais para inspirar sua jornada
           </p>
         </div>
 

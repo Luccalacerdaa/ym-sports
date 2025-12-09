@@ -36,16 +36,18 @@ export const useSimpleNotifications = () => {
     }
 
     try {
-      // Desregistrar SW antigo se existir
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      for (const registration of registrations) {
-        await registration.unregister();
-        console.log('🗑️ Service Worker antigo removido');
+      // Verificar se já existe SW registrado
+      const existingReg = await navigator.serviceWorker.getRegistration();
+      
+      if (existingReg) {
+        console.log('ℹ️ Service Worker já registrado:', existingReg.scope);
+        return true; // Não fazer nada se já existe
       }
 
-      // Registrar novo SW
-      const registration = await navigator.serviceWorker.register('/sw-new.js', {
-        scope: '/'
+      // Registrar novo SW apenas se não existir
+      const registration = await navigator.serviceWorker.register('/sw.js', {
+        scope: '/',
+        updateViaCache: 'none'
       });
 
       console.log('✅ Service Worker registrado:', registration);

@@ -182,7 +182,7 @@ export default function Nutrition() {
               </div>
             ) : (
               <div className="space-y-2">
-                {nutritionPlans.map((plan) => (
+                {nutritionPlans && nutritionPlans.length > 0 ? nutritionPlans.map((plan) => (
                   <div 
                     key={plan.id} 
                     className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer"
@@ -191,7 +191,7 @@ export default function Nutrition() {
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium truncate">{plan.title}</h4>
                       <p className="text-sm text-muted-foreground truncate">
-                        {plan.goals.join(", ")}
+                        {plan.goals && plan.goals.length > 0 ? plan.goals.join(", ") : 'Sem objetivos'}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -212,7 +212,7 @@ export default function Nutrition() {
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </div>
                   </div>
-                ))}
+                )) : <p className="text-sm text-muted-foreground text-center py-4">Nenhum plano de nutrição criado ainda.</p>}
               </div>
             )}
           </CardContent>
@@ -228,7 +228,7 @@ export default function Nutrition() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {achievements.slice(0, 6).map((achievement) => (
+              {achievements && achievements.length > 0 ? achievements.slice(0, 6).map((achievement) => (
                 <div 
                   key={achievement.id}
                   className={`flex flex-col items-center justify-center p-3 rounded-lg border text-center ${
@@ -245,7 +245,7 @@ export default function Nutrition() {
                   <h4 className="text-sm font-medium">{achievement.title}</h4>
                   <p className="text-xs mt-1 line-clamp-2">{achievement.description}</p>
                 </div>
-              ))}
+              )) : <p className="text-sm text-muted-foreground text-center col-span-full py-4">Nenhuma conquista ainda.</p>}
             </div>
             {achievements.length > 6 && (
               <Button 
@@ -286,7 +286,7 @@ export default function Nutrition() {
               <div>
                 <CardTitle>{selectedPlan.title}</CardTitle>
                 <CardDescription className="mt-1">
-                  {selectedPlan.goals.join(", ")}
+                  {selectedPlan.goals && selectedPlan.goals.length > 0 ? selectedPlan.goals.join(", ") : 'Sem objetivos definidos'}
                 </CardDescription>
               </div>
               <Badge>
@@ -369,7 +369,7 @@ export default function Nutrition() {
             <CardContent>
               {selectedDay.meals && selectedDay.meals.length > 0 ? (
                 <div className="space-y-6">
-                  {selectedDay.meals.map((meal, mealIndex) => (
+                  {selectedDay.meals && selectedDay.meals.map((meal, mealIndex) => (
                     <div key={meal.id || mealIndex} className="space-y-3">
                       <div className="flex justify-between items-center">
                         <h3 className="font-medium flex items-center">
@@ -460,7 +460,7 @@ export default function Nutrition() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {achievements.map((achievement) => (
+              {achievements && achievements.length > 0 ? achievements.map((achievement) => (
                 <div 
                   key={achievement.id}
                   className={`flex items-start p-4 rounded-lg border ${
@@ -487,7 +487,7 @@ export default function Nutrition() {
                     </div>
                   </div>
                 </div>
-              ))}
+              )) : <p className="text-sm text-muted-foreground text-center col-span-full py-8">Nenhuma conquista ainda.</p>}
             </div>
           </CardContent>
         </Card>
