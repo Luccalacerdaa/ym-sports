@@ -16,7 +16,6 @@ export function BottomNavBar() {
       style={{ 
         position: 'fixed',
         bottom: '0px',
-        paddingBottom: '20px',
         width: '100%',
         zIndex: 9999,
         transform: 'translateZ(0)',
@@ -24,22 +23,22 @@ export function BottomNavBar() {
         backfaceVisibility: 'hidden'
       }}
     >
-      <nav className="flex justify-around items-center h-24 sm:h-28 max-w-screen-xl mx-auto px-2">
+      <nav className="flex justify-around items-end h-32 sm:h-36 max-w-screen-xl mx-auto px-2 pt-3 pb-6">
         {navItems.map((item) => (
           <NavLink
             key={item.title}
             to={item.url}
             end={item.url === "/dashboard"}
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+              `flex flex-col items-center justify-end flex-1 h-full transition-colors pb-2 ${
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
               }`
             }
           >
-            <item.icon className="h-6 w-6 mb-1" />
-            <span className="text-xs font-medium">{item.title}</span>
+            <item.icon className="h-6 w-6 mb-2" />
+            <span className="text-xs font-medium whitespace-nowrap">{item.title}</span>
           </NavLink>
         ))}
       </nav>
