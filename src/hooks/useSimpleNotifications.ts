@@ -19,9 +19,12 @@ export const useSimpleNotifications = () => {
     }
 
     try {
-      const permission = await Notification.requestPermission();
-      console.log(`🔔 Permissão de notificação: ${permission}`);
-      return permission === 'granted';
+      if (typeof window !== 'undefined' && 'Notification' in window) {
+        const permission = await Notification.requestPermission();
+        console.log(`🔔 Permissão de notificação: ${permission}`);
+        return permission === 'granted';
+      }
+      return false;
     } catch (error) {
       console.error('❌ Erro ao solicitar permissão:', error);
       return false;
@@ -74,13 +77,15 @@ export const useSimpleNotifications = () => {
           type: 'TEST_NOTIFICATION'
         });
         console.log('🧪 Teste enviado via Service Worker');
-      } else {
-        // Fallback direto
+      } else if (typeof window !== 'undefined' && 'Notification' in window) {
+        // Fallback direto (só se Notification existir)
         new Notification('🧪 Teste YM Sports', {
           body: 'Notificação de teste funcionando!',
           icon: '/icons/icon-192.png'
         });
         console.log('🧪 Teste enviado diretamente');
+      } else {
+        console.log('⚠️ Notification API não disponível');
       }
     } catch (error) {
       console.error('❌ Erro no teste:', error);
@@ -135,6 +140,6 @@ export const useSimpleNotifications = () => {
     requestPermission,
     sendTestNotification,
     forceCheck,
-    hasPermission: isSupported() && Notification.permission === 'granted'
+    hasPermission: isSupported() && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted'
   };
 };

@@ -34,6 +34,11 @@ export const useWebPush = () => {
       return false;
     }
 
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      console.log('❌ Notification API não disponível');
+      return false;
+    }
+
     setIsLoading(true);
     
     try {
@@ -103,7 +108,7 @@ export const useWebPush = () => {
 
   // Auto-inscrever quando usuário faz login (opcional)
   useEffect(() => {
-    if (user && Notification.permission === 'granted') {
+    if (user && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
       checkSubscription().then(async (subscribed) => {
         if (!subscribed) {
           console.log('🔄 Auto-inscrevendo para push notifications...');
