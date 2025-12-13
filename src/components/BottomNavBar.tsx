@@ -23,22 +23,25 @@ export function BottomNavBar() {
         backfaceVisibility: 'hidden'
       }}
     >
-      <nav className="flex justify-around items-center h-28 sm:h-32 max-w-screen-xl mx-auto px-2 py-4" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
+      <nav 
+        className="flex justify-around items-start h-24 sm:h-28 max-w-screen-xl mx-auto px-2 pt-3"
+        style={{ paddingBottom: 'max(28px, calc(env(safe-area-inset-bottom) + 8px))' }}
+      >
         {navItems.map((item) => (
           <NavLink
             key={item.title}
             to={item.url}
             end={item.url === "/dashboard"}
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center flex-1 h-full transition-colors gap-1 ${
+              `flex flex-col items-center justify-start flex-1 h-full transition-colors gap-1.5 ${
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
               }`
             }
           >
-            <item.icon className="h-6 w-6" />
-            <span className="text-[11px] font-medium whitespace-nowrap leading-tight">{item.title}</span>
+            <item.icon className="h-7 w-7" />
+            <span className="text-[10px] font-medium whitespace-nowrap leading-none">{item.title}</span>
           </NavLink>
         ))}
       </nav>
