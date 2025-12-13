@@ -369,7 +369,7 @@ export default function Nutrition() {
             <CardContent>
               {selectedDay.meals && selectedDay.meals.length > 0 ? (
                 <div className="space-y-6">
-                  {selectedDay.meals && selectedDay.meals.map((meal, mealIndex) => (
+                  {selectedDay.meals.map((meal, mealIndex) => (
                     <div key={meal.id || mealIndex} className="space-y-3">
                       <div className="flex justify-between items-center">
                         <h3 className="font-medium flex items-center">

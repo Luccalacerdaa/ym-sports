@@ -123,20 +123,20 @@ export default function Design() {
             className="h-20 w-20 object-contain"
           />
           <div>
-            <h1 className="text-5xl font-bold text-yellow-500">
+            <h1 className="text-5xl font-bold text-white">
               YM DESIGN
             </h1>
-            <p className="text-xl text-gray-400">Por Yago - Designer Especialista em Esportes</p>
+            <p className="text-xl text-gray-400">Designer Especialista em Esportes</p>
           </div>
         </div>
         
         <div className="space-y-4">
           <h2 className="text-3xl font-bold text-white">
-            Crie seu material de divulgação agora mesmo!
+            Material profissional para atletas
           </h2>
           
-          <p className="text-lg text-gray-300 max-w-4xl mx-auto leading-relaxed">
-            Designer profissional a sua disposição para produzir sua arte pré jogo, edição de vídeo com melhores momentos para portfólio online e divulgação para clubes.
+          <p className="text-lg text-gray-300 max-w-3xl mx-auto">
+            Artes profissionais, edição de vídeo e portfólio para divulgação.
           </p>
           
           <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6 max-w-2xl mx-auto">
@@ -144,7 +144,7 @@ export default function Design() {
               20% OFF em duas artes mensais
             </h3>
             <p className="text-yellow-400 font-semibold">
-              CONDIÇÃO EXCLUSIVA A ASSINANTES DO APP
+              EXCLUSIVO PARA ASSINANTES DO APP
             </p>
           </div>
         </div>
@@ -164,9 +164,9 @@ export default function Design() {
       {/* CTA Principal */}
       <Card className="bg-black border border-yellow-500/30 text-white">
         <CardContent className="p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4 text-yellow-500">Pronto para destacar seu talento?</h2>
+          <h2 className="text-2xl font-bold mb-4 text-white">Destaque seu talento</h2>
           <p className="text-lg mb-6 text-gray-300">
-            Entre em contato agora e receba um orçamento personalizado para seu projeto!
+            Entre em contato e receba um orçamento personalizado!
           </p>
           <Button 
             size="lg" 
@@ -206,13 +206,12 @@ export default function Design() {
                   <Badge variant="outline" className="border-yellow-500/30 text-yellow-500">Vídeo</Badge>
                 </div>
                 
-                <h3 className="text-2xl font-bold text-yellow-500">
-                  Veja Nossos Trabalhos em Ação
+                <h3 className="text-2xl font-bold text-white">
+                  Nossos Trabalhos em Ação
                 </h3>
                 
                 <p className="text-gray-300 leading-relaxed">
-                  Assista ao vídeo e descubra como transformamos ideias em designs incríveis. 
-                  Veja exemplos reais de artes criadas para jogadores e times.
+                  Confira exemplos reais de artes criadas para jogadores e times.
                 </p>
                 
                 <div className="flex items-center gap-4 text-sm text-gray-400">
@@ -242,7 +241,7 @@ export default function Design() {
 
       {/* Filtros do Portfólio */}
       <div className="space-y-6">
-        <h2 className="text-3xl font-bold text-center">Portfólio de Trabalhos</h2>
+        <h2 className="text-3xl font-bold text-center text-white">Portfólio</h2>
         
         <div className="flex flex-wrap justify-center gap-2">
           {categories.map((category) => (
@@ -318,10 +317,9 @@ export default function Design() {
       {/* CTA Final */}
       <Card className="bg-black border border-yellow-500/30 text-white">
         <CardContent className="p-8 text-center">
-          <h2 className="text-3xl font-bold mb-4 text-yellow-500">Vamos criar algo incrível juntos?</h2>
+          <h2 className="text-3xl font-bold mb-4 text-white">Vamos criar algo incrível?</h2>
           <p className="text-lg mb-6 text-gray-300">
-            Seja para fotos profissionais, designs para redes sociais ou identidade visual completa, 
-            estamos prontos para elevar sua imagem no esporte!
+            Fotos profissionais, designs para redes sociais ou identidade visual completa.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
