@@ -110,16 +110,27 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
   
   // Gerar plano nutricional
   const handleGeneratePlan = async () => {
+    console.log('🎯 [GENERATOR] Iniciando geração de plano nutricional...');
+    console.log('📝 [GENERATOR] Objetivos:', goals);
+    console.log('🍽️ [GENERATOR] Tipos de refeição:', mealTypes);
+    console.log('⚙️ [GENERATOR] Complexidade:', complexityLevel);
+    console.log('📅 [GENERATOR] Dias:', daysCount);
+    
     // Validar formulário
     if (goals.length === 0) {
+      console.warn('⚠️ [GENERATOR] Nenhum objetivo selecionado');
       toast.error("Selecione pelo menos um objetivo");
       return;
     }
     
     if (mealTypes.length === 0) {
+      console.warn('⚠️ [GENERATOR] Nenhum tipo de refeição selecionado');
       toast.error("Selecione pelo menos um tipo de refeição");
       return;
     }
+    
+    console.log('🔍 [GENERATOR] Processando preferências alimentares...');
+    console.log('🔍 [GENERATOR] foodPreferences:', foodPreferences);
     
     // Processar preferências alimentares (separar por vírgulas)
     const processedPreferences = {
@@ -133,8 +144,11 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
         ? foodPreferences.allergies[0].split(',').map(item => item.trim()).filter(item => item.length > 0)
         : []
     };
+    
+    console.log('✅ [GENERATOR] Preferências processadas:', processedPreferences);
 
     // Salvar preferências alimentares
+    console.log('💾 [GENERATOR] Salvando preferências...');
     await saveFoodPreferences(processedPreferences);
     
     // Preparar solicitação
@@ -147,15 +161,25 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
       waterReminder
     };
     
+    console.log('📦 [GENERATOR] Request preparado:', request);
+    
     // Mudar para o estado de geração
     setStep('generating');
+    console.log('⏳ [GENERATOR] Gerando plano...');
     
     try {
       // Gerar plano
       const plan = await generateNutritionPlan(request);
+      console.log('✅ [GENERATOR] Plano gerado com sucesso:', {
+        id: plan?.id,
+        title: plan?.title,
+        daysCount: plan?.days?.length || 0
+      });
       setGeneratedPlan(plan);
       setStep('review');
+      console.log('📋 [GENERATOR] Mudando para review');
     } catch (error: any) {
+      console.error('❌ [GENERATOR] Erro ao gerar plano:', error);
       toast.error(`Erro ao gerar plano: ${error.message}`);
       setStep('form');
     }

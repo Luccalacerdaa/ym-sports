@@ -22,6 +22,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export default function Nutrition() {
+  console.log('🍎 [NUTRITION] Componente inicializado');
+  
   const navigate = useNavigate();
   const { profile } = useProfile();
   const { nutritionPlans = [], currentPlan, loading, fetchNutritionPlans, fetchNutritionPlanDetails, deleteNutritionPlan } = useNutritionPlans();
@@ -29,6 +31,15 @@ export default function Nutrition() {
   const { achievements = [], checkAchievements } = useNutritionAchievements();
   const { isNotificationsDialogOpen, openNotificationsDialog, closeNotificationsDialog } = useNotificationsManager();
   const { sendNotification, permissionGranted } = useSimpleNotifications();
+  
+  console.log('📊 [NUTRITION] Estado dos hooks:', {
+    nutritionPlansCount: nutritionPlans?.length || 0,
+    achievementsCount: achievements?.length || 0,
+    loading,
+    todayIntake,
+    dailyGoal,
+    waterProgress
+  });
   
   const [selectedTab, setSelectedTab] = useState("overview");
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
@@ -38,31 +49,49 @@ export default function Nutrition() {
 
   // Carregar dados iniciais
   useEffect(() => {
+    console.log('⚙️ [NUTRITION] useEffect executado');
     try {
+      console.log('📥 [NUTRITION] Buscando planos nutricionais...');
       fetchNutritionPlans();
+      
+      console.log('💧 [NUTRITION] Gerando dicas de hidratação...');
       const tips = generateHydrationTips();
+      console.log('💧 [NUTRITION] Dicas geradas:', tips);
       setHydrationTips(Array.isArray(tips) ? tips : ['Beba água regularmente']);
       
-      // Verificar conquistas
+      console.log('🏆 [NUTRITION] Verificando conquistas...');
       checkAchievements();
+      
+      console.log('✅ [NUTRITION] useEffect concluído com sucesso');
     } catch (error) {
-      console.error('Erro ao carregar dados iniciais:', error);
+      console.error('❌ [NUTRITION] Erro ao carregar dados iniciais:', error);
       setHydrationTips(['Beba água regularmente']);
     }
   }, []);
 
   // Selecionar plano
   const handleSelectPlan = async (planId: string) => {
-    console.log('Selecionando plano:', planId);
+    console.log('📋 [NUTRITION] Selecionando plano:', planId);
     const plan = await fetchNutritionPlanDetails(planId);
-    console.log('Plano carregado:', plan);
+    console.log('📋 [NUTRITION] Plano carregado:', {
+      id: plan?.id,
+      title: plan?.title,
+      daysCount: plan?.days?.length || 0
+    });
+    
     if (plan) {
       setSelectedPlan(plan);
       if (plan.days && plan.days.length > 0) {
         setSelectedDay(plan.days[0]);
-        console.log('Dia selecionado:', plan.days[0]);
+        console.log('📅 [NUTRITION] Dia selecionado:', {
+          day: plan.days[0].day_of_week,
+          mealsCount: plan.days[0].meals?.length || 0
+        });
       }
       setSelectedTab("plan");
+      console.log('✅ [NUTRITION] Plano selecionado com sucesso');
+    } else {
+      console.warn('⚠️ [NUTRITION] Plano não encontrado');
     }
   };
 
@@ -85,16 +114,26 @@ export default function Nutrition() {
 
   // Adicionar água
   const handleAddWater = async (amount: number) => {
+    console.log(`💧 [NUTRITION] Adicionando ${amount}ml de água...`);
     await addWaterIntake(amount);
+    console.log(`✅ [NUTRITION] ${amount}ml de água registrados. Total hoje: ${todayIntake + amount}ml`);
     toast.success(`${amount}ml de água registrados`);
   };
 
   // Renderizar visão geral
   const renderOverview = () => {
+    console.log('🎨 [NUTRITION] Renderizando visão geral...');
+    
     // Garantir que achievements é um array
     const safeAchievements = Array.isArray(achievements) ? achievements : [];
     const safeNutritionPlans = Array.isArray(nutritionPlans) ? nutritionPlans : [];
     const safeHydrationTips = Array.isArray(hydrationTips) ? hydrationTips : ['Beba água regularmente'];
+    
+    console.log('📊 [NUTRITION] Arrays seguros:', {
+      achievements: safeAchievements.length,
+      nutritionPlans: safeNutritionPlans.length,
+      hydrationTips: safeHydrationTips.length
+    });
     
     return (
       <div className="space-y-6">
@@ -278,7 +317,13 @@ export default function Nutrition() {
 
   // Renderizar detalhes do plano
   const renderPlanDetails = () => {
+    console.log('📋 [NUTRITION] Renderizando detalhes do plano...', {
+      selectedPlan: selectedPlan?.id,
+      selectedDay: selectedDay?.id
+    });
+    
     if (!selectedPlan) {
+      console.log('⚠️ [NUTRITION] Nenhum plano selecionado');
       return (
         <div className="flex justify-center items-center py-12">
           <Button 
@@ -460,8 +505,15 @@ export default function Nutrition() {
 
   // Renderizar conquistas
   const renderAchievements = () => {
+    console.log('🏆 [NUTRITION] Renderizando conquistas...');
+    
     // Garantir que achievements é um array
     const safeAchievements = Array.isArray(achievements) ? achievements : [];
+    
+    console.log('🏆 [NUTRITION] Conquistas seguras:', {
+      total: safeAchievements.length,
+      achieved: safeAchievements.filter(a => a.achieved).length
+    });
     
     return (
       <div className="space-y-6">
