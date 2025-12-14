@@ -123,13 +123,13 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
     
     // Processar preferências alimentares (separar por vírgulas)
     const processedPreferences = {
-      favorites: (foodPreferences.favorites && foodPreferences.favorites[0]) 
+      favorites: (Array.isArray(foodPreferences?.favorites) && foodPreferences.favorites.length > 0 && foodPreferences.favorites[0]) 
         ? foodPreferences.favorites[0].split(',').map(item => item.trim()).filter(item => item.length > 0)
         : [],
-      avoid: (foodPreferences.avoid && foodPreferences.avoid[0]) 
+      avoid: (Array.isArray(foodPreferences?.avoid) && foodPreferences.avoid.length > 0 && foodPreferences.avoid[0]) 
         ? foodPreferences.avoid[0].split(',').map(item => item.trim()).filter(item => item.length > 0)
         : [],
-      allergies: (foodPreferences.allergies && foodPreferences.allergies[0]) 
+      allergies: (Array.isArray(foodPreferences?.allergies) && foodPreferences.allergies.length > 0 && foodPreferences.allergies[0]) 
         ? foodPreferences.allergies[0].split(',').map(item => item.trim()).filter(item => item.length > 0)
         : []
     };

@@ -24,9 +24,9 @@ import { ptBR } from "date-fns/locale";
 export default function Nutrition() {
   const navigate = useNavigate();
   const { profile } = useProfile();
-  const { nutritionPlans, currentPlan, loading, fetchNutritionPlans, fetchNutritionPlanDetails, deleteNutritionPlan } = useNutritionPlans();
+  const { nutritionPlans = [], currentPlan, loading, fetchNutritionPlans, fetchNutritionPlanDetails, deleteNutritionPlan } = useNutritionPlans();
   const { todayIntake, dailyGoal, progress: waterProgress, addWaterIntake, generateHydrationTips } = useWaterIntake();
-  const { achievements, checkAchievements } = useNutritionAchievements();
+  const { achievements = [], checkAchievements } = useNutritionAchievements();
   const { isNotificationsDialogOpen, openNotificationsDialog, closeNotificationsDialog } = useNotificationsManager();
   const { sendNotification, permissionGranted } = useSimpleNotifications();
   
@@ -34,7 +34,7 @@ export default function Nutrition() {
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<NutritionPlan | null>(null);
   const [selectedDay, setSelectedDay] = useState<DailyPlan | null>(null);
-  const [hydrationTips, setHydrationTips] = useState<string[]>([]);
+  const [hydrationTips, setHydrationTips] = useState<string[]>(['Beba água regularmente']);
 
   // Carregar dados iniciais
   useEffect(() => {
