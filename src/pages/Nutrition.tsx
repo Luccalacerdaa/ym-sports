@@ -38,11 +38,17 @@ export default function Nutrition() {
 
   // Carregar dados iniciais
   useEffect(() => {
-    fetchNutritionPlans();
-    setHydrationTips(generateHydrationTips());
-    
-    // Verificar conquistas
-    checkAchievements();
+    try {
+      fetchNutritionPlans();
+      const tips = generateHydrationTips();
+      setHydrationTips(Array.isArray(tips) ? tips : ['Beba água regularmente']);
+      
+      // Verificar conquistas
+      checkAchievements();
+    } catch (error) {
+      console.error('Erro ao carregar dados iniciais:', error);
+      setHydrationTips(['Beba água regularmente']);
+    }
   }, []);
 
   // Selecionar plano
