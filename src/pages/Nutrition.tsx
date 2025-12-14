@@ -85,6 +85,11 @@ export default function Nutrition() {
 
   // Renderizar visão geral
   const renderOverview = () => {
+    // Garantir que achievements é um array
+    const safeAchievements = Array.isArray(achievements) ? achievements : [];
+    const safeNutritionPlans = Array.isArray(nutritionPlans) ? nutritionPlans : [];
+    const safeHydrationTips = Array.isArray(hydrationTips) ? hydrationTips : ['Beba água regularmente'];
+    
     return (
       <div className="space-y-6">
         {/* Seção de Hidratação */}
@@ -139,7 +144,7 @@ export default function Nutrition() {
           <CardFooter className="pt-0">
             <div className="text-sm text-muted-foreground">
               <h4 className="font-medium text-foreground mb-1">Dica:</h4>
-              <p>{hydrationTips[Math.floor(Math.random() * hydrationTips.length)]}</p>
+              <p>{safeHydrationTips.length > 0 ? safeHydrationTips[Math.floor(Math.random() * safeHydrationTips.length)] : 'Mantenha-se hidratado!'}</p>
             </div>
           </CardFooter>
         </Card>
@@ -166,7 +171,7 @@ export default function Nutrition() {
               <div className="flex justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
-            ) : nutritionPlans.length === 0 ? (
+            ) : safeNutritionPlans.length === 0 ? (
               <div className="text-center py-8">
                 <Apple className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">
@@ -182,7 +187,7 @@ export default function Nutrition() {
               </div>
             ) : (
               <div className="space-y-2">
-                {nutritionPlans && nutritionPlans.length > 0 ? nutritionPlans.map((plan) => (
+                {safeNutritionPlans.map((plan) => (
                   <div 
                     key={plan.id} 
                     className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer"
@@ -212,7 +217,7 @@ export default function Nutrition() {
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </div>
                   </div>
-                )) : <p className="text-sm text-muted-foreground text-center py-4">Nenhum plano de nutrição criado ainda.</p>}
+                ))}
               </div>
             )}
           </CardContent>
@@ -228,7 +233,7 @@ export default function Nutrition() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {achievements && achievements.length > 0 ? achievements.slice(0, 6).map((achievement) => (
+              {safeAchievements.slice(0, 6).map((achievement) => (
                 <div 
                   key={achievement.id}
                   className={`flex flex-col items-center justify-center p-3 rounded-lg border text-center ${
@@ -245,9 +250,12 @@ export default function Nutrition() {
                   <h4 className="text-sm font-medium">{achievement.title}</h4>
                   <p className="text-xs mt-1 line-clamp-2">{achievement.description}</p>
                 </div>
-              )) : <p className="text-sm text-muted-foreground text-center col-span-full py-4">Nenhuma conquista ainda.</p>}
+              ))}
+              {safeAchievements.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center col-span-full py-4">Nenhuma conquista ainda.</p>
+              )}
             </div>
-            {achievements.length > 6 && (
+            {safeAchievements.length > 6 && (
               <Button 
                 variant="ghost" 
                 className="w-full mt-3"
@@ -446,6 +454,9 @@ export default function Nutrition() {
 
   // Renderizar conquistas
   const renderAchievements = () => {
+    // Garantir que achievements é um array
+    const safeAchievements = Array.isArray(achievements) ? achievements : [];
+    
     return (
       <div className="space-y-6">
         <Card>
@@ -460,7 +471,7 @@ export default function Nutrition() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {achievements && achievements.length > 0 ? achievements.map((achievement) => (
+              {safeAchievements.map((achievement) => (
                 <div 
                   key={achievement.id}
                   className={`flex items-start p-4 rounded-lg border ${
@@ -487,7 +498,10 @@ export default function Nutrition() {
                     </div>
                   </div>
                 </div>
-              )) : <p className="text-sm text-muted-foreground text-center col-span-full py-8">Nenhuma conquista ainda.</p>}
+              ))}
+              {safeAchievements.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center col-span-full py-8">Nenhuma conquista ainda.</p>
+              )}
             </div>
           </CardContent>
         </Card>
