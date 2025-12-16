@@ -26,14 +26,40 @@ export default function Nutrition() {
   
   const navigate = useNavigate();
   const { profile } = useProfile();
-  const { nutritionPlans = [], currentPlan, loading, fetchNutritionPlans, fetchNutritionPlanDetails, deleteNutritionPlan } = useNutritionPlans();
-  const { todayIntake, dailyGoal, progress: waterProgress, addWaterIntake, generateHydrationTips } = useWaterIntake();
-  const { achievements = [], checkAchievements } = useNutritionAchievements();
-  const { isNotificationsDialogOpen, openNotificationsDialog, closeNotificationsDialog } = useNotificationsManager();
-  const { sendNotification, permissionGranted } = useSimpleNotifications();
+  const nutritionHooks = useNutritionPlans();
+  const waterHooks = useWaterIntake();
+  const achievementsHooks = useNutritionAchievements();
+  const notificationsHooks = useNotificationsManager();
+  const simpleNotificationsHooks = useSimpleNotifications();
   
-  console.log('📊 [NUTRITION] Estado dos hooks:', {
+  // Log detalhado dos hooks ANTES de desestruturar
+  console.log('🔍 [NUTRITION] Hooks RAW:', {
+    nutritionHooks: {
+      type: typeof nutritionHooks,
+      hasPlans: 'nutritionPlans' in nutritionHooks,
+      plansType: typeof nutritionHooks.nutritionPlans,
+      plansIsArray: Array.isArray(nutritionHooks.nutritionPlans)
+    },
+    achievementsHooks: {
+      type: typeof achievementsHooks,
+      hasAchievements: 'achievements' in achievementsHooks,
+      achievementsType: typeof achievementsHooks.achievements,
+      achievementsIsArray: Array.isArray(achievementsHooks.achievements)
+    }
+  });
+  
+  const { nutritionPlans = [], currentPlan, loading, fetchNutritionPlans, fetchNutritionPlanDetails, deleteNutritionPlan } = nutritionHooks;
+  const { todayIntake, dailyGoal, progress: waterProgress, addWaterIntake, generateHydrationTips } = waterHooks;
+  const { achievements = [], checkAchievements } = achievementsHooks;
+  const { isNotificationsDialogOpen, openNotificationsDialog, closeNotificationsDialog } = notificationsHooks;
+  const { sendNotification, permissionGranted } = simpleNotificationsHooks;
+  
+  console.log('📊 [NUTRITION] Estado dos hooks APÓS destructuring:', {
+    nutritionPlansType: typeof nutritionPlans,
+    nutritionPlansIsArray: Array.isArray(nutritionPlans),
     nutritionPlansCount: nutritionPlans?.length || 0,
+    achievementsType: typeof achievements,
+    achievementsIsArray: Array.isArray(achievements),
     achievementsCount: achievements?.length || 0,
     loading,
     todayIntake,
@@ -241,7 +267,7 @@ export default function Nutrition() {
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium truncate">{plan.title}</h4>
                       <p className="text-sm text-muted-foreground truncate">
-                        {plan.goals && plan.goals.length > 0 ? plan.goals.join(", ") : 'Sem objetivos'}
+                        {Array.isArray(plan.goals) && plan.goals.length > 0 ? plan.goals.join(", ") : 'Sem objetivos'}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -345,7 +371,7 @@ export default function Nutrition() {
               <div>
                 <CardTitle>{selectedPlan.title}</CardTitle>
                 <CardDescription className="mt-1">
-                  {selectedPlan.goals && selectedPlan.goals.length > 0 ? selectedPlan.goals.join(", ") : 'Sem objetivos definidos'}
+                  {Array.isArray(selectedPlan.goals) && selectedPlan.goals.length > 0 ? selectedPlan.goals.join(", ") : 'Sem objetivos definidos'}
                 </CardDescription>
               </div>
               <Badge>
@@ -452,7 +478,7 @@ export default function Nutrition() {
                                     <span className="font-medium">Preparo:</span> {food.preparation}
                                   </div>
                                 )}
-                                {food.alternatives && food.alternatives.length > 0 && (
+                                {Array.isArray(food.alternatives) && food.alternatives.length > 0 && (
                                   <div className="text-xs text-green-600 mt-1">
                                     <span className="font-medium">Alternativas:</span> {food.alternatives.join(', ')}
                                   </div>
@@ -567,25 +593,6 @@ export default function Nutrition() {
     );
   };
 
-  // Proteção extra: verificar se todos os dados necessários existão
-  if (!nutritionPlans || !achievements || !hydrationTips) {
-    console.log('⚠️ [NUTRITION] Aguardando dados iniciais...', {
-      nutritionPlans: !!nutritionPlans,
-      achievements: !!achievements,
-      hydrationTips: !!hydrationTips
-    });
-    return (
-      <div className="container max-w-4xl mx-auto px-4 py-6 flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Carregando página de nutrição...</p>
-        </div>
-      </div>
-    );
-  }
-
-  console.log('✅ [NUTRITION] Renderizando componente completo');
-
   return (
     <div className="container max-w-4xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6">
@@ -602,10 +609,7 @@ export default function Nutrition() {
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => {
-              console.log('🎯 [NUTRITION] Abrindo gerador de planos...');
-              setIsGeneratorOpen(true);
-            }}
+            onClick={() => setIsGeneratorOpen(true)}
           >
             <Plus className="h-4 w-4 mr-2" />
             Novo Plano
@@ -613,10 +617,7 @@ export default function Nutrition() {
         </div>
       </div>
 
-      <Tabs value={selectedTab} onValueChange={(value) => {
-        console.log('📑 [NUTRITION] Mudando tab para:', value);
-        setSelectedTab(value);
-      }} className="w-full">
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
         <TabsList className="grid grid-cols-3 mb-6">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="plan">Plano Atual</TabsTrigger>
@@ -636,12 +637,8 @@ export default function Nutrition() {
       {/* Gerador de Plano Nutricional */}
       {isGeneratorOpen && (
         <NutritionPlanGenerator 
-          onClose={() => {
-            console.log('❌ [NUTRITION] Fechando gerador de planos');
-            setIsGeneratorOpen(false);
-          }} 
+          onClose={() => setIsGeneratorOpen(false)} 
           onPlanCreated={(plan) => {
-            console.log('✅ [NUTRITION] Plano criado:', plan?.title);
             setIsGeneratorOpen(false);
             fetchNutritionPlans();
             toast.success("Plano nutricional criado com sucesso!");
@@ -666,12 +663,10 @@ export default function Nutrition() {
       )}
       
       {/* Gerenciador de Notificações */}
-      {isNotificationsDialogOpen && (
-        <SimpleNotificationManager 
-          open={isNotificationsDialogOpen} 
-          onClose={closeNotificationsDialog} 
-        />
-      )}
+      <SimpleNotificationManager 
+        open={isNotificationsDialogOpen} 
+        onClose={closeNotificationsDialog} 
+      />
     </div>
   );
 }
