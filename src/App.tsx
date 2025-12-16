@@ -24,7 +24,7 @@ import ExerciseLibrary from "./pages/ExerciseLibrary";
 import Achievements from "./pages/Achievements";
 import Ranking from "./pages/Ranking";
 import NewRanking from "./pages/NewRanking";
-import Nutrition from "./pages/Nutrition";
+import Nutrition from "./pages/NutritionNew";
 import Portfolio from "./pages/Portfolio";
 import PublicPortfolio from "./pages/PublicPortfolio";
 import Design from "./pages/Design";
