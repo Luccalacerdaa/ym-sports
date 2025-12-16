@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Component, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { useNutritionAchievements } from "@/hooks/useNutritionAchievements";
 import { useProfile } from "@/hooks/useProfile";
 import { useNotificationsManager } from "@/hooks/useNotificationsManager";
 import { NutritionPlan, DailyPlan, Meal, FoodItem } from "@/types/nutrition";
-import { Loader2, Plus, Droplet, Award, Utensils, Calendar, ChevronRight, Apple, Trash2, Bell } from "lucide-react";
+import { Loader2, Plus, Droplet, Award, Utensils, Calendar, ChevronRight, Apple, Trash2, Bell, AlertTriangle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -21,7 +21,72 @@ import { useDailyNotifications } from "@/hooks/useDailyNotifications";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-export default function Nutrition() {
+// ErrorBoundary interno para capturar erros
+class NutritionErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    console.error('🚨 [NUTRITION-ERROR-BOUNDARY] Erro capturado:', error);
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error('🚨 [NUTRITION-ERROR-BOUNDARY] Detalhes:', {
+      error: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack
+    });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="container max-w-4xl mx-auto px-4 py-6">
+          <Card className="bg-red-500/10 border-red-500/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-red-400">
+                <AlertTriangle className="h-5 w-5" />
+                Erro na Página de Nutrição
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 bg-red-500/20 border border-red-500/40 rounded">
+                <p className="font-semibold text-red-300">Erro:</p>
+                <p className="text-sm text-gray-300 mt-1">{this.state.error?.message}</p>
+              </div>
+              
+              <div className="text-sm text-gray-400">
+                <p className="font-semibold mb-2">Ações possíveis:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Recarregar a página (F5)</li>
+                  <li>Limpar cache e cookies</li>
+                  <li>Entrar em contato com o suporte</li>
+                </ul>
+              </div>
+              
+              <Button 
+                onClick={() => window.location.reload()}
+                className="w-full"
+              >
+                Recarregar Página
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+function NutritionContent() {
   console.log('🍎 [NUTRITION] Componente inicializado');
   
   const navigate = useNavigate();
@@ -668,5 +733,14 @@ export default function Nutrition() {
         onClose={closeNotificationsDialog} 
       />
     </div>
+  );
+}
+
+// Export com ErrorBoundary
+export default function Nutrition() {
+  return (
+    <NutritionErrorBoundary>
+      <NutritionContent />
+    </NutritionErrorBoundary>
   );
 }
