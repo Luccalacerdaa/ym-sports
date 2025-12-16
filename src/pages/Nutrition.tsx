@@ -567,6 +567,25 @@ export default function Nutrition() {
     );
   };
 
+  // Proteção extra: verificar se todos os dados necessários existão
+  if (!nutritionPlans || !achievements || !hydrationTips) {
+    console.log('⚠️ [NUTRITION] Aguardando dados iniciais...', {
+      nutritionPlans: !!nutritionPlans,
+      achievements: !!achievements,
+      hydrationTips: !!hydrationTips
+    });
+    return (
+      <div className="container max-w-4xl mx-auto px-4 py-6 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Carregando página de nutrição...</p>
+        </div>
+      </div>
+    );
+  }
+
+  console.log('✅ [NUTRITION] Renderizando componente completo');
+
   return (
     <div className="container max-w-4xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6">
@@ -583,7 +602,10 @@ export default function Nutrition() {
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => setIsGeneratorOpen(true)}
+            onClick={() => {
+              console.log('🎯 [NUTRITION] Abrindo gerador de planos...');
+              setIsGeneratorOpen(true);
+            }}
           >
             <Plus className="h-4 w-4 mr-2" />
             Novo Plano
@@ -591,7 +613,10 @@ export default function Nutrition() {
         </div>
       </div>
 
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+      <Tabs value={selectedTab} onValueChange={(value) => {
+        console.log('📑 [NUTRITION] Mudando tab para:', value);
+        setSelectedTab(value);
+      }} className="w-full">
         <TabsList className="grid grid-cols-3 mb-6">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="plan">Plano Atual</TabsTrigger>
@@ -611,8 +636,12 @@ export default function Nutrition() {
       {/* Gerador de Plano Nutricional */}
       {isGeneratorOpen && (
         <NutritionPlanGenerator 
-          onClose={() => setIsGeneratorOpen(false)} 
+          onClose={() => {
+            console.log('❌ [NUTRITION] Fechando gerador de planos');
+            setIsGeneratorOpen(false);
+          }} 
           onPlanCreated={(plan) => {
+            console.log('✅ [NUTRITION] Plano criado:', plan?.title);
             setIsGeneratorOpen(false);
             fetchNutritionPlans();
             toast.success("Plano nutricional criado com sucesso!");
@@ -637,10 +666,12 @@ export default function Nutrition() {
       )}
       
       {/* Gerenciador de Notificações */}
-      <SimpleNotificationManager 
-        open={isNotificationsDialogOpen} 
-        onClose={closeNotificationsDialog} 
-      />
+      {isNotificationsDialogOpen && (
+        <SimpleNotificationManager 
+          open={isNotificationsDialogOpen} 
+          onClose={closeNotificationsDialog} 
+        />
+      )}
     </div>
   );
 }

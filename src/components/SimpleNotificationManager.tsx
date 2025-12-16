@@ -12,23 +12,46 @@ interface SimpleNotificationManagerProps {
 }
 
 export const SimpleNotificationManager = ({ open, onClose }: SimpleNotificationManagerProps) => {
+  console.log('🔔 [NOTIFICATION_MANAGER] Componente inicializado');
+  
+  const simpleNotifications = useSimpleNotifications();
+  
+  console.log('🔔 [NOTIFICATION_MANAGER] Hook retornou:', Object.keys(simpleNotifications || {}));
+  
   const { 
-    notifications, 
-    permissionGranted, 
+    permissionGranted,
+    hasPermission,
     requestPermission,
-    sendNotification,
-    setupDefaultNotifications
-  } = useSimpleNotifications();
+    sendTestNotification
+  } = simpleNotifications || {};
+  
+  // Dados mockados por enquanto já que o hook não retorna notifications
+  const notifications = [];
+  const safeNotifications = Array.isArray(notifications) ? notifications : [];
+  
+  console.log('🔔 [NOTIFICATION_MANAGER] Notificações:', safeNotifications.length);
 
   const handleRequestPermission = async () => {
-    await requestPermission();
+    console.log('🔔 [NOTIFICATION_MANAGER] Solicitando permissão...');
+    if (requestPermission) {
+      await requestPermission();
+    } else {
+      console.warn('⚠️ [NOTIFICATION_MANAGER] requestPermission não disponível');
+    }
   };
 
   const handleTestNotification = () => {
-    sendNotification(
-      '🧪 Teste - YM Sports',
-      'Esta é uma notificação de teste! Se você viu isso, as notificações estão funcionando.'
-    );
+    console.log('🧪 [NOTIFICATION_MANAGER] Enviando notificação de teste...');
+    if (sendTestNotification) {
+      sendTestNotification();
+    } else {
+      console.warn('⚠️ [NOTIFICATION_MANAGER] sendTestNotification não disponível');
+    }
+  };
+  
+  const handleSetupDefaultNotifications = () => {
+    console.log('⚙️ [NOTIFICATION_MANAGER] Reconfigurando notificações...');
+    // Por enquanto não faz nada, pois setupDefaultNotifications não existe no hook
   };
 
   return (
@@ -46,7 +69,7 @@ export const SimpleNotificationManager = ({ open, onClose }: SimpleNotificationM
         
         <div className="py-4 space-y-4">
           {/* Status da Permissão */}
-          {!permissionGranted ? (
+          {!hasPermission ? (
             <div className="text-center p-4 border rounded-md bg-yellow-50 border-yellow-200">
               <BellOff className="h-8 w-8 mx-auto mb-2 text-yellow-600" />
               <p className="text-sm mb-3 text-yellow-800">
@@ -73,25 +96,25 @@ export const SimpleNotificationManager = ({ open, onClose }: SimpleNotificationM
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-semibold">
-                Notificações Configuradas ({notifications.length})
+                Notificações Configuradas ({safeNotifications.length})
               </h3>
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={setupDefaultNotifications}
+                onClick={handleSetupDefaultNotifications}
               >
                 <Settings className="h-4 w-4 mr-2" />
                 Reconfigurar
               </Button>
             </div>
 
-            {notifications.length === 0 ? (
+            {safeNotifications.length === 0 ? (
               <p className="text-muted-foreground text-sm text-center py-4">
                 Nenhuma notificação configurada.
               </p>
             ) : (
               <div className="space-y-3">
-                {notifications.map((notification) => (
+                {safeNotifications.map((notification) => (
                   <div 
                     key={notification.id} 
                     className="flex items-center justify-between p-3 border rounded-md bg-secondary/20"
