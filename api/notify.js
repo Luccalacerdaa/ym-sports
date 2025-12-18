@@ -1,20 +1,28 @@
-import webpush from 'web-push';
-import { createClient } from '@supabase/supabase-js';
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+const webpush = require('web-push');
+const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
-  process.env.VITE_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.VITE_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 // Configurar VAPID
 webpush.setVapidDetails(
   'mailto:suporte@ymsports.com',
-  process.env.VITE_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
+  process.env.VITE_VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
 );
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+module.exports = async function handler(req, res) {
+  // CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -26,13 +34,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'user_id and title required' });
     }
 
+    console.log(`📨 Enviando notificação para user: ${user_id}`);
+
     // Buscar subscriptions do usuário
     const { data: subs, error } = await supabase
       .from('push_subscriptions')
       .select('*')
       .eq('user_id', user_id);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Erro ao buscar subscriptions:', error);
+      throw error;
+    }
+
+    console.log(`📱 Encontradas ${subs?.length || 0} subscriptions`);
 
     if (!subs || subs.length === 0) {
       return res.status(404).json({ 
@@ -68,7 +83,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await webpush.sendNotification(pushSubscription, payload);
         sent++;
         console.log(`✅ Enviado com sucesso!`);
-      } catch (error: any) {
+      } catch (error) {
         failed++;
         console.error(`❌ Erro ao enviar:`, {
           statusCode: error.statusCode,
@@ -88,15 +103,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    console.log(`📊 Resultado: ${sent} enviadas, ${failed} falharam`);
+
     return res.status(200).json({
       success: sent > 0,
       sent,
       failed,
       total: subs.length
     });
-  } catch (error: any) {
-    console.error('Erro no notify:', error);
+  } catch (error) {
+    console.error('❌ Erro no notify:', error);
     return res.status(500).json({ error: error.message });
   }
-}
+};
 
