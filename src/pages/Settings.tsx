@@ -3,8 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { usePushSimple } from "@/hooks/usePushSimple";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { 
   Settings as SettingsIcon, 
@@ -13,62 +11,13 @@ import {
   Shield, 
   Smartphone,
   Info,
-  ExternalLink,
-  Send,
-  TestTube
+  ExternalLink
 } from "lucide-react";
 
 export default function Settings() {
   const appVersion = "1.0.0";
   const buildDate = new Date().toLocaleDateString('pt-BR');
-  const { isSupported, isSubscribed, permission, loading, subscribe, unsubscribe } = usePushSimple();
-  const { user } = useAuth();
-  const navigate = useNavigate();
-
-  const sendQuickTest = async () => {
-    if (!user || !isSubscribed) {
-      toast.error('❌ Ative as notificações push primeiro');
-      return;
-    }
-
-    try {
-      toast.info('📤 Enviando notificação de teste...');
-      
-      const response = await fetch('/api/notify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: user.id,
-          title: '🎉 YM Sports - Teste',
-          body: 'Notificações funcionando perfeitamente!',
-          url: '/dashboard'
-        })
-      });
-
-      const result = await response.json();
-      
-      if (response.ok && result.success) {
-        toast.success(`✅ Teste enviado! (${result.sent} dispositivo(s))`);
-      } else {
-        toast.error(`❌ ${result.error || 'Erro ao enviar'}`);
-        if (result.failed && result.failed > 0) {
-          toast.info('💡 Tente reativar o push');
-        }
-      }
-    } catch (error) {
-      toast.error('❌ Erro ao enviar teste');
-    }
-  };
-
-  const reactivatePush = async () => {
-    toast.info('🔄 Reativando push...');
-    const success = await subscribe();
-    if (success) {
-      toast.success('✅ Push reativado com sucesso!');
-    } else {
-      toast.error('❌ Erro ao reativar');
-    }
-  };
+  const { isSupported, isSubscribed, permission, loading, subscribe } = usePushSimple();
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -145,53 +94,19 @@ export default function Settings() {
                     disabled={loading || permission === 'denied'}
                     className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                   >
-                    {loading ? "Ativando..." : "🔔 Ativar Push"}
+                    {loading ? "Ativando..." : "🔔 Ativar Notificações"}
                   </Button>
                 )}
                 
                 {isSubscribed && (
-                  <>
-                    <div className="bg-green-900/30 p-3 rounded-lg border border-green-700/50">
-                      <p className="text-sm text-green-300 text-center">
-                        ✅ Notificações push ativas!
-                      </p>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button 
-                        onClick={sendQuickTest}
-                        variant="outline"
-                        className="border-yellow-700/50 hover:bg-yellow-900/30"
-                      >
-                        <Send className="mr-2 h-4 w-4" />
-                        Teste Rápido
-                      </Button>
-                      
-                      <Button 
-                        onClick={() => navigate('/dashboard/notification-test')}
-                        variant="outline"
-                        className="border-blue-700/50 hover:bg-blue-900/30"
-                      >
-                        <TestTube className="mr-2 h-4 w-4" />
-                        Central de Testes
-                      </Button>
-                    </div>
-
-                    <div className="pt-2 border-t border-gray-700">
-                      <p className="text-xs text-gray-400 mb-2 text-center">
-                        Notificações não chegando?
-                      </p>
-                      <Button 
-                        onClick={reactivatePush}
-                        disabled={loading}
-                        variant="outline"
-                        className="w-full border-purple-700/50 hover:bg-purple-900/30"
-                        size="sm"
-                      >
-                        🔄 Reativar Push
-                      </Button>
-                    </div>
-                  </>
+                  <div className="bg-green-900/30 p-4 rounded-lg border border-green-700/50">
+                    <p className="text-sm text-green-300 text-center font-medium">
+                      ✅ Notificações push ativas!
+                    </p>
+                    <p className="text-xs text-green-400/70 text-center mt-1">
+                      Você receberá notificações de eventos, conquistas e lembretes
+                    </p>
+                  </div>
                 )}
               </div>
             </CardContent>
