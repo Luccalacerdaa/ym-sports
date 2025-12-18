@@ -8,10 +8,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { SplashScreen } from "./components/SplashScreen";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { useUpdateNotification } from "./hooks/useUpdateNotification";
 import { useSimpleNotifications } from "./hooks/useSimpleNotifications";
-import { useWebPush } from "./hooks/useWebPush";
-import { NotificationDebugger } from "./components/NotificationDebugger";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -38,14 +35,9 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   const [showSplash, setShowSplash] = useState(true);
-  // Hook para detectar e notificar sobre atualizações do PWA
-  useUpdateNotification();
   
   // Sistema simplificado de notificações
   useSimpleNotifications();
-  
-  // Sistema de Web Push (funciona com app fechado)
-  useWebPush();
   
 
   const handleSplashComplete = () => {
@@ -99,8 +91,6 @@ const App = () => (
           <Sonner />
           <ErrorBoundary>
             <AppContent />
-            {/* Debugger de notificações (sempre disponível) */}
-            <NotificationDebugger />
           </ErrorBoundary>
         </TooltipProvider>
       </AuthProvider>
