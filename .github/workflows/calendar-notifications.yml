@@ -1,0 +1,109 @@
+name: Notificações de Eventos (Calendário)
+
+on:
+  schedule:
+    # Verificar eventos a cada 5 minutos
+    - cron: '*/5 * * * *'
+  
+  # Permitir execução manual
+  workflow_dispatch:
+
+jobs:
+  check-events:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Buscar eventos próximos
+        id: events
+        run: |
+          # Data/hora atual e daqui 30 minutos
+          NOW=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
+          IN_30MIN=$(date -u -d "+30 minutes" +"%Y-%m-%dT%H:%M:%S.000Z")
+          
+          echo "🔍 Buscando eventos entre $NOW e $IN_30MIN"
+          
+          # Buscar eventos do Supabase
+          EVENTS=$(curl -s -X GET \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/events?start_date=gte.$NOW&start_date=lte.$IN_30MIN&select=*" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          
+          EVENT_COUNT=$(echo "$EVENTS" | jq '. | length')
+          echo "events=$EVENTS" >> $GITHUB_OUTPUT
+          echo "count=$EVENT_COUNT" >> $GITHUB_OUTPUT
+          echo "📅 Eventos encontrados: $EVENT_COUNT"
+
+      - name: Enviar notificações de eventos
+        if: steps.events.outputs.count > 0
+        env:
+          EVENTS: ${{ steps.events.outputs.events }}
+        run: |
+          echo "🚀 Processando eventos..."
+          
+          echo "$EVENTS" | jq -c '.[]' | while read event; do
+            USER_ID=$(echo "$event" | jq -r '.user_id')
+            EVENT_ID=$(echo "$event" | jq -r '.id')
+            TITLE=$(echo "$event" | jq -r '.title')
+            START_DATE=$(echo "$event" | jq -r '.start_date')
+            LOCATION=$(echo "$event" | jq -r '.location // ""')
+            
+            # Calcular minutos até o evento
+            NOW_EPOCH=$(date +%s)
+            EVENT_EPOCH=$(date -d "$START_DATE" +%s)
+            MINUTES_UNTIL=$(( ($EVENT_EPOCH - $NOW_EPOCH) / 60 ))
+            
+            echo "📅 Evento: $TITLE"
+            echo "⏰ Começa em: $MINUTES_UNTIL minutos"
+            echo "👤 Usuário: ${USER_ID:0:20}..."
+            
+            # Determinar mensagem baseada no tempo
+            if [ $MINUTES_UNTIL -le 5 ]; then
+              EMOJI="🚨"
+              MESSAGE="Faltam apenas $MINUTES_UNTIL minutos!"
+            elif [ $MINUTES_UNTIL -le 15 ]; then
+              EMOJI="⚠️"
+              MESSAGE="Começa em $MINUTES_UNTIL minutos"
+            else
+              EMOJI="📅"
+              MESSAGE="Começa em $MINUTES_UNTIL minutos"
+            fi
+            
+            # Adicionar localização se existir
+            if [ ! -z "$LOCATION" ] && [ "$LOCATION" != "null" ]; then
+              MESSAGE="$MESSAGE - Local: $LOCATION"
+            fi
+            
+            FULL_TITLE="$EMOJI $TITLE"
+            
+            echo "📤 Enviando notificação: $FULL_TITLE"
+            
+            # Enviar notificação
+            RESPONSE=$(curl -s -X POST https://ym-sports.vercel.app/api/notify \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"user_id\": \"$USER_ID\",
+                \"title\": \"$FULL_TITLE\",
+                \"body\": \"$MESSAGE\",
+                \"url\": \"/dashboard/calendar\"
+              }")
+            
+            echo "✅ Resposta: $RESPONSE"
+            
+            # Registrar que enviamos (para evitar duplicatas)
+            # Em produção, você salvaria isso no banco de dados
+            echo "✓ Notificação enviada para evento $EVENT_ID"
+            
+            sleep 1
+          done
+          
+          echo "🎉 Todas as notificações de eventos enviadas!"
+
+      - name: Log resultado
+        if: always()
+        run: |
+          echo "📊 Resumo da Verificação:"
+          echo "⏰ Horário UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
+          echo "🌎 Horário BRT: $(TZ=America/Sao_Paulo date '+%Y-%m-%d %H:%M:%S')"
+          echo "📅 Eventos próximos: ${{ steps.events.outputs.count }}"
+          echo "✅ Verificação concluída!"
+

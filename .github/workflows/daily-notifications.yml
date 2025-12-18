@@ -1,0 +1,129 @@
+name: Notificações Diárias Automáticas
+
+on:
+  schedule:
+    # Horários em UTC (Brasil = UTC-3)
+    # 07:00 BRT = 10:00 UTC
+    - cron: '0 10 * * *'  # 07:00 BRT - Bom dia
+    # 09:00 BRT = 12:00 UTC
+    - cron: '0 12 * * *'  # 09:00 BRT - Hidratação
+    # 11:30 BRT = 14:30 UTC
+    - cron: '30 14 * * *' # 11:30 BRT - Treino manhã
+    # 14:00 BRT = 17:00 UTC
+    - cron: '0 17 * * *'  # 14:00 BRT - Hidratação
+    # 17:00 BRT = 20:00 UTC
+    - cron: '0 20 * * *'  # 17:00 BRT - Treino tarde ⭐
+    # 19:00 BRT = 22:00 UTC
+    - cron: '0 22 * * *'  # 19:00 BRT - Hidratação
+    # 21:00 BRT = 00:00 UTC (dia seguinte)
+    - cron: '0 0 * * *'   # 21:00 BRT - Boa noite
+  
+  # Permitir execução manual
+  workflow_dispatch:
+    inputs:
+      notification_type:
+        description: 'Tipo de notificação'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+          - morning
+          - hydration
+          - workout
+          - evening
+          - test
+
+jobs:
+  send-notification:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Identificar horário e tipo de notificação
+        id: notification
+        run: |
+          HOUR=$(date -u +%H)
+          
+          case $HOUR in
+            10) TYPE="morning"; TITLE="💪 Bom dia, atleta!"; BODY="Hora de começar o dia com energia! Vamos treinar hoje?"; URL="/dashboard" ;;
+            12) TYPE="hydration"; TITLE="💧 Hidratação"; BODY="Já bebeu água hoje? Mantenha-se hidratado!"; URL="/dashboard/nutrition" ;;
+            14) TYPE="workout"; TITLE="🏋️ Hora do Treino!"; BODY="Seu treino está te esperando. Vamos nessa!"; URL="/dashboard/training" ;;
+            17) TYPE="hydration"; TITLE="💧 Hidratação"; BODY="Continue bebendo água! Seu corpo agradece."; URL="/dashboard/nutrition" ;;
+            20) TYPE="workout"; TITLE="🏃‍♂️ Treino da Tarde!"; BODY="Que tal um treino agora? Você consegue!"; URL="/dashboard/training" ;;
+            22) TYPE="hydration"; TITLE="💧 Última Hidratação"; BODY="Beba mais água antes de dormir!"; URL="/dashboard/nutrition" ;;
+            0)  TYPE="evening"; TITLE="🌙 Boa Noite!"; BODY="Descanse bem para conquistar seus objetivos amanhã!"; URL="/dashboard/motivational" ;;
+            *)  TYPE="test"; TITLE="🧪 Teste"; BODY="Notificação automática funcionando!"; URL="/dashboard" ;;
+          esac
+          
+          # Se for execução manual, usar input
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            TYPE="${{ github.event.inputs.notification_type }}"
+            case $TYPE in
+              morning) TITLE="💪 Bom dia, atleta!"; BODY="Hora de começar o dia com energia!"; URL="/dashboard" ;;
+              hydration) TITLE="💧 Hidratação"; BODY="Já bebeu água hoje?"; URL="/dashboard/nutrition" ;;
+              workout) TITLE="🏋️ Treino!"; BODY="Seu treino está te esperando!"; URL="/dashboard/training" ;;
+              evening) TITLE="🌙 Boa Noite!"; BODY="Descanse bem!"; URL="/dashboard/motivational" ;;
+              test) TITLE="🧪 Teste Manual"; BODY="GitHub Actions funcionando!"; URL="/dashboard" ;;
+            esac
+          fi
+          
+          echo "type=$TYPE" >> $GITHUB_OUTPUT
+          echo "title=$TITLE" >> $GITHUB_OUTPUT
+          echo "body=$BODY" >> $GITHUB_OUTPUT
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "🔔 Tipo: $TYPE | Título: $TITLE"
+
+      - name: Buscar todos os usuários ativos
+        id: users
+        run: |
+          # Buscar usuários do Supabase
+          RESPONSE=$(curl -s -X GET \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/profiles?select=user_id" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          
+          echo "users=$RESPONSE" >> $GITHUB_OUTPUT
+          echo "📊 Usuários encontrados"
+
+      - name: Enviar notificações via API
+        env:
+          NOTIFICATION_TYPE: ${{ steps.notification.outputs.type }}
+          NOTIFICATION_TITLE: ${{ steps.notification.outputs.title }}
+          NOTIFICATION_BODY: ${{ steps.notification.outputs.body }}
+          NOTIFICATION_URL: ${{ steps.notification.outputs.url }}
+          USERS: ${{ steps.users.outputs.users }}
+        run: |
+          echo "🚀 Enviando notificações..."
+          echo "📋 Tipo: $NOTIFICATION_TYPE"
+          echo "📝 Título: $NOTIFICATION_TITLE"
+          
+          # Parse users JSON e enviar para cada um
+          echo "$USERS" | jq -r '.[].user_id' | while read user_id; do
+            if [ ! -z "$user_id" ]; then
+              echo "📤 Enviando para usuário: ${user_id:0:20}..."
+              
+              RESPONSE=$(curl -s -X POST https://ym-sports.vercel.app/api/notify \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"user_id\": \"$user_id\",
+                  \"title\": \"$NOTIFICATION_TITLE\",
+                  \"body\": \"$NOTIFICATION_BODY\",
+                  \"url\": \"$NOTIFICATION_URL\"
+                }")
+              
+              echo "✅ Resposta: $RESPONSE"
+              sleep 1  # Evitar rate limiting
+            fi
+          done
+          
+          echo "🎉 Notificações enviadas com sucesso!"
+
+      - name: Log resultado
+        if: always()
+        run: |
+          echo "📊 Resumo da Execução:"
+          echo "⏰ Horário UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
+          echo "🌎 Horário BRT: $(TZ=America/Sao_Paulo date '+%Y-%m-%d %H:%M:%S')"
+          echo "🔔 Tipo: ${{ steps.notification.outputs.type }}"
+          echo "📝 Título: ${{ steps.notification.outputs.title }}"
+          echo "✅ Workflow concluído!"
+
