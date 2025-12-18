@@ -1,9 +1,0 @@
-{
-  "name": "ym-sports-api",
-  "version": "1.0.0",
-  "dependencies": {
-    "@supabase/supabase-js": "^2.88.0",
-    "web-push": "^3.6.7"
-  }
-}
-
