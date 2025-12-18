@@ -32,13 +32,15 @@ export default async function handler(req, res) {
   try {
     // Configurar Supabase
     const supabaseUrl = process.env.VITE_SUPABASE_URL;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // Nome correto da variável
 
     if (!supabaseUrl || !supabaseServiceKey) {
       console.error('❌ Variáveis de ambiente não configuradas');
+      console.error('VITE_SUPABASE_URL:', supabaseUrl ? '✓' : '✗');
+      console.error('SUPABASE_SERVICE_ROLE_KEY:', supabaseServiceKey ? '✓' : '✗');
       return res.status(500).json({ 
         error: 'Supabase configuration missing',
-        message: 'Configure VITE_SUPABASE_URL e SUPABASE_SERVICE_KEY no Vercel'
+        message: 'Configure VITE_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no Vercel'
       });
     }
 
