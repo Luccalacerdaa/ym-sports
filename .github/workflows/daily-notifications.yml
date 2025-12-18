@@ -72,17 +72,32 @@ jobs:
           echo "url=$URL" >> $GITHUB_OUTPUT
           echo "🔔 Tipo: $TYPE | Título: $TITLE"
 
-      - name: Buscar todos os usuários ativos
+      - name: Buscar usuários com push ativo
         id: users
         run: |
-          # Buscar usuários do Supabase
-          RESPONSE=$(curl -s -X GET \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/profiles?select=user_id" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          # Buscar apenas usuários com push subscription ativa
+          echo "🔍 Buscando usuários com notificações ativas..."
           
+          RESPONSE=$(curl -s -X GET \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/push_subscriptions?select=user_id" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json")
+          
+          echo "📊 Resposta do Supabase:"
+          echo "$RESPONSE"
+          
+          # Verificar se houve erro
+          if echo "$RESPONSE" | grep -q "message"; then
+            echo "⚠️ Erro ao buscar usuários. Usando fallback..."
+            # Usar user_id padrão como fallback
+            RESPONSE='[{"user_id":"45610e6d-f5f5-4540-912d-a5c9a361e20f"}]'
+          fi
+          
+          USER_COUNT=$(echo "$RESPONSE" | jq 'length' 2>/dev/null || echo "0")
           echo "users=$RESPONSE" >> $GITHUB_OUTPUT
-          echo "📊 Usuários encontrados"
+          echo "count=$USER_COUNT" >> $GITHUB_OUTPUT
+          echo "✅ Encontrados: $USER_COUNT usuários com push ativo"
 
       - name: Enviar notificações via API
         env:
@@ -91,17 +106,28 @@ jobs:
           NOTIFICATION_BODY: ${{ steps.notification.outputs.body }}
           NOTIFICATION_URL: ${{ steps.notification.outputs.url }}
           USERS: ${{ steps.users.outputs.users }}
+          USER_COUNT: ${{ steps.users.outputs.count }}
         run: |
-          echo "🚀 Enviando notificações..."
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🚀 ENVIANDO NOTIFICAÇÕES"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "📋 Tipo: $NOTIFICATION_TYPE"
           echo "📝 Título: $NOTIFICATION_TITLE"
+          echo "💬 Mensagem: $NOTIFICATION_BODY"
+          echo "🔗 URL: $NOTIFICATION_URL"
+          echo "👥 Usuários: $USER_COUNT"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          
+          SENT_COUNT=0
+          FAILED_COUNT=0
           
           # Parse users JSON e enviar para cada um
-          echo "$USERS" | jq -r '.[].user_id' | while read user_id; do
+          echo "$USERS" | jq -r '.[].user_id' 2>/dev/null | while read user_id; do
             if [ ! -z "$user_id" ]; then
-              echo "📤 Enviando para usuário: ${user_id:0:20}..."
+              echo "📤 Enviando para: ${user_id:0:36}"
               
-              RESPONSE=$(curl -s -X POST https://ym-sports.vercel.app/api/notify \
+              RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://ym-sports.vercel.app/api/notify \
                 -H "Content-Type: application/json" \
                 -d "{
                   \"user_id\": \"$user_id\",
@@ -110,12 +136,34 @@ jobs:
                   \"url\": \"$NOTIFICATION_URL\"
                 }")
               
-              echo "✅ Resposta: $RESPONSE"
+              HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+              BODY=$(echo "$RESPONSE" | head -n-1)
+              
+              if [ "$HTTP_CODE" = "200" ]; then
+                SENT=$(echo "$BODY" | jq -r '.sent // 0' 2>/dev/null || echo "0")
+                FAILED=$(echo "$BODY" | jq -r '.failed // 0' 2>/dev/null || echo "0")
+                echo "   ✅ HTTP $HTTP_CODE - Enviadas: $SENT, Falharam: $FAILED"
+                SENT_COUNT=$((SENT_COUNT + SENT))
+                FAILED_COUNT=$((FAILED_COUNT + FAILED))
+              else
+                echo "   ❌ HTTP $HTTP_CODE - Erro: $BODY"
+                FAILED_COUNT=$((FAILED_COUNT + 1))
+              fi
+              
+              echo ""
               sleep 1  # Evitar rate limiting
             fi
           done
           
-          echo "🎉 Notificações enviadas com sucesso!"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📊 RESUMO FINAL"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ Notificações enviadas: $SENT_COUNT"
+          echo "❌ Notificações falharam: $FAILED_COUNT"
+          echo "👥 Usuários processados: $USER_COUNT"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "🎉 Workflow concluído!"
 
       - name: Log resultado
         if: always()

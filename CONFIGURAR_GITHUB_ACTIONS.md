@@ -20,19 +20,59 @@
 2. Clique em **New repository secret**
 
 ### **1.3 Adicionar SECRET 1 - SUPABASE_URL:**
-- **Name:** `SUPABASE_URL`
-- **Value:** `https://qfnjgksvpjbuhzwuitzg.supabase.co`
+- Clique em **New repository secret**
+- **Name:** `SUPABASE_URL` (copie EXATAMENTE)
+- **Value:** `https://qfnjgksvpjbuhzwuitzg.supabase.co` (copie EXATAMENTE)
 - Clique em **Add secret**
+- ✅ Deve aparecer na lista
 
 ### **1.4 Adicionar SECRET 2 - SUPABASE_ANON_KEY:**
-- **Name:** `SUPABASE_ANON_KEY`
-- **Value:** `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmpna3N2cGpidWh6d3VpdHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAwNzE0NzAsImV4cCI6MjA0NTY0NzQ3MH0.ZW-a1HlOCgzM1QwNW3o55Ik83Cve_ClfT7hJbKEus_0`
+- Clique em **New repository secret** novamente
+- **Name:** `SUPABASE_ANON_KEY` (copie EXATAMENTE)
+- **Value:** Cole a chave abaixo (copie TODA a linha):
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmpna3N2cGpidWh6d3VpdHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAwNzE0NzAsImV4cCI6MjA0NTY0NzQ3MH0.ZW-a1HlOCgzM1QwNW3o55Ik83Cve_ClfT7hJbKEus_0
+```
+
 - Clique em **Add secret**
+- ✅ Deve aparecer na lista
+
+**⚠️ IMPORTANTE:**
+- Copie TODA a chave (do `eyJ` até o final `s_0`)
+- NÃO adicione espaços no início ou fim
+- NÃO adicione aspas ou outros caracteres
 
 ### **1.5 Verificar:**
 Você deve ter **2 secrets**:
 - ✅ SUPABASE_URL
 - ✅ SUPABASE_ANON_KEY
+
+---
+
+---
+
+## 📆 **IMPORTANTE: Workflow de Eventos**
+
+### **Já está configurado e funcionando!** ✅
+
+O segundo workflow **"Notificações de Eventos (Calendário)"** já está ativo e vai:
+
+1. ✅ Verificar **a cada 5 minutos** se há eventos próximos
+2. ✅ Buscar eventos dos próximos 30 minutos
+3. ✅ Enviar notificação automática para cada evento:
+   - 🚨 **Menos de 5 min**: "Faltam apenas X minutos!"
+   - ⚠️ **5-15 min**: "Começa em X minutos"
+   - 📅 **15-30 min**: "Evento começa em X minutos"
+4. ✅ Incluir localização do evento (se houver)
+
+**Como funciona:**
+- Quando você criar um evento no calendário do app
+- O GitHub Actions vai detectar automaticamente
+- E enviar notificações para você nos momentos certos
+- **Funciona mesmo com app fechado!** 🎉
+
+**Não precisa fazer nada extra** - os mesmos secrets já ativam este workflow!
 
 ---
 
@@ -177,9 +217,38 @@ Os workflows rodam **automaticamente** nestes horários:
 
 ## 🆘 **Problemas?**
 
+### **❌ Erro: "Invalid API key"**
+
+Se você ver este erro nos logs:
+```
+Invalid API key - Double check your Supabase anon API key
+```
+
+**Solução:**
+1. GitHub → Settings → Secrets and variables → Actions
+2. **Deletar** os secrets existentes (se houver)
+3. **Adicionar novamente** com os valores EXATOS:
+
+```
+SUPABASE_URL:
+https://qfnjgksvpjbuhzwuitzg.supabase.co
+
+SUPABASE_ANON_KEY:
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmpna3N2cGpidWh6d3VpdHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAwNzE0NzAsImV4cCI6MjA0NTY0NzQ3MH0.ZW-a1HlOCgzM1QwNW3o55Ik83Cve_ClfT7hJbKEus_0
+```
+
+4. **Importante:**
+   - Copie TODA a chave (do `eyJ` até `s_0`)
+   - NÃO adicione espaços
+   - NÃO adicione aspas
+   - NÃO quebre em múltiplas linhas
+
+5. Teste novamente
+
 ### **Erro: Secrets not found**
 - Certifique-se que adicionou os 2 secrets corretamente
 - Nomes devem ser EXATAMENTE: `SUPABASE_URL` e `SUPABASE_ANON_KEY`
+- Sem espaços, sem aspas, sem caracteres extras
 
 ### **Workflow não executa automaticamente**
 - Pode demorar alguns minutos após o commit
