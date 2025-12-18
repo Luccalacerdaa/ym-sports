@@ -123,9 +123,16 @@ Sempre responda em português brasileiro, seja prestativo e demonstre conhecimen
 
   constructor() {
     // Tentar obter a API key do localStorage ou variável de ambiente
+    // IMPORTANTE: Configure a API key em Configurações do Chat
     this.apiKey = localStorage.getItem('openai_api_key') || 
                   process.env.REACT_APP_OPENAI_API_KEY || 
                   null;
+                  
+    // Se não tem API key salva, tentar usar a configurada pelo usuário
+    if (!this.apiKey) {
+      // Mostrar que é necessário configurar a API key
+      console.warn('⚠️ API Key do OpenAI não configurada. Configure em Configurações do Chat.');
+    }
   }
 
   // Configurar API key

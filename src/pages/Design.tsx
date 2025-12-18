@@ -114,130 +114,29 @@ export default function Design() {
 
   return (
     <div className="container mx-auto p-6 space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-6">
-        <div className="flex items-center justify-center gap-4 mb-6">
+      {/* Header Simplificado */}
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center gap-4 mb-4">
           <img 
             src="/icons/logo.png" 
             alt="YM Sports" 
-            className="h-20 w-20 object-contain"
+            className="h-16 w-16 object-contain"
           />
-          <div>
-            <h1 className="text-5xl font-bold text-white">
-              YM DESIGN
-            </h1>
-            <p className="text-xl text-gray-400">Designer Especialista em Esportes</p>
-          </div>
+          <h1 className="text-2xl font-bold text-white">
+            YM DESIGN
+          </h1>
         </div>
         
-        <div className="space-y-4">
-          <h2 className="text-3xl font-bold text-white">
-            Material profissional para atletas
-          </h2>
-          
-          <p className="text-lg text-gray-300 max-w-3xl mx-auto">
-            Artes profissionais, edição de vídeo e portfólio para divulgação.
-          </p>
-          
-          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6 max-w-2xl mx-auto">
-            <h3 className="text-2xl font-bold text-yellow-500 mb-2">
-              20% OFF em duas artes mensais
-            </h3>
-            <p className="text-yellow-400 font-semibold">
-              EXCLUSIVO PARA ASSINANTES DO APP
-            </p>
-          </div>
-        </div>
+        <p className="text-lg text-gray-400">Designer Especialista em Esportes</p>
         
-        <div className="flex flex-wrap justify-center gap-2 mt-6">
-          <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-500 border border-yellow-500/30">
-            <Star className="h-3 w-3 mr-1" />
-            5.0 Estrelas
-          </Badge>
-          <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-500 border border-yellow-500/30">
-            <Zap className="h-3 w-3 mr-1" />
-            Entrega Rápida
-          </Badge>
-        </div>
+        <h2 className="text-xl font-semibold text-white">
+          Material profissional para atletas
+        </h2>
+        
+        <p className="text-base text-gray-300 max-w-2xl mx-auto">
+          Artes profissionais, edição de vídeo e portfólio para divulgação.
+        </p>
       </div>
-
-      {/* CTA Principal */}
-      <Card className="bg-black border border-yellow-500/30 text-white">
-        <CardContent className="p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4 text-white">Destaque seu talento</h2>
-          <p className="text-lg mb-6 text-gray-300">
-            Entre em contato e receba um orçamento personalizado!
-          </p>
-          <Button 
-            size="lg" 
-            onClick={handleWhatsAppContact}
-            className="bg-yellow-500 text-black hover:bg-yellow-400 font-semibold"
-          >
-            <MessageCircle className="h-5 w-5 mr-2" />
-            Falar com Yago no WhatsApp
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Post de Vídeo */}
-      <Card className="bg-gradient-to-r from-gray-900 to-black border border-yellow-500/30 overflow-hidden">
-        <CardContent className="p-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
-            {/* Vídeo */}
-            <div className="relative aspect-video lg:aspect-square">
-              <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
-                <div className="text-center text-gray-400">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-yellow-500 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-black" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <p className="text-lg font-semibold">Vídeo Promocional</p>
-                  <p className="text-sm">Confira nossos trabalhos em ação</p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Conteúdo */}
-            <div className="p-8 flex flex-col justify-center">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-yellow-500 text-black">Novo</Badge>
-                  <Badge variant="outline" className="border-yellow-500/30 text-yellow-500">Vídeo</Badge>
-                </div>
-                
-                <h3 className="text-2xl font-bold text-white">
-                  Nossos Trabalhos em Ação
-                </h3>
-                
-                <p className="text-gray-300 leading-relaxed">
-                  Confira exemplos reais de artes criadas para jogadores e times.
-                </p>
-                
-                <div className="flex items-center gap-4 text-sm text-gray-400">
-                  <div className="flex items-center gap-1">
-                    <Eye className="h-4 w-4" />
-                    <span>2.5K visualizações</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Heart className="h-4 w-4" />
-                    <span>180 curtidas</span>
-                  </div>
-                </div>
-                
-                <Button 
-                  size="lg" 
-                  onClick={handleWhatsAppContact}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold w-full"
-                >
-                  <MessageCircle className="mr-2 h-5 w-5" />
-                  Solicitar Orçamento
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Filtros do Portfólio */}
       <div className="space-y-6">
@@ -313,11 +212,51 @@ export default function Design() {
         ))}
       </div>
 
+      {/* Oferta Especial */}
+      <Card className="bg-yellow-500/10 border border-yellow-500/30 text-white">
+        <CardContent className="p-8 text-center space-y-4">
+          <h3 className="text-3xl font-bold text-yellow-500">
+            20% OFF em duas artes mensais
+          </h3>
+          <p className="text-xl text-yellow-400 font-semibold">
+            EXCLUSIVO PARA ASSINANTES DO APP
+          </p>
+          
+          <div className="flex flex-wrap justify-center gap-3 pt-4">
+            <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-500 border border-yellow-500/30 text-base py-2 px-4">
+              <Star className="h-4 w-4 mr-1" />
+              5.0 Estrelas
+            </Badge>
+            <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-500 border border-yellow-500/30 text-base py-2 px-4">
+              <Zap className="h-4 w-4 mr-1" />
+              Entrega Rápida
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Destaque seu talento */}
+      <Card className="bg-black border border-yellow-500/30 text-white">
+        <CardContent className="p-8 text-center">
+          <h2 className="text-2xl font-bold mb-4 text-white">Destaque seu talento</h2>
+          <p className="text-lg mb-6 text-gray-300">
+            Entre em contato e receba um orçamento personalizado!
+          </p>
+          <Button 
+            size="lg" 
+            onClick={handleWhatsAppContact}
+            className="bg-yellow-500 text-black hover:bg-yellow-400 font-semibold"
+          >
+            <MessageCircle className="h-5 w-5 mr-2" />
+            Falar com Yago no WhatsApp
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* CTA Final */}
       <Card className="bg-black border border-yellow-500/30 text-white">
         <CardContent className="p-8 text-center">
-          <h2 className="text-3xl font-bold mb-4 text-white">Vamos criar algo incrível?</h2>
+          <h2 className="text-2xl font-bold mb-4 text-white">Vamos criar algo incrível?</h2>
           <p className="text-lg mb-6 text-gray-300">
             Fotos profissionais, designs para redes sociais ou identidade visual completa.
           </p>

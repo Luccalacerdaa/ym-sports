@@ -1,7 +1,7 @@
 // Service Worker Simplificado para YM Sports
 // Foco em notificações que funcionem mesmo com app fechado
 
-const SW_VERSION = '12.0.0';
+const SW_VERSION = '13.0.0';
 const CACHE_NAME = `ym-sports-v${SW_VERSION}`;
 
 console.log(`[SW] 🚀 YM Sports Service Worker v${SW_VERSION} iniciado!`);

@@ -26,8 +26,7 @@ export default function Motivational() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedVideo, setSelectedVideo] = useState<YouTubeVideo | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [channelUrl, setChannelUrl] = useState("https://youtube.com/shorts/7zt94EyRO9w?si=Ml4TEP9Ca4DFRP7h");
-  const [showSettings, setShowSettings] = useState(false);
+  const [channelUrl] = useState("https://youtube.com/shorts/7zt94EyRO9w?si=Ml4TEP9Ca4DFRP7h");
 
   // Carregar vídeos do canal
   const loadVideosFromChannel = async (url: string) => {
@@ -114,15 +113,6 @@ export default function Motivational() {
               </h1>
             </div>
             
-            <Button
-              onClick={() => setShowSettings(!showSettings)}
-              variant="outline"
-              size="sm"
-              className="border-gray-700 text-gray-300 hover:bg-gray-800"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Configurar Canal
-            </Button>
           </div>
           
           <p className="text-gray-400">
@@ -130,60 +120,6 @@ export default function Motivational() {
           </p>
         </div>
 
-        {/* Configurações do Canal */}
-        {showSettings && (
-          <Card className="mb-8 bg-gray-900 border-gray-800">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center">
-                <Settings className="w-5 h-5 mr-2" />
-                Configurar Canal do YouTube
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  URL do Canal ou Vídeo do YouTube
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    value={channelUrl}
-                    onChange={(e) => setChannelUrl(e.target.value)}
-                    placeholder="https://youtube.com/shorts/VIDEO_ID ou URL do canal"
-                    className="bg-gray-800 border-gray-700 text-white"
-                  />
-                  <Button
-                    onClick={() => loadVideosFromChannel(channelUrl)}
-                    disabled={loading}
-                    className="bg-red-600 hover:bg-red-700 text-white"
-                  >
-                    {loading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <RefreshCw className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-                <p className="text-xs text-gray-400 mt-1">
-                  Cole a URL de qualquer vídeo do canal que você quer acompanhar
-                </p>
-              </div>
-              
-              <div className="flex items-center gap-2 text-sm">
-                {videos.length > 0 ? (
-                  <>
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span className="text-green-400">{videos.length} vídeos carregados</span>
-                  </>
-                ) : (
-                  <>
-                    <AlertCircle className="w-4 h-4 text-yellow-500" />
-                    <span className="text-yellow-400">Nenhum vídeo carregado</span>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Filtros */}
         <div className="mb-8 space-y-4">
@@ -413,13 +349,6 @@ export default function Motivational() {
                 className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black"
               >
                 Limpar Busca
-              </Button>
-              <Button
-                onClick={() => setShowSettings(true)}
-                variant="outline"
-                className="border-red-500 text-red-500 hover:bg-red-500 hover:text-black"
-              >
-                Configurar Canal
               </Button>
             </div>
           </div>
