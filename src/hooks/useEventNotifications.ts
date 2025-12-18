@@ -9,6 +9,11 @@ export const useEventNotifications = () => {
   useEffect(() => {
     if (!user) return;
 
+    // ⚠️ DESATIVADO: GitHub Actions agora cuida das notificações de eventos
+    // Isso evita notificações duplicadas ao abrir o app
+    console.log('ℹ️ Notificações de eventos gerenciadas pelo GitHub Actions');
+    return; // Desativa o hook
+    
     // Verificar eventos a cada 5 minutos
     const checkUpcomingEvents = async () => {
       try {
