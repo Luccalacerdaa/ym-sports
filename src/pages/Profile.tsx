@@ -9,7 +9,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePhotoUpload } from "@/hooks/usePhotoUpload";
-import { NotificationSettings } from "@/components/NotificationSettings";
 import { ImageCropper } from "@/components/ImageCropper";
 import { toast } from "sonner";
 import { 
@@ -563,11 +562,6 @@ export default function Profile() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Notificações Push */}
-          <div className="animate-fade-in" style={{ animationDelay: "0.25s" }}>
-            <NotificationSettings />
-          </div>
 
           {/* Informações da Conta */}
           <Card className="hover-scale animate-fade-in" style={{ animationDelay: "0.3s" }}>

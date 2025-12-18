@@ -27,7 +27,6 @@ import PublicPortfolio from "./pages/PublicPortfolio";
 import Design from "./pages/Design";
 import Motivational from "./pages/Motivational";
 import Settings from "./pages/Settings";
-import NotificationSchedulePage from "./pages/NotificationSchedulePage";
 import DashboardLayout from "./pages/DashboardLayout";
 import NotFound from "./pages/NotFound";
 
@@ -73,7 +72,6 @@ const AppContent = () => {
                 <Route path="design" element={<Design />} />
                 <Route path="motivational" element={<Motivational />} />
                 <Route path="settings" element={<Settings />} />
-                <Route path="notifications-schedule" element={<NotificationSchedulePage />} />
             </Route>
             <Route path="/portfolio/:slug" element={<PublicPortfolio />} />
             <Route path="*" element={<NotFound />} />
