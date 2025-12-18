@@ -14,6 +14,24 @@ SECURITY DEFINER
 SET search_path = public, pg_temp
 LANGUAGE sql
 AS $$
+  -- Usar CTE para ordenar antes de agregar
+  WITH ordered_events AS (
+    SELECT 
+      id,
+      user_id,
+      title,
+      description,
+      event_type,
+      start_date,
+      end_date,
+      location,
+      opponent
+    FROM events
+    WHERE 
+      start_date >= NOW() 
+      AND start_date <= (NOW() + (minutes_ahead || ' minutes')::INTERVAL)
+    ORDER BY start_date ASC
+  )
   SELECT COALESCE(
     jsonb_agg(
       jsonb_build_object(
@@ -30,11 +48,7 @@ AS $$
     ),
     '[]'::jsonb
   )
-  FROM events e
-  WHERE 
-    e.start_date >= NOW() 
-    AND e.start_date <= (NOW() + (minutes_ahead || ' minutes')::INTERVAL)
-  ORDER BY e.start_date ASC;
+  FROM ordered_events e;
 $$;
 
 -- Dar permissões
