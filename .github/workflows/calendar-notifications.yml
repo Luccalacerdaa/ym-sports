@@ -13,34 +13,42 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Buscar eventos próximos
+      - name: Buscar eventos próximos (via RPC)
         id: events
         run: |
-          # Data/hora atual e daqui 30 minutos
-          NOW=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
-          IN_30MIN=$(date -u -d "+30 minutes" +"%Y-%m-%dT%H:%M:%S.000Z")
-          
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "🔍 BUSCANDO EVENTOS PRÓXIMOS"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "📅 Período: $NOW até $IN_30MIN"
+          echo "⏰ Verificando próximos 30 minutos..."
           echo ""
           
-          # Buscar eventos do Supabase
-          EVENTS=$(curl -s -X GET \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/events?start_date=gte.$NOW&start_date=lte.$IN_30MIN&select=*" \
+          # Buscar eventos usando RPC function (bypass RLS)
+          EVENTS=$(curl -s -X POST \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/get_upcoming_events" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Content-Type: application/json")
+            -H "Content-Type: application/json" \
+            -d '{"minutes_ahead": 30}')
           
           echo "📦 Resposta do Supabase:"
-          echo "$EVENTS"
+          echo "$EVENTS" | head -c 500  # Limitar output
           echo ""
           
           # Verificar se houve erro
-          if echo "$EVENTS" | grep -q "message"; then
-            echo "⚠️ Erro ao buscar eventos (API key inválida ou sem permissão)"
-            echo "   Usando lista vazia como fallback..."
+          if echo "$EVENTS" | grep -q '"message"'; then
+            echo "⚠️ Erro ao buscar eventos:"
+            echo "$EVENTS"
+            echo ""
+            echo "❌ Se a função RPC não existe, você precisa executar a migração!"
+            echo "📖 Veja: supabase/migrations/20251218_events_rpc.sql"
+            echo ""
+            echo "Usando lista vazia como fallback..."
+            EVENTS='[]'
+            EVENT_COUNT=0
+          elif echo "$EVENTS" | grep -q '"code"'; then
+            echo "⚠️ Erro RPC:"
+            echo "$EVENTS"
+            echo "Usando lista vazia como fallback..."
             EVENTS='[]'
             EVENT_COUNT=0
           else
@@ -50,6 +58,14 @@ jobs:
           echo "events=$EVENTS" >> $GITHUB_OUTPUT
           echo "count=$EVENT_COUNT" >> $GITHUB_OUTPUT
           echo "✅ Eventos encontrados: $EVENT_COUNT"
+          
+          # Debug info
+          if [ "$EVENT_COUNT" -gt 0 ]; then
+            echo ""
+            echo "📋 Eventos:"
+            echo "$EVENTS" | jq -r '.[] | "  - \(.title) às \(.start_date)"' 2>/dev/null || echo "  (erro ao listar)"
+          fi
+          
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
       - name: Enviar notificações de eventos
