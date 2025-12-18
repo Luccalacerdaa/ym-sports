@@ -23,11 +23,19 @@ jobs:
           echo ""
           
           # Buscar eventos usando RPC function (bypass RLS)
-          # Nota: Se continuar dando erro "Invalid API key", veja DIAGNOSTICO_EVENTOS.md
+          # Usa SERVICE_KEY se disponível (acesso total), senão usa ANON_KEY
+          if [ ! -z "${{ secrets.SUPABASE_SERVICE_KEY }}" ]; then
+            echo "🔑 Usando Service Role Key (acesso total)"
+            API_KEY="${{ secrets.SUPABASE_SERVICE_KEY }}"
+          else
+            echo "🔑 Usando Anon Key"
+            API_KEY="${{ secrets.SUPABASE_ANON_KEY }}"
+          fi
+          
           EVENTS=$(curl -s -X POST \
             "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/get_upcoming_events" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "apikey: $API_KEY" \
+            -H "Authorization: Bearer $API_KEY" \
             -H "Content-Type: application/json" \
             -H "Prefer: params=single-object" \
             -d '{"minutes_ahead": 30}')
