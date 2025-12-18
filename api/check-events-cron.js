@@ -110,7 +110,12 @@ export default async function handler(req, res) {
       try {
         console.log(`   📤 Enviando notificação: ${emoji} ${event.title}`);
         
-        const notifyResponse = await fetch(`${process.env.VERCEL_URL || 'https://ym-sports.vercel.app'}/api/notify`, {
+        // Montar URL corretamente (VERCEL_URL não inclui https://)
+        const baseUrl = process.env.VERCEL_URL 
+          ? `https://${process.env.VERCEL_URL}` 
+          : 'https://ym-sports.vercel.app';
+        
+        const notifyResponse = await fetch(`${baseUrl}/api/notify`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
