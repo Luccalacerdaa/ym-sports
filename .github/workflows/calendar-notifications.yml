@@ -20,27 +20,51 @@ jobs:
           NOW=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
           IN_30MIN=$(date -u -d "+30 minutes" +"%Y-%m-%dT%H:%M:%S.000Z")
           
-          echo "🔍 Buscando eventos entre $NOW e $IN_30MIN"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🔍 BUSCANDO EVENTOS PRÓXIMOS"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📅 Período: $NOW até $IN_30MIN"
+          echo ""
           
           # Buscar eventos do Supabase
           EVENTS=$(curl -s -X GET \
             "${{ secrets.SUPABASE_URL }}/rest/v1/events?start_date=gte.$NOW&start_date=lte.$IN_30MIN&select=*" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json")
           
-          EVENT_COUNT=$(echo "$EVENTS" | jq '. | length')
+          echo "📦 Resposta do Supabase:"
+          echo "$EVENTS"
+          echo ""
+          
+          # Verificar se houve erro
+          if echo "$EVENTS" | grep -q "message"; then
+            echo "⚠️ Erro ao buscar eventos (API key inválida ou sem permissão)"
+            echo "   Usando lista vazia como fallback..."
+            EVENTS='[]'
+            EVENT_COUNT=0
+          else
+            EVENT_COUNT=$(echo "$EVENTS" | jq '. | length' 2>/dev/null || echo "0")
+          fi
+          
           echo "events=$EVENTS" >> $GITHUB_OUTPUT
           echo "count=$EVENT_COUNT" >> $GITHUB_OUTPUT
-          echo "📅 Eventos encontrados: $EVENT_COUNT"
+          echo "✅ Eventos encontrados: $EVENT_COUNT"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
       - name: Enviar notificações de eventos
         if: steps.events.outputs.count > 0
         env:
           EVENTS: ${{ steps.events.outputs.events }}
         run: |
-          echo "🚀 Processando eventos..."
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🚀 PROCESSANDO EVENTOS"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
           
-          echo "$EVENTS" | jq -c '.[]' | while read event; do
+          SENT_COUNT=0
+          
+          echo "$EVENTS" | jq -c '.[]' 2>/dev/null | while read event; do
             USER_ID=$(echo "$event" | jq -r '.user_id')
             EVENT_ID=$(echo "$event" | jq -r '.id')
             TITLE=$(echo "$event" | jq -r '.title')
@@ -52,9 +76,11 @@ jobs:
             EVENT_EPOCH=$(date -d "$START_DATE" +%s)
             MINUTES_UNTIL=$(( ($EVENT_EPOCH - $NOW_EPOCH) / 60 ))
             
-            echo "📅 Evento: $TITLE"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "📅 EVENTO: $TITLE"
             echo "⏰ Começa em: $MINUTES_UNTIL minutos"
-            echo "👤 Usuário: ${USER_ID:0:20}..."
+            echo "👤 Usuário: ${USER_ID:0:36}"
+            echo "🆔 Evento ID: ${EVENT_ID:0:36}"
             
             # Determinar mensagem baseada no tempo
             if [ $MINUTES_UNTIL -le 5 ]; then
@@ -75,10 +101,12 @@ jobs:
             
             FULL_TITLE="$EMOJI $TITLE"
             
-            echo "📤 Enviando notificação: $FULL_TITLE"
+            echo "📤 Enviando: $FULL_TITLE"
+            echo "💬 Mensagem: $MESSAGE"
+            echo ""
             
             # Enviar notificação
-            RESPONSE=$(curl -s -X POST https://ym-sports.vercel.app/api/notify \
+            RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://ym-sports.vercel.app/api/notify \
               -H "Content-Type: application/json" \
               -d "{
                 \"user_id\": \"$USER_ID\",
@@ -87,16 +115,29 @@ jobs:
                 \"url\": \"/dashboard/calendar\"
               }")
             
-            echo "✅ Resposta: $RESPONSE"
+            HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+            BODY=$(echo "$RESPONSE" | head -n-1)
             
-            # Registrar que enviamos (para evitar duplicatas)
-            # Em produção, você salvaria isso no banco de dados
-            echo "✓ Notificação enviada para evento $EVENT_ID"
+            if [ "$HTTP_CODE" = "200" ]; then
+              SENT=$(echo "$BODY" | jq -r '.sent // 0' 2>/dev/null || echo "0")
+              FAILED=$(echo "$BODY" | jq -r '.failed // 0' 2>/dev/null || echo "0")
+              echo "✅ HTTP $HTTP_CODE - Enviadas: $SENT, Falharam: $FAILED"
+              SENT_COUNT=$((SENT_COUNT + 1))
+            else
+              echo "❌ HTTP $HTTP_CODE - Erro ao enviar"
+              echo "   Resposta: $BODY"
+            fi
             
+            echo ""
             sleep 1
           done
           
-          echo "🎉 Todas as notificações de eventos enviadas!"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📊 RESUMO"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ Notificações enviadas: $SENT_COUNT"
+          echo "🎉 Processamento concluído!"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
       - name: Log resultado
         if: always()
