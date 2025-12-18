@@ -1,11 +1,8 @@
-import { NotificationSettings } from "@/components/NotificationSettings";
-import { NotificationSchedule } from "@/components/NotificationSchedule";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useSimpleNotifications } from "@/hooks/useSimpleNotifications";
-import { useWebPush } from "@/hooks/useWebPush";
 import { toast } from "sonner";
 import { 
   Settings as SettingsIcon, 
@@ -15,15 +12,13 @@ import {
   Smartphone,
   Info,
   ExternalLink,
-  TestTube,
-  Zap
+  TestTube
 } from "lucide-react";
 
 export default function Settings() {
   const appVersion = "1.0.0";
   const buildDate = new Date().toLocaleDateString('pt-BR');
-  const { sendTestNotification, forceCheck, hasPermission, requestPermission } = useSimpleNotifications();
-  const { isSubscribed, isLoading, subscribe, unsubscribe } = useWebPush();
+  const { hasPermission, requestPermission } = useSimpleNotifications();
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -42,21 +37,29 @@ export default function Settings() {
           <Bell className="h-5 w-5 text-primary" />
           <h2 className="text-xl font-semibold">Notificações</h2>
         </div>
-        <NotificationSettings />
         
-        {/* Teste de Notificações */}
-        <Card className="bg-gray-900 border-gray-800">
+        {/* Teste Simples */}
+        <Card className="bg-gradient-to-br from-yellow-900/50 to-orange-900/50 border-yellow-700">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-yellow-500">
+            <CardTitle className="flex items-center gap-2 text-yellow-300">
               <TestTube className="h-5 w-5" />
-              Teste de Notificações
+              Teste de Notificação
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
+            <div className="bg-yellow-900/30 p-4 rounded-lg border border-yellow-700/50">
+              <p className="text-sm text-yellow-200 mb-2">
+                🧪 Notificação de teste chegará em <strong>1 minuto</strong>
+              </p>
+              <p className="text-xs text-yellow-300/70">
+                Aguarde 1 minuto e a notificação chegará automaticamente via Service Worker.
+              </p>
+            </div>
+            
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-300">Status das Permissões:</span>
+              <span className="text-sm text-gray-300">Permissão:</span>
               <Badge variant={hasPermission ? "default" : "destructive"}>
-                {hasPermission ? "✅ Permitido" : "❌ Negado"}
+                {hasPermission ? "✅ Permitida" : "❌ Negada"}
               </Badge>
             </div>
             
@@ -66,121 +69,47 @@ export default function Settings() {
                   onClick={async () => {
                     const granted = await requestPermission();
                     if (granted) {
-                      toast.success("Permissão concedida!");
+                      toast.success("✅ Permissão concedida!");
                     } else {
-                      toast.error("Permissão negada");
+                      toast.error("❌ Permissão negada");
                     }
                   }}
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
                 >
                   <Bell className="mr-2 h-4 w-4" />
-                  Solicitar Permissão
+                  Permitir Notificações
                 </Button>
               )}
               
               <Button 
                 onClick={() => {
-                  sendTestNotification();
-                  toast.success("Teste enviado!");
+                  // Agendar notificação para 1 minuto
+                  const now = new Date();
+                  const testTime = new Date(now.getTime() + 60000); // +1 minuto
+                  const timeString = testTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                  
+                  if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({
+                      type: 'SCHEDULE_TEST',
+                      time: testTime.getTime()
+                    });
+                  }
+                  
+                  toast.success(`⏰ Notificação agendada para ${timeString}!`);
                 }}
                 disabled={!hasPermission}
-                className="flex-1 bg-green-600 hover:bg-green-700"
+                className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-bold"
               >
                 <TestTube className="mr-2 h-4 w-4" />
-                Teste Imediato
-              </Button>
-              
-              <Button 
-                onClick={() => {
-                  forceCheck();
-                  toast.success("Verificação forçada!");
-                }}
-                disabled={!hasPermission}
-                className="flex-1 bg-purple-600 hover:bg-purple-700"
-              >
-                <Zap className="mr-2 h-4 w-4" />
-                Forçar Verificação
+                Agendar Teste (1 min)
               </Button>
             </div>
             
             <p className="text-xs text-gray-400">
-              Use estes botões para testar se as notificações estão funcionando corretamente.
+              Teste simples para verificar se notificações estão funcionando.
             </p>
           </CardContent>
         </Card>
-        
-        {/* Web Push (App Fechado) */}
-        <Card className="bg-gradient-to-br from-purple-900/50 to-blue-900/50 border-purple-700">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-purple-300">
-              <Smartphone className="h-5 w-5" />
-              Push Notifications (App Fechado)
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="bg-purple-900/30 p-4 rounded-lg border border-purple-700/50">
-              <p className="text-sm text-purple-200 mb-2">
-                🚀 Sistema de notificações que funciona mesmo com o app completamente fechado!
-              </p>
-              <p className="text-xs text-purple-300/70">
-                As notificações serão enviadas pelo servidor nos horários programados.
-              </p>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-300">Status da Inscrição:</span>
-              <Badge variant={isSubscribed ? "default" : "secondary"} className={isSubscribed ? "bg-green-600" : ""}>
-                {isSubscribed ? "✅ Inscrito" : "⭕ Não Inscrito"}
-              </Badge>
-            </div>
-            
-            <div className="flex gap-2">
-              {!isSubscribed ? (
-                <Button 
-                  onClick={async () => {
-                    const success = await subscribe();
-                    if (success) {
-                      toast.success("✅ Inscrito! Notificações funcionarão com app fechado!");
-                    } else {
-                      toast.error("❌ Falha ao inscrever");
-                    }
-                  }}
-                  disabled={isLoading || !hasPermission}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700"
-                >
-                  {isLoading ? "Inscrevendo..." : "🔔 Ativar Push Notifications"}
-                </Button>
-              ) : (
-                <Button 
-                  onClick={async () => {
-                    const success = await unsubscribe();
-                    if (success) {
-                      toast.success("Push notifications desativadas");
-                    } else {
-                      toast.error("Erro ao desativar");
-                    }
-                  }}
-                  disabled={isLoading}
-                  variant="outline"
-                  className="flex-1 border-purple-600 text-purple-300 hover:bg-purple-900/50"
-                >
-                  {isLoading ? "Cancelando..." : "🔕 Desativar Push"}
-                </Button>
-              )}
-            </div>
-            
-            {!hasPermission && (
-              <div className="bg-yellow-900/30 p-3 rounded-lg border border-yellow-700/50">
-                <p className="text-xs text-yellow-300">
-                  ⚠️ Você precisa permitir notificações primeiro (use o botão acima)
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        
-        {/* Cronograma de Notificações */}
-        <NotificationSchedule compact={true} />
       </div>
 
       <Separator />

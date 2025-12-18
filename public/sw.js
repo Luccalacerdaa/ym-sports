@@ -1,7 +1,7 @@
 // Service Worker Simplificado para YM Sports
 // Foco em notificações que funcionem mesmo com app fechado
 
-const SW_VERSION = '14.0.0';
+const SW_VERSION = '15.0.0';
 const CACHE_NAME = `ym-sports-v${SW_VERSION}`;
 
 console.log(`[SW] 🚀 YM Sports Service Worker v${SW_VERSION} iniciado!`);
@@ -152,6 +152,30 @@ self.addEventListener('message', (event) => {
   if (event.data.type === 'FORCE_CHECK') {
     console.log('[SW] 🔄 Verificação forçada de notificações');
     checkNotifications();
+  }
+  
+  if (event.data.type === 'SCHEDULE_TEST') {
+    console.log('[SW] ⏰ Notificação de teste agendada');
+    
+    const targetTime = event.data.time;
+    const now = Date.now();
+    const delay = targetTime - now;
+    
+    if (delay > 0) {
+      setTimeout(() => {
+        console.log('[SW] 🧪 Enviando notificação de teste agendada');
+        self.registration.showNotification('🧪 Teste YM Sports', {
+          body: 'Notificação agendada funcionando perfeitamente! ✅',
+          icon: '/icons/icon-192.png',
+          badge: '/icons/icon-96.png',
+          tag: 'scheduled-test',
+          requireInteraction: true,
+          vibrate: [200, 100, 200]
+        });
+      }, delay);
+      
+      console.log(`[SW] ⏰ Teste agendado para daqui ${Math.round(delay/1000)}s`);
+    }
   }
 });
 

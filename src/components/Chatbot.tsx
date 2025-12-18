@@ -228,7 +228,7 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                     )}
                     
                     <div
-                      className={`max-w-[80%] p-3 rounded-lg ${
+                      className={`max-w-[80%] p-2.5 rounded-lg ${
                         message.role === 'user'
                           ? 'bg-yellow-500 text-black ml-auto font-medium'
                           : 'bg-gray-900 text-white border border-gray-700'
@@ -238,9 +238,9 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                         dangerouslySetInnerHTML={{
                           __html: formatMessage(message.content)
                         }}
-                        className="text-sm leading-relaxed"
+                        className="text-xs leading-snug whitespace-pre-wrap break-words"
                       />
-                      <div className="text-xs opacity-70 mt-2">
+                      <div className="text-[10px] opacity-60 mt-1.5">
                         {message.timestamp.toLocaleTimeString('pt-BR', {
                           hour: '2-digit',
                           minute: '2-digit'
