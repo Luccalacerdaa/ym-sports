@@ -1,8 +1,13 @@
 // Service Worker Simplificado para YM Sports
 // Foco em notificações que funcionem mesmo com app fechado
 
-const SW_VERSION = '15.0.0';
+const SW_VERSION = '16.0.0';
 const CACHE_NAME = `ym-sports-v${SW_VERSION}`;
+
+// Configurações do Supabase (será recebido do app)
+let supabaseUrl = null;
+let supabaseKey = null;
+let userId = null;
 
 console.log(`[SW] 🚀 YM Sports Service Worker v${SW_VERSION} iniciado!`);
 
@@ -25,6 +30,7 @@ const NOTIFICATIONS = [
 // Cache simples para notificações enviadas
 let sentToday = [];
 let currentDate = new Date().toDateString();
+let eventsNotified = new Set(); // Cache de eventos já notificados
 
 // Função principal para verificar notificações
 function checkNotifications() {
@@ -71,6 +77,113 @@ function checkNotifications() {
   });
 }
 
+// Função para verificar eventos próximos (CALENDARIO)
+async function checkUpcomingEvents() {
+  if (!supabaseUrl || !supabaseKey || !userId) {
+    console.log('[SW] ⚠️ Supabase não configurado ainda');
+    return;
+  }
+
+  try {
+    const now = new Date();
+    const in30Minutes = new Date(now.getTime() + 30 * 60 * 1000);
+    
+    console.log('[SW] 📅 Verificando eventos próximos...');
+    
+    // Buscar eventos do Supabase
+    const response = await fetch(
+      `${supabaseUrl}/rest/v1/events?user_id=eq.${userId}&start_date=gte.${now.toISOString()}&start_date=lte.${in30Minutes.toISOString()}&select=*`,
+      {
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const events = await response.json();
+    console.log(`[SW] 📅 Encontrados ${events.length} eventos próximos`);
+
+    // Processar cada evento
+    for (const event of events) {
+      const eventDate = new Date(event.start_date);
+      const minutesUntil = Math.round((eventDate.getTime() - now.getTime()) / 60000);
+      
+      const notificationKey30 = `event_30min_${event.id}`;
+      const notificationKey5 = `event_5min_${event.id}`;
+      const notificationKeyNow = `event_now_${event.id}`;
+      
+      // Notificar 30 minutos antes
+      if (!eventsNotified.has(notificationKey30) && minutesUntil <= 30 && minutesUntil > 10) {
+        console.log(`[SW] 📤 Enviando notificação: ${event.title} em ${minutesUntil}min`);
+        
+        await self.registration.showNotification(`📅 ${event.title}`, {
+          body: `Começa em ${minutesUntil} minutos${event.location ? ` - ${event.location}` : ''}`,
+          icon: '/icons/icon-192.png',
+          badge: '/icons/icon-96.png',
+          tag: `event-${event.id}`,
+          requireInteraction: true,
+          vibrate: [200, 100, 200],
+          data: { url: '/calendar', eventId: event.id }
+        });
+        
+        eventsNotified.add(notificationKey30);
+        console.log(`[SW] ✅ Notificação enviada: ${event.title} (30min)`);
+      }
+      
+      // Notificar 5 minutos antes
+      if (!eventsNotified.has(notificationKey5) && minutesUntil <= 10 && minutesUntil > 1) {
+        console.log(`[SW] 📤 Enviando notificação: ${event.title} em ${minutesUntil}min`);
+        
+        await self.registration.showNotification(`⚠️ ${event.title}`, {
+          body: `Faltam apenas ${minutesUntil} minutos!${event.location ? ` - ${event.location}` : ''}`,
+          icon: '/icons/icon-192.png',
+          badge: '/icons/icon-96.png',
+          tag: `event-${event.id}-warning`,
+          requireInteraction: true,
+          vibrate: [200, 100, 200, 100, 200],
+          data: { url: '/calendar', eventId: event.id }
+        });
+        
+        eventsNotified.add(notificationKey5);
+        console.log(`[SW] ✅ Notificação enviada: ${event.title} (5min)`);
+      }
+      
+      // Notificar quando começar (0-1 minuto)
+      if (!eventsNotified.has(notificationKeyNow) && minutesUntil <= 1 && minutesUntil >= 0) {
+        console.log(`[SW] 📤 Enviando notificação: ${event.title} AGORA`);
+        
+        await self.registration.showNotification(`🚀 ${event.title}`, {
+          body: `Está começando AGORA!${event.location ? ` - ${event.location}` : ''}`,
+          icon: '/icons/icon-192.png',
+          badge: '/icons/icon-96.png',
+          tag: `event-${event.id}-start`,
+          requireInteraction: true,
+          vibrate: [300, 100, 300, 100, 300],
+          data: { url: '/calendar', eventId: event.id }
+        });
+        
+        eventsNotified.add(notificationKeyNow);
+        console.log(`[SW] ✅ Notificação enviada: ${event.title} (AGORA)`);
+      }
+    }
+    
+    // Limpar cache de eventos notificados após 2 horas
+    if (eventsNotified.size > 100) {
+      eventsNotified.clear();
+      console.log('[SW] 🧹 Cache de eventos limpo');
+    }
+    
+  } catch (error) {
+    console.error('[SW] ❌ Erro ao verificar eventos:', error);
+  }
+}
+
 // Instalar Service Worker
 self.addEventListener('install', (event) => {
   console.log('[SW] 📦 Instalando...');
@@ -85,13 +198,15 @@ self.addEventListener('activate', (event) => {
       console.log('[SW] ✅ Service Worker ativo e controlando páginas!');
       // Iniciar verificação imediatamente
       checkNotifications();
+      checkUpcomingEvents();
     })
   );
 });
 
-// Verificar notificações a cada minuto
+// Verificar notificações e eventos a cada minuto
 setInterval(() => {
   checkNotifications();
+  checkUpcomingEvents();
 }, 60000);
 
 // Log de vida a cada 5 minutos
@@ -152,6 +267,21 @@ self.addEventListener('message', (event) => {
   if (event.data.type === 'FORCE_CHECK') {
     console.log('[SW] 🔄 Verificação forçada de notificações');
     checkNotifications();
+    checkUpcomingEvents();
+  }
+  
+  if (event.data.type === 'SET_SUPABASE_CONFIG') {
+    console.log('[SW] ⚙️ Configurando Supabase');
+    supabaseUrl = event.data.supabaseUrl;
+    supabaseKey = event.data.supabaseKey;
+    userId = event.data.userId;
+    console.log('[SW] ✅ Supabase configurado!', { 
+      url: supabaseUrl ? '✓' : '✗', 
+      key: supabaseKey ? '✓' : '✗', 
+      userId: userId ? '✓' : '✗' 
+    });
+    // Verificar eventos imediatamente após configurar
+    checkUpcomingEvents();
   }
   
   if (event.data.type === 'SCHEDULE_TEST') {

@@ -175,6 +175,17 @@ export const useSimpleNotifications = () => {
         return;
       }
 
+      // 4. Enviar configurações do Supabase para o SW
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'SET_SUPABASE_CONFIG',
+          supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+          supabaseKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+          userId: user.id
+        });
+        console.log('📤 Configurações do Supabase enviadas ao SW');
+      }
+
       console.log('✅ Sistema de notificações configurado com sucesso!');
     };
 
