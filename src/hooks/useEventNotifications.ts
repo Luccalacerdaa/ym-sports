@@ -1,11 +1,9 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { useSimpleNotifications } from '@/hooks/useSimpleNotifications';
 
 export const useEventNotifications = () => {
   const { user } = useAuth();
-  const { sendNotification, permissionGranted } = useSimpleNotifications();
 
   useEffect(() => {
     if (!user) return;
@@ -51,17 +49,21 @@ export const useEventNotifications = () => {
               });
             }
 
-            // Enviar notificação push
-            if (permissionGranted) {
-              try {
-                sendNotification(
-                  `📅 ${event.title}`,
-                  `Começa em ${minutesUntil} minutos${event.location ? ` - ${event.location}` : ''}`
-                );
-                console.log(`✅ Notificação enviada: Evento ${event.title} em ${minutesUntil}min`);
-              } catch (error) {
-                console.error('Erro ao enviar notificação push:', error);
-              }
+            // Enviar notificação push via API
+            try {
+              await fetch('/api/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  user_id: user.id,
+                  title: `📅 ${event.title}`,
+                  body: `Começa em ${minutesUntil} minutos${event.location ? ` - ${event.location}` : ''}`,
+                  url: '/calendar'
+                })
+              });
+              console.log(`✅ Notificação enviada via API: ${event.title}`);
+            } catch (error) {
+              console.error('Erro ao enviar notificação push:', error);
             }
 
             // Marcar como notificado
@@ -86,17 +88,21 @@ export const useEventNotifications = () => {
               });
             }
 
-            // Enviar notificação push
-            if (permissionGranted) {
-              try {
-                sendNotification(
-                  `🚀 ${event.title}`,
-                  `Está começando agora!${event.location ? ` - ${event.location}` : ''}`
-                );
-                console.log(`✅ Notificação enviada: Evento ${event.title} COMEÇANDO AGORA`);
-              } catch (error) {
-                console.error('Erro ao enviar notificação push de início:', error);
-              }
+            // Enviar notificação push via API
+            try {
+              await fetch('/api/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  user_id: user.id,
+                  title: `🚀 ${event.title}`,
+                  body: `Está começando agora!${event.location ? ` - ${event.location}` : ''}`,
+                  url: '/calendar'
+                })
+              });
+              console.log(`✅ Notificação de início enviada via API: ${event.title}`);
+            } catch (error) {
+              console.error('Erro ao enviar notificação push de início:', error);
             }
 
             // Marcar como notificado
