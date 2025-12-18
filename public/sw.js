@@ -1,10 +1,16 @@
 // Service Worker Simplificado para YM Sports
 // Foco em notificações que funcionem mesmo com app fechado
 
-const SW_VERSION = '13.0.0';
+const SW_VERSION = '14.0.0';
 const CACHE_NAME = `ym-sports-v${SW_VERSION}`;
 
 console.log(`[SW] 🚀 YM Sports Service Worker v${SW_VERSION} iniciado!`);
+
+// Limpar notificações antigas
+self.registration.getNotifications().then(notifications => {
+  console.log(`[SW] 🧹 Limpando ${notifications.length} notificações antigas`);
+  notifications.forEach(notification => notification.close());
+});
 
 // Cronograma simplificado de notificações
 const NOTIFICATIONS = [
@@ -113,6 +119,24 @@ self.addEventListener('notificationclose', (event) => {
 // Mensagens do app
 self.addEventListener('message', (event) => {
   console.log('[SW] 💬 Mensagem recebida:', event.data);
+  
+  if (event.data.type === 'SHOW_NOTIFICATION') {
+    console.log('[SW] 🔔 Notificação solicitada:', event.data.title);
+    
+    self.registration.showNotification(event.data.title, {
+      body: event.data.body,
+      icon: event.data.options?.icon || '/icons/icon-192.png',
+      badge: event.data.options?.badge || '/icons/icon-96.png',
+      tag: event.data.options?.tag || `notification-${Date.now()}`,
+      requireInteraction: event.data.options?.requireInteraction || false,
+      vibrate: [200, 100, 200],
+      data: { url: '/dashboard' }
+    }).then(() => {
+      console.log(`[SW] ✅ Notificação mostrada: ${event.data.title}`);
+    }).catch(error => {
+      console.error(`[SW] ❌ Erro ao mostrar notificação: ${error}`);
+    });
+  }
   
   if (event.data.type === 'TEST_NOTIFICATION') {
     console.log('[SW] 🧪 Teste de notificação solicitado');

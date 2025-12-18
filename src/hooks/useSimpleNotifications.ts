@@ -92,6 +92,52 @@ export const useSimpleNotifications = () => {
     }
   }, [isSupported]);
 
+  // Enviar notificação
+  const sendNotification = useCallback((title: string, body: string, options?: NotificationOptions) => {
+    if (!isSupported()) {
+      console.warn('⚠️ Notificações não suportadas');
+      return;
+    }
+
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      console.warn('⚠️ Notification API não disponível');
+      return;
+    }
+
+    if (Notification.permission !== 'granted') {
+      console.warn('⚠️ Permissão de notificação não concedida');
+      return;
+    }
+
+    try {
+      // Tentar enviar via Service Worker primeiro
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'SHOW_NOTIFICATION',
+          title,
+          body,
+          options: {
+            icon: '/icons/icon-192.png',
+            badge: '/icons/icon-96.png',
+            ...options
+          }
+        });
+        console.log(`✅ Notificação enviada via SW: ${title}`);
+      } else {
+        // Fallback: notificação direta
+        new Notification(title, {
+          body,
+          icon: '/icons/icon-192.png',
+          badge: '/icons/icon-96.png',
+          ...options
+        });
+        console.log(`✅ Notificação enviada diretamente: ${title}`);
+      }
+    } catch (error) {
+      console.error('❌ Erro ao enviar notificação:', error);
+    }
+  }, [isSupported]);
+
   // Forçar verificação de notificações
   const forceCheck = useCallback(() => {
     if (navigator.serviceWorker.controller) {
@@ -138,8 +184,10 @@ export const useSimpleNotifications = () => {
   return {
     isSupported,
     requestPermission,
+    sendNotification,
     sendTestNotification,
     forceCheck,
-    hasPermission: isSupported() && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted'
+    hasPermission: isSupported() && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted',
+    permissionGranted: isSupported() && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted'
   };
 };

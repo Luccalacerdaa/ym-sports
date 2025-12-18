@@ -5,19 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
-  MessageCircle, 
   Send, 
-  Bot, 
   User, 
   X, 
-  Settings, 
   Trash2, 
-  Key,
-  ExternalLink,
   Minimize2,
   Maximize2,
-  HelpCircle,
-  Zap
+  HelpCircle
 } from 'lucide-react';
 import { chatbotService, ChatMessage, ChatAction } from '@/services/chatbotService';
 import { toast } from 'sonner';
@@ -32,8 +26,6 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [apiKey, setApiKey] = useState('');
   const [isMinimized, setIsMinimized] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -56,10 +48,6 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
         setMessages([welcomeMessage]);
       }
       
-      // Verificar se tem API key
-      if (chatbotService.hasApiKey()) {
-        setShowSettings(false);
-      }
     }
   }, [isOpen]);
 
@@ -124,18 +112,6 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
     }
   };
 
-  // Configurar API key
-  const saveApiKey = () => {
-    if (!apiKey.trim()) {
-      toast.error('Digite uma API key válida');
-      return;
-    }
-
-    chatbotService.setApiKey(apiKey.trim());
-    setShowSettings(false);
-    toast.success('✅ API key configurada!');
-  };
-
   // Limpar conversa
   const clearConversation = () => {
     setMessages([]);
@@ -176,9 +152,9 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-end p-4">
-      <Card className={`w-full max-w-md bg-white shadow-2xl transition-all duration-300 ${
-        isMinimized ? 'h-16' : 'h-[600px]'
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <Card className={`w-full max-w-lg bg-white shadow-2xl transition-all duration-300 ${
+        isMinimized ? 'h-16' : 'h-[85vh] max-h-[700px]'
       }`}>
         {/* Header */}
         <CardHeader className="pb-3 border-b bg-gradient-to-r from-yellow-500 to-yellow-600 text-black rounded-t-lg">
@@ -210,10 +186,11 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowSettings(!showSettings)}
+                onClick={clearConversation}
                 className="text-black hover:bg-black/20"
+                title="Limpar conversa"
               >
-                <Settings className="w-4 h-4" />
+                <Trash2 className="w-4 h-4" />
               </Button>
               
               <Button
@@ -229,57 +206,7 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
         </CardHeader>
 
         {!isMinimized && (
-          <CardContent className="p-0 flex flex-col h-full bg-black">
-            {/* Configurações */}
-            {showSettings && (
-              <div className="p-4 border-b bg-gray-800 border-gray-700">
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-yellow-500 mb-1">
-                      API Key da OpenAI
-                    </label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="password"
-                        placeholder="sk-..."
-                        value={apiKey}
-                        onChange={(e) => setApiKey(e.target.value)}
-                        className="flex-1 bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                      />
-                      <Button 
-                        onClick={saveApiKey} 
-                        size="sm"
-                        className="bg-yellow-500 hover:bg-yellow-600 text-black"
-                      >
-                        <Key className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <p className="text-xs text-gray-400 mt-1">
-                      Necessária para usar o chatbot com IA. 
-                      <a 
-                        href="https://platform.openai.com/api-keys" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-yellow-500 hover:underline ml-1"
-                      >
-                        Obter API key <ExternalLink className="w-3 h-3 inline" />
-                      </a>
-                    </p>
-                  </div>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={clearConversation}
-                    className="w-full border-gray-600 text-white hover:bg-gray-700"
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Limpar Conversa
-                  </Button>
-                </div>
-              </div>
-            )}
-
+          <CardContent className="p-0 flex flex-col h-[calc(100%-80px)] bg-black">
             {/* Mensagens */}
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
@@ -395,13 +322,6 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                   <Send className="w-4 h-4" />
                 </Button>
               </div>
-              
-              {!chatbotService.hasApiKey() && (
-                <p className="text-xs text-yellow-500 mt-2 flex items-center gap-1">
-                  <Zap className="w-3 h-3" />
-                  Configure sua API key da OpenAI para usar a IA completa
-                </p>
-              )}
             </div>
           </CardContent>
         )}
