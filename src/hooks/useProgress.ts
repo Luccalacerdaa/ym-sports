@@ -69,7 +69,11 @@ export const useProgress = () => {
     const pointsToNext = nextLevelPoints - currentPoints;
     const progress = (pointsInCurrentLevel / 100) * 100;
     
-    return { progress: Math.min(progress, 100), pointsToNext };
+    // Garantir que pointsToNext nunca seja negativo
+    return { 
+      progress: Math.min(progress, 100), 
+      pointsToNext: Math.max(pointsToNext, 0) 
+    };
   };
 
   // Buscar progresso do usuário

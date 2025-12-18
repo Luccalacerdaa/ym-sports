@@ -1,4 +1,5 @@
 // Serviço do Chatbot YM Sports - Assistente IA com conhecimento completo do app
+import { OPENAI_CONFIG } from '@/config/openai.config';
 
 export interface ChatMessage {
   id: string;
@@ -122,17 +123,10 @@ Sempre responda em português brasileiro, seja prestativo e demonstre conhecimen
 `;
 
   constructor() {
-    // Tentar obter a API key do localStorage ou variável de ambiente
-    // IMPORTANTE: Configure a API key em Configurações do Chat
-    this.apiKey = localStorage.getItem('openai_api_key') || 
-                  process.env.REACT_APP_OPENAI_API_KEY || 
-                  null;
-                  
-    // Se não tem API key salva, tentar usar a configurada pelo usuário
-    if (!this.apiKey) {
-      // Mostrar que é necessário configurar a API key
-      console.warn('⚠️ API Key do OpenAI não configurada. Configure em Configurações do Chat.');
-    }
+    // Usar a API key padrão do config (sempre disponível)
+    this.apiKey = OPENAI_CONFIG.defaultApiKey;
+    
+    console.log('✅ Chatbot inicializado com API Key padrão');
   }
 
   // Configurar API key
@@ -369,7 +363,12 @@ Sempre responda em português brasileiro, seja prestativo e demonstre conhecimen
     const saved = localStorage.getItem('ym_chat_history');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const messages = JSON.parse(saved);
+        // Converter timestamp de string para Date
+        return messages.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }));
       } catch (error) {
         console.error('Erro ao carregar conversa:', error);
       }
