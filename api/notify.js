@@ -1,17 +1,33 @@
 const webpush = require('web-push');
 const { createClient } = require('@supabase/supabase-js');
 
+// Verificar variáveis de ambiente
+if (!process.env.VITE_SUPABASE_URL) {
+  console.error('❌ VITE_SUPABASE_URL não configurado');
+}
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('❌ SUPABASE_SERVICE_ROLE_KEY não configurado');
+}
+if (!process.env.VITE_VAPID_PUBLIC_KEY) {
+  console.error('❌ VITE_VAPID_PUBLIC_KEY não configurado');
+}
+if (!process.env.VAPID_PRIVATE_KEY) {
+  console.error('❌ VAPID_PRIVATE_KEY não configurado');
+}
+
 const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.VITE_SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
 
 // Configurar VAPID
-webpush.setVapidDetails(
-  'mailto:suporte@ymsports.com',
-  process.env.VITE_VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-);
+if (process.env.VITE_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    'mailto:suporte@ymsports.com',
+    process.env.VITE_VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+}
 
 module.exports = async function handler(req, res) {
   // CORS
@@ -28,6 +44,33 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    // Verificar se variáveis estão configuradas
+    if (!process.env.VITE_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('❌ Variáveis Supabase não configuradas no Vercel');
+      return res.status(500).json({ 
+        error: 'Variáveis de ambiente não configuradas. Configure VITE_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no Vercel.',
+        configured: {
+          supabaseUrl: !!process.env.VITE_SUPABASE_URL,
+          supabaseKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+          vapidPublic: !!process.env.VITE_VAPID_PUBLIC_KEY,
+          vapidPrivate: !!process.env.VAPID_PRIVATE_KEY
+        }
+      });
+    }
+
+    if (!process.env.VITE_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+      console.error('❌ Variáveis VAPID não configuradas no Vercel');
+      return res.status(500).json({ 
+        error: 'Variáveis VAPID não configuradas. Configure VITE_VAPID_PUBLIC_KEY e VAPID_PRIVATE_KEY no Vercel.',
+        configured: {
+          supabaseUrl: !!process.env.VITE_SUPABASE_URL,
+          supabaseKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+          vapidPublic: !!process.env.VITE_VAPID_PUBLIC_KEY,
+          vapidPrivate: !!process.env.VAPID_PRIVATE_KEY
+        }
+      });
+    }
+
     const { user_id, title, body, url } = req.body;
 
     if (!user_id || !title) {

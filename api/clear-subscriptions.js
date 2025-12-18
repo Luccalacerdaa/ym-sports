@@ -1,8 +1,16 @@
 const { createClient } = require('@supabase/supabase-js');
 
+// Verificar variáveis de ambiente
+if (!process.env.VITE_SUPABASE_URL) {
+  console.error('❌ VITE_SUPABASE_URL não configurado');
+}
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('❌ SUPABASE_SERVICE_ROLE_KEY não configurado');
+}
+
 const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.VITE_SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
 
 module.exports = async function handler(req, res) {
@@ -20,6 +28,15 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    // Verificar se variáveis estão configuradas
+    if (!process.env.VITE_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('❌ Variáveis não configuradas no Vercel');
+      return res.status(500).json({ 
+        error: 'Variáveis de ambiente não configuradas. Configure no Vercel.',
+        docs: 'Veja CONFIGURAR_VERCEL_AGORA.md'
+      });
+    }
+
     const { user_id } = req.body;
 
     if (!user_id) {
