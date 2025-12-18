@@ -23,11 +23,13 @@ jobs:
           echo ""
           
           # Buscar eventos usando RPC function (bypass RLS)
+          # Nota: Se continuar dando erro "Invalid API key", veja DIAGNOSTICO_EVENTOS.md
           EVENTS=$(curl -s -X POST \
             "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/get_upcoming_events" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Content-Type: application/json" \
+            -H "Prefer: params=single-object" \
             -d '{"minutes_ahead": 30}')
           
           echo "📦 Resposta do Supabase:"
