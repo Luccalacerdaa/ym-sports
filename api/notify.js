@@ -1,5 +1,5 @@
-const webpush = require('web-push');
-const { createClient } = require('@supabase/supabase-js');
+import webpush from 'web-push';
+import { createClient } from '@supabase/supabase-js';
 
 // Verificar variáveis de ambiente
 if (!process.env.VITE_SUPABASE_URL) {
@@ -29,7 +29,7 @@ if (process.env.VITE_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   );
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
