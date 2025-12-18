@@ -27,12 +27,49 @@ export const usePushSimple = () => {
     return outputArray;
   };
 
+  // Desinscrever (limpar subscriptions antigas)
+  const unsubscribe = useCallback(async () => {
+    if (!user) return false;
+
+    try {
+      // Desinscrever do PushManager
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      
+      if (subscription) {
+        await subscription.unsubscribe();
+        console.log('🗑️ Subscription local removida');
+      }
+
+      // Limpar do backend
+      const response = await fetch('/api/clear-subscriptions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id })
+      });
+
+      if (!response.ok) {
+        console.warn('⚠️ Erro ao limpar backend, mas continuando...');
+      }
+
+      setIsSubscribed(false);
+      console.log('✅ Push desativado!');
+      return true;
+    } catch (error) {
+      console.error('❌ Erro ao desinscrever:', error);
+      return false;
+    }
+  }, [user]);
+
   // Subscrever
   const subscribe = useCallback(async () => {
     if (!user || !isSupported) return false;
 
     setLoading(true);
     try {
+      // Primeiro, limpar qualquer subscription antiga
+      await unsubscribe();
+
       // Solicitar permissão
       const perm = await Notification.requestPermission();
       setPermission(perm);
@@ -52,6 +89,8 @@ export const usePushSimple = () => {
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       });
 
+      console.log('📝 Nova subscription criada:', subscription.endpoint.substring(0, 50) + '...');
+
       // Salvar no backend
       const response = await fetch('/api/subscribe', {
         method: 'POST',
@@ -62,18 +101,22 @@ export const usePushSimple = () => {
         })
       });
 
-      if (!response.ok) throw new Error('Falha ao salvar subscription');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Falha ao salvar subscription');
+      }
 
       setIsSubscribed(true);
-      console.log('✅ Push ativado!');
+      console.log('✅ Push ativado com sucesso!');
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Erro ao subscrever:', error);
+      alert(`Erro ao ativar push: ${error.message}`);
       return false;
     } finally {
       setLoading(false);
     }
-  }, [user, isSupported]);
+  }, [user, isSupported, unsubscribe]);
 
   // Verificar se está subscrito
   useEffect(() => {
@@ -98,7 +141,8 @@ export const usePushSimple = () => {
     isSubscribed,
     permission,
     loading,
-    subscribe
+    subscribe,
+    unsubscribe
   };
 };
 

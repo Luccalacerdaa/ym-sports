@@ -21,7 +21,7 @@ import {
 export default function Settings() {
   const appVersion = "1.0.0";
   const buildDate = new Date().toLocaleDateString('pt-BR');
-  const { isSupported, isSubscribed, permission, loading, subscribe } = usePushSimple();
+  const { isSupported, isSubscribed, permission, loading, subscribe, unsubscribe } = usePushSimple();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -50,10 +50,23 @@ export default function Settings() {
       if (response.ok && result.success) {
         toast.success(`✅ Teste enviado! (${result.sent} dispositivo(s))`);
       } else {
-        toast.error('❌ Erro ao enviar teste');
+        toast.error(`❌ ${result.error || 'Erro ao enviar'}`);
+        if (result.failed && result.failed > 0) {
+          toast.info('💡 Tente reativar o push');
+        }
       }
     } catch (error) {
       toast.error('❌ Erro ao enviar teste');
+    }
+  };
+
+  const reactivatePush = async () => {
+    toast.info('🔄 Reativando push...');
+    const success = await subscribe();
+    if (success) {
+      toast.success('✅ Push reativado com sucesso!');
+    } else {
+      toast.error('❌ Erro ao reativar');
     }
   };
 
@@ -161,6 +174,21 @@ export default function Settings() {
                       >
                         <TestTube className="mr-2 h-4 w-4" />
                         Central de Testes
+                      </Button>
+                    </div>
+
+                    <div className="pt-2 border-t border-gray-700">
+                      <p className="text-xs text-gray-400 mb-2 text-center">
+                        Notificações não chegando?
+                      </p>
+                      <Button 
+                        onClick={reactivatePush}
+                        disabled={loading}
+                        variant="outline"
+                        className="w-full border-purple-700/50 hover:bg-purple-900/30"
+                        size="sm"
+                      >
+                        🔄 Reativar Push
                       </Button>
                     </div>
                   </>

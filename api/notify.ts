@@ -35,7 +35,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (error) throw error;
 
     if (!subs || subs.length === 0) {
-      return res.status(404).json({ error: 'No subscriptions found' });
+      return res.status(404).json({ 
+        error: 'Nenhuma subscription encontrada. Ative o Push nas Configurações.',
+        sent: 0,
+        failed: 0,
+        total: 0
+      });
     }
 
     const payload = JSON.stringify({
@@ -59,20 +64,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           }
         };
 
+        console.log(`📤 Tentando enviar para: ${sub.endpoint.substring(0, 50)}...`);
         await webpush.sendNotification(pushSubscription, payload);
         sent++;
-        console.log(`✅ Enviado para: ${sub.endpoint.substring(0, 50)}...`);
+        console.log(`✅ Enviado com sucesso!`);
       } catch (error: any) {
         failed++;
-        console.error(`❌ Erro: ${error.message}`);
+        console.error(`❌ Erro ao enviar:`, {
+          statusCode: error.statusCode,
+          message: error.message,
+          endpoint: sub.endpoint.substring(0, 50) + '...'
+        });
         
-        // Se a subscription está inválida (410 ou 404), remover
-        if (error.statusCode === 410 || error.statusCode === 404) {
+        // Se a subscription está inválida (410, 404 ou outros erros de push), remover
+        if (error.statusCode === 410 || error.statusCode === 404 || error.statusCode === 400) {
+          console.log(`🗑️ Removendo subscription inválida (status: ${error.statusCode})`);
           await supabase
             .from('push_subscriptions')
             .delete()
             .eq('id', sub.id);
-          console.log(`🗑️ Subscription inválida removida`);
+          console.log(`✅ Subscription removida`);
         }
       }
     }
