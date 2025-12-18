@@ -19,7 +19,7 @@
   "crons": [
     {
       "path": "/api/check-events-cron",
-      "schedule": "*/5 * * * *"
+      "schedule": "* * * * *"
     }
   ],
   "cleanUrls": true,
