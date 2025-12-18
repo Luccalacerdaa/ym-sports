@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { usePushSimple } from "@/hooks/usePushSimple";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { 
   Settings as SettingsIcon, 
@@ -11,13 +13,49 @@ import {
   Shield, 
   Smartphone,
   Info,
-  ExternalLink
+  ExternalLink,
+  Send,
+  TestTube
 } from "lucide-react";
 
 export default function Settings() {
   const appVersion = "1.0.0";
   const buildDate = new Date().toLocaleDateString('pt-BR');
   const { isSupported, isSubscribed, permission, loading, subscribe } = usePushSimple();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const sendQuickTest = async () => {
+    if (!user || !isSubscribed) {
+      toast.error('❌ Ative as notificações push primeiro');
+      return;
+    }
+
+    try {
+      toast.info('📤 Enviando notificação de teste...');
+      
+      const response = await fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.id,
+          title: '🎉 YM Sports - Teste',
+          body: 'Notificações funcionando perfeitamente!',
+          url: '/dashboard'
+        })
+      });
+
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        toast.success(`✅ Teste enviado! (${result.sent} dispositivo(s))`);
+      } else {
+        toast.error('❌ Erro ao enviar teste');
+      }
+    } catch (error) {
+      toast.error('❌ Erro ao enviar teste');
+    }
+  };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -80,7 +118,7 @@ export default function Settings() {
                 </div>
               )}
               
-              <div className="flex gap-2">
+              <div className="space-y-2">
                 {!isSubscribed && (
                   <Button 
                     onClick={async () => {
@@ -92,18 +130,40 @@ export default function Settings() {
                       }
                     }}
                     disabled={loading || permission === 'denied'}
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                   >
                     {loading ? "Ativando..." : "🔔 Ativar Push"}
                   </Button>
                 )}
                 
                 {isSubscribed && (
-                  <div className="bg-green-900/30 p-3 rounded-lg border border-green-700/50 flex-1">
-                    <p className="text-sm text-green-300 text-center">
-                      ✅ Notificações push ativas!
-                    </p>
-                  </div>
+                  <>
+                    <div className="bg-green-900/30 p-3 rounded-lg border border-green-700/50">
+                      <p className="text-sm text-green-300 text-center">
+                        ✅ Notificações push ativas!
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button 
+                        onClick={sendQuickTest}
+                        variant="outline"
+                        className="border-yellow-700/50 hover:bg-yellow-900/30"
+                      >
+                        <Send className="mr-2 h-4 w-4" />
+                        Teste Rápido
+                      </Button>
+                      
+                      <Button 
+                        onClick={() => navigate('/dashboard/notification-test')}
+                        variant="outline"
+                        className="border-blue-700/50 hover:bg-blue-900/30"
+                      >
+                        <TestTube className="mr-2 h-4 w-4" />
+                        Central de Testes
+                      </Button>
+                    </div>
+                  </>
                 )}
               </div>
             </CardContent>
