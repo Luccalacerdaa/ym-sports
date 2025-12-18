@@ -42,7 +42,7 @@ jobs:
             echo "$EVENTS"
             echo ""
             echo "❌ Se a função RPC não existe, você precisa executar a migração!"
-            echo "📖 Veja: supabase/migrations/20251218_events_rpc.sql"
+            echo "📖 Veja: supabase/migrations/20251218_events_rpc_v3.sql"
             echo ""
             echo "Usando lista vazia como fallback..."
             EVENTS='[]'
@@ -54,6 +54,15 @@ jobs:
             EVENTS='[]'
             EVENT_COUNT=0
           else
+            # Extrair eventos do wrapper se necessário
+            # Formato antigo: [{"get_upcoming_events": [{...}]}]
+            # Formato novo: [{...}]
+            if echo "$EVENTS" | grep -q '"get_upcoming_events"'; then
+              echo "ℹ️ Detectado formato com wrapper, extraindo eventos..."
+              EVENTS=$(echo "$EVENTS" | jq '.[0].get_upcoming_events' 2>/dev/null || echo '[]')
+              echo "✅ Eventos extraídos do wrapper"
+            fi
+            
             EVENT_COUNT=$(echo "$EVENTS" | jq '. | length' 2>/dev/null || echo "0")
           fi
           
