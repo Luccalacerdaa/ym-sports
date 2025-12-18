@@ -16,6 +16,12 @@
       ]
     }
   ],
+  "crons": [
+    {
+      "path": "/api/check-events-cron",
+      "schedule": "*/5 * * * *"
+    }
+  ],
   "cleanUrls": true,
   "trailingSlash": false
 }
