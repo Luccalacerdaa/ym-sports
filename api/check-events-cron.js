@@ -87,22 +87,39 @@ export default async function handler(req, res) {
       // Determinar se deve notificar e qual mensagem
       let emoji = '';
       let message = '';
+      let notificationTag = '';  // Tag única para cada tipo de notificação
       
-      if (minutesUntil <= 1 && minutesUntil >= 0) {
+      // AGORA ou evento recente (já começou há até 2 minutos)
+      if (minutesUntil <= 2 && minutesUntil >= -2) {
         emoji = '🚀';
         message = `Está começando AGORA!${event.location ? ` - ${event.location}` : ''}`;
-      } else if (minutesUntil <= 5) {
+        notificationTag = 'now';
+        console.log(`   🎯 Tipo: AGORA (${minutesUntil}min)`);
+      } 
+      // 3-5 minutos antes
+      else if (minutesUntil <= 5) {
         emoji = '🚨';
         message = `Faltam apenas ${minutesUntil} minutos!${event.location ? ` - ${event.location}` : ''}`;
-      } else if (minutesUntil <= 15) {
+        notificationTag = '5min';
+        console.log(`   ⚠️ Tipo: 5 MINUTOS (${minutesUntil}min)`);
+      } 
+      // 6-15 minutos antes
+      else if (minutesUntil <= 15) {
         emoji = '⚠️';
         message = `Começa em ${minutesUntil} minutos${event.location ? ` - ${event.location}` : ''}`;
-      } else if (minutesUntil <= 30) {
+        notificationTag = '15min';
+        console.log(`   📢 Tipo: 15 MINUTOS (${minutesUntil}min)`);
+      } 
+      // 16-30 minutos antes
+      else if (minutesUntil <= 30) {
         emoji = '📅';
         message = `Começa em ${minutesUntil} minutos${event.location ? ` - ${event.location}` : ''}`;
-      } else {
-        // Evento muito distante, pular
-        console.log(`   ⏭️ Evento muito distante (${minutesUntil}min), pulando...`);
+        notificationTag = '30min';
+        console.log(`   📆 Tipo: 30 MINUTOS (${minutesUntil}min)`);
+      } 
+      // Evento muito distante ou muito antigo
+      else {
+        console.log(`   ⏭️ Evento fora do intervalo (${minutesUntil}min), pulando...`);
         continue;
       }
 
