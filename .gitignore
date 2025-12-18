@@ -23,6 +23,3 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
-
-# OpenAI Config (contains API key)
-src/config/openai.config.ts

@@ -1,5 +1,4 @@
 // Serviço do Chatbot YM Sports - Assistente IA com conhecimento completo do app
-import { OPENAI_CONFIG } from '@/config/openai.config';
 
 export interface ChatMessage {
   id: string;
@@ -123,10 +122,14 @@ Sempre responda em português brasileiro, seja prestativo e demonstre conhecimen
 `;
 
   constructor() {
-    // Usar a API key padrão do config (sempre disponível)
-    this.apiKey = OPENAI_CONFIG.defaultApiKey;
+    // Buscar API key da variável de ambiente
+    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || null;
     
-    console.log('✅ Chatbot inicializado com API Key padrão');
+    if (this.apiKey) {
+      console.log('✅ Chatbot inicializado com API Key');
+    } else {
+      console.warn('⚠️ API Key do OpenAI não configurada. Configure VITE_OPENAI_API_KEY no Vercel.');
+    }
   }
 
   // Configurar API key
