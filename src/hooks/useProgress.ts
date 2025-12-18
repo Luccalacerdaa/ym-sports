@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import NotificationService from '@/services/notificationService';
 
 export interface UserProgress {
   id: string;
@@ -335,21 +336,7 @@ export const useProgress = () => {
 
       // Enviar notificação se subiu de nível
       if (result?.levelUp) {
-        try {
-          await fetch('/api/notify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              user_id: user.id,
-              title: '🎉 Parabéns! Subiu de Nível!',
-              body: `Você alcançou o nível ${result.newLevel}! Continue treinando!`,
-              url: '/dashboard'
-            })
-          });
-          console.log(`✅ Notificação de level up enviada via API`);
-        } catch (error) {
-          console.error('Erro ao enviar notificação de nível:', error);
-        }
+        await NotificationService.levelUp(user.id, result.newLevel);
       }
 
       return result;
@@ -421,21 +408,7 @@ export const useProgress = () => {
           }
 
           // Enviar notificação de conquista desbloqueada
-          try {
-            await fetch('/api/notify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                user_id: user.id,
-                title: '🏆 Nova Conquista Desbloqueada!',
-                body: `${achievement.icon} ${achievement.name} - ${achievement.description}`,
-                url: '/dashboard/achievements'
-              })
-            });
-            console.log(`✅ Notificação de conquista enviada via API: ${achievement.name}`);
-          } catch (error) {
-            console.error('Erro ao enviar notificação de conquista:', error);
-          }
+          await NotificationService.achievement(user.id, achievement.name, achievement.description);
         }
       }
 

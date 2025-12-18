@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import NotificationService from '@/services/notificationService';
 
 export const useEventNotifications = () => {
   const { user } = useAuth();
@@ -38,33 +39,8 @@ export const useEventNotifications = () => {
           
           // Notificar 30 minutos antes ou quando o evento estiver começando
           if (!alreadyNotified && minutesUntil <= 30 && minutesUntil > 5) {
-            // Enviar notificação local
-            if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification(`📅 ${event.title}`, {
-                body: `Começa em ${minutesUntil} minutos${event.location ? ` - ${event.location}` : ''}`,
-                icon: '/icons/icon-192.png',
-                badge: '/icons/icon-96.png',
-                tag: `event-${event.id}`,
-                requireInteraction: true,
-              });
-            }
-
-            // Enviar notificação push via API
-            try {
-              await fetch('/api/notify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  user_id: user.id,
-                  title: `📅 ${event.title}`,
-                  body: `Começa em ${minutesUntil} minutos${event.location ? ` - ${event.location}` : ''}`,
-                  url: '/calendar'
-                })
-              });
-              console.log(`✅ Notificação enviada via API: ${event.title}`);
-            } catch (error) {
-              console.error('Erro ao enviar notificação push:', error);
-            }
+            // Enviar notificação push
+            await NotificationService.eventReminder(user.id, event.title, minutesUntil, event.location);
 
             // Marcar como notificado
             localStorage.setItem(notificationKey, 'true');
@@ -77,33 +53,8 @@ export const useEventNotifications = () => {
           
           // Notificar quando o evento estiver começando (entre 0 e 5 minutos)
           if (!alreadyNotifiedStart && minutesUntil <= 5 && minutesUntil >= 0) {
-            // Enviar notificação local
-            if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification(`🚀 ${event.title}`, {
-                body: `Está começando agora!${event.location ? ` - ${event.location}` : ''}`,
-                icon: '/icons/icon-192.png',
-                badge: '/icons/icon-96.png',
-                tag: `event-start-${event.id}`,
-                requireInteraction: true,
-              });
-            }
-
-            // Enviar notificação push via API
-            try {
-              await fetch('/api/notify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  user_id: user.id,
-                  title: `🚀 ${event.title}`,
-                  body: `Está começando agora!${event.location ? ` - ${event.location}` : ''}`,
-                  url: '/calendar'
-                })
-              });
-              console.log(`✅ Notificação de início enviada via API: ${event.title}`);
-            } catch (error) {
-              console.error('Erro ao enviar notificação push de início:', error);
-            }
+            // Enviar notificação push
+            await NotificationService.eventReminder(user.id, event.title, minutesUntil, event.location);
 
             // Marcar como notificado
             localStorage.setItem(notificationStartKey, 'true');

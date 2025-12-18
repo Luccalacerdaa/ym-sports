@@ -9,6 +9,8 @@ import { SplashScreen } from "./components/SplashScreen";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useSimpleNotifications } from "./hooks/useSimpleNotifications";
+import { useDailyNotifications } from "./hooks/useDailyNotifications";
+import { useEventNotifications } from "./hooks/useEventNotifications";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -36,9 +38,10 @@ const queryClient = new QueryClient();
 const AppContent = () => {
   const [showSplash, setShowSplash] = useState(true);
   
-  // Sistema simplificado de notificações
-  useSimpleNotifications();
-  
+  // Sistema de notificações
+  useSimpleNotifications(); // Registra Service Worker e permissões
+  useDailyNotifications();  // Notificações agendadas diárias
+  useEventNotifications();  // Lembretes de eventos do calendário
 
   const handleSplashComplete = () => {
     setShowSplash(false);
