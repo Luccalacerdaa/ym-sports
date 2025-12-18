@@ -21,6 +21,19 @@ export default function NotificationTest() {
     url: '/dashboard'
   });
 
+  const clearNotificationCache = () => {
+    let count = 0;
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key?.startsWith('daily_notification_')) {
+        localStorage.removeItem(key);
+        count++;
+      }
+    }
+    toast.success(`✅ ${count} notificações limpas do cache!`);
+    console.log(`🧹 Cache de notificações limpo: ${count} itens removidos`);
+  };
+
   const sendTestNotification = async () => {
     if (!user) {
       toast.error('❌ Você precisa estar logado');
@@ -125,6 +138,20 @@ export default function NotificationTest() {
               </p>
             </div>
           )}
+          
+          <div className="pt-4 border-t border-gray-700">
+            <Button
+              onClick={clearNotificationCache}
+              variant="outline"
+              className="w-full border-yellow-700/50 text-yellow-400 hover:bg-yellow-900/20"
+              size="sm"
+            >
+              🧹 Limpar Cache de Notificações Diárias
+            </Button>
+            <p className="text-xs text-gray-500 mt-2 text-center">
+              Útil para testar notificações que já foram enviadas hoje
+            </p>
+          </div>
         </CardContent>
       </Card>
 

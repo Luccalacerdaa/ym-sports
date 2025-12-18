@@ -1,7 +1,7 @@
 // Service Worker Simplificado para YM Sports
 // Foco em notificações que funcionem mesmo com app fechado
 
-const SW_VERSION = '16.0.0';
+const SW_VERSION = '17.0.0';
 const CACHE_NAME = `ym-sports-v${SW_VERSION}`;
 
 // Configurações do Supabase (será recebido do app)
@@ -17,14 +17,15 @@ self.registration.getNotifications().then(notifications => {
   notifications.forEach(notification => notification.close());
 });
 
-// Cronograma simplificado de notificações
+// Cronograma de notificações diárias (sincronizado com useDailyNotifications)
 const NOTIFICATIONS = [
-  { time: "07:00", title: "💪 Bom dia, atleta!", body: "Hora de começar o dia com energia!" },
-  { time: "08:30", title: "🏃‍♂️ Treino te espera", body: "Seu treino personalizado está disponível!" },
-  { time: "12:00", title: "🥗 Hora do almoço", body: "Cuide da sua alimentação!" },
-  { time: "15:30", title: "🎯 Foco no objetivo", body: "Continue firme nos seus sonhos!" },
-  { time: "18:30", title: "🌟 Fim de dia", body: "Que tal um treino noturno?" },
-  { time: "20:00", title: "🏆 Ranking", body: "Veja sua posição no ranking!" }
+  { time: "07:00", type: "morning", title: "💪 Bom dia, atleta!", body: "Hora de começar o dia com energia! Vamos treinar hoje?", url: "/dashboard" },
+  { time: "09:00", type: "hydration", title: "💧 Hidratação", body: "Já bebeu água hoje? Mantenha-se hidratado!", url: "/dashboard/nutrition" },
+  { time: "11:30", type: "workout", title: "🏋️ Hora do Treino!", body: "Seu treino está te esperando. Vamos nessa!", url: "/dashboard/training" },
+  { time: "14:00", type: "hydration", title: "💧 Hidratação", body: "Continue bebendo água! Seu corpo agradece.", url: "/dashboard/nutrition" },
+  { time: "17:00", type: "workout", title: "🏃‍♂️ Treino da Tarde!", body: "Que tal um treino agora? Você consegue!", url: "/dashboard/training" },
+  { time: "19:00", type: "hydration", title: "💧 Última Hidratação", body: "Beba mais água antes de dormir!", url: "/dashboard/nutrition" },
+  { time: "21:00", type: "evening", title: "🌙 Boa Noite!", body: "Descanse bem para conquistar seus objetivos amanhã!", url: "/dashboard/motivational" }
 ];
 
 // Cache simples para notificações enviadas
@@ -53,25 +54,29 @@ function checkNotifications() {
     
     // Se é o horário certo e ainda não foi enviada hoje
     if (currentTime === notification.time && !sentToday.includes(key)) {
-      console.log(`[SW] 📤 Enviando: ${notification.title}`);
+      console.log(`[SW] 📤 Enviando notificação agendada: ${notification.title} (${notification.type})`);
       
       // Enviar notificação
       self.registration.showNotification(notification.title, {
         body: notification.body,
         icon: '/icons/icon-192.png',
         badge: '/icons/icon-96.png',
-        tag: `ym-${Date.now()}`,
-        requireInteraction: false,
+        tag: `daily-${notification.type}-${Date.now()}`,
+        requireInteraction: notification.type === 'workout', // Treinos exigem interação
         vibrate: [200, 100, 200],
-        data: { url: '/dashboard' },
+        data: { 
+          url: notification.url,
+          type: notification.type,
+          timestamp: now.toISOString()
+        },
         actions: [
-          { action: 'open', title: 'Abrir App' }
+          { action: 'open', title: notification.type === 'workout' ? 'Ver Treino' : 'Abrir App' }
         ]
       }).then(() => {
-        console.log(`[SW] ✅ Notificação enviada: ${notification.title}`);
+        console.log(`[SW] ✅ Notificação enviada: ${notification.title} às ${currentTime}`);
         sentToday.push(key);
       }).catch(error => {
-        console.error(`[SW] ❌ Erro ao enviar: ${error}`);
+        console.error(`[SW] ❌ Erro ao enviar notificação: ${error}`);
       });
     }
   });
@@ -216,12 +221,26 @@ setInterval(() => {
 
 // Clique na notificação
 self.addEventListener('notificationclick', (event) => {
-  console.log('[SW] 👆 Notificação clicada');
+  console.log('[SW] 👆 Notificação clicada:', event.notification.data);
   event.notification.close();
+  
+  const url = event.notification.data?.url || '/dashboard';
   
   if (event.action === 'open' || !event.action) {
     event.waitUntil(
-      clients.openWindow('/dashboard')
+      clients.matchAll({ type: 'window', includeUncontrolled: true })
+        .then((clientList) => {
+          // Se já existe uma janela aberta, focar nela e navegar
+          for (const client of clientList) {
+            if ('focus' in client) {
+              client.focus();
+              client.postMessage({ type: 'NAVIGATE', url });
+              return;
+            }
+          }
+          // Senão, abrir nova janela
+          return clients.openWindow(url);
+        })
     );
   }
 });
@@ -282,6 +301,20 @@ self.addEventListener('message', (event) => {
     });
     // Verificar eventos imediatamente após configurar
     checkUpcomingEvents();
+  }
+  
+  if (event.data.type === 'SET_DAILY_SCHEDULE') {
+    console.log('[SW] 📅 Recebendo cronograma de notificações diárias');
+    console.log('[SW] 📋 Horários:', event.data.schedule.map(s => `${s.time} (${s.type})`).join(', '));
+    
+    // Atualizar o cronograma global (se necessário)
+    // Por enquanto, o SW já tem o cronograma hardcoded
+    // Mas podemos adicionar lógica dinâmica aqui no futuro
+    
+    console.log('[SW] ✅ Cronograma confirmado! Notificações serão enviadas nos horários programados.');
+    
+    // Forçar verificação imediata
+    checkNotifications();
   }
   
   if (event.data.type === 'SCHEDULE_TEST') {

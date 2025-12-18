@@ -29,18 +29,39 @@ export const useDailyNotifications = () => {
   useEffect(() => {
     if (!user) return;
 
-    // Verificar notificações a cada minuto
+    console.log('🔔 useDailyNotifications: Iniciando sistema de notificações diárias');
+
+    // Enviar cronograma para o Service Worker
+    const setupSchedule = async () => {
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'SET_DAILY_SCHEDULE',
+          userId: user.id,
+          schedule: NOTIFICATION_SCHEDULE
+        });
+        console.log('✅ Cronograma de notificações enviado ao Service Worker');
+      }
+    };
+
+    setupSchedule();
+
+    // Verificar notificações a cada minuto (fallback se SW falhar)
     const checkSchedule = () => {
       const now = new Date();
       const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
       const today = now.toDateString();
+
+      console.log(`⏰ Verificando horário: ${currentTime}`);
 
       NOTIFICATION_SCHEDULE.forEach(schedule => {
         if (currentTime === schedule.time) {
           const sentKey = `daily_notification_${schedule.type}_${today}`;
           const alreadySent = localStorage.getItem(sentKey);
 
+          console.log(`🔍 Horário ${schedule.time} (${schedule.type}) - Já enviada: ${alreadySent}`);
+
           if (!alreadySent) {
+            console.log(`📤 Enviando notificação: ${schedule.type}`);
             sendScheduledNotification(schedule.type);
             localStorage.setItem(sentKey, 'true');
 
