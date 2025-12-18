@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSimpleNotifications } from '@/hooks/useSimpleNotifications';
 
 export interface UserProgress {
   id: string;
@@ -49,6 +50,7 @@ export interface UserActivity {
 
 export const useProgress = () => {
   const { user } = useAuth();
+  const { sendNotification, permissionGranted } = useSimpleNotifications();
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [userAchievements, setUserAchievements] = useState<UserAchievement[]>([]);
@@ -334,20 +336,13 @@ export const useProgress = () => {
       setProgress(updatedProgress);
 
       // Enviar notificação se subiu de nível
-      if (result?.levelUp) {
+      if (result?.levelUp && permissionGranted) {
         try {
-          await fetch('/api/send-notification-to-user', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              user_id: user.id,
-              title: '🎉 Parabéns! Subiu de Nível!',
-              body: `Você alcançou o nível ${result.newLevel}! Continue treinando!`,
-              url: '/dashboard',
-              icon: '/icons/logo.png',
-              data: { type: 'level_up', level: result.newLevel }
-            })
-          });
+          sendNotification(
+            '🎉 Parabéns! Subiu de Nível!',
+            `Você alcançou o nível ${result.newLevel}! Continue treinando!`
+          );
+          console.log(`✅ Notificação enviada: Level Up ${result.newLevel}`);
         } catch (error) {
           console.error('Erro ao enviar notificação de nível:', error);
         }
@@ -422,25 +417,16 @@ export const useProgress = () => {
           }
 
           // Enviar notificação de conquista desbloqueada
-          try {
-            await fetch('/api/send-notification-to-user', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                user_id: user.id,
-                title: `🏆 Nova Conquista Desbloqueada!`,
-                body: `${achievement.icon} ${achievement.name} - ${achievement.description}`,
-                url: '/dashboard/achievements',
-                icon: '/icons/logo.png',
-                data: { 
-                  type: 'achievement_unlocked', 
-                  achievement_id: achievement.id,
-                  achievement_name: achievement.name
-                }
-              })
-            });
-          } catch (error) {
-            console.error('Erro ao enviar notificação de conquista:', error);
+          if (permissionGranted) {
+            try {
+              sendNotification(
+                '🏆 Nova Conquista Desbloqueada!',
+                `${achievement.icon} ${achievement.name} - ${achievement.description}`
+              );
+              console.log(`✅ Notificação enviada: Conquista ${achievement.name}`);
+            } catch (error) {
+              console.error('Erro ao enviar notificação de conquista:', error);
+            }
           }
         }
       }
