@@ -1,26 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import webpush from 'web-push';
 
-// Configuração do Supabase
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-// Configuração do Web-Push
-const webPushVapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-const webPushVapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
-const webPushContact = process.env.WEB_PUSH_CONTACT;
-
-// Inicializar Supabase
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-// Inicializar Web-Push
-webpush.setVapidDetails(
-  webPushContact,
-  webPushVapidPublicKey,
-  webPushVapidPrivateKey
-);
-
-// Cronograma de notificações diárias
+// Cronograma de notificações diárias (constante, pode ficar fora)
 const DAILY_SCHEDULE = {
   '07:00': { title: "💪 Bom dia, atleta!", body: "Hora de começar o dia com energia!", url: "/dashboard" },
   '09:00': { title: "💧 Hora da Hidratação!", body: "Beba água para manter o foco e a energia!", url: "/dashboard/nutrition" },
@@ -41,11 +22,45 @@ export default async function handler(req, res) {
   console.log(`⏰ Timestamp: ${new Date().toISOString()}`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
+  // ✅ Ler variáveis de ambiente DENTRO do handler (necessário para Vercel)
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const webPushVapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const webPushVapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+  const webPushContact = process.env.WEB_PUSH_CONTACT;
+
+  // Debug das variáveis
+  console.log('🔍 Verificando variáveis de ambiente:');
+  console.log(`   SUPABASE_URL: ${supabaseUrl ? '✓ Configurada' : '✗ Faltando'}`);
+  console.log(`   SUPABASE_SERVICE_ROLE_KEY: ${supabaseServiceKey ? '✓ Configurada' : '✗ Faltando'}`);
+  console.log(`   NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${webPushVapidPublicKey ? '✓ Configurada' : '✗ Faltando'}`);
+  console.log(`   VAPID_PRIVATE_KEY: ${webPushVapidPrivateKey ? '✓ Configurada' : '✗ Faltando'}`);
+  console.log(`   WEB_PUSH_CONTACT: ${webPushContact ? '✓ Configurada' : '✗ Faltando'}`);
+
   // Validar variáveis de ambiente
   if (!supabaseUrl || !supabaseServiceKey || !webPushVapidPublicKey || !webPushVapidPrivateKey || !webPushContact) {
-    console.error('❌ Variáveis de ambiente não configuradas');
-    return res.status(500).json({ error: 'Environment variables not configured' });
+    console.error('❌ Variáveis de ambiente não configuradas completamente');
+    return res.status(500).json({ 
+      error: 'Environment variables not configured',
+      missing: {
+        supabaseUrl: !supabaseUrl,
+        supabaseServiceKey: !supabaseServiceKey,
+        webPushVapidPublicKey: !webPushVapidPublicKey,
+        webPushVapidPrivateKey: !webPushVapidPrivateKey,
+        webPushContact: !webPushContact
+      }
+    });
   }
+
+  // ✅ Inicializar Supabase DENTRO do handler
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+  // ✅ Inicializar Web-Push DENTRO do handler
+  webpush.setVapidDetails(
+    webPushContact,
+    webPushVapidPublicKey,
+    webPushVapidPrivateKey
+  );
 
   try {
     // Pegar horário atual (UTC)
