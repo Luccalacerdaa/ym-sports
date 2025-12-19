@@ -7,15 +7,7 @@ import { setupMobileViewportFix } from "./utils/mobileViewportFix"; // Importar 
 // Inicializar correção de viewport para dispositivos móveis
 setupMobileViewportFix();
 
-// Register service worker for PWA
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(registration => {
-      console.log('ServiceWorker registration successful with scope: ', registration.scope);
-    }, err => {
-      console.log('ServiceWorker registration failed: ', err);
-    });
-  });
-}
+// Service Worker é registrado automaticamente pelo useSimpleNotifications após o login
+// Não registrar aqui para evitar duplicação e loop de recarregamento
 
 createRoot(document.getElementById("root")!).render(<App />);
