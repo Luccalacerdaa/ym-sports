@@ -192,19 +192,31 @@ async function checkUpcomingEvents() {
 // Instalar Service Worker
 self.addEventListener('install', (event) => {
   console.log('[SW] 📦 Instalando...');
-  self.skipWaiting();
+  // NÃO usar skipWaiting() para evitar loop de recarregamento
+  // self.skipWaiting();
 });
 
 // Ativar Service Worker
 self.addEventListener('activate', (event) => {
   console.log('[SW] ⚡ Ativando...');
   event.waitUntil(
-    clients.claim().then(() => {
-      console.log('[SW] ✅ Service Worker ativo e controlando páginas!');
-      // Iniciar verificação imediatamente
+    (async () => {
+      // Limpar caches antigos
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames
+          .filter(name => name !== CACHE_NAME)
+          .map(name => caches.delete(name))
+      );
+      
+      // NÃO usar clients.claim() automaticamente para evitar recarregamentos
+      // Apenas tomar controle em páginas novas
+      console.log('[SW] ✅ Service Worker ativo!');
+      
+      // Iniciar verificações
       checkNotifications();
       checkUpcomingEvents();
-    })
+    })()
   );
 });
 

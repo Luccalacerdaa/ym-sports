@@ -5,16 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   Play, 
-  Youtube, 
-  ExternalLink, 
   RefreshCw, 
   Search, 
   Calendar, 
-  Eye, 
-  Settings,
-  Loader2,
-  AlertCircle,
-  CheckCircle
+  Eye,
+  Loader2
 } from 'lucide-react';
 import { YouTubeService, YouTubeVideo } from '@/services/youtubeService';
 import VideoThumbnail from '@/components/VideoThumbnail';
@@ -85,11 +80,6 @@ export default function Motivational() {
     );
   };
 
-  // Abrir YouTube Shorts
-  const openYouTubeShorts = (shortsUrl: string) => {
-    window.open(shortsUrl, '_blank');
-  };
-
   // Formatar data
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -112,7 +102,6 @@ export default function Motivational() {
                 Motivação
               </h1>
             </div>
-            
           </div>
           
           <p className="text-gray-400">
@@ -172,26 +161,16 @@ export default function Motivational() {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     
-                    {/* Overlay com botões */}
+                    {/* Overlay com botão */}
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => openYouTubeShorts(video.shortsUrl)}
-                          className="bg-red-600 hover:bg-red-700 text-white"
-                        >
-                          <Youtube className="w-4 h-4 mr-1" />
-                          Shorts
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setSelectedVideo(video)}
-                          className="border-white text-white hover:bg-white hover:text-black"
-                        >
-                          <Play className="w-4 h-4" />
-                        </Button>
-                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setSelectedVideo(video)}
+                        className="border-white text-white hover:bg-white hover:text-black"
+                      >
+                        <Play className="w-4 h-4" />
+                      </Button>
                     </div>
 
                     {/* Badge de duração */}
@@ -232,7 +211,7 @@ export default function Motivational() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-gray-800">
+                    <div className="flex items-center justify-center pt-2 border-t border-gray-800">
                       <Button
                         size="sm"
                         variant="ghost"
@@ -241,16 +220,6 @@ export default function Motivational() {
                       >
                         <span className={`mr-1 ${favorites.includes(video.id) ? '❤️' : '🤍'}`} />
                         {favorites.includes(video.id) ? 'Favoritado' : 'Favoritar'}
-                      </Button>
-
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => openYouTubeShorts(video.shortsUrl)}
-                        className="text-xs text-gray-400 hover:text-yellow-500"
-                      >
-                        <ExternalLink className="w-3 h-3 mr-1" />
-                        Abrir
                       </Button>
                     </div>
                   </div>
@@ -288,21 +257,10 @@ export default function Motivational() {
               </div>
               
               <div className="p-4 border-t border-gray-800">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-400">
-                    <span>{selectedVideo.viewCount}</span>
-                    {" • "}
-                    <span>{formatDate(selectedVideo.publishedAt)}</span>
-                  </div>
-                  
-                  <Button
-                    size="sm"
-                    onClick={() => openYouTubeShorts(selectedVideo.shortsUrl)}
-                    className="bg-red-600 hover:bg-red-700 text-white"
-                  >
-                    <Youtube className="w-4 h-4 mr-1" />
-                    Ver no YouTube Shorts
-                  </Button>
+                <div className="text-sm text-gray-400 text-center">
+                  <span>{selectedVideo.viewCount}</span>
+                  {" • "}
+                  <span>{formatDate(selectedVideo.publishedAt)}</span>
                 </div>
               </div>
             </div>

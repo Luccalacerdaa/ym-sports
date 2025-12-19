@@ -44,6 +44,13 @@ export const useSimpleNotifications = () => {
       
       if (existingReg) {
         console.log('ℹ️ Service Worker já registrado:', existingReg.scope);
+        
+        // Verificar se há atualização disponível, mas NÃO forçar instalação
+        if (existingReg.waiting) {
+          console.log('⚠️ Nova versão do SW disponível, mas não será instalada automaticamente');
+          // Usuário pode recarregar manualmente para atualizar
+        }
+        
         return true; // Não fazer nada se já existe
       }
 
@@ -54,6 +61,9 @@ export const useSimpleNotifications = () => {
       });
 
       console.log('✅ Service Worker registrado:', registration);
+
+      // NÃO escutar por atualizações que causam recarregamento
+      // registration.addEventListener('updatefound', ...); // REMOVIDO
 
       // Aguardar ativação
       await navigator.serviceWorker.ready;

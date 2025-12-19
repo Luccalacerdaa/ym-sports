@@ -82,17 +82,17 @@ export default function ExerciseLibrary() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3">
-            <div className="p-3 bg-primary/10 rounded-full">
-              <Dumbbell className="h-8 w-8 text-primary" />
+            <div className="p-3 bg-yellow-500/10 rounded-full">
+              <Dumbbell className="h-8 w-8 text-yellow-500" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Biblioteca de Exercícios</h1>
-              <p className="text-muted-foreground">Explore nossa base de exercícios com vídeos e imagens</p>
+              <h1 className="text-3xl font-bold text-white">Biblioteca de Exercícios</h1>
+              <p className="text-yellow-300">Explore nossa base de exercícios com vídeos e imagens</p>
             </div>
           </div>
         </div>
@@ -293,9 +293,9 @@ export default function ExerciseLibrary() {
         {/* Mensagem quando não há resultados */}
         {filteredExercises.length === 0 && (
           <div className="text-center py-12">
-            <Dumbbell className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum exercício encontrado</h3>
-            <p className="text-muted-foreground">
+            <Dumbbell className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2 text-white">Nenhum exercício encontrado</h3>
+            <p className="text-yellow-300">
               Tente ajustar os filtros ou termo de busca
             </p>
           </div>

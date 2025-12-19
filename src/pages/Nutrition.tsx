@@ -689,25 +689,13 @@ function NutritionContent() {
           <TabsTrigger value="achievements">Conquistas</TabsTrigger>
         </TabsList>
         <TabsContent value="overview">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-gray-400">Tab Overview - DESABILITADA TEMPORARIAMENTE PARA DEBUG</p>
-            </CardContent>
-          </Card>
+          {renderOverview()}
         </TabsContent>
         <TabsContent value="plan">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-gray-400">Tab Plan - DESABILITADA TEMPORARIAMENTE PARA DEBUG</p>
-            </CardContent>
-          </Card>
+          {renderPlanDetails()}
         </TabsContent>
         <TabsContent value="achievements">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-gray-400">Tab Achievements - DESABILITADA TEMPORARIAMENTE PARA DEBUG</p>
-            </CardContent>
-          </Card>
+          {renderAchievements()}
         </TabsContent>
       </Tabs>
 
