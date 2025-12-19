@@ -127,10 +127,8 @@ export default async function handler(req, res) {
       try {
         console.log(`   📤 Enviando notificação: ${emoji} ${event.title}`);
         
-        // Montar URL corretamente (VERCEL_URL não inclui https://)
-        const baseUrl = process.env.VERCEL_URL 
-          ? `https://${process.env.VERCEL_URL}` 
-          : 'https://ym-sports.vercel.app';
+        // SEMPRE usar o domínio principal (deployment previews não têm /api/notify)
+        const baseUrl = 'https://ym-sports.vercel.app';
         
         const notifyResponse = await fetch(`${baseUrl}/api/notify`, {
           method: 'POST',
