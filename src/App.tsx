@@ -32,6 +32,7 @@ import Settings from "./pages/Settings";
 import NotificationTest from "./pages/NotificationTest";
 import DashboardLayout from "./pages/DashboardLayout";
 import NotFound from "./pages/NotFound";
+import InstallGuide from "./pages/InstallGuide";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const AppContent = () => {
     <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/install-guide" element={<InstallGuide />} />
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/signup" element={<Signup />} />
             <Route path="/dashboard" element={

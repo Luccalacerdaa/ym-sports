@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Trophy, TrendingUp, Zap, Check, Megaphone, Heart, Volume2, VolumeX } from "lucide-react";
+import { Calendar, Trophy, TrendingUp, Zap, Check, Megaphone, Heart, Volume2, VolumeX, Smartphone } from "lucide-react";
 import logoImage from "@/assets/ym-sports-logo-new.png";
 import { useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -193,6 +193,15 @@ const Index = () => {
             <Button variant="hero" size="xl" onClick={() => navigate("/auth/signup")} className="w-full sm:w-auto hover:scale-110 transition-transform duration-300">Começar agora</Button>
             <Button variant="outline" size="xl" onClick={() => navigate("/auth/login")} className="w-full sm:w-auto hover:scale-110 transition-transform duration-300">
               Entrar
+            </Button>
+            <Button 
+              variant="outline" 
+              size="xl" 
+              onClick={() => navigate("/install-guide")} 
+              className="w-full sm:w-auto hover:scale-110 transition-transform duration-300 border-primary/50 text-primary hover:bg-primary/10"
+            >
+              <Smartphone className="w-5 h-5 mr-2" />
+              Como Instalar
             </Button>
           </div>
         </div>
