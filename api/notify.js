@@ -1,34 +1,6 @@
 import webpush from 'web-push';
 import { createClient } from '@supabase/supabase-js';
 
-// Verificar variáveis de ambiente
-if (!process.env.VITE_SUPABASE_URL) {
-  console.error('❌ VITE_SUPABASE_URL não configurado');
-}
-if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  console.error('❌ SUPABASE_SERVICE_ROLE_KEY não configurado');
-}
-if (!process.env.VITE_VAPID_PUBLIC_KEY) {
-  console.error('❌ VITE_VAPID_PUBLIC_KEY não configurado');
-}
-if (!process.env.VAPID_PRIVATE_KEY) {
-  console.error('❌ VAPID_PRIVATE_KEY não configurado');
-}
-
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
-
-// Configurar VAPID
-if (process.env.VITE_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-  webpush.setVapidDetails(
-    'mailto:suporte@ymsports.com',
-    process.env.VITE_VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
-  );
-}
-
 export default async function handler(req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -44,32 +16,65 @@ export default async function handler(req, res) {
   }
 
   try {
+    // ========================================
+    // INICIALIZAR SUPABASE E WEBPUSH AQUI
+    // ========================================
+    console.log('🔧 Inicializando Supabase e WebPush...');
+    
+    // Verificar variáveis de ambiente
+    const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const vapidPublicKey = process.env.VITE_VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+    
+    console.log('📋 Verificando variáveis de ambiente:');
+    console.log('  - SUPABASE_URL:', supabaseUrl ? '✅' : '❌');
+    console.log('  - SUPABASE_SERVICE_ROLE_KEY:', supabaseServiceKey ? '✅' : '❌');
+    console.log('  - VAPID_PUBLIC_KEY:', vapidPublicKey ? '✅' : '❌');
+    console.log('  - VAPID_PRIVATE_KEY:', vapidPrivateKey ? '✅' : '❌');
+
     // Verificar se variáveis estão configuradas
-    if (!process.env.VITE_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (!supabaseUrl || !supabaseServiceKey) {
       console.error('❌ Variáveis Supabase não configuradas no Vercel');
       return res.status(500).json({ 
-        error: 'Variáveis de ambiente não configuradas. Configure VITE_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no Vercel.',
+        error: 'Variáveis de ambiente Supabase não configuradas. Configure VITE_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no Vercel.',
         configured: {
-          supabaseUrl: !!process.env.VITE_SUPABASE_URL,
-          supabaseKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-          vapidPublic: !!process.env.VITE_VAPID_PUBLIC_KEY,
-          vapidPrivate: !!process.env.VAPID_PRIVATE_KEY
+          supabaseUrl: !!supabaseUrl,
+          supabaseKey: !!supabaseServiceKey,
+          vapidPublic: !!vapidPublicKey,
+          vapidPrivate: !!vapidPrivateKey
         }
       });
     }
 
-    if (!process.env.VITE_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+    if (!vapidPublicKey || !vapidPrivateKey) {
       console.error('❌ Variáveis VAPID não configuradas no Vercel');
       return res.status(500).json({ 
         error: 'Variáveis VAPID não configuradas. Configure VITE_VAPID_PUBLIC_KEY e VAPID_PRIVATE_KEY no Vercel.',
         configured: {
-          supabaseUrl: !!process.env.VITE_SUPABASE_URL,
-          supabaseKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-          vapidPublic: !!process.env.VITE_VAPID_PUBLIC_KEY,
-          vapidPrivate: !!process.env.VAPID_PRIVATE_KEY
+          supabaseUrl: !!supabaseUrl,
+          supabaseKey: !!supabaseServiceKey,
+          vapidPublic: !!vapidPublicKey,
+          vapidPrivate: !!vapidPrivateKey
         }
       });
     }
+
+    // Criar cliente Supabase
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    console.log('✅ Cliente Supabase criado');
+
+    // Configurar VAPID
+    webpush.setVapidDetails(
+      'mailto:suporte@ymsports.com',
+      vapidPublicKey,
+      vapidPrivateKey
+    );
+    console.log('✅ WebPush configurado');
+
+    // ========================================
+    // PROCESSAR NOTIFICAÇÃO
+    // ========================================
 
     const { user_id, title, body, url } = req.body;
 
