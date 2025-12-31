@@ -61,8 +61,8 @@ export function NotificationPrompt() {
   if (!showPrompt) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center p-4 pointer-events-none">
-      <Card className="w-full max-w-md pointer-events-auto animate-in slide-in-from-bottom-5 duration-300 bg-gradient-to-br from-purple-900/95 to-blue-900/95 border-purple-700 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-4 pb-24 pointer-events-none">
+      <Card className="w-full max-w-md pointer-events-auto animate-in slide-in-from-bottom-5 duration-300 bg-gradient-to-br from-purple-900/95 to-blue-900/95 border-purple-700 backdrop-blur-sm shadow-2xl">
         <CardContent className="p-6 space-y-4">
           <div className="flex items-start gap-4">
             <div className="bg-purple-700/50 p-3 rounded-full">
