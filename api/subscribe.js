@@ -1,18 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Verificar variáveis de ambiente
-if (!process.env.VITE_SUPABASE_URL) {
-  console.error('❌ VITE_SUPABASE_URL não configurado');
-}
-if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  console.error('❌ SUPABASE_SERVICE_ROLE_KEY não configurado');
-}
-
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
-
 export default async function handler(req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -28,18 +15,37 @@ export default async function handler(req, res) {
   }
 
   try {
+    // ========================================
+    // INICIALIZAR SUPABASE AQUI
+    // ========================================
+    console.log('🔧 Inicializando Supabase...');
+    
+    const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    console.log('📋 Verificando variáveis:');
+    console.log('  - SUPABASE_URL:', supabaseUrl ? '✅' : '❌');
+    console.log('  - SUPABASE_SERVICE_ROLE_KEY:', supabaseServiceKey ? '✅' : '❌');
+
     // Verificar se variáveis estão configuradas
-    if (!process.env.VITE_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (!supabaseUrl || !supabaseServiceKey) {
       console.error('❌ Variáveis não configuradas no Vercel');
       return res.status(500).json({ 
-        error: 'Variáveis de ambiente não configuradas. Configure no Vercel: Settings → Environment Variables',
-        docs: 'Veja CONFIGURAR_VERCEL_AGORA.md',
+        error: 'Variáveis de ambiente não configuradas. Configure VITE_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no Vercel.',
         configured: {
-          supabaseUrl: !!process.env.VITE_SUPABASE_URL,
-          supabaseKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+          supabaseUrl: !!supabaseUrl,
+          supabaseKey: !!supabaseServiceKey
         }
       });
     }
+
+    // Criar cliente Supabase
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    console.log('✅ Cliente Supabase criado');
+
+    // ========================================
+    // PROCESSAR SUBSCRIPTION
+    // ========================================
 
     const { user_id, subscription } = req.body;
 
@@ -48,44 +54,63 @@ export default async function handler(req, res) {
     }
 
     console.log(`📝 Salvando subscription para user: ${user_id}`);
+    console.log(`📍 Endpoint: ${subscription.endpoint.substring(0, 60)}...`);
 
-    // Verificar se já existe uma subscription com este endpoint
-    const { data: existing } = await supabase
+    // PASSO 1: Verificar se este endpoint já existe para QUALQUER usuário
+    const { data: anyExisting } = await supabase
       .from('push_subscriptions')
-      .select('id')
-      .eq('user_id', user_id)
-      .eq('endpoint', subscription.endpoint)
-      .single();
+      .select('id, user_id')
+      .eq('endpoint', subscription.endpoint);
 
-    if (existing) {
-      // Atualizar subscription existente
-      const { error } = await supabase
-        .from('push_subscriptions')
-        .update({
-          p256dh: subscription.keys.p256dh,
-          auth: subscription.keys.auth,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', existing.id);
+    if (anyExisting && anyExisting.length > 0) {
+      console.log(`🔍 Endpoint já existe! Encontradas ${anyExisting.length} ocorrências`);
+      
+      // Se o endpoint já pertence a OUTRO usuário, remover
+      const otherUsers = anyExisting.filter(sub => sub.user_id !== user_id);
+      if (otherUsers.length > 0) {
+        console.log(`🗑️ Removendo ${otherUsers.length} subscription(s) de outros usuários`);
+        for (const otherSub of otherUsers) {
+          await supabase
+            .from('push_subscriptions')
+            .delete()
+            .eq('id', otherSub.id);
+          console.log(`  ✅ Removido de user: ${otherSub.user_id.substring(0, 8)}...`);
+        }
+      }
 
-      if (error) throw error;
-      console.log('✅ Subscription atualizada');
-    } else {
-      // Criar nova subscription
-      const { error } = await supabase
-        .from('push_subscriptions')
-        .insert({
-          user_id,
-          endpoint: subscription.endpoint,
-          p256dh: subscription.keys.p256dh,
-          auth: subscription.keys.auth
-        });
+      // Verificar se já existe para este usuário
+      const userExisting = anyExisting.find(sub => sub.user_id === user_id);
+      
+      if (userExisting) {
+        // Atualizar subscription existente para este usuário
+        const { error } = await supabase
+          .from('push_subscriptions')
+          .update({
+            p256dh: subscription.keys.p256dh,
+            auth: subscription.keys.auth,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', userExisting.id);
 
-      if (error) throw error;
-      console.log('✅ Nova subscription criada');
+        if (error) throw error;
+        console.log('✅ Subscription atualizada para este usuário');
+        return res.status(200).json({ success: true, action: 'updated' });
+      }
     }
 
-    return res.status(200).json({ success: true });
+    // PASSO 2: Criar nova subscription para este usuário
+    const { error } = await supabase
+      .from('push_subscriptions')
+      .insert({
+        user_id,
+        endpoint: subscription.endpoint,
+        p256dh: subscription.keys.p256dh,
+        auth: subscription.keys.auth
+      });
+
+    if (error) throw error;
+    console.log('✅ Nova subscription criada');
+    return res.status(200).json({ success: true, action: 'created' });
   } catch (error) {
     console.error('❌ Erro ao salvar subscription:', error);
     return res.status(500).json({ error: error.message });
