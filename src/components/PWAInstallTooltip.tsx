@@ -69,14 +69,16 @@ export function PWAInstallTooltip({ isOpen, onClose }: PWAInstallTooltipProps) {
           
           {showVideo ? (
             <div className="space-y-4">
-              <div className="bg-gray-100 rounded-lg p-8 text-center">
-                <Play className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p className="text-sm text-gray-600">
-                  Vídeo tutorial para iOS será exibido aqui
-                </p>
-                <p className="text-xs text-gray-500 mt-2">
-                  (Implementar player de vídeo)
-                </p>
+              <div className="rounded-lg overflow-hidden bg-black">
+                <video
+                  className="w-full h-auto"
+                  controls
+                  autoPlay
+                  playsInline
+                  src="/tutorials/ios-install.mov"
+                >
+                  Seu navegador não suporta o vídeo de instalação para iOS.
+                </video>
               </div>
               
               <div className="text-sm space-y-2">
@@ -120,14 +122,16 @@ export function PWAInstallTooltip({ isOpen, onClose }: PWAInstallTooltipProps) {
           
           {showVideo ? (
             <div className="space-y-4">
-              <div className="bg-gray-100 rounded-lg p-8 text-center">
-                <Play className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p className="text-sm text-gray-600">
-                  Vídeo tutorial para Android será exibido aqui
-                </p>
-                <p className="text-xs text-gray-500 mt-2">
-                  (Implementar player de vídeo)
-                </p>
+              <div className="rounded-lg overflow-hidden bg-black">
+                <video
+                  className="w-full h-auto"
+                  controls
+                  autoPlay
+                  playsInline
+                  src="/tutorials/android-install.mov"
+                >
+                  Seu navegador não suporta o vídeo de instalação para Android.
+                </video>
               </div>
               
               <div className="text-sm space-y-2">

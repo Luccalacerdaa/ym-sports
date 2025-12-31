@@ -118,9 +118,9 @@ export const usePushSimple = () => {
     }
   }, [user, isSupported, unsubscribe]);
 
-  // Verificar se está subscrito
+  // Verificar e atualizar subscriptions antigas automaticamente
   useEffect(() => {
-    const checkSubscription = async () => {
+    const checkAndUpdateSubscription = async () => {
       if (!isSupported || !user) return;
 
       try {
@@ -128,12 +128,53 @@ export const usePushSimple = () => {
         const subscription = await registration.pushManager.getSubscription();
         setIsSubscribed(!!subscription);
         setPermission(Notification.permission);
+
+        // 🔄 AUTO-UPDATE: Verificar se há subscription antiga no backend
+        if (subscription) {
+          console.log('🔍 Verificando se subscription precisa ser atualizada...');
+          
+          // Verificar no backend se esta subscription é antiga
+          const checkResponse = await fetch('/api/list-devices', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          });
+
+          if (checkResponse.ok) {
+            const data = await checkResponse.json();
+            const userDevices = data.devices_by_user?.[user.id] || [];
+            
+            // Verificar se algum dispositivo deste usuário é antigo (sem updated_at)
+            const hasOldDevice = userDevices.some((d: any) => d.is_old);
+            
+            if (hasOldDevice) {
+              console.log('🔄 Subscription antiga detectada! Atualizando automaticamente...');
+              
+              // Reenviar a subscription atual para atualizar no backend
+              const updateResponse = await fetch('/api/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  user_id: user.id,
+                  subscription: subscription.toJSON()
+                })
+              });
+
+              if (updateResponse.ok) {
+                console.log('✅ Subscription atualizada automaticamente para o novo sistema!');
+              } else {
+                console.warn('⚠️ Falha ao atualizar subscription antiga');
+              }
+            } else {
+              console.log('✅ Subscription já está no novo sistema');
+            }
+          }
+        }
       } catch (error) {
-        console.error('Erro ao verificar subscription:', error);
+        console.error('Erro ao verificar/atualizar subscription:', error);
       }
     };
 
-    checkSubscription();
+    checkAndUpdateSubscription();
   }, [isSupported, user]);
 
   return {
