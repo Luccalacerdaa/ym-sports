@@ -23,17 +23,22 @@ export default async function handler(req, res) {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
   // ✅ Ler variáveis de ambiente DENTRO do handler (necessário para Vercel)
-  const supabaseUrl = process.env.SUPABASE_URL;
+  // IMPORTANTE: Usar VITE_SUPABASE_URL para consistência com outros endpoints
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const webPushVapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const webPushVapidPublicKey = process.env.VITE_VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
   const webPushVapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
-  const webPushContact = process.env.WEB_PUSH_CONTACT;
+  const webPushContact = process.env.WEB_PUSH_CONTACT || 'mailto:suporte@ymsports.com';
 
   // Debug das variáveis
   console.log('🔍 Verificando variáveis de ambiente:');
-  console.log(`   SUPABASE_URL: ${supabaseUrl ? '✓ Configurada' : '✗ Faltando'}`);
+  console.log(`   VITE_SUPABASE_URL: ${process.env.VITE_SUPABASE_URL ? '✓ Configurada' : '✗ Faltando'}`);
+  console.log(`   SUPABASE_URL: ${process.env.SUPABASE_URL ? '✓ Configurada' : '✗ Faltando'}`);
+  console.log(`   → Usando: ${supabaseUrl ? '✓' : '✗'}`);
   console.log(`   SUPABASE_SERVICE_ROLE_KEY: ${supabaseServiceKey ? '✓ Configurada' : '✗ Faltando'}`);
-  console.log(`   NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${webPushVapidPublicKey ? '✓ Configurada' : '✗ Faltando'}`);
+  console.log(`   VITE_VAPID_PUBLIC_KEY: ${process.env.VITE_VAPID_PUBLIC_KEY ? '✓ Configurada' : '✗ Faltando'}`);
+  console.log(`   NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ? '✓ Configurada' : '✗ Faltando'}`);
+  console.log(`   → Usando: ${webPushVapidPublicKey ? '✓' : '✗'}`);
   console.log(`   VAPID_PRIVATE_KEY: ${webPushVapidPrivateKey ? '✓ Configurada' : '✗ Faltando'}`);
   console.log(`   WEB_PUSH_CONTACT: ${webPushContact ? '✓ Configurada' : '✗ Faltando'}`);
 
