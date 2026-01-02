@@ -189,21 +189,25 @@ export const useNutritionAchievements = () => {
     }
   };
 
-  // Contar registros de água do usuário
+  // Contar DIAS ÚNICOS com registros de água do usuário
   const countWaterRegistrations = async () => {
     if (!user) return 0;
     
     try {
-      const { count, error } = await supabase
+      const { data, error } = await supabase
         .from('water_intake_logs')
-        .select('id', { count: 'exact', head: true })
+        .select('date')
         .eq('user_id', user.id);
       
       if (error) throw error;
       
-      return count || 0;
+      // Contar apenas dias únicos (não contar múltiplos registros no mesmo dia)
+      const uniqueDays = new Set((data || []).map(log => log.date));
+      console.log('🧪 [ACHIEVEMENTS] Dias únicos com hidratação:', uniqueDays.size, 'dias:', Array.from(uniqueDays));
+      
+      return uniqueDays.size;
     } catch (err) {
-      console.error('Erro ao contar registros de água:', err);
+      console.error('Erro ao contar dias de hidratação:', err);
       return 0;
     }
   };

@@ -209,6 +209,13 @@ function NutritionContent() {
     await addWaterIntake(amount);
     console.log(`✅ [NUTRITION] ${amount}ml de água registrados. Total hoje: ${todayIntake + amount}ml`);
     toast.success(`${amount}ml de água registrados`);
+    
+    // Verificar conquistas após adicionar água
+    console.log('🏆 [NUTRITION] Verificando conquistas de hidratação...');
+    const newAchievements = await checkAchievements();
+    if (newAchievements && newAchievements.length > 0) {
+      console.log('🎉 [NUTRITION] Novas conquistas desbloqueadas:', newAchievements);
+    }
   };
 
   // Renderizar visão geral
@@ -326,10 +333,20 @@ function NutritionContent() {
                 {safeNutritionPlans.map((plan) => (
                   <div 
                     key={plan.id} 
-                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer"
-                    onClick={() => handleSelectPlan(plan.id!)}
+                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent/50 transition-colors"
                   >
-                    <div className="flex-1 min-w-0">
+                    <div 
+                      className="flex-1 min-w-0 cursor-pointer"
+                      onClick={() => {
+                        console.log('🖱️ [NUTRITION] Clicou no plano:', plan.id, plan.title);
+                        if (plan.id) {
+                          handleSelectPlan(plan.id);
+                        } else {
+                          console.error('⚠️ [NUTRITION] Plano sem ID:', plan);
+                          toast.error('Erro: Plano sem identificador');
+                        }
+                      }}
+                    >
                       <h4 className="font-medium truncate">{plan.title}</h4>
                       <p className="text-sm text-muted-foreground truncate">
                         {Array.isArray(plan.goals) && plan.goals.length > 0 ? plan.goals.join(", ") : 'Sem objetivos'}
@@ -345,12 +362,16 @@ function NutritionContent() {
                         size="icon"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDeletePlan(plan.id!);
+                          e.preventDefault();
+                          console.log('🗑️ [NUTRITION] Clicou em deletar plano:', plan.id);
+                          if (plan.id) {
+                            handleDeletePlan(plan.id);
+                          }
                         }}
                       >
                         <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
                       </Button>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground cursor-pointer" onClick={() => plan.id && handleSelectPlan(plan.id)} />
                     </div>
                   </div>
                 ))}
@@ -703,10 +724,18 @@ function NutritionContent() {
       {isGeneratorOpen && (
         <NutritionPlanGenerator 
           onClose={() => setIsGeneratorOpen(false)} 
-          onPlanCreated={(plan) => {
+          onPlanCreated={async (plan) => {
             setIsGeneratorOpen(false);
-            fetchNutritionPlans();
+            await fetchNutritionPlans();
             toast.success("Plano nutricional criado com sucesso!");
+            
+            // Verificar conquistas após criar plano
+            console.log('🏆 [NUTRITION] Verificando conquistas nutricionais após criar plano...');
+            const newAchievements = await checkAchievements();
+            if (newAchievements && newAchievements.length > 0) {
+              console.log('🎉 [NUTRITION] Novas conquistas desbloqueadas:', newAchievements);
+              toast.success(`🎉 Você desbloqueou ${newAchievements.length} conquista(s)!`);
+            }
             
             // Enviar notificação se permitido
             if (permissionGranted) {
