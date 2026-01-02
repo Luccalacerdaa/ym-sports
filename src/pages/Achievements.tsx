@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useProgress } from '@/hooks/useProgress';
+import { useNutritionAchievements } from '@/hooks/useNutritionAchievements';
 import { 
   Trophy, 
   Star, 
@@ -32,6 +33,12 @@ const Achievements = () => {
     error,
     getLevelProgress 
   } = useProgress();
+  
+  // Hook de conquistas nutricionais
+  const { 
+    achievements: nutritionAchievements,
+    loading: nutritionLoading 
+  } = useNutritionAchievements();
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
@@ -73,18 +80,28 @@ const Achievements = () => {
   const levelProgress = getLevelProgress(progress.total_points, progress.current_level);
   
   // Filtrar conquistas por categoria
-  const filteredAchievements = selectedCategory === 'all' 
+  const filteredAchievements = selectedCategory === 'nutrition' 
+    ? [] // Não mostrar conquistas de treino na aba de nutrição
+    : selectedCategory === 'all' 
     ? achievements 
     : achievements.filter(a => a.category === selectedCategory);
 
+  // Para conquistas nutricionais, usar diretamente do hook
+  const filteredNutritionAchievements = selectedCategory === 'nutrition' 
+    ? nutritionAchievements 
+    : [];
+
   // Conquistas desbloqueadas vs não desbloqueadas
   const unlockedAchievementIds = userAchievements.map(ua => ua.achievement_id);
-  const unlockedAchievements = filteredAchievements.filter(a => 
-    unlockedAchievementIds.includes(a.id)
-  );
-  const lockedAchievements = filteredAchievements.filter(a => 
-    !unlockedAchievementIds.includes(a.id)
-  );
+  
+  // Se for aba de nutrição, usar as conquistas nutricionais
+  const unlockedAchievements = selectedCategory === 'nutrition'
+    ? filteredNutritionAchievements.filter(a => a.achieved)
+    : filteredAchievements.filter(a => unlockedAchievementIds.includes(a.id));
+    
+  const lockedAchievements = selectedCategory === 'nutrition'
+    ? filteredNutritionAchievements.filter(a => !a.achieved)
+    : filteredAchievements.filter(a => !unlockedAchievementIds.includes(a.id));
 
   // Função para obter ícone da raridade
   const getRarityIcon = (rarity: string) => {

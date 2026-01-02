@@ -24,6 +24,7 @@ import Achievements from "./pages/Achievements";
 import Ranking from "./pages/Ranking";
 import NewRanking from "./pages/NewRanking";
 import Nutrition from "./pages/NutritionNew";
+import NutritionPlanView from "./pages/NutritionPlanView";
 import Portfolio from "./pages/Portfolio";
 import PublicPortfolio from "./pages/PublicPortfolio";
 import Design from "./pages/Design";
@@ -74,6 +75,7 @@ const AppContent = () => {
               <Route path="achievements" element={<Achievements />} />
               <Route path="ranking" element={<NewRanking />} />
                 <Route path="nutrition" element={<Nutrition />} />
+                <Route path="nutrition/:planId" element={<NutritionPlanView />} />
                 <Route path="portfolio" element={<Portfolio />} />
                 <Route path="design" element={<Design />} />
                 <Route path="motivational" element={<Motivational />} />

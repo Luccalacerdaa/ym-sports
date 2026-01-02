@@ -76,6 +76,14 @@ export default function Nutrition() {
     console.log(`💧 [NUTRITION-NEW] Adicionando ${amount}ml`);
     await addWaterIntake(amount);
     toast.success(`${amount}ml de água registrados`);
+    
+    // Verificar conquistas após adicionar água
+    console.log('🏆 [NUTRITION-NEW] Verificando conquistas de hidratação...');
+    const newAchievements = await checkAchievements();
+    if (newAchievements && newAchievements.length > 0) {
+      console.log('🎉 [NUTRITION-NEW] Novas conquistas desbloqueadas:', newAchievements);
+      toast.success(`🎉 Você desbloqueou ${newAchievements.length} conquista(s)!`);
+    }
   };
 
   return (
@@ -192,14 +200,20 @@ export default function Nutrition() {
                   return (
                     <div 
                       key={planId} 
-                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer"
-                      onClick={() => {
-                        if (planId) {
-                          navigate(`/dashboard/nutrition?plan=${planId}`);
-                        }
-                      }}
+                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent/50 transition-colors"
                     >
-                      <div className="flex-1 min-w-0">
+                      <div 
+                        className="flex-1 min-w-0 cursor-pointer"
+                        onClick={() => {
+                          console.log('🖱️ [NUTRITION-NEW] Clicou no plano:', planId, planTitle);
+                          if (planId) {
+                            navigate(`/dashboard/nutrition/${planId}`);
+                          } else {
+                            console.error('⚠️ [NUTRITION-NEW] Plano sem ID:', plan);
+                            toast.error('Erro: Plano sem identificador');
+                          }
+                        }}
+                      >
                         <h4 className="font-medium truncate">{planTitle}</h4>
                         <p className="text-sm text-muted-foreground truncate">
                           {planGoals.length > 0 ? planGoals.join(", ") : 'Sem objetivos'}
@@ -215,6 +229,8 @@ export default function Nutrition() {
                           size="icon"
                           onClick={(e) => {
                             e.stopPropagation();
+                            e.preventDefault();
+                            console.log('🗑️ [NUTRITION-NEW] Clicou em deletar plano:', planId);
                             if (planId) {
                               handleDeletePlan(planId);
                             }
@@ -222,7 +238,13 @@ export default function Nutrition() {
                         >
                           <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
                         </Button>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        <ChevronRight 
+                          className="h-4 w-4 text-muted-foreground cursor-pointer" 
+                          onClick={() => {
+                            console.log('➡️ [NUTRITION-NEW] Clicou na seta:', planId);
+                            planId && navigate(`/dashboard/nutrition/${planId}`);
+                          }}
+                        />
                       </div>
                     </div>
                   );
@@ -290,10 +312,18 @@ export default function Nutrition() {
       {isGeneratorOpen && (
         <NutritionPlanGenerator 
           onClose={() => setIsGeneratorOpen(false)} 
-          onPlanCreated={(plan) => {
+          onPlanCreated={async (plan) => {
             setIsGeneratorOpen(false);
-            fetchNutritionPlans();
+            await fetchNutritionPlans();
             toast.success("Plano nutricional criado com sucesso!");
+            
+            // Verificar conquistas após criar plano
+            console.log('🏆 [NUTRITION-NEW] Verificando conquistas nutricionais após criar plano...');
+            const newAchievements = await checkAchievements();
+            if (newAchievements && newAchievements.length > 0) {
+              console.log('🎉 [NUTRITION-NEW] Novas conquistas desbloqueadas:', newAchievements);
+              toast.success(`🎉 Você desbloqueou ${newAchievements.length} conquista(s)!`);
+            }
           }}
         />
       )}
