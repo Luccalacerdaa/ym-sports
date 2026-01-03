@@ -174,28 +174,38 @@ export default function Ranking() {
     }
 
     try {
-      await updateUserLocation(locationForm);
-      setIsLocationDialogOpen(false);
-      toast.success("Localização atualizada com sucesso!");
+      // Chamar com os 3 parâmetros corretos
+      const result = await updateUserLocation(
+        locationForm.state, 
+        locationForm.city_approximate || '', 
+        locationForm.postal_code_prefix || ''
+      );
       
-      // Recalcular rankings com nova localização
-      console.log('🔄 Recalculando rankings após atualização manual...');
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Aguardar 1s
-      await calculateRankings();
-      
-      // Forçar recarga dos rankings
-      await fetchRankings('national');
-      await fetchRankings('regional');
-      await fetchRankings('local');
-      
-      // Buscar nova posição do usuário
-      const newPosition = await getUserPosition();
-      setUserPosition(newPosition);
-      
-      toast.success('✅ Rankings atualizados com sua nova localização!');
-    } catch (error) {
+      if (result?.success) {
+        setIsLocationDialogOpen(false);
+        toast.success("Localização atualizada com sucesso!");
+        
+        // Recalcular rankings com nova localização
+        console.log('🔄 Recalculando rankings após atualização manual...');
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Aguardar 1s
+        await calculateRankings();
+        
+        // Forçar recarga dos rankings
+        await fetchRankings('national');
+        await fetchRankings('regional');
+        await fetchRankings('local');
+        
+        // Buscar nova posição do usuário
+        const newPosition = await getUserPosition();
+        setUserPosition(newPosition);
+        
+        toast.success('✅ Rankings atualizados com sua nova localização!');
+      } else {
+        toast.error(result?.error || 'Erro ao atualizar localização');
+      }
+    } catch (error: any) {
       console.error('❌ Erro ao atualizar localização:', error);
-      toast.error("Erro ao atualizar localização");
+      toast.error(`Erro: ${error.message}`);
     }
   };
 

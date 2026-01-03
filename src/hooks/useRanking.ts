@@ -61,6 +61,19 @@ const STATE_TO_REGION: { [key: string]: string } = {
   'PR': 'Sul', 'RS': 'Sul', 'SC': 'Sul'
 };
 
+// Função para calcular distância entre dois pontos em km (fórmula de Haversine)
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Raio da Terra em km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
 export const useRanking = () => {
   const { user } = useAuth();
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -225,11 +238,21 @@ export const useRanking = () => {
 
   // Atualizar localização do usuário manualmente
   const updateUserLocation = async (state: string, city_approximate: string, postal_code_prefix: string) => {
-    if (!user) return;
+    if (!user) return { success: false, error: 'Usuário não autenticado' };
 
     try {
+      console.log('📍 [UPDATE-LOCATION] Atualizando localização manualmente:', { state, city_approximate, postal_code_prefix });
+      
+      // Validar que state é uma sigla de 2 caracteres
+      if (!state || state.length !== 2) {
+        return { success: false, error: 'Estado deve ser uma sigla de 2 caracteres (ex: SP, RJ, MG)' };
+      }
+      
       // Mapear estado para região
-      const region = STATE_TO_REGION[state] || 'Desconhecido';
+      const region = STATE_TO_REGION[state];
+      if (!region) {
+        return { success: false, error: 'Estado inválido' };
+      }
 
       // Preparar dados para salvar
       const locationData = {
@@ -242,6 +265,8 @@ export const useRanking = () => {
         longitude_approximate: null,
         updated_at: new Date().toISOString()
       };
+
+      console.log('💾 [UPDATE-LOCATION] Salvando dados:', locationData);
 
       // Verificar se já existe localização
       const { data: existingLocation } = await supabase
@@ -257,22 +282,30 @@ export const useRanking = () => {
           .update(locationData)
           .eq('id', existingLocation.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ [UPDATE-LOCATION] Erro ao atualizar:', error);
+          throw error;
+        }
       } else {
         // Inserir nova localização
         const { error } = await supabase
           .from('user_locations')
           .insert(locationData);
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ [UPDATE-LOCATION] Erro ao inserir:', error);
+          throw error;
+        }
       }
+
+      console.log('✅ [UPDATE-LOCATION] Localização salva com sucesso!');
 
       // Atualizar estado local
       await fetchUserLocation();
       
       return { success: true, location: { state, region, city: city_approximate } };
     } catch (err: any) {
-      console.error('Erro ao atualizar localização do usuário:', err);
+      console.error('❌ [UPDATE-LOCATION] Erro ao atualizar localização do usuário:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {
@@ -284,6 +317,82 @@ export const useRanking = () => {
   const fetchRankings = async (type: 'national' | 'regional' | 'local' = 'national') => {
     try {
       setError(null);
+
+      // ESPECIAL: Para ranking local, buscar por GPS (raio de 100km)
+      if (type === 'local' && userLocation?.latitude_approximate && userLocation?.longitude_approximate) {
+        console.log('🌍 Buscando ranking local por GPS (raio de 100km)...');
+        
+        // Buscar todas as localizações com GPS
+        const { data: allLocations, error: locError } = await supabase
+          .from('user_locations')
+          .select('user_id, latitude_approximate, longitude_approximate, city_approximate, state')
+          .not('latitude_approximate', 'is', null)
+          .not('longitude_approximate', 'is', null);
+
+        if (locError) throw locError;
+
+        // Filtrar por distância
+        const nearbyUsers = allLocations
+          ?.filter(loc => {
+            const distance = calculateDistance(
+              userLocation.latitude_approximate!,
+              userLocation.longitude_approximate!,
+              loc.latitude_approximate!,
+              loc.longitude_approximate!
+            );
+            console.log(`📍 Usuário ${loc.user_id}: ${distance.toFixed(2)}km de distância`);
+            return distance <= 100; // 100km
+          })
+          .map(loc => loc.user_id) || [];
+
+        console.log(`👥 Encontrados ${nearbyUsers.length} usuários próximos (raio de 100km)`);
+
+        if (nearbyUsers.length === 0) {
+          console.log('⚠️ Nenhum usuário próximo encontrado, mostrando ranking do estado');
+          // Fallback para ranking por estado
+        } else {
+          // Buscar progresso dos usuários próximos
+          const { data: progressData, error: progError } = await supabase
+            .from('user_progress')
+            .select('user_id, points')
+            .in('user_id', nearbyUsers)
+            .order('points', { ascending: false });
+
+          if (progError) throw progError;
+
+          // Buscar perfis
+          const { data: profilesData, error: profError } = await supabase
+            .from('profiles')
+            .select('id, name, avatar_url')
+            .in('id', nearbyUsers);
+
+          if (profError) console.warn('Erro ao buscar perfis:', profError);
+
+          // Montar ranking local por GPS
+          const localByGPS: RankingEntry[] = (progressData || []).map((p, idx) => {
+            const profile = profilesData?.find(prof => prof.id === p.user_id);
+            const loc = allLocations?.find(l => l.user_id === p.user_id);
+            return {
+              id: `${p.user_id}-local-gps`,
+              user_id: p.user_id,
+              ranking_type: 'local',
+              region: loc?.city_approximate || loc?.state || 'Próximo',
+              position: idx + 1,
+              total_points: p.points || 0,
+              period: 'all_time',
+              profile: profile ? {
+                id: profile.id,
+                name: profile.name,
+                avatar_url: profile.avatar_url
+              } : undefined
+            } as RankingEntry;
+          });
+
+          setLocalRanking(localByGPS);
+          console.log(`✅ Ranking local por GPS configurado: ${localByGPS.length} atletas`);
+          return localByGPS;
+        }
+      }
 
       // Verificar se existem rankings, se não, calcular primeiro
       const { data: existingRankings, error: checkError } = await supabase
