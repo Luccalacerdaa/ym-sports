@@ -436,23 +436,86 @@ export default function Ranking() {
             disabled={loading}
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Atualizar
+            Atualizar Rankings
+          </Button>
+          
+          <Button 
+            variant="outline"
+            onClick={handleGetGPSLocation} 
+            disabled={isGettingLocation}
+          >
+            {isGettingLocation ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                Atualizando...
+              </>
+            ) : (
+              <>
+                <MapPin className="h-4 w-4 mr-2" />
+                {userLocation ? 'Atualizar Localização' : 'Detectar Localização GPS'}
+              </>
+            )}
           </Button>
           
           {!userLocation && (
-            <Button onClick={handleGetGPSLocation} disabled={isGettingLocation}>
-              {isGettingLocation ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Detectando localização...
-                </>
-              ) : (
-                <>
-                  <MapPin className="h-4 w-4 mr-2" />
-                  Detectar Localização GPS
-                </>
-              )}
-            </Button>
+            <Dialog open={isLocationDialogOpen} onOpenChange={setIsLocationDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="ghost" className="gap-2">
+                  <Map className="h-4 w-4" />
+                  Configurar Manual
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Configurar Localização Manualmente</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleUpdateLocation} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="state">Estado*</Label>
+                    <Select
+                      value={locationForm.state}
+                      onValueChange={(value) => setLocationForm({ ...locationForm, state: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione seu estado" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {STATE_OPTIONS.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="city">Cidade (opcional)</Label>
+                    <Input
+                      id="city"
+                      value={locationForm.city_approximate}
+                      onChange={(e) => setLocationForm({ ...locationForm, city_approximate: e.target.value })}
+                      placeholder="Ex: Belo Horizonte"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="postal">CEP Prefixo (opcional)</Label>
+                    <Input
+                      id="postal"
+                      value={locationForm.postal_code_prefix}
+                      onChange={(e) => setLocationForm({ ...locationForm, postal_code_prefix: e.target.value })}
+                      placeholder="Ex: 30000"
+                      maxLength={5}
+                    />
+                  </div>
+                  
+                  <Button type="submit" className="w-full">
+                    Salvar Localização
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
           )}
         </div>
       </div>
