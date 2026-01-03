@@ -198,48 +198,202 @@ export class YouTubeService {
         embedUrl: "https://www.youtube.com/embed/7zt94EyRO9w"
       },
       {
-        id: "dQw4w9WgXcQ",
-        title: "🏃‍♂️ Treino Matinal - Comece o Dia com Energia",
-        description: "Dicas rápidas para um treino matinal eficiente.",
-        thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+        id: "y0gfkHX4JTI",
+        title: "🏃‍♂️ Motivação Esportiva",
+        description: "Conteúdo motivacional para atletas.",
+        thumbnail: "https://img.youtube.com/vi/y0gfkHX4JTI/hqdefault.jpg",
         publishedAt: new Date(Date.now() - 86400000).toISOString(),
         duration: "52s",
         viewCount: "856 visualizações",
-        shortsUrl: "https://youtube.com/shorts/dQw4w9WgXcQ",
-        embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        shortsUrl: "https://youtube.com/shorts/y0gfkHX4JTI",
+        embedUrl: "https://www.youtube.com/embed/y0gfkHX4JTI"
       },
       {
-        id: "jNQXAC9IVRw",
-        title: "🥗 Alimentação Saudável - Dicas Rápidas",
-        description: "Como manter uma alimentação equilibrada no dia a dia.",
-        thumbnail: "https://img.youtube.com/vi/jNQXAC9IVRw/hqdefault.jpg",
+        id: "CB_txzChCrg",
+        title: "⚽ Treino de Elite",
+        description: "Técnicas e motivação para treinos de alto nível.",
+        thumbnail: "https://img.youtube.com/vi/CB_txzChCrg/hqdefault.jpg",
         publishedAt: new Date(Date.now() - 172800000).toISOString(),
         duration: "38s",
         viewCount: "2.1K visualizações",
-        shortsUrl: "https://youtube.com/shorts/jNQXAC9IVRw",
-        embedUrl: "https://www.youtube.com/embed/jNQXAC9IVRw"
+        shortsUrl: "https://youtube.com/shorts/CB_txzChCrg",
+        embedUrl: "https://www.youtube.com/embed/CB_txzChCrg"
       },
       {
-        id: "L_jWHffIx5E",
-        title: "🎯 Foco nos Objetivos - Mentalidade Vencedora",
-        description: "Como manter o foco e a disciplina para alcançar seus objetivos.",
-        thumbnail: "https://img.youtube.com/vi/L_jWHffIx5E/hqdefault.jpg",
+        id: "QB5YBad5xhU",
+        title: "🎯 Foco e Determinação",
+        description: "Como manter o foco nos seus objetivos esportivos.",
+        thumbnail: "https://img.youtube.com/vi/QB5YBad5xhU/hqdefault.jpg",
         publishedAt: new Date(Date.now() - 259200000).toISOString(),
         duration: "41s",
         viewCount: "3.4K visualizações",
-        shortsUrl: "https://youtube.com/shorts/L_jWHffIx5E",
-        embedUrl: "https://www.youtube.com/embed/L_jWHffIx5E"
+        shortsUrl: "https://youtube.com/shorts/QB5YBad5xhU",
+        embedUrl: "https://www.youtube.com/embed/QB5YBad5xhU"
       },
       {
-        id: "kJQP7kiw5Fk",
-        title: "💧 Hidratação - A Importância da Água",
-        description: "Por que beber água é fundamental para seu desempenho.",
-        thumbnail: "https://img.youtube.com/vi/kJQP7kiw5Fk/hqdefault.jpg",
+        id: "tNepTLIcRQk",
+        title: "💯 Superação no Esporte",
+        description: "Histórias de superação e motivação.",
+        thumbnail: "https://img.youtube.com/vi/tNepTLIcRQk/hqdefault.jpg",
         publishedAt: new Date(Date.now() - 345600000).toISOString(),
         duration: "29s",
         viewCount: "1.8K visualizações",
-        shortsUrl: "https://youtube.com/shorts/kJQP7kiw5Fk",
-        embedUrl: "https://www.youtube.com/embed/kJQP7kiw5Fk"
+        shortsUrl: "https://youtube.com/shorts/tNepTLIcRQk",
+        embedUrl: "https://www.youtube.com/embed/tNepTLIcRQk"
+      },
+      {
+        id: "adzILomT374",
+        title: "🔥 Mentalidade Vencedora",
+        description: "Desenvolva a mentalidade de um campeão.",
+        thumbnail: "https://img.youtube.com/vi/adzILomT374/hqdefault.jpg",
+        publishedAt: new Date(Date.now() - 432000000).toISOString(),
+        duration: "35s",
+        viewCount: "2.5K visualizações",
+        shortsUrl: "https://youtube.com/shorts/adzILomT374",
+        embedUrl: "https://www.youtube.com/embed/adzILomT374"
+      },
+      {
+        id: "N9Js1eG81DU",
+        title: "⚡ Energia para Treinar",
+        description: "Dicas para manter energia nos treinos.",
+        thumbnail: "https://img.youtube.com/vi/N9Js1eG81DU/hqdefault.jpg",
+        publishedAt: new Date(Date.now() - 518400000).toISOString(),
+        duration: "44s",
+        viewCount: "1.9K visualizações",
+        shortsUrl: "https://youtube.com/shorts/N9Js1eG81DU",
+        embedUrl: "https://www.youtube.com/embed/N9Js1eG81DU"
+      },
+      {
+        id: "ELeBOArjsmI",
+        title: "🏆 Caminho do Sucesso",
+        description: "O que fazer para alcançar o sucesso no esporte.",
+        thumbnail: "https://img.youtube.com/vi/ELeBOArjsmI/hqdefault.jpg",
+        publishedAt: new Date(Date.now() - 604800000).toISOString(),
+        duration: "50s",
+        viewCount: "3.2K visualizações",
+        shortsUrl: "https://youtube.com/shorts/ELeBOArjsmI",
+        embedUrl: "https://www.youtube.com/embed/ELeBOArjsmI"
+      },
+      {
+        id: "8PfzY2im3gQ",
+        title: "💪 Força e Resistência",
+        description: "Treinos para desenvolvimento físico.",
+        thumbnail: "https://img.youtube.com/vi/8PfzY2im3gQ/hqdefault.jpg",
+        publishedAt: new Date(Date.now() - 691200000).toISOString(),
+        duration: "47s",
+        viewCount: "2.8K visualizações",
+        shortsUrl: "https://youtube.com/shorts/8PfzY2im3gQ",
+        embedUrl: "https://www.youtube.com/embed/8PfzY2im3gQ"
+      },
+      {
+        id: "qAr9dciOapk",
+        title: "🎖️ Disciplina Esportiva",
+        description: "A importância da disciplina no esporte.",
+        thumbnail: "https://img.youtube.com/vi/qAr9dciOapk/hqdefault.jpg",
+        publishedAt: new Date(Date.now() - 777600000).toISOString(),
+        duration: "42s",
+        viewCount: "2.3K visualizações",
+        shortsUrl: "https://youtube.com/shorts/qAr9dciOapk",
+        embedUrl: "https://www.youtube.com/embed/qAr9dciOapk"
+      },
+      {
+        id: "JPkrqQGmTw0",
+        title: "🌟 Brilhe no Campo",
+        description: "Como se destacar durante os jogos.",
+        thumbnail: "https://img.youtube.com/vi/JPkrqQGmTw0/hqdefault.jpg",
+        publishedAt: new Date(Date.now() - 864000000).toISOString(),
+        duration: "39s",
+        viewCount: "1.7K visualizações",
+        shortsUrl: "https://youtube.com/shorts/JPkrqQGmTw0",
+        embedUrl: "https://www.youtube.com/embed/JPkrqQGmTw0"
+      },
+      {
+        id: "fmJM7kyGqEE",
+        title: "🚀 Evolução Constante",
+        description: "Sempre busque evoluir no esporte.",
+        thumbnail: "https://img.youtube.com/vi/fmJM7kyGqEE/hqdefault.jpg",
+        publishedAt: new Date(Date.now() - 950400000).toISOString(),
+        duration: "46s",
+        viewCount: "2.9K visualizações",
+        shortsUrl: "https://youtube.com/shorts/fmJM7kyGqEE",
+        embedUrl: "https://www.youtube.com/embed/fmJM7kyGqEE"
+      },
+      {
+        id: "YPB_bLgUL6c",
+        title: "⭐ Estrelas do Esporte",
+        description: "Inspiração dos grandes atletas.",
+        thumbnail: "https://img.youtube.com/vi/YPB_bLgUL6c/hqdefault.jpg",
+        publishedAt: new Date(Date.now() - 1036800000).toISOString(),
+        duration: "54s",
+        viewCount: "3.5K visualizações",
+        shortsUrl: "https://youtube.com/shorts/YPB_bLgUL6c",
+        embedUrl: "https://www.youtube.com/embed/YPB_bLgUL6c"
+      },
+      {
+        id: "Z7Bot0qYni4",
+        title: "🎮 Táticas Vencedoras",
+        description: "Estratégias para vencer.",
+        thumbnail: "https://img.youtube.com/vi/Z7Bot0qYni4/hqdefault.jpg",
+        publishedAt: new Date(Date.now() - 1123200000).toISOString(),
+        duration: "48s",
+        viewCount: "2.1K visualizações",
+        shortsUrl: "https://youtube.com/shorts/Z7Bot0qYni4",
+        embedUrl: "https://www.youtube.com/embed/Z7Bot0qYni4"
+      },
+      {
+        id: "pQpVISYWUQ4",
+        title: "🏅 Espírito de Equipe",
+        description: "A força do trabalho em equipe.",
+        thumbnail: "https://img.youtube.com/vi/pQpVISYWUQ4/hqdefault.jpg",
+        publishedAt: new Date(Date.now() - 1209600000).toISOString(),
+        duration: "43s",
+        viewCount: "2.6K visualizações",
+        shortsUrl: "https://youtube.com/shorts/pQpVISYWUQ4",
+        embedUrl: "https://www.youtube.com/embed/pQpVISYWUQ4"
+      },
+      {
+        id: "oRbMBRaH7Lo",
+        title: "🔰 Fundamentos do Jogo",
+        description: "Domine os fundamentos básicos.",
+        thumbnail: "https://img.youtube.com/vi/oRbMBRaH7Lo/hqdefault.jpg",
+        publishedAt: new Date(Date.now() - 1296000000).toISOString(),
+        duration: "51s",
+        viewCount: "1.5K visualizações",
+        shortsUrl: "https://youtube.com/shorts/oRbMBRaH7Lo",
+        embedUrl: "https://www.youtube.com/embed/oRbMBRaH7Lo"
+      },
+      {
+        id: "GzH70edQqXU",
+        title: "🎯 Precisão e Técnica",
+        description: "Aprimore sua técnica esportiva.",
+        thumbnail: "https://img.youtube.com/vi/GzH70edQqXU/hqdefault.jpg",
+        publishedAt: new Date(Date.now() - 1382400000).toISOString(),
+        duration: "40s",
+        viewCount: "2.2K visualizações",
+        shortsUrl: "https://youtube.com/shorts/GzH70edQqXU",
+        embedUrl: "https://www.youtube.com/embed/GzH70edQqXU"
+      },
+      {
+        id: "sygtYfrl9Wg",
+        title: "💎 Talento e Dedicação",
+        description: "Talento com trabalho duro.",
+        thumbnail: "https://img.youtube.com/vi/sygtYfrl9Wg/hqdefault.jpg",
+        publishedAt: new Date(Date.now() - 1468800000).toISOString(),
+        duration: "36s",
+        viewCount: "3.1K visualizações",
+        shortsUrl: "https://youtube.com/shorts/sygtYfrl9Wg",
+        embedUrl: "https://www.youtube.com/embed/sygtYfrl9Wg"
+      },
+      {
+        id: "HZeQSNlJas4",
+        title: "🏃 Velocidade e Agilidade",
+        description: "Desenvolva velocidade nos treinos.",
+        thumbnail: "https://img.youtube.com/vi/HZeQSNlJas4/hqdefault.jpg",
+        publishedAt: new Date(Date.now() - 1555200000).toISOString(),
+        duration: "37s",
+        viewCount: "2.4K visualizações",
+        shortsUrl: "https://youtube.com/shorts/HZeQSNlJas4",
+        embedUrl: "https://www.youtube.com/embed/HZeQSNlJas4"
       }
     ];
   }
