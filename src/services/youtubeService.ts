@@ -198,48 +198,48 @@ export class YouTubeService {
         embedUrl: "https://www.youtube.com/embed/7zt94EyRO9w"
       },
       {
-        id: "mock2",
+        id: "dQw4w9WgXcQ",
         title: "🏃‍♂️ Treino Matinal - Comece o Dia com Energia",
         description: "Dicas rápidas para um treino matinal eficiente.",
-        thumbnail: "https://img.youtube.com/vi/mock2/hqdefault.jpg",
+        thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
         publishedAt: new Date(Date.now() - 86400000).toISOString(),
         duration: "52s",
         viewCount: "856 visualizações",
-        shortsUrl: "https://youtube.com/shorts/mock2",
-        embedUrl: "https://www.youtube.com/embed/mock2"
+        shortsUrl: "https://youtube.com/shorts/dQw4w9WgXcQ",
+        embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
       },
       {
-        id: "mock3",
+        id: "jNQXAC9IVRw",
         title: "🥗 Alimentação Saudável - Dicas Rápidas",
         description: "Como manter uma alimentação equilibrada no dia a dia.",
-        thumbnail: "https://img.youtube.com/vi/mock3/hqdefault.jpg",
+        thumbnail: "https://img.youtube.com/vi/jNQXAC9IVRw/hqdefault.jpg",
         publishedAt: new Date(Date.now() - 172800000).toISOString(),
         duration: "38s",
         viewCount: "2.1K visualizações",
-        shortsUrl: "https://youtube.com/shorts/mock3",
-        embedUrl: "https://www.youtube.com/embed/mock3"
+        shortsUrl: "https://youtube.com/shorts/jNQXAC9IVRw",
+        embedUrl: "https://www.youtube.com/embed/jNQXAC9IVRw"
       },
       {
-        id: "mock4",
+        id: "L_jWHffIx5E",
         title: "🎯 Foco nos Objetivos - Mentalidade Vencedora",
         description: "Como manter o foco e a disciplina para alcançar seus objetivos.",
-        thumbnail: "https://img.youtube.com/vi/mock4/hqdefault.jpg",
+        thumbnail: "https://img.youtube.com/vi/L_jWHffIx5E/hqdefault.jpg",
         publishedAt: new Date(Date.now() - 259200000).toISOString(),
         duration: "41s",
         viewCount: "3.4K visualizações",
-        shortsUrl: "https://youtube.com/shorts/mock4",
-        embedUrl: "https://www.youtube.com/embed/mock4"
+        shortsUrl: "https://youtube.com/shorts/L_jWHffIx5E",
+        embedUrl: "https://www.youtube.com/embed/L_jWHffIx5E"
       },
       {
-        id: "mock5",
+        id: "kJQP7kiw5Fk",
         title: "💧 Hidratação - A Importância da Água",
         description: "Por que beber água é fundamental para seu desempenho.",
-        thumbnail: "https://img.youtube.com/vi/mock5/hqdefault.jpg",
+        thumbnail: "https://img.youtube.com/vi/kJQP7kiw5Fk/hqdefault.jpg",
         publishedAt: new Date(Date.now() - 345600000).toISOString(),
         duration: "29s",
         viewCount: "1.8K visualizações",
-        shortsUrl: "https://youtube.com/shorts/mock5",
-        embedUrl: "https://www.youtube.com/embed/mock5"
+        shortsUrl: "https://youtube.com/shorts/kJQP7kiw5Fk",
+        embedUrl: "https://www.youtube.com/embed/kJQP7kiw5Fk"
       }
     ];
   }

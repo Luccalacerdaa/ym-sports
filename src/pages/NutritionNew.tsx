@@ -76,14 +76,6 @@ export default function Nutrition() {
     console.log(`💧 [NUTRITION-NEW] Adicionando ${amount}ml`);
     await addWaterIntake(amount);
     toast.success(`${amount}ml de água registrados`);
-    
-    // Verificar conquistas após adicionar água
-    console.log('🏆 [NUTRITION-NEW] Verificando conquistas de hidratação...');
-    const newAchievements = await checkAchievements();
-    if (newAchievements && newAchievements.length > 0) {
-      console.log('🎉 [NUTRITION-NEW] Novas conquistas desbloqueadas:', newAchievements);
-      toast.success(`🎉 Você desbloqueou ${newAchievements.length} conquista(s)!`);
-    }
   };
 
   return (
@@ -312,18 +304,10 @@ export default function Nutrition() {
       {isGeneratorOpen && (
         <NutritionPlanGenerator 
           onClose={() => setIsGeneratorOpen(false)} 
-          onPlanCreated={async (plan) => {
+          onPlanCreated={(plan) => {
             setIsGeneratorOpen(false);
-            await fetchNutritionPlans();
+            fetchNutritionPlans();
             toast.success("Plano nutricional criado com sucesso!");
-            
-            // Verificar conquistas após criar plano
-            console.log('🏆 [NUTRITION-NEW] Verificando conquistas nutricionais após criar plano...');
-            const newAchievements = await checkAchievements();
-            if (newAchievements && newAchievements.length > 0) {
-              console.log('🎉 [NUTRITION-NEW] Novas conquistas desbloqueadas:', newAchievements);
-              toast.success(`🎉 Você desbloqueou ${newAchievements.length} conquista(s)!`);
-            }
           }}
         />
       )}
