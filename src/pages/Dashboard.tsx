@@ -2,13 +2,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Trophy, Dumbbell, Bell, ArrowRight, Medal, Flame, User, Clock, MapPin, Users, Gamepad2, Target } from "lucide-react";
+import { Calendar, Trophy, Dumbbell, ArrowRight, Medal, Flame, User, Clock, MapPin, Users, Gamepad2, Target } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useEvents } from "@/hooks/useEvents";
 import { useTrainings } from "@/hooks/useTrainings";
 import { useProgress } from "@/hooks/useProgress";
+import { useRanking } from "@/hooks/useRanking";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -16,7 +18,10 @@ export default function Dashboard() {
   const { getUpcomingEvents } = useEvents();
   const { getTodaysTraining } = useTrainings();
   const { progress, getLevelProgress } = useProgress();
+  const { getUserPosition, userLocation } = useRanking();
   const navigate = useNavigate();
+  
+  const [userPosition, setUserPosition] = useState<any>(null);
 
   // Obter próximos eventos e treino de hoje
   const upcomingEvents = getUpcomingEvents(3);
@@ -25,12 +30,27 @@ export default function Dashboard() {
   // Calcular progresso do nível
   const levelProgress = progress ? getLevelProgress(progress.total_points, progress.current_level) : { progress: 0, pointsToNext: 100 };
 
+  // Buscar posição do usuário no ranking
+  useEffect(() => {
+    const fetchPosition = async () => {
+      try {
+        const position = await getUserPosition();
+        console.log('📊 [DASHBOARD] Posição do usuário:', position);
+        setUserPosition(position);
+      } catch (error) {
+        console.error('❌ [DASHBOARD] Erro ao buscar posição:', error);
+      }
+    };
+    
+    fetchPosition();
+  }, [progress]);
+
   // Dados reais do usuário
   const displayName = profile?.name || 'Usuário';
   const userAge = profile?.age || 'Não informado';
   const userHeight = profile?.height ? `${profile.height}cm` : 'Não informado';
   const userWeight = profile?.weight ? `${profile.weight}kg` : 'Não informado';
-  const userPosition = profile?.position || 'Não informado';
+  const userPosition2 = profile?.position || 'Não informado';
 
   // Se ainda está carregando o perfil
   if (profileLoading) {
@@ -249,19 +269,54 @@ export default function Dashboard() {
                 <Trophy className="h-5 w-5 text-primary" />
                 Ranking
               </CardTitle>
-              <CardDescription>Sistema de pontuação</CardDescription>
+              <CardDescription>
+                {userLocation?.state ? `${userLocation.state} - ${userLocation.region}` : 'Sistema de pontuação'}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-center">
                 <Trophy className="h-16 w-16 text-muted-foreground" />
               </div>
               <div className="text-center space-y-2">
+                {/* Posição Regional */}
+                {userPosition?.regional && (
+                  <div>
+                    <div className="text-2xl font-bold text-primary">
+                      #{userPosition.regional.position}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Posição Regional ({userLocation?.region})
+                    </div>
+                  </div>
+                )}
+                
+                {/* Posição Nacional */}
+                {userPosition?.national && (
+                  <div>
+                    <div className="text-xl font-bold text-muted-foreground">
+                      #{userPosition.national.position}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Posição Nacional
+                    </div>
+                  </div>
+                )}
+                
+                {/* Se não tiver posição */}
+                {!userPosition && (
+                  <div>
+                    <div className="text-2xl font-bold text-primary">--</div>
+                    <div className="text-sm text-muted-foreground">
+                      {userLocation?.state ? 'Calculando posição...' : 'Configure sua localização'}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Pontos */}
                 <div>
-                  <div className="text-2xl font-bold text-primary">--</div>
-                  <div className="text-sm text-muted-foreground">Posição Atual</div>
-                </div>
-                <div>
-                  <div className="text-xl font-bold text-muted-foreground">0</div>
+                  <div className="text-xl font-bold text-muted-foreground">
+                    {progress?.total_points || 0}
+                  </div>
                   <div className="text-xs text-muted-foreground">Pontos Acumulados</div>
                 </div>
               </div>
@@ -350,25 +405,6 @@ export default function Dashboard() {
                 {todaysTraining ? 'Ver todos os treinos' : 'Criar treinos'}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-            </CardContent>
-          </Card>
-
-          {/* Card Notificações */}
-          <Card className="hover-scale transition-all hover:shadow-lg animate-fade-in md:col-span-2" style={{ animationDelay: "0.5s" }}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-primary" />
-                Notificações
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Nenhuma notificação</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  As notificações aparecerão aqui quando houver novidades
-                </p>
-              </div>
             </CardContent>
           </Card>
         </div>
