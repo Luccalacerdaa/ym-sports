@@ -85,6 +85,10 @@ export const useRanking = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRequestingLocation, setIsRequestingLocation] = useState(false);
+  
+  // Controle de cache para evitar recargas múltiplas
+  const [isFetchingRankings, setIsFetchingRankings] = useState(false);
+  const [lastFetchTime, setLastFetchTime] = useState<{ [key: string]: number }>({});
 
   // Buscar localização do usuário
   const fetchUserLocation = async () => {
@@ -316,6 +320,23 @@ export const useRanking = () => {
   // Buscar rankings - CORRIGIDO para evitar erro 400
   const fetchRankings = async (type: 'national' | 'regional' | 'local' = 'national') => {
     try {
+      // Evitar múltiplas chamadas simultâneas para o mesmo tipo
+      const now = Date.now();
+      const lastFetch = lastFetchTime[type] || 0;
+      const CACHE_DURATION = 3000; // 3 segundos de cache
+      
+      if (now - lastFetch < CACHE_DURATION) {
+        console.log(`⏭️ Usando cache para ranking ${type} (${Math.round((CACHE_DURATION - (now - lastFetch)) / 1000)}s restantes)`);
+        return type === 'national' ? nationalRanking : type === 'regional' ? regionalRanking : localRanking;
+      }
+      
+      if (isFetchingRankings) {
+        console.log(`⏳ Já está buscando rankings, aguardando...`);
+        return [];
+      }
+      
+      setIsFetchingRankings(true);
+      setLastFetchTime(prev => ({ ...prev, [type]: now }));
       setError(null);
 
       // ESPECIAL: Para ranking local, buscar por GPS (raio de 100km)
@@ -354,11 +375,14 @@ export const useRanking = () => {
           // Buscar progresso dos usuários próximos
           const { data: progressData, error: progError } = await supabase
             .from('user_progress')
-            .select('user_id, points')
+            .select('user_id, total_points')
             .in('user_id', nearbyUsers)
-            .order('points', { ascending: false });
+            .order('total_points', { ascending: false });
 
-          if (progError) throw progError;
+          if (progError) {
+            console.error('❌ Erro ao buscar progresso para ranking local GPS:', progError);
+            throw progError;
+          }
 
           // Buscar perfis
           const { data: profilesData, error: profError } = await supabase
@@ -378,7 +402,7 @@ export const useRanking = () => {
               ranking_type: 'local',
               region: loc?.city_approximate || loc?.state || 'Próximo',
               position: idx + 1,
-              total_points: p.points || 0,
+              total_points: p.total_points || 0,
               period: 'all_time',
               profile: profile ? {
                 id: profile.id,
@@ -654,6 +678,8 @@ export const useRanking = () => {
       console.error(`Erro ao buscar ranking ${type}:`, err);
       setError(err.message);
       return [];
+    } finally {
+      setIsFetchingRankings(false);
     }
   };
 

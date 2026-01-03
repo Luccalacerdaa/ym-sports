@@ -259,11 +259,82 @@ export default function Ranking() {
       return (
         <div className="text-center py-8">
           <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mb-4">
             {type === 'national' ? 'Nenhum ranking nacional disponível' :
              type === 'regional' ? 'Configure sua localização para ver o ranking regional' :
              'Configure sua localização para ver o ranking local'}
           </p>
+          {(type === 'regional' || type === 'local') && !userLocation && (
+            <div className="flex flex-col items-center gap-3 mt-4">
+              <Button 
+                onClick={handleGetGPSLocation} 
+                disabled={isGettingLocation}
+                className="gap-2"
+              >
+                <MapPin className="h-4 w-4" />
+                {isGettingLocation ? 'Obtendo localização...' : 'Usar Minha Localização GPS'}
+              </Button>
+              <span className="text-sm text-muted-foreground">ou</span>
+              <Dialog open={isLocationDialogOpen} onOpenChange={setIsLocationDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <Map className="h-4 w-4" />
+                    Configurar Manualmente
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Configurar Localização</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleUpdateLocation} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="state">Estado*</Label>
+                      <Select
+                        value={locationForm.state}
+                        onValueChange={(value) => setLocationForm({ ...locationForm, state: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione seu estado" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {STATE_OPTIONS.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="city">Cidade (opcional)</Label>
+                      <Input
+                        id="city"
+                        value={locationForm.city_approximate}
+                        onChange={(e) => setLocationForm({ ...locationForm, city_approximate: e.target.value })}
+                        placeholder="Ex: Belo Horizonte"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="postal">CEP Prefixo (opcional)</Label>
+                      <Input
+                        id="postal"
+                        value={locationForm.postal_code_prefix}
+                        onChange={(e) => setLocationForm({ ...locationForm, postal_code_prefix: e.target.value })}
+                        placeholder="Ex: 30000"
+                        maxLength={5}
+                      />
+                    </div>
+                    
+                    <Button type="submit" className="w-full">
+                      Salvar Localização
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
         </div>
       );
     }
