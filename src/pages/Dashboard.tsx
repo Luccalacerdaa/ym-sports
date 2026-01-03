@@ -96,7 +96,7 @@ export default function Dashboard() {
                 </Avatar>
                 <div>
                   <div className="font-bold">{displayName}</div>
-                  <div className="text-sm text-muted-foreground">{userPosition}</div>
+                  <div className="text-sm text-muted-foreground">{userPosition2}</div>
                 </div>
               </CardTitle>
             </CardHeader>
