@@ -58,23 +58,87 @@ export const useProgress = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Função para calcular pontos necessários para o próximo nível
-  const getPointsForNextLevel = (currentLevel: number): number => {
-    return currentLevel * 100; // 100 pontos por nível
+  const getPointsForNextLevel = async (currentLevel: number): Promise<number> => {
+    try {
+      const { data, error } = await supabase
+        .from('level_thresholds')
+        .select('points_required')
+        .eq('level', currentLevel + 1)
+        .single();
+      
+      if (error) throw error;
+      return data?.points_required || (currentLevel * 100);
+    } catch (err) {
+      // Fallback para fórmula antiga se tabela não existir
+      return currentLevel * 100;
+    }
+  };
+
+  // Função para calcular nível baseado em pontos
+  const getLevelFromPoints = async (totalPoints: number): Promise<number> => {
+    try {
+      const { data, error } = await supabase
+        .from('level_thresholds')
+        .select('level')
+        .lte('points_required', totalPoints)
+        .order('level', { ascending: false })
+        .limit(1)
+        .single();
+      
+      if (error) throw error;
+      return data?.level || 1;
+    } catch (err) {
+      // Fallback para fórmula antiga se tabela não existir
+      return Math.floor(totalPoints / 100) + 1;
+    }
   };
 
   // Função para calcular progresso até o próximo nível
-  const getLevelProgress = (currentPoints: number, currentLevel: number): { progress: number; pointsToNext: number } => {
-    const currentLevelPoints = (currentLevel - 1) * 100;
-    const nextLevelPoints = currentLevel * 100;
-    const pointsInCurrentLevel = currentPoints - currentLevelPoints;
-    const pointsToNext = nextLevelPoints - currentPoints;
-    const progress = (pointsInCurrentLevel / 100) * 100;
-    
-    // Garantir que pointsToNext nunca seja negativo
-    return { 
-      progress: Math.min(progress, 100), 
-      pointsToNext: Math.max(pointsToNext, 0) 
-    };
+  const getLevelProgress = async (currentPoints: number, currentLevel: number): Promise<{ progress: number; pointsToNext: number }> => {
+    try {
+      // Buscar pontos necessários para o nível atual e próximo
+      const { data: levels, error } = await supabase
+        .from('level_thresholds')
+        .select('level, points_required')
+        .in('level', [currentLevel, currentLevel + 1])
+        .order('level');
+      
+      if (error) throw error;
+      
+      if (!levels || levels.length < 2) {
+        // Fallback
+        const currentLevelPoints = (currentLevel - 1) * 100;
+        const nextLevelPoints = currentLevel * 100;
+        const pointsInCurrentLevel = currentPoints - currentLevelPoints;
+        const pointsToNext = nextLevelPoints - currentPoints;
+        return { 
+          progress: Math.min((pointsInCurrentLevel / 100) * 100, 100), 
+          pointsToNext: Math.max(pointsToNext, 0) 
+        };
+      }
+      
+      const currentLevelPoints = levels[0].points_required;
+      const nextLevelPoints = levels[1].points_required;
+      const pointsInCurrentLevel = currentPoints - currentLevelPoints;
+      const pointsNeeded = nextLevelPoints - currentLevelPoints;
+      const pointsToNext = nextLevelPoints - currentPoints;
+      const progress = (pointsInCurrentLevel / pointsNeeded) * 100;
+      
+      return { 
+        progress: Math.min(Math.max(progress, 0), 100), 
+        pointsToNext: Math.max(pointsToNext, 0) 
+      };
+    } catch (err) {
+      // Fallback para fórmula antiga
+      const currentLevelPoints = (currentLevel - 1) * 100;
+      const nextLevelPoints = currentLevel * 100;
+      const pointsInCurrentLevel = currentPoints - currentLevelPoints;
+      const pointsToNext = nextLevelPoints - currentPoints;
+      return { 
+        progress: Math.min((pointsInCurrentLevel / 100) * 100, 100), 
+        pointsToNext: Math.max(pointsToNext, 0) 
+      };
+    }
   };
 
   // Buscar progresso do usuário
