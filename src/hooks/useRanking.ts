@@ -350,133 +350,6 @@ export const useRanking = () => {
       setLastFetchTime(prev => ({ ...prev, [type]: now }));
       setError(null);
 
-      // ESPECIAL: Para ranking local, buscar por GPS (raio de 100km)
-      if (type === 'local' && userLocation?.latitude_approximate && userLocation?.longitude_approximate) {
-        console.log('🌍 Buscando ranking local por GPS (raio de 100km)...');
-        
-        // Buscar todas as localizações com GPS
-        const { data: allLocations, error: locError } = await supabase
-          .from('user_locations')
-          .select('user_id, latitude_approximate, longitude_approximate, city_approximate, state')
-          .not('latitude_approximate', 'is', null)
-          .not('longitude_approximate', 'is', null);
-
-        if (locError) throw locError;
-
-        // Filtrar por distância
-        const nearbyUsers = allLocations
-          ?.filter(loc => {
-            const distance = calculateDistance(
-              userLocation.latitude_approximate!,
-              userLocation.longitude_approximate!,
-              loc.latitude_approximate!,
-              loc.longitude_approximate!
-            );
-            console.log(`📍 Usuário ${loc.user_id}: ${distance.toFixed(2)}km de distância`);
-            return distance <= 100; // 100km
-          })
-          .map(loc => loc.user_id) || [];
-
-        console.log(`👥 Encontrados ${nearbyUsers.length} usuários próximos (raio de 100km)`);
-
-        // Se tem poucos usuários próximos (menos de 3), complementar com usuários do mesmo estado
-        let usersToShow = nearbyUsers;
-        let isUsingMixedRanking = false;
-        
-        if (nearbyUsers.length < 3) {
-          console.log(`⚠️ Poucos usuários com GPS próximo (${nearbyUsers.length}), complementando com usuários do estado ${userLocation.state}`);
-          
-          // Buscar usuários do mesmo estado que não estão na lista de próximos
-          const { data: stateLocations, error: stateError } = await supabase
-            .from('user_locations')
-            .select('user_id')
-            .eq('state', userLocation.state);
-          
-          if (!stateError && stateLocations) {
-            const stateUserIds = stateLocations
-              .map(loc => loc.user_id)
-              .filter(uid => !nearbyUsers.includes(uid)); // Excluir os que já estão na lista GPS
-            
-            usersToShow = [...nearbyUsers, ...stateUserIds];
-            isUsingMixedRanking = true;
-            console.log(`📍 Adicionados ${stateUserIds.length} usuários do estado. Total: ${usersToShow.length}`);
-          }
-        }
-
-        if (usersToShow.length === 0) {
-          console.log('⚠️ Nenhum usuário próximo encontrado, mostrando ranking do estado');
-          // Fallback para ranking por estado (código existente)
-        } else {
-          // Buscar progresso dos usuários próximos (ou do estado)
-          const { data: progressData, error: progError } = await supabase
-            .from('user_progress')
-            .select('user_id, total_points')
-            .in('user_id', usersToShow)
-            .order('total_points', { ascending: false });
-
-          if (progError) {
-            console.error('❌ Erro ao buscar progresso para ranking local GPS:', progError);
-            throw progError;
-          }
-          
-          console.log(`📊 Progresso encontrado para ${progressData?.length || 0} usuários`);
-
-          // Buscar perfis
-          const { data: profilesData, error: profError } = await supabase
-            .from('profiles')
-            .select('id, name, avatar_url')
-            .in('id', usersToShow);
-
-          if (profError) console.warn('Erro ao buscar perfis:', profError);
-          
-          console.log(`👤 Perfis encontrados: ${profilesData?.length || 0}`);
-          if (profilesData) {
-            console.log('Perfis:', profilesData.map(p => ({ id: p.id, name: p.name })));
-          }
-
-          // Montar ranking local por GPS (ou misto GPS + Estado)
-          const localByGPS: RankingEntry[] = (progressData || []).map((p, idx) => {
-            const profile = profilesData?.find(prof => prof.id === p.user_id);
-            const loc = allLocations?.find(l => l.user_id === p.user_id);
-            const isGpsUser = nearbyUsers.includes(p.user_id);
-            
-            console.log(`🔧 Montando entrada ${idx + 1}:`, {
-              user_id: p.user_id,
-              profile_name: profile?.name,
-              points: p.total_points,
-              location: loc?.city_approximate || loc?.state,
-              has_gps: isGpsUser
-            });
-            
-            return {
-              id: `${p.user_id}-local-${isGpsUser ? 'gps' : 'state'}`,
-              user_id: p.user_id,
-              ranking_type: 'local',
-              region: loc?.city_approximate || loc?.state || userLocation.state,
-              position: idx + 1,
-              total_points: p.total_points || 0,
-              period: 'all_time',
-              calculated_at: new Date().toISOString(),
-              user_name: profile?.name || `Jogador #${idx + 1}`,
-              user_avatar: profile?.avatar_url || undefined,
-              user_location: loc?.city_approximate || loc?.state || userLocation.state
-            } as RankingEntry;
-          });
-
-          setLocalRanking(localByGPS);
-          const rankinTypeMsg = isUsingMixedRanking ? 
-            `GPS (${nearbyUsers.length}) + Estado (${usersToShow.length - nearbyUsers.length})` : 
-            'GPS';
-          console.log(`✅ Ranking local por ${rankinTypeMsg} configurado: ${localByGPS.length} atletas`);
-          console.log('Ranking completo:', localByGPS.map(r => ({ 
-            pos: r.position, 
-            name: r.user_name, 
-            points: r.total_points 
-          })));
-          return localByGPS;
-        }
-      }
-
       // Verificar se existem rankings, se não, calcular primeiro
       const { data: existingRankings, error: checkError } = await supabase
         .from('rankings')
@@ -653,35 +526,19 @@ export const useRanking = () => {
       }
       
       // Combinar dados de rankings com perfis e progresso
-      // Primeiro, remover duplicatas (mesmo usuário aparecendo mais de uma vez)
-      const uniqueUserIds = new Set();
+      // Primeiro, remover duplicatas (mesmo usuário + mesmo tipo aparecendo mais de uma vez)
+      const uniqueKey = new Set();
       const uniqueRankings = data.filter(entry => {
-        if (uniqueUserIds.has(entry.user_id)) {
-          console.log(`⚠️ Usuário duplicado encontrado: ${entry.user_id} - Posição: ${entry.position} - Tipo: ${entry.ranking_type}`);
+        const key = `${entry.user_id}-${entry.ranking_type}`;
+        if (uniqueKey.has(key)) {
+          console.log(`⚠️ Ranking duplicado encontrado: ${entry.user_id} - Tipo: ${entry.ranking_type} - Posição: ${entry.position}`);
           return false; // Filtrar duplicatas
         }
-        uniqueUserIds.add(entry.user_id);
+        uniqueKey.add(key);
         return true;
       });
       
       console.log(`Rankings únicos após remoção de duplicatas: ${uniqueRankings.length}`);
-      
-      // Reordenar rankings por pontos e recalcular posições
-      uniqueRankings.sort((a, b) => {
-        // Ordenar por pontos (decrescente)
-        if (b.total_points !== a.total_points) {
-          return b.total_points - a.total_points;
-        }
-        // Se pontos iguais, desempatar por ID
-        return a.user_id.localeCompare(b.user_id);
-      });
-      
-      // Atualizar posições com base na nova ordenação
-      uniqueRankings.forEach((ranking, index) => {
-        ranking.position = index + 1;
-      });
-      
-      console.log(`Rankings reordenados e posições recalculadas: ${uniqueRankings.length}`);
       
       // Agora mapear os rankings únicos para adicionar informações de usuário
       const rankingsWithUserInfo = uniqueRankings.map(entry => {
