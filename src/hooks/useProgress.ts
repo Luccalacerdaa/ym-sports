@@ -268,17 +268,16 @@ export const useProgress = () => {
       const today = new Date().toISOString().split('T')[0];
       
       // Verificar se já completou QUALQUER treino hoje (não apenas este treino específico)
-      const { data: existingActivity, error: checkError} = await supabase
+      const { data: existingActivities, error: checkError } = await supabase
         .from('user_activities')
-        .select('id, activity_data')
+        .select('id')
         .eq('user_id', user.id)
         .eq('activity_type', 'workout_completed')
-        .gte('created_at', `${today}T00:00:00`)
-        .maybeSingle();
+        .gte('created_at', `${today}T00:00:00`);
 
       if (checkError) throw checkError;
 
-      if (existingActivity) {
+      if (existingActivities && existingActivities.length > 0) {
         throw new Error('Você já completou um treino hoje! Volte amanhã para ganhar mais pontos. 🔥');
       }
 
