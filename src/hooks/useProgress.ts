@@ -341,7 +341,7 @@ export const useProgress = () => {
     } catch (err: any) {
       console.error('Erro ao registrar treino:', err);
       setError(err.message);
-      return null;
+      throw err; // ← Lançar erro para ser capturado no componente
     }
   };
 
