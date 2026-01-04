@@ -15,6 +15,7 @@ interface PlayerStatsProps {
   region?: string;
   state?: string;
   className?: string;
+  levelProgress?: number; // Percentual de progresso para o próximo nível (0-100)
 }
 
 export const PlayerStats = ({
@@ -27,17 +28,15 @@ export const PlayerStats = ({
   local,
   region = 'Sudeste',
   state = 'MG',
-  className
+  className,
+  levelProgress
 }: PlayerStatsProps) => {
   const [imageError, setImageError] = useState(false);
   
-  // Calcular progresso REAL para o próximo nível
-  // Fórmula: pontos necessários para próximo nível = nivel_atual * 100
-  const pointsForCurrentLevel = (level - 1) * 100;
-  const pointsForNextLevel = level * 100;
-  const pointsInCurrentLevel = totalPoints - pointsForCurrentLevel;
-  const pointsNeededForNextLevel = pointsForNextLevel - pointsForCurrentLevel;
-  const nextLevelProgress = Math.min(100, Math.max(0, Math.floor((pointsInCurrentLevel / pointsNeededForNextLevel) * 100)));
+  // Usar o progresso passado como prop, ou fallback para cálculo local (para compatibilidade)
+  const nextLevelProgress = levelProgress !== undefined 
+    ? Math.min(100, Math.max(0, Math.floor(levelProgress)))
+    : 0; // Se não foi passado, mostrar 0% (será atualizado quando o componente pai enviar)
   
   // Obter medalha baseada na posição
   const getMedalIcon = (position?: number) => {

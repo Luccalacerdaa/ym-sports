@@ -97,7 +97,10 @@ export default function NewRanking() {
   const [userPosition, setUserPosition] = useState<any>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [levelProgress, setLevelProgress] = useState<number>(0);
   const isInitializingRef = useRef(false);
+  
+  const { getLevelProgress } = useProgress();
 
   // Buscar posição do usuário
   useEffect(() => {
@@ -114,6 +117,22 @@ export default function NewRanking() {
       fetchUserPosition();
     }
   }, [loading, selectedTab]);
+
+  // Calcular progresso de nível sempre que a posição mudar
+  useEffect(() => {
+    const calculateProgress = async () => {
+      if (userPosition?.total_points && userPosition?.current_level) {
+        try {
+          const { progress } = await getLevelProgress(userPosition.total_points, userPosition.current_level);
+          setLevelProgress(progress);
+        } catch (error) {
+          console.error('Erro ao calcular progresso de nível:', error);
+          setLevelProgress(0);
+        }
+      }
+    };
+    calculateProgress();
+  }, [userPosition]);
 
   // Forçar recálculo de rankings ao carregar (apenas uma vez)
   useEffect(() => {
@@ -383,6 +402,7 @@ export default function NewRanking() {
         local={userPosition?.local}
         region={userLocation?.region}
         state={userLocation?.state}
+        levelProgress={levelProgress}
       />
       
       {/* Tabs de Ranking */}
