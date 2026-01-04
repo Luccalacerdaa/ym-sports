@@ -154,7 +154,14 @@ export const useRanking = () => {
 
   // Atualizar localização do usuário a partir do GPS
   const updateUserLocationFromGPS = async () => {
-    if (!user || isRequestingLocation) return { success: false, error: 'Usuário não autenticado ou já solicitando localização' };
+    if (!user) {
+      return { success: false, error: 'Usuário não autenticado' };
+    }
+    
+    if (isRequestingLocation) {
+      console.log('⚠️ [GPS] Já existe uma solicitação de localização em andamento');
+      return { success: false, error: 'Já solicitando localização' };
+    }
 
     setIsRequestingLocation(true);
     try {
@@ -237,6 +244,8 @@ export const useRanking = () => {
       
       setError(errorMessage);
       return { success: false, error: errorMessage };
+    } finally {
+      setIsRequestingLocation(false);
     }
   };
 
@@ -318,14 +327,15 @@ export const useRanking = () => {
   };
 
   // Buscar rankings - CORRIGIDO para evitar erro 400
-  const fetchRankings = async (type: 'national' | 'regional' | 'local' = 'national') => {
+  const fetchRankings = async (type: 'national' | 'regional' | 'local' = 'national', forceRefresh: boolean = false) => {
     try {
       // Evitar múltiplas chamadas simultâneas para o mesmo tipo
       const now = Date.now();
       const lastFetch = lastFetchTime[type] || 0;
       const CACHE_DURATION = 3000; // 3 segundos de cache
       
-      if (now - lastFetch < CACHE_DURATION) {
+      // Se forceRefresh = true, pula o cache
+      if (!forceRefresh && now - lastFetch < CACHE_DURATION) {
         console.log(`⏭️ Usando cache para ranking ${type} (${Math.round((CACHE_DURATION - (now - lastFetch)) / 1000)}s restantes)`);
         return type === 'national' ? nationalRanking : type === 'regional' ? regionalRanking : localRanking;
       }

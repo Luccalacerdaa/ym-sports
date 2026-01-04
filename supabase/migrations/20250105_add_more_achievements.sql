@@ -4,6 +4,16 @@
 -- Total: 24 conquistas atuais → 60+ conquistas após este script
 -- Sistema de pontos balanceado para motivar usuários
 
+-- Adicionar constraint UNIQUE na coluna name (se não existir)
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'achievements_name_key'
+  ) THEN
+    ALTER TABLE achievements ADD CONSTRAINT achievements_name_key UNIQUE (name);
+  END IF;
+END $$;
+
 -- =============================================
 -- 1. CONQUISTAS DE TREINOS (Workout)
 -- =============================================

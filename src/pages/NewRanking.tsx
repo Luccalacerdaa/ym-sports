@@ -227,12 +227,12 @@ export default function NewRanking() {
         // Aguardar 1 segundo para o banco sincronizar
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Recalcular rankings
+        // Recalcular rankings (forçando atualização, sem cache)
         console.log('🔄 [GPS] Recalculando rankings...');
         await calculateRankings();
-        await fetchRankings('national');
-        await fetchRankings('regional');
-        await fetchRankings('local');
+        await fetchRankings('national', true); // forceRefresh = true
+        await fetchRankings('regional', true); // forceRefresh = true
+        await fetchRankings('local', true); // forceRefresh = true
         
         const position = await getUserPosition();
         setUserPosition(position);
