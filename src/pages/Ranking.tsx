@@ -132,9 +132,12 @@ export default function Ranking() {
   }, [loading, userLocation]);
 
   const handleGetGPSLocation = async () => {
+    console.log('🌍 [GPS] handleGetGPSLocation chamado!');
     setIsGettingLocation(true);
     try {
+      console.log('📍 [GPS] Chamando updateUserLocationFromGPS...');
       const result = await updateUserLocationFromGPS();
+      console.log('✅ [GPS] Resultado:', result);
       
       if (result?.success) {
         toast.success(`📍 Localização atualizada: ${result.location.state} - ${result.location.region}`);
@@ -159,6 +162,7 @@ export default function Ranking() {
         toast.error(result?.error || 'Erro ao obter localização');
       }
     } catch (error: any) {
+      console.error('❌ [GPS] Erro ao obter localização:', error);
       toast.error(`Erro: ${error.message}`);
     } finally {
       setIsGettingLocation(false);
