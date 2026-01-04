@@ -89,6 +89,7 @@ export const useRanking = () => {
   // Controle de cache para evitar recargas múltiplas
   const [isFetchingRankings, setIsFetchingRankings] = useState(false);
   const [lastFetchTime, setLastFetchTime] = useState<{ [key: string]: number }>({});
+  const [lastAchievementCheck, setLastAchievementCheck] = useState<number>(0);
 
   // Buscar localização do usuário
   const fetchUserLocation = async () => {
@@ -748,6 +749,19 @@ export const useRanking = () => {
     try {
       setError(null);
 
+      console.log('🗑️ LIMPANDO rankings antigos...');
+      // DELETAR TODOS os rankings antigos antes de recalcular
+      const { error: deleteError } = await supabase
+        .from('rankings')
+        .delete()
+        .eq('period', 'all_time');
+      
+      if (deleteError) {
+        console.error('❌ Erro ao deletar rankings antigos:', deleteError);
+      } else {
+        console.log('✅ Rankings antigos deletados com sucesso');
+      }
+
       // Buscar todos os usuários com progresso
       console.log('🔍 Buscando user_progress...');
       const { data: progressData, error: progressError } = await supabase
@@ -865,7 +879,8 @@ export const useRanking = () => {
           position: index + 1,
           total_points: progress.total_points,
           period: 'all_time',
-          calculated_at: now
+          calculated_at: now,
+          region: null // Nacional não tem região
         };
       });
       rankingsToInsert.push(...nationalRankings);
@@ -992,8 +1007,8 @@ export const useRanking = () => {
       
       console.log('✅ Rankings calculados e atualizados com sucesso!');
       
-      // Verificar conquistas regionais
-      await checkRegionalAchievements();
+      // Verificar conquistas regionais (SEM notificações para evitar spam)
+      await checkRegionalAchievements(false);
       
       // Recarregar rankings
       if (userLocation) {
@@ -1046,8 +1061,16 @@ export const useRanking = () => {
   };
 
   // Verificar conquistas regionais
-  const checkRegionalAchievements = async () => {
+  const checkRegionalAchievements = async (showNotifications: boolean = true) => {
     if (!user || !userLocation) return;
+
+    // Cache de 30 segundos para evitar verificações múltiplas
+    const now = Date.now();
+    if (now - lastAchievementCheck < 30000) {
+      console.log('⏭️ Pulando verificação de conquistas regionais (cache ativo)');
+      return;
+    }
+    setLastAchievementCheck(now);
 
     try {
       // Buscar conquistas disponíveis para a região do usuário
@@ -1134,8 +1157,10 @@ export const useRanking = () => {
             continue;
           }
 
-          // Notificar usuário
-          toast.success(`🏆 Nova conquista regional desbloqueada: ${achievement.name}`);
+          // Notificar usuário apenas se showNotifications = true
+          if (showNotifications) {
+            toast.success(`🏆 Nova conquista regional: ${achievement.name}`);
+          }
 
           // Adicionar pontos ao usuário
           if (achievement.points_reward > 0) {
@@ -1147,8 +1172,8 @@ export const useRanking = () => {
               })
               .eq('user_id', user.id);
 
-            if (!updateError) {
-              toast.success(`+${achievement.points_reward} pontos adicionados!`);
+            if (!updateError && showNotifications) {
+              toast.success(`+${achievement.points_reward} pontos!`);
             }
           }
         }

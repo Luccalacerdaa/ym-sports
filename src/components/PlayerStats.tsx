@@ -31,8 +31,13 @@ export const PlayerStats = ({
 }: PlayerStatsProps) => {
   const [imageError, setImageError] = useState(false);
   
-  // Calcular progresso para o próximo nível (exemplo: 70%)
-  const nextLevelProgress = Math.min(70, Math.floor(Math.random() * 100));
+  // Calcular progresso REAL para o próximo nível
+  // Fórmula: pontos necessários para próximo nível = nivel_atual * 100
+  const pointsForCurrentLevel = (level - 1) * 100;
+  const pointsForNextLevel = level * 100;
+  const pointsInCurrentLevel = totalPoints - pointsForCurrentLevel;
+  const pointsNeededForNextLevel = pointsForNextLevel - pointsForCurrentLevel;
+  const nextLevelProgress = Math.min(100, Math.max(0, Math.floor((pointsInCurrentLevel / pointsNeededForNextLevel) * 100)));
   
   // Obter medalha baseada na posição
   const getMedalIcon = (position?: number) => {
