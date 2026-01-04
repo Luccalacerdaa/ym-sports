@@ -78,6 +78,7 @@ export default function NewRanking() {
     loading, 
     error, 
     updateUserLocation, 
+    updateUserLocationFromGPS,
     calculateRankings, 
     getUserPosition,
     fetchRankings,
@@ -95,6 +96,7 @@ export default function NewRanking() {
   });
   const [userPosition, setUserPosition] = useState<any>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const isInitializingRef = useRef(false);
 
   // Buscar posição do usuário
@@ -211,6 +213,44 @@ export default function NewRanking() {
     }
   };
 
+  const handleGetGPSLocation = async () => {
+    console.log('🌍 [GPS] handleGetGPSLocation chamado!');
+    setIsGettingLocation(true);
+    try {
+      console.log('📍 [GPS] Chamando updateUserLocationFromGPS...');
+      const result = await updateUserLocationFromGPS();
+      
+      if (result.success) {
+        console.log('✅ [GPS] Localização obtida com sucesso!');
+        toast.success("📍 Localização atualizada via GPS!");
+        
+        // Aguardar 1 segundo para o banco sincronizar
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Recalcular rankings
+        console.log('🔄 [GPS] Recalculando rankings...');
+        await calculateRankings();
+        await fetchRankings('national');
+        await fetchRankings('regional');
+        await fetchRankings('local');
+        
+        const position = await getUserPosition();
+        setUserPosition(position);
+        
+        toast.success("🎯 Rankings recalculados com base na sua localização!");
+      } else {
+        console.error('❌ [GPS] Erro ao obter localização:', result.error);
+        toast.error(result.error || "Não foi possível obter sua localização");
+      }
+    } catch (error: any) {
+      console.error('❌ [GPS] Erro exception:', error);
+      toast.error(error.message || "Erro ao atualizar localização");
+    } finally {
+      setIsGettingLocation(false);
+      console.log('🏁 [GPS] Processo finalizado');
+    }
+  };
+
   if (loading && !userPosition) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -233,16 +273,36 @@ export default function NewRanking() {
         </div>
         
         <div className="flex items-center gap-2">
+          {/* Botão para detectar localização GPS */}
+          <Button 
+            variant="outline" 
+            className="gap-2"
+            onClick={handleGetGPSLocation}
+            disabled={isGettingLocation}
+          >
+            {isGettingLocation ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                Detectando GPS...
+              </>
+            ) : (
+              <>
+                <MapPin className="h-4 w-4" />
+                {userLocation ? 'Atualizar Localização' : 'Detectar Localização GPS'}
+              </>
+            )}
+          </Button>
+
+          {/* Botão para configurar manualmente (opcional) */}
           <Dialog open={isLocationDialogOpen} onOpenChange={setIsLocationDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <MapPin className="h-4 w-4" />
-                {userLocation ? 'Atualizar Localização' : 'Configurar Localização'}
+              <Button variant="ghost" size="icon" title="Configurar manualmente">
+                <Map className="h-4 w-4" />
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Configurar Localização</DialogTitle>
+                <DialogTitle>Configurar Localização Manualmente</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
@@ -305,6 +365,7 @@ export default function NewRanking() {
             size="icon"
             onClick={handleRefreshRankings}
             disabled={isRefreshing}
+            title="Atualizar rankings"
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>

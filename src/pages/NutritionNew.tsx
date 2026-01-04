@@ -4,9 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { useNutritionPlans } from "@/hooks/useNutritionPlans";
 import { useWaterIntake } from "@/hooks/useWaterIntake";
-import { useNutritionAchievements } from "@/hooks/useNutritionAchievements";
 import { NutritionPlan } from "@/types/nutrition";
-import { Loader2, Plus, Droplet, Award, Utensils, ChevronRight, Apple, Trash2 } from "lucide-react";
+import { Loader2, Plus, Droplet, Utensils, ChevronRight, Apple, Trash2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -20,7 +19,6 @@ export default function Nutrition() {
   // Hooks
   const nutritionHooks = useNutritionPlans();
   const waterHooks = useWaterIntake();
-  const achievementsHooks = useNutritionAchievements();
   
   // Extrair valores com defaults seguros
   const nutritionPlans = Array.isArray(nutritionHooks?.nutritionPlans) ? nutritionHooks.nutritionPlans : [];
@@ -33,14 +31,10 @@ export default function Nutrition() {
   const waterProgress = waterHooks?.progress || 0;
   const addWaterIntake = waterHooks?.addWaterIntake || (async () => {});
   
-  const achievements = Array.isArray(achievementsHooks?.achievements) ? achievementsHooks.achievements : [];
-  const checkAchievements = achievementsHooks?.checkAchievements || (() => {});
-  
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
 
   console.log('📊 [NUTRITION-NEW] Estado inicial:', {
     nutritionPlansCount: nutritionPlans.length,
-    achievementsCount: achievements.length,
     loading,
     todayIntake,
     dailyGoal,
@@ -52,7 +46,6 @@ export default function Nutrition() {
     console.log('⚙️ [NUTRITION-NEW] Carregando dados iniciais');
     try {
       fetchNutritionPlans();
-      checkAchievements();
     } catch (error) {
       console.error('❌ [NUTRITION-NEW] Erro ao carregar:', error);
     }
@@ -242,59 +235,6 @@ export default function Nutrition() {
                   );
                 })}
               </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Seção de Conquistas */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center">
-              <Award className="h-5 w-5 mr-2 text-yellow-500" />
-              Conquistas Nutricionais
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {achievements.slice(0, 6).map((achievement) => {
-                const achievementId = achievement?.id || Math.random().toString();
-                const achievementTitle = achievement?.title || 'Conquista';
-                const achievementDescription = achievement?.description || '';
-                const achieved = achievement?.achieved || false;
-                
-                return (
-                  <div 
-                    key={achievementId}
-                    className={`flex flex-col items-center justify-center p-3 rounded-lg border text-center ${
-                      achieved 
-                        ? "bg-primary/10 border-primary/30" 
-                        : "bg-muted/30 border-muted text-muted-foreground"
-                    }`}
-                  >
-                    <div className={`h-8 w-8 rounded-full flex items-center justify-center mb-2 ${
-                      achieved ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
-                    }`}>
-                      {achieved && <Award className="h-5 w-5" />}
-                    </div>
-                    <h4 className="text-sm font-medium">{achievementTitle}</h4>
-                    <p className="text-xs mt-1 line-clamp-2">{achievementDescription}</p>
-                  </div>
-                );
-              })}
-              {achievements.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center col-span-full py-4">
-                  Nenhuma conquista ainda.
-                </p>
-              )}
-            </div>
-            {achievements.length > 6 && (
-              <Button 
-                variant="ghost" 
-                className="w-full mt-3"
-                onClick={() => navigate('/dashboard/achievements')}
-              >
-                Ver todas as conquistas
-              </Button>
             )}
           </CardContent>
         </Card>
