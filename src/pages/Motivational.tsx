@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   Play, 
@@ -13,7 +12,6 @@ import {
 } from 'lucide-react';
 import { YouTubeService, YouTubeVideo } from '@/services/youtubeService';
 import VideoThumbnail from '@/components/VideoThumbnail';
-import { toast } from 'sonner';
 
 export default function Motivational() {
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
@@ -27,20 +25,15 @@ export default function Motivational() {
   const loadVideosFromChannel = async (url: string) => {
     setLoading(true);
     try {
-      toast.info("🔍 Buscando vídeos do canal...");
-      
       const fetchedVideos = await YouTubeService.getVideosFromUrl(url);
       
       if (fetchedVideos.length > 0) {
         setVideos(fetchedVideos);
-        toast.success(`✅ ${fetchedVideos.length} vídeos carregados!`);
       } else {
-        toast.warning("⚠️ Nenhum vídeo encontrado. Usando dados de exemplo.");
         setVideos(YouTubeService.getMockVideos());
       }
     } catch (error) {
       console.error('Erro ao carregar vídeos:', error);
-      toast.error("❌ Erro ao carregar vídeos. Usando dados de exemplo.");
       setVideos(YouTubeService.getMockVideos());
     } finally {
       setLoading(false);
@@ -110,35 +103,21 @@ export default function Motivational() {
         </div>
 
 
-        {/* Filtros */}
-        <div className="mb-8 space-y-4">
-          <div className="flex gap-4">
-            {/* Busca */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Buscar vídeos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-gray-900 border-gray-700 text-white placeholder-gray-400"
-              />
-            </div>
-            
-            {/* Botão de atualizar */}
-            <Button
-              onClick={() => loadVideosFromChannel(channelUrl)}
-              disabled={loading}
-              variant="outline"
-              className="border-gray-700 text-gray-300 hover:bg-gray-800"
-            >
-              {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              ) : (
-                <RefreshCw className="w-4 h-4 mr-2" />
-              )}
-              Atualizar
-            </Button>
-          </div>
+        {/* Botão de atualizar */}
+        <div className="mb-8 flex justify-end">
+          <Button
+            onClick={() => loadVideosFromChannel(channelUrl)}
+            disabled={loading}
+            variant="outline"
+            className="border-gray-700 text-gray-300 hover:bg-gray-800"
+          >
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            ) : (
+              <RefreshCw className="w-4 h-4 mr-2" />
+            )}
+            Atualizar
+          </Button>
         </div>
 
         {/* Loading */}
@@ -153,7 +132,7 @@ export default function Motivational() {
         {!loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredVideos.map(video => (
-              <Card key={video.id} className="bg-gray-900 border-gray-800 hover:border-yellow-500/50 transition-all duration-300 group">
+              <Card key={video.id} className="bg-gray-800/50 border-gray-700 hover:border-gray-500 transition-all duration-300 group">
                 <CardHeader className="p-0">
                   <div className="relative aspect-video overflow-hidden rounded-t-lg bg-gray-800">
                     <VideoThumbnail 
@@ -280,7 +259,7 @@ export default function Motivational() {
           </Card>
           
           <Card className="bg-gray-900/50 border-gray-800 text-center p-4">
-            <div className="text-2xl font-bold text-blue-500">{filteredVideos.length}</div>
+            <div className="text-2xl font-bold text-gray-300">{filteredVideos.length}</div>
             <div className="text-sm text-gray-400">Resultados</div>
           </Card>
           

@@ -13,9 +13,12 @@ WHERE id NOT IN (
   ORDER BY user_id, ranking_type, COALESCE(region, ''), position ASC
 );
 
--- Passo 2: Criar índice único para IMPEDIR duplicatas futuras
-CREATE UNIQUE INDEX IF NOT EXISTS idx_rankings_unique_entry
-ON rankings (user_id, ranking_type, COALESCE(region, ''));
+-- Passo 2: REMOVER índice problemático (se existir)
+DROP INDEX IF EXISTS idx_rankings_unique_entry;
+
+-- Criar índice não-único para melhorar performance
+CREATE INDEX IF NOT EXISTS idx_rankings_lookup
+ON rankings (user_id, ranking_type, region);
 
 -- Passo 3: Verificar resultado
 DO $$
