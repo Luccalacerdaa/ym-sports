@@ -39,17 +39,24 @@ export default function Dashboard() {
         try {
           setHasPreloadedRankings(true);
           
-          // Calcular rankings (em background, sem bloquear)
-          await calculateRankings();
+          // Verificar se já tem rankings no localStorage (cache de 5min)
+          const hasNationalCache = localStorage.getItem('ym_rankings_national');
+          const hasCache = hasNationalCache && 
+            (Date.now() - JSON.parse(hasNationalCache).timestamp < 5 * 60 * 1000);
           
-          // Aguardar sincronização
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          // Buscar rankings (1x apenas!)
-          await fetchRankings('national');
-          if (userLocation) {
-            await fetchRankings('regional');
-            await fetchRankings('local');
+          if (!hasCache) {
+            // Calcular rankings apenas se não tem cache
+            await calculateRankings();
+            
+            // Aguardar sincronização
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Buscar rankings (1x apenas!)
+            await fetchRankings('national');
+            if (userLocation) {
+              await fetchRankings('regional');
+              await fetchRankings('local');
+            }
           }
           
           // Buscar posição do usuário

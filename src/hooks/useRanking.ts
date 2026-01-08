@@ -77,9 +77,27 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 export const useRanking = () => {
   const { user } = useAuth();
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
-  const [nationalRanking, setNationalRanking] = useState<RankingEntry[]>([]);
-  const [regionalRanking, setRegionalRanking] = useState<RankingEntry[]>([]);
-  const [localRanking, setLocalRanking] = useState<RankingEntry[]>([]);
+  
+  // Carregar rankings do localStorage se existirem
+  const loadFromStorage = (key: string): RankingEntry[] => {
+    try {
+      const stored = localStorage.getItem(`ym_rankings_${key}`);
+      if (stored) {
+        const data = JSON.parse(stored);
+        // Cache de 5 minutos
+        if (data.timestamp && Date.now() - data.timestamp < 5 * 60 * 1000) {
+          return data.rankings || [];
+        }
+      }
+    } catch (e) {
+      console.error('Erro ao carregar rankings do localStorage:', e);
+    }
+    return [];
+  };
+  
+  const [nationalRanking, setNationalRanking] = useState<RankingEntry[]>(() => loadFromStorage('national'));
+  const [regionalRanking, setRegionalRanking] = useState<RankingEntry[]>(() => loadFromStorage('regional'));
+  const [localRanking, setLocalRanking] = useState<RankingEntry[]>(() => loadFromStorage('local'));
   const [regionalAchievements, setRegionalAchievements] = useState<RegionalAchievement[]>([]);
   const [userRegionalAchievements, setUserRegionalAchievements] = useState<UserRegionalAchievement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -534,6 +552,16 @@ export const useRanking = () => {
         };
       });
 
+      // Salvar no localStorage
+      try {
+        localStorage.setItem(`ym_rankings_${type}`, JSON.stringify({
+          rankings: rankingsWithUserInfo,
+          timestamp: Date.now()
+        }));
+      } catch (e) {
+        console.warn('Erro ao salvar rankings no localStorage:', e);
+      }
+      
       switch (type) {
         case 'national':
           setNationalRanking(rankingsWithUserInfo);
@@ -568,13 +596,16 @@ export const useRanking = () => {
       const { error: deleteError } = await supabase
         .from('rankings')
         .delete()
-        .eq('period', 'all_time');
+        .neq('period', 'NEVER_MATCH'); // Deleta tudo (workaround)
       
       if (deleteError) {
         console.error('❌ Erro ao deletar rankings antigos:', deleteError);
       } else {
         console.log('✅ Rankings antigos deletados com sucesso');
       }
+      
+      // Aguardar 500ms para garantir que delete foi processado
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Buscar todos os usuários com progresso
       console.log('🔍 Buscando user_progress...');
@@ -798,20 +829,18 @@ export const useRanking = () => {
       
       console.log(`✅ Calculados ${rankingsToInsert.length} rankings`);
       
-      // Usar upsert em vez de delete + insert para evitar erros de chave duplicada
-      const BATCH_SIZE = 100;
+      // Inserir rankings (já deletamos tudo, então INSERT simples)
+      const BATCH_SIZE = 50; // Reduzir batch size
       for (let i = 0; i < rankingsToInsert.length; i += BATCH_SIZE) {
         const batch = rankingsToInsert.slice(i, i + BATCH_SIZE);
-        const { error: upsertError } = await supabase
-          .from('rankings')
-          .upsert(batch, {
-            onConflict: 'user_id,ranking_type,region,period',
-            ignoreDuplicates: false // Atualizar registros existentes
-          });
         
-        if (upsertError) {
-          console.error(`❌ Erro ao atualizar lote ${Math.floor(i/BATCH_SIZE) + 1}:`, upsertError);
-          // Continuar mesmo com erro para tentar processar outros lotes
+        // Usar INSERT simples já que deletamos tudo
+        const { error: insertError } = await supabase
+          .from('rankings')
+          .insert(batch);
+        
+        if (insertError) {
+          console.error(`❌ Erro ao inserir lote ${Math.floor(i/BATCH_SIZE) + 1}:`, insertError);
           console.log('Continuando com o próximo lote...');
           continue;
         } else {
@@ -824,12 +853,7 @@ export const useRanking = () => {
       // Verificar conquistas regionais (SEM notificações para evitar spam)
       await checkRegionalAchievements(false);
       
-      // Recarregar rankings
-      if (userLocation) {
-        await fetchRankings('national');
-        await fetchRankings('regional');
-        await fetchRankings('local');
-      }
+      // NÃO recarregar rankings aqui! Deixar componentes carregarem quando precisarem
     } catch (err: any) {
       console.error('Erro ao calcular rankings:', err);
       setError(err.message);
