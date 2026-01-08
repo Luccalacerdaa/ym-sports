@@ -102,9 +102,9 @@ export default function NewRanking() {
   
   const { getLevelProgress } = useProgress();
 
-  // Buscar posição do usuário
+  // Buscar posição do usuário (APENAS quando carrega, não quando muda de aba)
   useEffect(() => {
-    if (!loading) {
+    if (!loading && hasInitializedRankings) {
       const fetchUserPosition = async () => {
         try {
           const position = await getUserPosition();
@@ -116,7 +116,7 @@ export default function NewRanking() {
       };
       fetchUserPosition();
     }
-  }, [loading, selectedTab]);
+  }, [loading, hasInitializedRankings]); // ✅ Removido selectedTab
 
   // Calcular progresso de nível sempre que a posição mudar
   useEffect(() => {
@@ -167,23 +167,8 @@ export default function NewRanking() {
     recalculateRankings();
   }, [user, loading, hasInitializedRankings]);
 
-  // Carregar rankings regionais/locais quando localização for obtida
-  useEffect(() => {
-    const loadRegionalRankings = async () => {
-      if (userLocation && hasInitializedRankings && !isInitializingRef.current) {
-        try {
-          console.log('Carregando rankings regionais/locais...');
-          await fetchRankings('regional');
-          await fetchRankings('local');
-          console.log('Rankings regionais/locais carregados!');
-        } catch (error) {
-          console.error('Erro ao carregar rankings regionais/locais:', error);
-        }
-      }
-    };
-
-    loadRegionalRankings();
-  }, [userLocation, hasInitializedRankings]);
+  // ❌ REMOVIDO: Causava duplicação de fetchRankings
+  // Regional e local já são carregados no useEffect de recalculateRankings
 
   const handleUpdateLocation = async () => {
     if (!locationForm.state || !locationForm.region) {
