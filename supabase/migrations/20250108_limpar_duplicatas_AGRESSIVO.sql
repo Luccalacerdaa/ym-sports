@@ -5,9 +5,9 @@
 -- Passo 1: DELETAR TUDO (começar do zero)
 TRUNCATE TABLE rankings CASCADE;
 
--- Passo 2: Remover índices problemáticos
+-- Passo 2: Remover constraints e índices problemáticos
 DROP INDEX IF EXISTS idx_rankings_unique_entry;
-DROP INDEX IF EXISTS rankings_user_id_ranking_type_region_period_key;
+ALTER TABLE rankings DROP CONSTRAINT IF EXISTS rankings_user_id_ranking_type_region_period_key;
 
 -- Passo 3: Criar índice de performance (NÃO único)
 CREATE INDEX IF NOT EXISTS idx_rankings_lookup
