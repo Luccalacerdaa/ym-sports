@@ -10,7 +10,7 @@ import { useTrainings } from "@/hooks/useTrainings";
 import { useProgress } from "@/hooks/useProgress";
 import { useRanking } from "@/hooks/useRanking";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -23,9 +23,9 @@ export default function Dashboard() {
   
   const [userPosition, setUserPosition] = useState<any>(null);
 
-  // Obter próximos eventos e treino de hoje
-  const upcomingEvents = getUpcomingEvents(3);
-  const todaysTraining = getTodaysTraining();
+  // Obter próximos eventos e treino de hoje (memoizados para evitar re-renders)
+  const upcomingEvents = useMemo(() => getUpcomingEvents(3), [getUpcomingEvents]);
+  const todaysTraining = useMemo(() => getTodaysTraining(), [getTodaysTraining]);
   
   // Calcular progresso do nível
   const levelProgress = progress ? getLevelProgress(progress.total_points, progress.current_level) : { progress: 0, pointsToNext: 100 };

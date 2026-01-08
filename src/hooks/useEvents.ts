@@ -169,12 +169,6 @@ export const useEvents = () => {
       .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
       .slice(0, limit);
     
-    console.log('getUpcomingEvents:', { 
-      totalEvents: events.length, 
-      upcomingEvents: upcomingEvents.length,
-      events: events.map(e => ({ id: e.id, title: e.title, start_date: e.start_date }))
-    });
-    
     return upcomingEvents;
   };
 
