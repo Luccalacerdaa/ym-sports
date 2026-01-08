@@ -72,6 +72,13 @@ const Achievements = () => {
 
   const levelProgress = getLevelProgress(progress.total_points, progress.current_level);
   
+  // Debug logs
+  console.log('📊 [ACHIEVEMENTS] Progresso:', {
+    total_points: progress.total_points,
+    current_level: progress.current_level,
+    levelProgress: levelProgress
+  });
+  
   // Filtrar conquistas por categoria
   const filteredAchievements = selectedCategory === 'all' 
     ? achievements 

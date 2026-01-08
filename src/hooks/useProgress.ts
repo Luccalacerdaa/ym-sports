@@ -95,48 +95,78 @@ export const useProgress = () => {
 
   // Função para calcular progresso até o próximo nível
   const getLevelProgress = async (currentPoints: number, currentLevel: number): Promise<{ progress: number; pointsToNext: number }> => {
+    console.log('🔍 [getLevelProgress] Entrada:', { currentPoints, currentLevel });
+    
     try {
-      // Buscar pontos necessários para o nível atual e próximo
-      const { data: levels, error } = await supabase
+      // Primeiro, descobrir o nível CORRETO baseado nos pontos (não confiar no currentLevel)
+      const { data: correctLevelData, error: correctLevelError } = await supabase
         .from('level_thresholds')
         .select('level, points_required')
-        .in('level', [currentLevel, currentLevel + 1])
-        .order('level');
+        .lte('points_required', currentPoints)
+        .order('level', { ascending: false })
+        .limit(1);
       
-      if (error) throw error;
+      if (correctLevelError) throw correctLevelError;
       
-      if (!levels || levels.length < 2) {
-        // Fallback
-        const currentLevelPoints = (currentLevel - 1) * 100;
-        const nextLevelPoints = currentLevel * 100;
-        const pointsInCurrentLevel = currentPoints - currentLevelPoints;
-        const pointsToNext = nextLevelPoints - currentPoints;
-        return { 
-          progress: Math.min((pointsInCurrentLevel / 100) * 100, 100), 
-          pointsToNext: Math.max(pointsToNext, 0) 
-        };
+      if (!correctLevelData || correctLevelData.length === 0) {
+        console.warn('⚠️ [getLevelProgress] Nenhum nível encontrado, fallback');
+        return { progress: 0, pointsToNext: 100 };
       }
       
-      const currentLevelPoints = levels[0].points_required;
-      const nextLevelPoints = levels[1].points_required;
-      const pointsInCurrentLevel = currentPoints - currentLevelPoints;
-      const pointsNeeded = nextLevelPoints - currentLevelPoints;
+      const actualLevel = correctLevelData[0].level;
+      const actualLevelPoints = correctLevelData[0].points_required;
+      
+      console.log('✅ [getLevelProgress] Nível correto:', actualLevel, '(estava informado:', currentLevel, ')');
+      
+      // Agora buscar o PRÓXIMO nível
+      const { data: nextLevelData, error: nextLevelError } = await supabase
+        .from('level_thresholds')
+        .select('level, points_required')
+        .gt('level', actualLevel)
+        .order('level', { ascending: true })
+        .limit(1);
+      
+      if (nextLevelError) throw nextLevelError;
+      
+      if (!nextLevelData || nextLevelData.length === 0) {
+        console.log('📊 [getLevelProgress] Nível máximo atingido');
+        return { progress: 100, pointsToNext: 0 };
+      }
+      
+      const nextLevelPoints = nextLevelData[0].points_required;
+      const pointsInCurrentLevel = currentPoints - actualLevelPoints;
+      const pointsNeeded = nextLevelPoints - actualLevelPoints;
       const pointsToNext = nextLevelPoints - currentPoints;
       const progress = (pointsInCurrentLevel / pointsNeeded) * 100;
+      
+      console.log('📊 [getLevelProgress] Cálculo:', {
+        actualLevel,
+        actualLevelPoints,
+        nextLevel: nextLevelData[0].level,
+        nextLevelPoints,
+        currentPoints,
+        pointsInCurrentLevel,
+        pointsNeeded,
+        progress: Math.floor(progress),
+        pointsToNext
+      });
       
       return { 
         progress: Math.min(Math.max(progress, 0), 100), 
         pointsToNext: Math.max(pointsToNext, 0) 
       };
     } catch (err) {
+      console.error('❌ [getLevelProgress] Erro:', err);
       // Fallback para fórmula antiga
-      const currentLevelPoints = (currentLevel - 1) * 100;
-      const nextLevelPoints = currentLevel * 100;
-      const pointsInCurrentLevel = currentPoints - currentLevelPoints;
-      const pointsToNext = nextLevelPoints - currentPoints;
+      const fallbackLevel = Math.floor(currentPoints / 100) + 1;
+      const fallbackCurrentPoints = (fallbackLevel - 1) * 100;
+      const fallbackNextPoints = fallbackLevel * 100;
+      const fallbackProgress = ((currentPoints - fallbackCurrentPoints) / 100) * 100;
+      const fallbackPointsToNext = fallbackNextPoints - currentPoints;
+      
       return { 
-        progress: Math.min((pointsInCurrentLevel / 100) * 100, 100), 
-        pointsToNext: Math.max(pointsToNext, 0) 
+        progress: Math.min(Math.max(fallbackProgress, 0), 100), 
+        pointsToNext: Math.max(fallbackPointsToNext, 0) 
       };
     }
   };
