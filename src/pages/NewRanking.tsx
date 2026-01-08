@@ -234,12 +234,21 @@ export default function NewRanking() {
         // Recalcular rankings (forçando atualização, sem cache)
         console.log('🔄 [GPS] Recalculando rankings...');
         await calculateRankings();
+        
+        // Aguardar 1 segundo para sincronização
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Forçar recarga de TODOS os rankings
         await fetchRankings('national', true); // forceRefresh = true
         await fetchRankings('regional', true); // forceRefresh = true
         await fetchRankings('local', true); // forceRefresh = true
         
         const position = await getUserPosition();
         setUserPosition(position);
+        
+        // Forçar re-render da página
+        setHasInitializedRankings(false);
+        setTimeout(() => setHasInitializedRankings(true), 100);
         
         toast.success("🎯 Rankings recalculados com base na sua localização!");
       } else {

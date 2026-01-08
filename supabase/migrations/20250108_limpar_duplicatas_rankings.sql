@@ -4,13 +4,13 @@
 -- Problema: Banco tem 10-13 entradas duplicadas por usuário
 -- Solução: Manter apenas 1 entrada por (user_id, ranking_type, region)
 
--- Passo 1: Deletar TODAS as duplicatas, mantendo apenas a mais recente
+-- Passo 1: Deletar TODAS as duplicatas, mantendo apenas UMA entrada por combinação
 DELETE FROM rankings
 WHERE id NOT IN (
   SELECT DISTINCT ON (user_id, ranking_type, COALESCE(region, ''))
     id
   FROM rankings
-  ORDER BY user_id, ranking_type, COALESCE(region, ''), created_at DESC
+  ORDER BY user_id, ranking_type, COALESCE(region, ''), position ASC
 );
 
 -- Passo 2: Criar índice único para IMPEDIR duplicatas futuras
