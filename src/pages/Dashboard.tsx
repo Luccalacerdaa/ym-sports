@@ -18,7 +18,7 @@ export default function Dashboard() {
   const { getUpcomingEvents } = useEvents();
   const { getTodaysTraining } = useTrainings();
   const { progress, getLevelProgress } = useProgress();
-  const { getUserPosition, userLocation, calculateRankings, fetchRankings } = useRanking();
+  const { getUserPosition, userLocation, calculateRankings, fetchRankings, nationalRanking } = useRanking();
   const navigate = useNavigate();
   
   const [userPosition, setUserPosition] = useState<any>(null);
@@ -39,24 +39,27 @@ export default function Dashboard() {
         try {
           setHasPreloadedRankings(true);
           
-          // Verificar se já tem rankings no localStorage (cache de 5min)
-          const hasNationalCache = localStorage.getItem('ym_rankings_national');
-          const hasCache = hasNationalCache && 
-            (Date.now() - JSON.parse(hasNationalCache).timestamp < 5 * 60 * 1000);
+          // Verificar se já tem rankings carregados (do localStorage ou anterior)
+          if (nationalRanking.length > 0) {
+            console.log('✅ [DASHBOARD] Rankings já carregados do localStorage');
+            // Apenas buscar posição
+            const position = await getUserPosition();
+            setUserPosition(position);
+            return;
+          }
           
-          if (!hasCache) {
-            // Calcular rankings apenas se não tem cache
-            await calculateRankings();
-            
-            // Aguardar sincronização
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // Buscar rankings (1x apenas!)
-            await fetchRankings('national');
-            if (userLocation) {
-              await fetchRankings('regional');
-              await fetchRankings('local');
-            }
+          // Se não tem cache, calcular
+          console.log('🔄 [DASHBOARD] Calculando rankings pela primeira vez...');
+          await calculateRankings();
+          
+          // Aguardar sincronização
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Buscar rankings (1x apenas!)
+          await fetchRankings('national');
+          if (userLocation) {
+            await fetchRankings('regional');
+            await fetchRankings('local');
           }
           
           // Buscar posição do usuário
@@ -70,7 +73,7 @@ export default function Dashboard() {
     };
     
     preloadRankings();
-  }, [user, hasPreloadedRankings]); // Roda apenas 1x quando user carrega
+  }, [user, hasPreloadedRankings, nationalRanking.length]); // Roda quando rankings mudam
 
   // Dados reais do usuário
   const displayName = profile?.name || 'Usuário';

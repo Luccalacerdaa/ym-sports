@@ -348,6 +348,13 @@ export const useRanking = () => {
   // Buscar rankings - CORRIGIDO para evitar erro 400
   const fetchRankings = async (type: 'national' | 'regional' | 'local' = 'national', forceRefresh: boolean = false) => {
     try {
+      // Verificar se já tem dados no estado (veio do localStorage)
+      const currentRankings = type === 'national' ? nationalRanking : type === 'regional' ? regionalRanking : localRanking;
+      if (!forceRefresh && currentRankings.length > 0) {
+        console.log(`✅ Usando rankings do estado (${currentRankings.length} jogadores)`);
+        return currentRankings;
+      }
+      
       // Evitar múltiplas chamadas simultâneas para o mesmo tipo
       const now = Date.now();
       const lastFetch = lastFetchTime[type] || 0;
@@ -355,8 +362,8 @@ export const useRanking = () => {
       
       // Se forceRefresh = true, pula o cache
       if (!forceRefresh && now - lastFetch < CACHE_DURATION) {
-        console.log(`⏭️ Usando cache para ranking ${type} (${Math.round((CACHE_DURATION - (now - lastFetch)) / 1000)}s restantes)`);
-        return type === 'national' ? nationalRanking : type === 'regional' ? regionalRanking : localRanking;
+        console.log(`⏭️ Usando cache temporal para ranking ${type}`);
+        return currentRankings;
       }
       
       if (isFetchingRankings[type]) {
