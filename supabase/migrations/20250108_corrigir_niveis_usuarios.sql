@@ -43,7 +43,7 @@ BEGIN
     LIMIT 10
   LOOP
     RAISE NOTICE 'Usuario: % | Pontos: % | Nivel: %', 
-      COALESCE(rec.name, rec.user_id), 
+      COALESCE(rec.name, rec.user_id::text), 
       rec.total_points, 
       rec.current_level;
   END LOOP;
