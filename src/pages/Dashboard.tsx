@@ -18,7 +18,7 @@ export default function Dashboard() {
   const { getUpcomingEvents } = useEvents();
   const { getTodaysTraining } = useTrainings();
   const { progress, getLevelProgress } = useProgress();
-  const { getUserPosition, userLocation } = useRanking();
+  const { getUserPosition, userLocation, calculateRankings, fetchRankings } = useRanking();
   const navigate = useNavigate();
   
   const [userPosition, setUserPosition] = useState<any>(null);
@@ -30,20 +30,40 @@ export default function Dashboard() {
   // Calcular progresso do nível
   const levelProgress = progress ? getLevelProgress(progress.total_points, progress.current_level) : { progress: 0, pointsToNext: 100 };
 
-  // Buscar posição do usuário no ranking
+  // PRÉ-CARREGAR rankings no Dashboard (só roda 1x)
+  const [hasPreloadedRankings, setHasPreloadedRankings] = useState(false);
+  
   useEffect(() => {
-    const fetchPosition = async () => {
-      try {
-        const position = await getUserPosition();
-        console.log('📊 [DASHBOARD] Posição do usuário:', position);
-        setUserPosition(position);
-      } catch (error) {
-        console.error('❌ [DASHBOARD] Erro ao buscar posição:', error);
+    const preloadRankings = async () => {
+      if (user && !hasPreloadedRankings) {
+        try {
+          setHasPreloadedRankings(true);
+          
+          // Calcular rankings (em background, sem bloquear)
+          await calculateRankings();
+          
+          // Aguardar sincronização
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Buscar rankings (1x apenas!)
+          await fetchRankings('national');
+          if (userLocation) {
+            await fetchRankings('regional');
+            await fetchRankings('local');
+          }
+          
+          // Buscar posição do usuário
+          const position = await getUserPosition();
+          setUserPosition(position);
+        } catch (error) {
+          console.error('❌ [DASHBOARD] Erro ao pré-carregar rankings:', error);
+          setHasPreloadedRankings(false); // Permitir retry
+        }
       }
     };
     
-    fetchPosition();
-  }, [progress]);
+    preloadRankings();
+  }, [user, hasPreloadedRankings]); // Roda apenas 1x quando user carrega
 
   // Dados reais do usuário
   const displayName = profile?.name || 'Usuário';
