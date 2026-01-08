@@ -227,6 +227,14 @@ const Achievements = () => {
             </div>
             
             <div className="space-y-2">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-medium text-primary">
+                  {Math.floor(levelProgress.progress)}% completo
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {progress.total_points} / {progress.total_points + levelProgress.pointsToNext} pts
+                </span>
+              </div>
               <Progress value={levelProgress.progress} className="h-3" />
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Nível {progress.current_level}</span>

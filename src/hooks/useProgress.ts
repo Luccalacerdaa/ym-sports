@@ -260,13 +260,39 @@ export const useProgress = () => {
     }
   };
 
+  // Calcular nível baseado em pontos (usando level_thresholds)
+  const calculateLevel = async (totalPoints: number): Promise<number> => {
+    try {
+      const { data: thresholds, error } = await supabase
+        .from('level_thresholds')
+        .select('level, points_required')
+        .lte('points_required', totalPoints)
+        .order('level', { ascending: false })
+        .limit(1);
+
+      if (error) throw error;
+
+      // Se encontrou um threshold, retornar o nível
+      if (thresholds && thresholds.length > 0) {
+        return thresholds[0].level;
+      }
+
+      // Fallback para fórmula antiga se não houver thresholds
+      return Math.floor(totalPoints / 100) + 1;
+    } catch (err) {
+      console.error('Erro ao calcular nível:', err);
+      // Fallback para fórmula antiga
+      return Math.floor(totalPoints / 100) + 1;
+    }
+  };
+
   // Adicionar pontos
   const addPoints = async (points: number, activityType: string, activityData?: any) => {
     if (!user || !progress) return;
 
     try {
       const newTotalPoints = progress.total_points + points;
-      const newLevel = Math.floor(newTotalPoints / 100) + 1;
+      const newLevel = await calculateLevel(newTotalPoints);
       const levelIncreased = newLevel > progress.current_level;
 
       // Atualizar progresso
