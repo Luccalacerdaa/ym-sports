@@ -135,10 +135,8 @@ export const RankingGrid = ({ rankings, type, loading, className, title }: Ranki
                               src={`${entry.user_avatar}?t=${new Date().getTime()}`}
                               alt={entry.user_name || "Usuário"}
                               onError={(e) => {
-                                console.log(`Erro ao carregar avatar para ${entry.user_name}:`, e);
                                 handleImageError(entry.user_id);
                               }}
-                              onLoad={() => console.log(`Avatar carregado com sucesso para ${entry.user_name}`)}
                               className="object-cover"
                             />
                           ) : null}

@@ -182,11 +182,9 @@ export const GeoVisualizer = ({ className, rankingType = 'all' }: GeoVisualizerP
                                 alt={player.user_name || "Jogador"}
                                 className="w-full h-full rounded-full object-cover"
                                 onError={(e) => {
-                                  console.log("Erro ao carregar avatar:", player.user_name);
                                   e.currentTarget.style.display = 'none';
                                   e.currentTarget.parentElement!.innerHTML = `<span class="text-primary font-bold text-lg">${(player.user_name || "U")[0]}</span>`;
                                 }}
-                                onLoad={() => console.log("Avatar carregado:", player.user_name)}
                               />
                             ) : (
                               <span className="text-primary font-bold text-lg">
