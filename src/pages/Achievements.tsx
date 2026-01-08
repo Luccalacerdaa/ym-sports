@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -34,6 +34,17 @@ const Achievements = () => {
   } = useProgress();
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [levelProgress, setLevelProgress] = useState({ progress: 0, pointsToNext: 0 });
+
+  // Calcular progresso do nível (assíncrono)
+  useEffect(() => {
+    if (progress) {
+      getLevelProgress(progress.total_points, progress.current_level).then(result => {
+        console.log('📊 [ACHIEVEMENTS] Progresso calculado:', result);
+        setLevelProgress(result);
+      });
+    }
+  }, [progress?.total_points, progress?.current_level]);
 
   if (loading) {
     return (
@@ -69,15 +80,6 @@ const Achievements = () => {
       </div>
     );
   }
-
-  const levelProgress = getLevelProgress(progress.total_points, progress.current_level);
-  
-  // Debug logs
-  console.log('📊 [ACHIEVEMENTS] Progresso:', {
-    total_points: progress.total_points,
-    current_level: progress.current_level,
-    levelProgress: levelProgress
-  });
   
   // Filtrar conquistas por categoria
   const filteredAchievements = selectedCategory === 'all' 
