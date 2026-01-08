@@ -102,22 +102,6 @@ export default function NewRanking() {
   
   const { getLevelProgress } = useProgress();
 
-  // Buscar posição do usuário (APENAS quando carrega, não quando muda de aba)
-  useEffect(() => {
-    if (!loading && hasInitializedRankings) {
-      const fetchUserPosition = async () => {
-        try {
-          const position = await getUserPosition();
-          console.log('Posição do usuário obtida:', position);
-          setUserPosition(position);
-        } catch (error) {
-          console.error('Erro ao buscar posição do usuário:', error);
-        }
-      };
-      fetchUserPosition();
-    }
-  }, [loading, hasInitializedRankings]); // ✅ Removido selectedTab
-
   // Calcular progresso de nível sempre que a posição mudar
   useEffect(() => {
     const calculateProgress = async () => {
@@ -218,46 +202,33 @@ export default function NewRanking() {
   };
 
   const handleGetGPSLocation = async () => {
-    console.log('🌍 [GPS] handleGetGPSLocation chamado!');
     setIsGettingLocation(true);
     try {
-      console.log('📍 [GPS] Chamando updateUserLocationFromGPS...');
       const result = await updateUserLocationFromGPS();
       
       if (result.success) {
-        console.log('✅ [GPS] Localização obtida com sucesso!');
         toast.success("📍 Localização atualizada via GPS!");
         
-        // Aguardar 1 segundo para o banco sincronizar
+        // Forçar recálculo APENAS (não buscar rankings manualmente)
+        // O useEffect abaixo fará o fetch automaticamente
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Recalcular rankings (forçando atualização, sem cache)
-        console.log('🔄 [GPS] Recalculando rankings...');
         await calculateRankings();
         
-        // Aguardar 1.5 segundos para sincronização do banco
+        // Aguardar rankings serem salvos
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Forçar recarga de TODOS os rankings (1x apenas!)
-        await fetchRankings('national', true); // forceRefresh = true
-        await fetchRankings('regional', true); // forceRefresh = true
-        await fetchRankings('local', true); // forceRefresh = true
-        
-        // Atualizar posição do usuário
+        // Atualizar apenas a posição do usuário
         const position = await getUserPosition();
         setUserPosition(position);
         
-        toast.success("🎯 Rankings recalculados com base na sua localização!");
+        toast.success("🎯 Rankings atualizados!");
       } else {
-        console.error('❌ [GPS] Erro ao obter localização:', result.error);
-        toast.error(result.error || "Não foi possível obter sua localização");
+        toast.error(result.error || "Erro ao obter localização");
       }
     } catch (error: any) {
-      console.error('❌ [GPS] Erro exception:', error);
       toast.error(error.message || "Erro ao atualizar localização");
     } finally {
       setIsGettingLocation(false);
-      console.log('🏁 [GPS] Processo finalizado');
     }
   };
 
