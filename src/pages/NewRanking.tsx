@@ -118,20 +118,27 @@ export default function NewRanking() {
     calculateProgress();
   }, [userPosition]);
 
-  // ✅ Rankings já são pré-carregados no Dashboard!
-  // Apenas buscar posição do usuário quando entrar na página
+  // Buscar rankings quando entrar na página
   useEffect(() => {
-    const fetchPosition = async () => {
+    const loadRankings = async () => {
       if (!loading && user && !hasInitializedRankings && !isInitializingRef.current) {
         try {
           isInitializingRef.current = true;
           setHasInitializedRankings(true);
           
-          // Apenas buscar posição (rankings já estão no cache)
+          // Sempre buscar rankings (usa cache se já foi buscado recentemente)
+          await fetchRankings('national');
+          
+          if (userLocation) {
+            await fetchRankings('regional');
+            await fetchRankings('local');
+          }
+          
+          // Buscar posição do usuário
           const position = await getUserPosition();
           setUserPosition(position);
         } catch (error) {
-          console.error('Erro ao buscar posição:', error);
+          console.error('Erro ao carregar rankings:', error);
           setHasInitializedRankings(false);
         } finally {
           isInitializingRef.current = false;
@@ -139,8 +146,8 @@ export default function NewRanking() {
       }
     };
     
-    fetchPosition();
-  }, [user, loading, hasInitializedRankings]);
+    loadRankings();
+  }, [user, loading, hasInitializedRankings]); // SEM rankings.length para evitar loop
 
   // ❌ REMOVIDO: Causava duplicação de fetchRankings
   // Regional e local já são carregados no useEffect de recalculateRankings
