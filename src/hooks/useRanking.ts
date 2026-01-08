@@ -86,8 +86,8 @@ export const useRanking = () => {
   const [error, setError] = useState<string | null>(null);
   const [isRequestingLocation, setIsRequestingLocation] = useState(false);
   
-  // Controle de cache para evitar recargas múltiplas
-  const [isFetchingRankings, setIsFetchingRankings] = useState(false);
+  // Controle de cache para evitar recargas múltiplas (POR TIPO!)
+  const [isFetchingRankings, setIsFetchingRankings] = useState<{ [key: string]: boolean }>({});
   const [lastFetchTime, setLastFetchTime] = useState<{ [key: string]: number }>({});
   const [lastAchievementCheck, setLastAchievementCheck] = useState<number>(0);
 
@@ -341,12 +341,12 @@ export const useRanking = () => {
         return type === 'national' ? nationalRanking : type === 'regional' ? regionalRanking : localRanking;
       }
       
-      if (isFetchingRankings) {
-        console.log(`⏳ Já está buscando rankings, aguardando...`);
+      if (isFetchingRankings[type]) {
+        console.log(`⏳ Já está buscando ranking ${type}, aguardando...`);
         return [];
       }
       
-      setIsFetchingRankings(true);
+      setIsFetchingRankings(prev => ({ ...prev, [type]: true }));
       setLastFetchTime(prev => ({ ...prev, [type]: now }));
       setError(null);
 
@@ -552,7 +552,7 @@ export const useRanking = () => {
       setError(err.message);
       return [];
     } finally {
-      setIsFetchingRankings(false);
+      setIsFetchingRankings(prev => ({ ...prev, [type]: false }));
     }
   };
 
