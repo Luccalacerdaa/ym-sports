@@ -563,18 +563,31 @@ export const useRanking = () => {
         
         // Definir localização baseado no tipo de ranking
         let displayLocation = 'Brasil';
-        if (entry.ranking_type === 'local' && location?.city_approximate) {
-          // Local: mostrar cidade + estado
-          displayLocation = `${location.city_approximate} - ${entry.region || location.state}`;
-        } else if (entry.ranking_type === 'regional' && location?.state) {
-          // Regional: mostrar estado
-          displayLocation = location.state;
-        } else if (entry.ranking_type === 'national' && location?.state) {
-          // Nacional: mostrar estado
-          displayLocation = location.state;
-        } else if (entry.region) {
-          // Fallback: mostrar o que tiver na coluna region
-          displayLocation = entry.region;
+        
+        if (entry.ranking_type === 'local') {
+          // LOCAL: Prioridade: cidade + estado
+          if (location?.city_approximate && location?.state) {
+            displayLocation = `${location.city_approximate} - ${location.state}`;
+          } else if (location?.state) {
+            displayLocation = location.state;
+          } else if (entry.region) {
+            displayLocation = entry.region; // Fallback: estado que veio do ranking
+          }
+        } else if (entry.ranking_type === 'regional') {
+          // REGIONAL: Sempre mostrar ESTADO (não região!)
+          if (location?.state) {
+            displayLocation = location.state;
+          } else if (entry.ranking_type === 'regional') {
+            // Se não tem localização, tentar inferir do nome ou deixar como "Sudeste" temporariamente
+            displayLocation = entry.region; // Mostra região como fallback temporário
+          }
+        } else if (entry.ranking_type === 'national') {
+          // NACIONAL: Mostrar estado
+          if (location?.state) {
+            displayLocation = location.state;
+          } else if (entry.region) {
+            displayLocation = entry.region; // Fallback: estado que veio do ranking
+          }
         }
         
         return {
