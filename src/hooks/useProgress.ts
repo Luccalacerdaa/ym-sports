@@ -48,6 +48,10 @@ export interface UserActivity {
   created_at: string;
 }
 
+// Cache para getLevelProgress (evitar recálculos desnecessários)
+const levelProgressCache = new Map<string, { progress: number; pointsToNext: number; timestamp: number }>();
+const CACHE_DURATION = 30000; // 30 segundos
+
 export const useProgress = () => {
   const { user } = useAuth();
   const [progress, setProgress] = useState<UserProgress | null>(null);
@@ -95,7 +99,17 @@ export const useProgress = () => {
 
   // Função para calcular progresso até o próximo nível
   const getLevelProgress = async (currentPoints: number, currentLevel: number): Promise<{ progress: number; pointsToNext: number }> => {
-    console.log('🔍 [getLevelProgress] Entrada:', { currentPoints, currentLevel });
+    // Verificar cache primeiro
+    const cacheKey = `${currentPoints}-${currentLevel}`;
+    const cached = levelProgressCache.get(cacheKey);
+    const now = Date.now();
+    
+    if (cached && (now - cached.timestamp) < CACHE_DURATION) {
+      console.log('✅ [getLevelProgress] Usando cache:', cacheKey);
+      return { progress: cached.progress, pointsToNext: cached.pointsToNext };
+    }
+    
+    console.log('🔍 [getLevelProgress] Calculando:', { currentPoints, currentLevel });
     
     try {
       // Primeiro, descobrir o nível CORRETO baseado nos pontos (não confiar no currentLevel)
@@ -139,22 +153,21 @@ export const useProgress = () => {
       const pointsToNext = nextLevelPoints - currentPoints;
       const progress = (pointsInCurrentLevel / pointsNeeded) * 100;
       
-      console.log('📊 [getLevelProgress] Cálculo:', {
-        actualLevel,
-        actualLevelPoints,
-        nextLevel: nextLevelData[0].level,
-        nextLevelPoints,
-        currentPoints,
-        pointsInCurrentLevel,
-        pointsNeeded,
-        progress: Math.floor(progress),
-        pointsToNext
-      });
-      
-      return { 
+      const result = { 
         progress: Math.min(Math.max(progress, 0), 100), 
         pointsToNext: Math.max(pointsToNext, 0) 
       };
+      
+      // Salvar no cache
+      levelProgressCache.set(cacheKey, {
+        progress: result.progress,
+        pointsToNext: result.pointsToNext,
+        timestamp: now
+      });
+      
+      console.log('✅ [getLevelProgress] Resultado:', result);
+      
+      return result;
     } catch (err) {
       console.error('❌ [getLevelProgress] Erro:', err);
       // Fallback para fórmula antiga

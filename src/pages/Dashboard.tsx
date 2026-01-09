@@ -27,8 +27,14 @@ export default function Dashboard() {
   const upcomingEvents = useMemo(() => getUpcomingEvents(3), [getUpcomingEvents]);
   const todaysTraining = useMemo(() => getTodaysTraining(), [getTodaysTraining]);
   
-  // Calcular progresso do nível
-  const levelProgress = progress ? getLevelProgress(progress.total_points, progress.current_level) : { progress: 0, pointsToNext: 100 };
+  // Calcular progresso do nível (memoizado)
+  const [levelProgress, setLevelProgress] = useState({ progress: 0, pointsToNext: 100 });
+  
+  useEffect(() => {
+    if (progress) {
+      getLevelProgress(progress.total_points, progress.current_level).then(setLevelProgress);
+    }
+  }, [progress?.total_points, progress?.current_level, getLevelProgress]);
 
   // PRÉ-CARREGAR rankings no Dashboard (só roda 1x)
   const [hasPreloadedRankings, setHasPreloadedRankings] = useState(false);
