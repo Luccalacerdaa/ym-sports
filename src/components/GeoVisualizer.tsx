@@ -60,9 +60,9 @@ export const GeoVisualizer = ({ className, rankingType = 'all' }: GeoVisualizerP
       case 'national':
         return 'Atletas no Brasil';
       case 'regional':
-        return `Atletas na Região ${userLocation?.region || 'Sudeste'}`;
+        return `Atletas no Estado ${userLocation?.state || 'RJ'}`;
       case 'local':
-        return `Atletas em ${userLocation?.state || 'MG'}`;
+        return `Atletas em ${userLocation?.state || 'RJ'}`;
       default:
         return 'Atletas Próximos';
     }

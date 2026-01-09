@@ -410,7 +410,7 @@ export default function NewRanking() {
               rankings={regionalRanking} 
               type="regional" 
               loading={loading}
-              title={`Ranking Regional - ${userLocation.region}`}
+              title={`Ranking Regional - ${userLocation.state}`}
             />
           ) : (
             <Card>
