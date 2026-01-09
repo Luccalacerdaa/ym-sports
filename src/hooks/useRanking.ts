@@ -445,6 +445,16 @@ export const useRanking = () => {
         console.warn('Erro ao buscar perfis:', profilesError.message);
       }
       
+      // Buscar localizações (para pegar cidade no ranking local)
+      const { data: locationsData, error: locationsError } = await supabase
+        .from('user_locations')
+        .select('user_id, state, city_approximate')
+        .in('user_id', userIds);
+      
+      if (locationsError) {
+        console.warn('Erro ao buscar localizações:', locationsError.message);
+      }
+      
       // Verificar se há usuários sem perfil e criar perfis temporários em memória
       const missingProfileIds = userIds.filter(id => 
         !profilesData || !profilesData.some(p => p.id === id)
@@ -532,6 +542,7 @@ export const useRanking = () => {
       const rankingsWithUserInfo = uniqueRankings.map(entry => {
         const profile = allProfiles.find(p => p.id === entry.user_id);
         const progress = progressData?.find(p => p.user_id === entry.user_id);
+        const location = locationsData?.find(l => l.user_id === entry.user_id);
         
         // Usar nome do perfil ou nome mais amigável como fallback
         let displayName = profile?.name;
@@ -550,11 +561,27 @@ export const useRanking = () => {
         // Usar pontos do progresso se disponíveis (mais atualizados)
         const points = progress?.total_points || entry.total_points;
         
+        // Definir localização baseado no tipo de ranking
+        let displayLocation = 'Brasil';
+        if (entry.ranking_type === 'local' && location?.city_approximate) {
+          // Local: mostrar cidade + estado
+          displayLocation = `${location.city_approximate} - ${entry.region || location.state}`;
+        } else if (entry.ranking_type === 'regional' && location?.state) {
+          // Regional: mostrar estado
+          displayLocation = location.state;
+        } else if (entry.ranking_type === 'national' && location?.state) {
+          // Nacional: mostrar estado
+          displayLocation = location.state;
+        } else if (entry.region) {
+          // Fallback: mostrar o que tiver na coluna region
+          displayLocation = entry.region;
+        }
+        
         return {
           ...entry,
           user_name: displayName,
           user_avatar: profile?.avatar_url,
-          user_location: `${entry.region || 'Brasil'}`,
+          user_location: displayLocation,
           total_points: points, // Atualizar pontos com o valor mais recente
         };
       });
