@@ -14,18 +14,16 @@ WITH ranked_users AS (
   SELECT 
     up.user_id,
     up.total_points,
-    up.current_level,
     ROW_NUMBER() OVER (ORDER BY up.total_points DESC, up.updated_at ASC) as position
   FROM user_progress up
   WHERE up.total_points > 0
 )
-INSERT INTO rankings (user_id, ranking_type, position, total_points, current_level, period, region)
+INSERT INTO rankings (user_id, ranking_type, position, total_points, period, region)
 SELECT 
   user_id,
   'national' as ranking_type,
   position,
   total_points,
-  current_level,
   'all_time' as period,
   NULL as region
 FROM ranked_users;
@@ -35,20 +33,18 @@ WITH ranked_by_region AS (
   SELECT 
     up.user_id,
     up.total_points,
-    up.current_level,
     ul.region,
     ROW_NUMBER() OVER (PARTITION BY ul.region ORDER BY up.total_points DESC, up.updated_at ASC) as position
   FROM user_progress up
   INNER JOIN user_locations ul ON ul.user_id = up.user_id
   WHERE up.total_points > 0 AND ul.region IS NOT NULL
 )
-INSERT INTO rankings (user_id, ranking_type, position, total_points, current_level, period, region)
+INSERT INTO rankings (user_id, ranking_type, position, total_points, period, region)
 SELECT 
   user_id,
   'regional' as ranking_type,
   position,
   total_points,
-  current_level,
   'all_time' as period,
   region
 FROM ranked_by_region;
@@ -58,20 +54,18 @@ WITH ranked_by_state AS (
   SELECT 
     up.user_id,
     up.total_points,
-    up.current_level,
     ul.state as region,
     ROW_NUMBER() OVER (PARTITION BY ul.state ORDER BY up.total_points DESC, up.updated_at ASC) as position
   FROM user_progress up
   INNER JOIN user_locations ul ON ul.user_id = up.user_id
   WHERE up.total_points > 0 AND ul.state IS NOT NULL
 )
-INSERT INTO rankings (user_id, ranking_type, position, total_points, current_level, period, region)
+INSERT INTO rankings (user_id, ranking_type, position, total_points, period, region)
 SELECT 
   user_id,
   'local' as ranking_type,
   position,
   total_points,
-  current_level,
   'all_time' as period,
   region
 FROM ranked_by_state;
