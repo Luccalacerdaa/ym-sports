@@ -120,27 +120,27 @@ export default function Design() {
           <img 
             src="/icons/logo.png" 
             alt="YM Sports" 
-            className="h-16 w-16 object-contain"
+            className="h-24 w-24 object-contain"
           />
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-4xl font-bold text-white">
             YM DESIGN
           </h1>
         </div>
         
-        <p className="text-lg text-gray-400">Designer Especialista em Esportes</p>
+        <p className="text-2xl text-[#FFD700] font-semibold">Designer Especialista em Esportes</p>
         
         <h2 className="text-xl font-semibold text-white">
           Material profissional para atletas
         </h2>
         
-        <p className="text-base text-gray-300 max-w-2xl mx-auto">
-          Artes profissionais, edição de vídeo e portfólio para divulgação.
+        <p className="text-base text-gray-300 max-w-xl mx-auto">
+          Artes profissionais, edição de vídeo e divulgação.
         </p>
       </div>
 
       {/* Filtros do Portfólio */}
       <div className="space-y-6">
-        <h2 className="text-3xl font-bold text-center text-white">Portfólio</h2>
+        <h2 className="text-3xl font-bold text-center text-white">Trabalhos</h2>
         
         <div className="flex flex-wrap justify-center gap-2">
           {categories.map((category) => (

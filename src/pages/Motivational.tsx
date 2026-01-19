@@ -89,8 +89,7 @@ export default function Motivational() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <Play className="w-8 h-8 text-yellow-500" />
+            <div>
               <h1 className="text-3xl font-bold text-white">
                 Motivação
               </h1>
@@ -100,24 +99,6 @@ export default function Motivational() {
           <p className="text-gray-400">
             Vídeos motivacionais para inspirar sua jornada
           </p>
-        </div>
-
-
-        {/* Botão de atualizar */}
-        <div className="mb-8 flex justify-end">
-          <Button
-            onClick={() => loadVideosFromChannel(channelUrl)}
-            disabled={loading}
-            variant="outline"
-            className="border-gray-700 text-gray-300 hover:bg-gray-800"
-          >
-            {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            ) : (
-              <RefreshCw className="w-4 h-4 mr-2" />
-            )}
-            Atualizar
-          </Button>
         </div>
 
         {/* Loading */}
@@ -132,9 +113,9 @@ export default function Motivational() {
         {!loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredVideos.map(video => (
-              <Card key={video.id} className="bg-gray-800/50 border-gray-700 hover:border-gray-500 transition-all duration-300 group">
+              <Card key={video.id} className="bg-gray-100 border-gray-300 hover:border-gray-400 transition-all duration-300 group">
                 <CardHeader className="p-0">
-                  <div className="relative aspect-video overflow-hidden rounded-t-lg bg-gray-800">
+                  <div className="relative aspect-video overflow-hidden rounded-t-lg bg-gray-200">
                     <VideoThumbnail 
                       video={video}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -171,15 +152,15 @@ export default function Motivational() {
                 <CardContent className="p-4">
                   <div className="space-y-3">
                     <div>
-                      <h3 className="font-semibold text-white text-sm line-clamp-2 mb-1">
+                      <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 mb-1">
                         {video.title}
                       </h3>
-                      <p className="text-gray-400 text-xs line-clamp-2">
+                      <p className="text-gray-600 text-xs line-clamp-2">
                         {video.description}
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-gray-400">
+                    <div className="flex items-center justify-between text-xs text-gray-600">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         <span>{formatDate(video.publishedAt)}</span>
@@ -190,12 +171,12 @@ export default function Motivational() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-center pt-2 border-t border-gray-800">
+                    <div className="flex items-center justify-center pt-2 border-t border-gray-300">
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={() => toggleFavorite(video.id)}
-                        className={`text-xs ${favorites.includes(video.id) ? 'text-red-500' : 'text-gray-400'} hover:text-red-500`}
+                        className={`text-xs ${favorites.includes(video.id) ? 'text-red-500' : 'text-gray-600'} hover:text-red-500`}
                       >
                         <span className={`mr-1 ${favorites.includes(video.id) ? '❤️' : '🤍'}`} />
                         {favorites.includes(video.id) ? 'Favoritado' : 'Favoritar'}
@@ -248,26 +229,26 @@ export default function Motivational() {
 
         {/* Estatísticas */}
         <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-gray-900/50 border-gray-800 text-center p-4">
+          <Card className="bg-gray-100 border-gray-300 text-center p-4">
             <div className="text-2xl font-bold text-yellow-500">{videos.length}</div>
-            <div className="text-sm text-gray-400">Vídeos Disponíveis</div>
+            <div className="text-sm text-gray-600">Vídeos Disponíveis</div>
           </Card>
           
-          <Card className="bg-gray-900/50 border-gray-800 text-center p-4">
+          <Card className="bg-gray-100 border-gray-300 text-center p-4">
             <div className="text-2xl font-bold text-red-500">{favorites.length}</div>
-            <div className="text-sm text-gray-400">Favoritos</div>
+            <div className="text-sm text-gray-600">Favoritos</div>
           </Card>
           
-          <Card className="bg-gray-900/50 border-gray-800 text-center p-4">
-            <div className="text-2xl font-bold text-gray-300">{filteredVideos.length}</div>
-            <div className="text-sm text-gray-400">Resultados</div>
+          <Card className="bg-gray-100 border-gray-300 text-center p-4">
+            <div className="text-2xl font-bold text-gray-900">{filteredVideos.length}</div>
+            <div className="text-sm text-gray-600">Resultados</div>
           </Card>
           
-          <Card className="bg-gray-900/50 border-gray-800 text-center p-4">
+          <Card className="bg-gray-100 border-gray-300 text-center p-4">
             <div className="text-2xl font-bold text-green-500">
               {videos.filter(v => parseInt(v.duration) <= 60).length}
             </div>
-            <div className="text-sm text-gray-400">Shorts</div>
+            <div className="text-sm text-gray-600">Shorts</div>
           </Card>
         </div>
 

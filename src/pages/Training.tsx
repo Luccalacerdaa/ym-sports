@@ -210,8 +210,8 @@ export default function Training() {
           
           <Dialog open={isGenerateDialogOpen} onOpenChange={setIsGenerateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
-                <Sparkles className="h-4 w-4" />
+              <Button className="flex items-center gap-2 bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-black font-semibold text-base px-6 py-6 h-auto shadow-lg shadow-green-500/50">
+                <Sparkles className="h-5 w-5" />
                 Gerar com IA
               </Button>
             </DialogTrigger>
@@ -372,11 +372,11 @@ export default function Training() {
                   <Button 
                     onClick={handleGenerateTraining} 
                     disabled={aiLoading}
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                    className="flex-1 bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-black font-semibold shadow-lg shadow-green-500/50"
                   >
                     {aiLoading ? (
                       <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black mr-2"></div>
                         Gerando...
                       </>
                     ) : (

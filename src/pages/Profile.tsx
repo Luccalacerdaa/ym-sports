@@ -355,7 +355,7 @@ export default function Profile() {
                     <Shield className="h-4 w-4" />
                     Email
                   </Label>
-                  <p className="text-lg font-semibold">{user?.email || "Email não disponível"}</p>
+                  <p className="text-lg font-semibold break-words break-all">{user?.email || "Email não disponível"}</p>
                 </div>
 
                 <div className="space-y-2">
@@ -574,7 +574,7 @@ export default function Profile() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-muted-foreground">Email</Label>
-                <p className="text-lg font-semibold">{user?.email}</p>
+                <p className="text-lg font-semibold break-words break-all">{user?.email}</p>
               </div>
               <div className="space-y-2">
                 <Label className="text-muted-foreground">Membro desde</Label>

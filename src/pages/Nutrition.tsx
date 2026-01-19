@@ -303,6 +303,7 @@ function NutritionContent() {
               <Button 
                 size="sm" 
                 onClick={() => setIsGeneratorOpen(true)}
+                className="bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-black font-semibold shadow-lg shadow-green-500/50"
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Novo Plano
@@ -680,7 +681,7 @@ function NutritionContent() {
   };
 
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Nutrição</h1>
         <div className="flex gap-2">
@@ -696,6 +697,7 @@ function NutritionContent() {
             variant="outline" 
             size="sm"
             onClick={() => setIsGeneratorOpen(true)}
+            className="bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-black font-semibold shadow-lg shadow-green-500/50 border-0"
           >
             <Plus className="h-4 w-4 mr-2" />
             Novo Plano
@@ -765,11 +767,32 @@ function NutritionContent() {
   );
 }
 
-// Export com ErrorBoundary
 export default function Nutrition() {
   return (
     <NutritionErrorBoundary>
-      <NutritionContent />
+      <div className="container max-w-4xl mx-auto px-4 py-6">
+        {/* Aviso Importante */}
+        <Card className="mb-6 bg-yellow-500/10 border-yellow-500/50">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+              <div className="space-y-2">
+                <h3 className="font-semibold text-yellow-500">Aviso Importante sobre Nutrição</h3>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  Esta ferramenta tem como objetivo auxiliar e orientar sobre alimentação saudável para atletas. 
+                  Os planos gerados são sugestões educacionais e <span className="font-semibold text-yellow-400">não substituem 
+                  o acompanhamento de um nutricionista profissional</span>. Se você possui alergias alimentares, 
+                  restrições médicas ou condições de saúde específicas, consulte um profissional antes de seguir 
+                  qualquer plano alimentar. Não nos responsabilizamos por reações alérgicas ou problemas de saúde 
+                  decorrentes do uso inadequado desta ferramenta.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <NutritionContent />
+      </div>
     </NutritionErrorBoundary>
   );
 }
