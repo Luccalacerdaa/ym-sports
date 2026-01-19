@@ -13,58 +13,99 @@ import {
   Sparkles,
   ExternalLink,
   Heart,
-  Eye
+  Eye,
+  Play
 } from "lucide-react";
 
-// Dados de exemplo dos trabalhos do Yago
-const designPortfolio = [
+// Dados dos trabalhos de Fotos (Artes Profissionais)
+const photoPortfolio = [
   {
     id: 1,
-    title: "Arte Profissional - João Silva",
+    title: "Arte Profissional - Jogador",
     category: "Foto Profissional",
     description: "Design profissional para jogador de futebol com efeitos modernos e logo do clube.",
     tags: ["Profissional", "Futebol", "Moderno"],
-    rating: 5
+    rating: 5,
+    image: "/ym-design/fotos/foto-1-jogador-profissional.jpg" // ⚠️ Adicione seu arquivo aqui!
   },
   {
     id: 2,
-    title: "Card de Apresentação - Pedro Santos",
+    title: "Card de Apresentação",
     category: "Card Pessoal",
     description: "Card personalizado com estatísticas e informações do atleta.",
     tags: ["Card", "Estatísticas", "Personalizado"],
-    rating: 5
+    rating: 5,
+    image: "/ym-design/fotos/foto-2-card-apresentacao.jpg"
   },
   {
     id: 3,
-    title: "Banner para Redes Sociais - Maria Costa",
+    title: "Banner para Redes Sociais",
     category: "Social Media",
     description: "Banner dinâmico para Instagram e Facebook com cores vibrantes.",
     tags: ["Social Media", "Instagram", "Vibrante"],
-    rating: 5
+    rating: 5,
+    image: "/ym-design/fotos/foto-3-banner-social.jpg"
   },
   {
     id: 4,
-    title: "Montagem Artística - Carlos Lima",
+    title: "Montagem Artística",
     category: "Arte Digital",
     description: "Montagem artística com efeitos especiais e composição única.",
     tags: ["Arte Digital", "Efeitos", "Criativo"],
-    rating: 5
+    rating: 5,
+    image: "/ym-design/fotos/foto-4-montagem-artistica.jpg"
   },
   {
     id: 5,
-    title: "Logo Personalizada - Time Águias",
+    title: "Logo Personalizada",
     category: "Branding",
     description: "Criação de logo exclusiva para time amador com identidade visual completa.",
     tags: ["Logo", "Branding", "Time"],
-    rating: 5
+    rating: 5,
+    image: "/ym-design/fotos/foto-5-logo-time.jpg"
   },
   {
     id: 6,
-    title: "Poster Motivacional - Ana Rodrigues",
+    title: "Poster Motivacional",
     category: "Poster",
     description: "Poster inspiracional com frase motivacional e design impactante.",
     tags: ["Motivacional", "Poster", "Inspiração"],
-    rating: 5
+    rating: 5,
+    image: "/ym-design/fotos/foto-6-poster-motivacional.jpg"
+  }
+];
+
+// Dados dos trabalhos de Motion Design
+const motionPortfolio = [
+  {
+    id: 1,
+    title: "Intro Dinâmica - Jogador",
+    description: "Vídeo de apresentação com efeitos de motion design e transições suaves.",
+    tags: ["Motion", "Intro", "Profissional"],
+    rating: 5,
+    video: "/ym-design/motion/motion-1-intro-jogador.mp4", // ⚠️ Adicione seu vídeo aqui!
+    thumbnail: "/ym-design/motion/thumbnails/motion-1-thumb.jpg",
+    youtubeId: "" // Ou use YouTube ID se preferir
+  },
+  {
+    id: 2,
+    title: "Highlights Animados",
+    description: "Compilação de melhores momentos com efeitos visuais e música.",
+    tags: ["Highlights", "Animação", "Esportes"],
+    rating: 5,
+    video: "/ym-design/motion/motion-2-highlights.mp4",
+    thumbnail: "/ym-design/motion/thumbnails/motion-2-thumb.jpg",
+    youtubeId: ""
+  },
+  {
+    id: 3,
+    title: "Estatísticas Animadas",
+    description: "Visualização de dados e estatísticas com infográficos animados.",
+    tags: ["Stats", "Infográfico", "Moderno"],
+    rating: 5,
+    video: "/ym-design/motion/motion-3-estatisticas.mp4",
+    thumbnail: "/ym-design/motion/thumbnails/motion-3-thumb.jpg",
+    youtubeId: ""
   }
 ];
 
@@ -96,13 +137,15 @@ const services = [
 ];
 
 export default function Design() {
+  const [selectedSection, setSelectedSection] = useState<"fotos" | "motion">("fotos");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedVideo, setSelectedVideo] = useState<any>(null);
 
   const categories = ["all", "Foto Profissional", "Card Pessoal", "Social Media", "Arte Digital", "Branding", "Poster"];
 
   const filteredPortfolio = selectedCategory === "all" 
-    ? designPortfolio 
-    : designPortfolio.filter(item => item.category === selectedCategory);
+    ? photoPortfolio 
+    : photoPortfolio.filter(item => item.category === selectedCategory);
 
   const handleWhatsAppContact = () => {
     const message = encodeURIComponent(
@@ -138,79 +181,266 @@ export default function Design() {
         </p>
       </div>
 
-      {/* Filtros do Portfólio */}
-      <div className="space-y-6">
-        <h2 className="text-3xl font-bold text-center text-white">Trabalhos</h2>
-        
-        <div className="flex flex-wrap justify-center gap-2">
-          {categories.map((category) => (
-            <Button
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(category)}
-              className={selectedCategory === category ? "bg-yellow-500 text-black hover:bg-yellow-400" : "border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10"}
-            >
-              {category === "all" ? "Todos" : category}
-            </Button>
-          ))}
-        </div>
+      {/* Seleção de Seção: Fotos ou Motion */}
+      <div className="flex justify-center gap-4 mb-8">
+        <Button
+          size="lg"
+          variant={selectedSection === "fotos" ? "default" : "outline"}
+          onClick={() => setSelectedSection("fotos")}
+          className={selectedSection === "fotos" 
+            ? "bg-yellow-500 text-black hover:bg-yellow-400 font-semibold" 
+            : "border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10"}
+        >
+          <Camera className="h-5 w-5 mr-2" />
+          Fotos Profissionais
+        </Button>
+        <Button
+          size="lg"
+          variant={selectedSection === "motion" ? "default" : "outline"}
+          onClick={() => setSelectedSection("motion")}
+          className={selectedSection === "motion" 
+            ? "bg-yellow-500 text-black hover:bg-yellow-400 font-semibold" 
+            : "border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10"}
+        >
+          <Play className="h-5 w-5 mr-2" />
+          Motion Design
+        </Button>
       </div>
 
-      {/* Grid do Portfólio */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredPortfolio.map((item) => (
-          <Card key={item.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group border border-yellow-500/20 bg-gray-900/50">
-            <div className="relative overflow-hidden">
-              {/* Proporção 1080x1920 (9:16) */}
-              <div 
-                className="w-full bg-gray-800 flex items-center justify-center group-hover:bg-gray-700 transition-colors duration-300"
-                style={{ aspectRatio: '9/16' }}
+      {/* Filtros do Portfólio (apenas para Fotos) */}
+      {selectedSection === "fotos" && (
+        <div className="space-y-6">
+          <h2 className="text-3xl font-bold text-center text-white">Artes Profissionais</h2>
+          
+          <div className="flex flex-wrap justify-center gap-2">
+            {categories.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(category)}
+                className={selectedCategory === category ? "bg-yellow-500 text-black hover:bg-yellow-400" : "border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10"}
               >
-                <div className="text-center text-gray-400">
-                  <Image className="h-12 w-12 mx-auto mb-2" />
-                  <p className="text-sm">1080 x 1920 px</p>
-                  <p className="text-xs">Design Preview</p>
+                {category === "all" ? "Todos" : category}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {selectedSection === "motion" && (
+        <div className="space-y-6">
+          <h2 className="text-3xl font-bold text-center text-white">Motion Design</h2>
+          <p className="text-center text-gray-400">Vídeos animados e apresentações dinâmicas</p>
+        </div>
+      )}
+
+      {/* Grid de Fotos */}
+      {selectedSection === "fotos" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredPortfolio.map((item) => (
+            <Card key={item.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group border border-yellow-500/20 bg-gray-900/50">
+              <div className="relative overflow-hidden">
+                {/* Imagem real ou placeholder */}
+                <div 
+                  className="w-full bg-gray-800 flex items-center justify-center group-hover:bg-gray-700 transition-colors duration-300"
+                  style={{ aspectRatio: '9/16' }}
+                >
+                  <img 
+                    src={item.image} 
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback se a imagem não existir
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                  <div className="hidden text-center text-gray-400">
+                    <Image className="h-12 w-12 mx-auto mb-2" />
+                    <p className="text-sm">1080 x 1920 px</p>
+                    <p className="text-xs">Adicione sua foto!</p>
+                  </div>
+                </div>
+                <div className="absolute top-4 left-4">
+                  <Badge className="bg-yellow-500 text-black">
+                    {item.category}
+                  </Badge>
                 </div>
               </div>
-              <div className="absolute top-4 left-4">
-                <Badge className="bg-yellow-500 text-black">
-                  {item.category}
-                </Badge>
-              </div>
-            </div>
-            
-            <CardContent className="p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-lg text-yellow-500">{item.title}</h3>
-                <div className="flex items-center gap-1">
-                  {[...Array(item.rating)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-lg text-yellow-500">{item.title}</h3>
+                  <div className="flex items-center gap-1">
+                    {[...Array(item.rating)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                </div>
+                
+                <p className="text-sm text-gray-300">{item.description}</p>
+                
+                <div className="flex flex-wrap gap-1">
+                  {item.tags.map((tag, tagIndex) => (
+                    <Badge key={tagIndex} variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-500 border border-yellow-500/30">
+                      {tag}
+                    </Badge>
                   ))}
                 </div>
+                
+                <Button 
+                  className="w-full bg-yellow-500 text-black hover:bg-yellow-400"
+                  onClick={handleWhatsAppContact}
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Solicitar Orçamento
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Grid de Motion */}
+      {selectedSection === "motion" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {motionPortfolio.map((item) => (
+            <Card key={item.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group border border-yellow-500/20 bg-gray-900/50">
+              <div className="relative overflow-hidden cursor-pointer" onClick={() => setSelectedVideo(item)}>
+                {/* Thumbnail do vídeo */}
+                <div 
+                  className="w-full bg-gray-800 flex items-center justify-center group-hover:bg-gray-700 transition-colors duration-300 relative"
+                  style={{ aspectRatio: '16/9' }}
+                >
+                  <img 
+                    src={item.thumbnail} 
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                  <div className="hidden text-center text-gray-400">
+                    <Play className="h-12 w-12 mx-auto mb-2" />
+                    <p className="text-sm">Vídeo Motion</p>
+                    <p className="text-xs">Adicione seu vídeo!</p>
+                  </div>
+                  {/* Ícone de Play sobreposto */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/60 transition-colors">
+                    <div className="bg-yellow-500 rounded-full p-4 group-hover:scale-110 transition-transform">
+                      <Play className="h-8 w-8 text-black fill-black" />
+                    </div>
+                  </div>
+                </div>
               </div>
               
-              <p className="text-sm text-gray-300">{item.description}</p>
-              
-              <div className="flex flex-wrap gap-1">
-                {item.tags.map((tag, tagIndex) => (
-                  <Badge key={tagIndex} variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-500 border border-yellow-500/30">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-              
-              <Button 
-                className="w-full bg-yellow-500 text-black hover:bg-yellow-400"
-                onClick={handleWhatsAppContact}
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-lg text-yellow-500">{item.title}</h3>
+                  <div className="flex items-center gap-1">
+                    {[...Array(item.rating)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                </div>
+                
+                <p className="text-sm text-gray-300">{item.description}</p>
+                
+                <div className="flex flex-wrap gap-1">
+                  {item.tags.map((tag, tagIndex) => (
+                    <Badge key={tagIndex} variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-500 border border-yellow-500/30">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    className="flex-1 bg-yellow-500 text-black hover:bg-yellow-400"
+                    onClick={() => setSelectedVideo(item)}
+                  >
+                    <Play className="h-4 w-4 mr-2" />
+                    Assistir
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="flex-1 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black"
+                    onClick={handleWhatsAppContact}
+                  >
+                    Orçamento
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Modal de Vídeo */}
+      {selectedVideo && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setSelectedVideo(null)}>
+          <div className="bg-gray-900 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-gray-800">
+              <h3 className="text-lg font-semibold text-white">
+                {selectedVideo.title}
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedVideo(null)}
+                className="text-gray-400 hover:text-white"
               >
-                <Eye className="h-4 w-4 mr-2" />
-                Solicitar Orçamento
+                ✕
               </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            </div>
+            
+            <div className="aspect-video bg-black">
+              {selectedVideo.youtubeId ? (
+                <iframe
+                  src={`https://www.youtube.com/embed/${selectedVideo.youtubeId}?autoplay=1`}
+                  className="w-full h-full"
+                  allowFullScreen
+                  allow="autoplay"
+                  title={selectedVideo.title}
+                />
+              ) : (
+                <video 
+                  src={selectedVideo.video} 
+                  controls 
+                  autoPlay
+                  className="w-full h-full"
+                  onError={(e) => {
+                    (e.target as HTMLVideoElement).style.display = 'none';
+                    const parent = (e.target as HTMLVideoElement).parentElement;
+                    if (parent) {
+                      parent.innerHTML = '<div class="flex items-center justify-center h-full text-gray-400"><p>Vídeo não encontrado. Adicione o arquivo na pasta public/ym-design/motion/</p></div>';
+                    }
+                  }}
+                >
+                  Seu navegador não suporta vídeos.
+                </video>
+              )}
+            </div>
+            
+            <div className="p-4 border-t border-gray-800">
+              <p className="text-sm text-gray-400 text-center">
+                {selectedVideo.description}
+              </p>
+              <div className="flex justify-center mt-4">
+                <Button 
+                  className="bg-yellow-500 text-black hover:bg-yellow-400"
+                  onClick={handleWhatsAppContact}
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Solicitar Serviço Similar
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Oferta Especial */}
       <Card className="bg-yellow-500/10 border border-yellow-500/30 text-white">
