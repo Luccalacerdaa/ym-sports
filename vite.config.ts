@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => ({
         type: 'module'
       },
       manifest: {
-        name: 'YM Sports - O melhor amigo do jogador',
+        name: 'YM Sports - A evolução do esporte começa aqui',
         short_name: 'YM Sports',
         description: 'Eleve seu desempenho esportivo com treinos inteligentes, calendário de jogos, ranking regional e gamificação.',
         theme_color: '#ffffff',

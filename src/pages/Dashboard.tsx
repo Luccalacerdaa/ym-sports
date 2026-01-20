@@ -111,7 +111,7 @@ export default function Dashboard() {
               <h1 className="text-3xl font-bold text-foreground">
                 Olá, {displayName}!
               </h1>
-              <p className="text-muted-foreground">Seu melhor amigo no caminho do futebol</p>
+              <p className="text-muted-foreground">A evolução do esporte começa aqui.</p>
             </div>
           </div>
         </div>

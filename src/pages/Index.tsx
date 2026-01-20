@@ -284,7 +284,8 @@ const Index = () => {
             {/* Feature 1 - Calendário Inteligente */}
             <div className="group relative overflow-hidden rounded-2xl aspect-square cursor-pointer">
               <img src="/landing-page/Calendario.JPEG" alt="Calendário inteligente para organizar jogos" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
+              {/* Overlay amarelado por padrão, escurece no hover */}
+              <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/80 via-yellow-800/40 to-transparent group-hover:from-black group-hover:via-black/60 transition-all duration-300" />
               
               <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                 <div className="bg-blue-500/20 w-16 h-16 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -302,7 +303,8 @@ const Index = () => {
             {/* Feature 2 - Inteligência Artificial */}
             <div className="group relative overflow-hidden rounded-2xl aspect-square cursor-pointer">
               <img src="/landing-page/Foto-IA.JPEG" alt="Treinos personalizados com Inteligência Artificial" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
+              {/* Overlay amarelado por padrão, escurece no hover */}
+              <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/80 via-yellow-800/40 to-transparent group-hover:from-black group-hover:via-black/60 transition-all duration-300" />
               
               {/* Content that slides up on hover */}
               <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
@@ -321,7 +323,8 @@ const Index = () => {
             {/* Feature 3 - Ranking Regional */}
             <div className="group relative overflow-hidden rounded-2xl aspect-square cursor-pointer">
               <img src="/landing-page/Ranking-regional.JPEG" alt="Ranking regional e competições" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
+              {/* Overlay amarelado por padrão, escurece no hover */}
+              <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/80 via-yellow-800/40 to-transparent group-hover:from-black group-hover:via-black/60 transition-all duration-300" />
               
               <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                 <div className="bg-yellow-500/20 w-16 h-16 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -339,7 +342,8 @@ const Index = () => {
             {/* Feature 4 - Portfólio Online */}
             <div className="group relative overflow-hidden rounded-2xl aspect-square cursor-pointer">
               <img src="/landing-page/Portifolio.JPEG" alt="Portfólio online profissional" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
+              {/* Overlay amarelado por padrão, escurece no hover */}
+              <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/80 via-yellow-800/40 to-transparent group-hover:from-black group-hover:via-black/60 transition-all duration-300" />
               
               <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                 <div className="bg-purple-500/20 w-16 h-16 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">

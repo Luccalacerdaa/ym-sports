@@ -205,7 +205,7 @@ export default function Training() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Treinos</h1>
-            <p className="text-muted-foreground">Planeje e execute seus treinos personalizados</p>
+            <p className="text-muted-foreground">Tecnologia que transforma treino em performance.</p>
           </div>
           
           <Dialog open={isGenerateDialogOpen} onOpenChange={setIsGenerateDialogOpen}>
