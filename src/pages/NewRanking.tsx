@@ -116,7 +116,7 @@ export default function NewRanking() {
       }
     };
     calculateProgress();
-  }, [userPosition]);
+  }, [userPosition?.total_points, userPosition?.current_level]); // FIXO: só depende dos valores, não da função
 
   // Buscar rankings quando entrar na página (se necessário)
   useEffect(() => {

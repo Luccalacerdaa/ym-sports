@@ -34,7 +34,7 @@ export default function Dashboard() {
     if (progress) {
       getLevelProgress(progress.total_points, progress.current_level).then(setLevelProgress);
     }
-  }, [progress?.total_points, progress?.current_level, getLevelProgress]);
+  }, [progress?.total_points, progress?.current_level]); // REMOVIDO getLevelProgress das dependências
 
   // PRÉ-CARREGAR rankings no Dashboard (só roda 1x)
   const [hasPreloadedRankings, setHasPreloadedRankings] = useState(false);

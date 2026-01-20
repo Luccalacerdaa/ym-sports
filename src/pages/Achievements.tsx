@@ -44,7 +44,7 @@ const Achievements = () => {
         setLevelProgress(result);
       });
     }
-  }, [progress?.total_points, progress?.current_level]);
+  }, [progress?.total_points, progress?.current_level]); // FIXO: removido getLevelProgress
 
   if (loading) {
     return (
