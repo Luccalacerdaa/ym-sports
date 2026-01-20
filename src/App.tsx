@@ -31,6 +31,7 @@ import Design from "./pages/Design";
 import Motivational from "./pages/Motivational";
 import Settings from "./pages/Settings";
 import NotificationTest from "./pages/NotificationTest";
+import AdminRankings from "./pages/AdminRankings";
 import DashboardLayout from "./pages/DashboardLayout";
 import NotFound from "./pages/NotFound";
 import InstallGuide from "./pages/InstallGuide";
@@ -81,6 +82,7 @@ const AppContent = () => {
                 <Route path="motivational" element={<Motivational />} />
                 <Route path="settings" element={<Settings />} />
                 <Route path="notification-test" element={<NotificationTest />} />
+                <Route path="admin-rankings" element={<AdminRankings />} />
             </Route>
             <Route path="/portfolio/:slug" element={<PublicPortfolio />} />
             <Route path="*" element={<NotFound />} />
