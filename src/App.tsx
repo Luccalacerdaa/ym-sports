@@ -22,7 +22,7 @@ import HeightProjection from "./pages/HeightProjection";
 import ExerciseLibrary from "./pages/ExerciseLibrary";
 import Achievements from "./pages/Achievements";
 import Ranking from "./pages/Ranking";
-import NewRanking from "./pages/NewRanking";
+import Rankings from "./pages/Rankings";
 import Nutrition from "./pages/NutritionNew";
 import NutritionPlanView from "./pages/NutritionPlanView";
 import Portfolio from "./pages/Portfolio";
@@ -74,7 +74,7 @@ const AppContent = () => {
               <Route path="height-projection" element={<HeightProjection />} />
               <Route path="exercises" element={<ExerciseLibrary />} />
               <Route path="achievements" element={<Achievements />} />
-              <Route path="ranking" element={<NewRanking />} />
+              <Route path="ranking" element={<Rankings />} />
                 <Route path="nutrition" element={<Nutrition />} />
                 <Route path="nutrition/:planId" element={<NutritionPlanView />} />
                 <Route path="portfolio" element={<Portfolio />} />
