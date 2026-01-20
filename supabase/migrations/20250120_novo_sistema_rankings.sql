@@ -22,14 +22,16 @@ CREATE TABLE rankings_cache (
   points INTEGER NOT NULL DEFAULT 0,
   region TEXT, -- Para regional: 'Sudeste', 'Norte', etc. Para local: estado (ex: 'MG')
   city TEXT, -- Para local: cidade aproximada
-  calculated_at TIMESTAMPTZ DEFAULT NOW(),
-  
-  -- Índices para performance
-  CONSTRAINT rankings_cache_unique UNIQUE (user_id, ranking_type, COALESCE(region, ''), COALESCE(city, ''))
+  calculated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 3️⃣ ÍNDICES PARA PERFORMANCE
 -- ============================================
+-- Índice único para prevenir duplicações (suporta COALESCE)
+CREATE UNIQUE INDEX idx_rankings_cache_unique 
+  ON rankings_cache(user_id, ranking_type, COALESCE(region, ''), COALESCE(city, ''));
+
+-- Índices para performance de queries
 CREATE INDEX idx_rankings_cache_type ON rankings_cache(ranking_type);
 CREATE INDEX idx_rankings_cache_user ON rankings_cache(user_id);
 CREATE INDEX idx_rankings_cache_points ON rankings_cache(points DESC);
@@ -111,26 +113,23 @@ BEGIN
   FROM user_locations 
   WHERE user_id = target_user_id;
   
-  -- Atualizar/inserir ranking nacional
-  INSERT INTO rankings_cache (user_id, ranking_type, points)
-  VALUES (target_user_id, 'national', COALESCE(user_points, 0))
-  ON CONFLICT (user_id, ranking_type, COALESCE(region, ''), COALESCE(city, ''))
-  DO UPDATE SET points = COALESCE(user_points, 0), calculated_at = NOW();
+  -- Deletar rankings antigos do usuário
+  DELETE FROM rankings_cache WHERE user_id = target_user_id;
   
-  -- Atualizar/inserir ranking regional (se tiver região)
+  -- Inserir ranking nacional
+  INSERT INTO rankings_cache (user_id, ranking_type, points, region, city)
+  VALUES (target_user_id, 'national', COALESCE(user_points, 0), NULL, NULL);
+  
+  -- Inserir ranking regional (se tiver região)
   IF user_region IS NOT NULL THEN
-    INSERT INTO rankings_cache (user_id, ranking_type, points, region)
-    VALUES (target_user_id, 'regional', COALESCE(user_points, 0), user_region)
-    ON CONFLICT (user_id, ranking_type, COALESCE(region, ''), COALESCE(city, ''))
-    DO UPDATE SET points = COALESCE(user_points, 0), calculated_at = NOW();
+    INSERT INTO rankings_cache (user_id, ranking_type, points, region, city)
+    VALUES (target_user_id, 'regional', COALESCE(user_points, 0), user_region, NULL);
   END IF;
   
-  -- Atualizar/inserir ranking local (se tiver estado)
+  -- Inserir ranking local (se tiver estado)
   IF user_state IS NOT NULL THEN
     INSERT INTO rankings_cache (user_id, ranking_type, points, region, city)
-    VALUES (target_user_id, 'local', COALESCE(user_points, 0), user_state, user_city)
-    ON CONFLICT (user_id, ranking_type, COALESCE(region, ''), COALESCE(city, ''))
-    DO UPDATE SET points = COALESCE(user_points, 0), calculated_at = NOW();
+    VALUES (target_user_id, 'local', COALESCE(user_points, 0), user_state, user_city);
   END IF;
 END;
 $$;
