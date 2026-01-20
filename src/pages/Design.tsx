@@ -26,7 +26,7 @@ const photoPortfolio = [
     description: "Design profissional para jogador de futebol com efeitos modernos e logo do clube.",
     tags: ["Profissional", "Futebol", "Moderno"],
     rating: 5,
-    image: "/ym-design/fotos/foto-1-jogador-profissional.jpg" // ⚠️ Adicione seu arquivo aqui!
+    image: "/ym-design/fotos/IMG_1161.JPEG"
   },
   {
     id: 2,
@@ -35,7 +35,7 @@ const photoPortfolio = [
     description: "Card personalizado com estatísticas e informações do atleta.",
     tags: ["Card", "Estatísticas", "Personalizado"],
     rating: 5,
-    image: "/ym-design/fotos/foto-2-card-apresentacao.jpg"
+    image: "/ym-design/fotos/IMG_2526.JPEG"
   },
   {
     id: 3,
@@ -44,7 +44,7 @@ const photoPortfolio = [
     description: "Banner dinâmico para Instagram e Facebook com cores vibrantes.",
     tags: ["Social Media", "Instagram", "Vibrante"],
     rating: 5,
-    image: "/ym-design/fotos/foto-3-banner-social.jpg"
+    image: "/ym-design/fotos/IMG_3711.JPEG"
   },
   {
     id: 4,
@@ -53,7 +53,7 @@ const photoPortfolio = [
     description: "Montagem artística com efeitos especiais e composição única.",
     tags: ["Arte Digital", "Efeitos", "Criativo"],
     rating: 5,
-    image: "/ym-design/fotos/foto-4-montagem-artistica.jpg"
+    image: "/ym-design/fotos/IMG_3848 (1).JPEG"
   },
   {
     id: 5,
@@ -62,16 +62,7 @@ const photoPortfolio = [
     description: "Criação de logo exclusiva para time amador com identidade visual completa.",
     tags: ["Logo", "Branding", "Time"],
     rating: 5,
-    image: "/ym-design/fotos/foto-5-logo-time.jpg"
-  },
-  {
-    id: 6,
-    title: "Poster Motivacional",
-    category: "Poster",
-    description: "Poster inspiracional com frase motivacional e design impactante.",
-    tags: ["Motivacional", "Poster", "Inspiração"],
-    rating: 5,
-    image: "/ym-design/fotos/foto-6-poster-motivacional.jpg"
+    image: "/ym-design/fotos/IMG_4367.JPEG"
   }
 ];
 
@@ -83,9 +74,9 @@ const motionPortfolio = [
     description: "Vídeo de apresentação com efeitos de motion design e transições suaves.",
     tags: ["Motion", "Intro", "Profissional"],
     rating: 5,
-    video: "/ym-design/motion/motion-1-intro-jogador.mp4", // ⚠️ Adicione seu vídeo aqui!
-    thumbnail: "/ym-design/motion/thumbnails/motion-1-thumb.jpg",
-    youtubeId: "" // Ou use YouTube ID se preferir
+    video: "/ym-design/motion/IMG_1404.MOV",
+    thumbnail: "/ym-design/fotos/IMG_1161.JPEG", // Usando foto como thumbnail temporária
+    youtubeId: ""
   },
   {
     id: 2,
@@ -93,18 +84,18 @@ const motionPortfolio = [
     description: "Compilação de melhores momentos com efeitos visuais e música.",
     tags: ["Highlights", "Animação", "Esportes"],
     rating: 5,
-    video: "/ym-design/motion/motion-2-highlights.mp4",
-    thumbnail: "/ym-design/motion/thumbnails/motion-2-thumb.jpg",
+    video: "/ym-design/motion/IMG_4942.MOV",
+    thumbnail: "/ym-design/fotos/IMG_2526.JPEG", // Usando foto como thumbnail temporária
     youtubeId: ""
   },
   {
     id: 3,
-    title: "Estatísticas Animadas",
-    description: "Visualização de dados e estatísticas com infográficos animados.",
-    tags: ["Stats", "Infográfico", "Moderno"],
+    title: "Apresentação YM Sports",
+    description: "Vídeo institucional com identidade visual e apresentação profissional.",
+    tags: ["Institucional", "Branding", "Premium"],
     rating: 5,
-    video: "/ym-design/motion/motion-3-estatisticas.mp4",
-    thumbnail: "/ym-design/motion/thumbnails/motion-3-thumb.jpg",
+    video: "/ym-design/motion/VIDEO YM.MOV",
+    thumbnail: "/ym-design/fotos/IMG_3711.JPEG", // Usando foto como thumbnail temporária
     youtubeId: ""
   }
 ];
