@@ -219,7 +219,7 @@ const Index = () => {
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/70 via-black/60 to-black" />
         
         <div className="relative z-10 container mx-auto px-4">
-          <h2 className={`text-3xl md:text-5xl font-astro font-bold text-center mb-6 text-foreground transition-all duration-1000 ${benefitsSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+          <h2 className={`text-3xl md:text-5xl font-bebas font-bold text-center mb-6 text-foreground transition-all duration-1000 ${benefitsSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
             POR QUE ESCOLHER A YM SPORTS?
           </h2>
           
@@ -242,14 +242,14 @@ const Index = () => {
             {benefits.map((benefit, index) => <div key={index} className={`relative overflow-hidden rounded-2xl p-8 group ${benefitsSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`} style={{
             transitionDelay: benefitsSection.isVisible ? `${index * 0.15}s` : '0s'
           }}>
-                {/* Animated Background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-card via-card to-muted transition-all duration-500 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="absolute inset-0 border-2 border-primary/0 group-hover:border-primary/50 rounded-2xl transition-all duration-500" />
+                {/* Animated Background - INVERTIDO: amarelado por padrão, escurece no hover */}
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-900/30 via-yellow-800/20 to-yellow-700/10 group-hover:from-card group-hover:via-card group-hover:to-muted transition-all duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent group-hover:opacity-0 transition-opacity duration-500" />
+                <div className="absolute inset-0 border-2 border-primary/30 group-hover:border-primary/0 rounded-2xl transition-all duration-500" />
                 
                 {/* Content */}
                 <div className="relative z-10">
-                  <div className="bg-gradient-to-br from-primary/20 to-primary/5 w-20 h-20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg">
+                  <div className="bg-gradient-to-br from-primary/30 to-primary/10 w-20 h-20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg">
                     <benefit.icon className="w-10 h-10 text-primary group-hover:scale-110 transition-transform duration-300" />
                   </div>
                   <h3 className="text-2xl font-astro font-bold mb-3 text-foreground group-hover:text-primary transition-colors duration-300">
@@ -260,8 +260,8 @@ const Index = () => {
                   </p>
                 </div>
                 
-                {/* Glow Effect */}
-                <div className="absolute -inset-1 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+                {/* Glow Effect - invertido */}
+                <div className="absolute -inset-1 bg-primary/10 blur-xl opacity-100 group-hover:opacity-0 transition-opacity duration-500 -z-10" />
               </div>)}
           </div>
         </div>
@@ -284,8 +284,7 @@ const Index = () => {
             {/* Feature 1 - Calendário Inteligente */}
             <div className="group relative overflow-hidden rounded-2xl aspect-square cursor-pointer">
               <img src="/landing-page/Calendario.JPEG" alt="Calendário inteligente para organizar jogos" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-              {/* Overlay amarelado por padrão, escurece no hover */}
-              <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/80 via-yellow-800/40 to-transparent group-hover:from-black group-hover:via-black/60 transition-all duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
               
               <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                 <div className="bg-blue-500/20 w-16 h-16 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -303,8 +302,7 @@ const Index = () => {
             {/* Feature 2 - Inteligência Artificial */}
             <div className="group relative overflow-hidden rounded-2xl aspect-square cursor-pointer">
               <img src="/landing-page/Foto-IA.JPEG" alt="Treinos personalizados com Inteligência Artificial" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-              {/* Overlay amarelado por padrão, escurece no hover */}
-              <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/80 via-yellow-800/40 to-transparent group-hover:from-black group-hover:via-black/60 transition-all duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
               
               {/* Content that slides up on hover */}
               <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
@@ -323,8 +321,7 @@ const Index = () => {
             {/* Feature 3 - Ranking Regional */}
             <div className="group relative overflow-hidden rounded-2xl aspect-square cursor-pointer">
               <img src="/landing-page/Ranking-regional.JPEG" alt="Ranking regional e competições" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-              {/* Overlay amarelado por padrão, escurece no hover */}
-              <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/80 via-yellow-800/40 to-transparent group-hover:from-black group-hover:via-black/60 transition-all duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
               
               <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                 <div className="bg-yellow-500/20 w-16 h-16 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -342,8 +339,7 @@ const Index = () => {
             {/* Feature 4 - Portfólio Online */}
             <div className="group relative overflow-hidden rounded-2xl aspect-square cursor-pointer">
               <img src="/landing-page/Portifolio.JPEG" alt="Portfólio online profissional" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-              {/* Overlay amarelado por padrão, escurece no hover */}
-              <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/80 via-yellow-800/40 to-transparent group-hover:from-black group-hover:via-black/60 transition-all duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
               
               <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                 <div className="bg-purple-500/20 w-16 h-16 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -407,8 +403,10 @@ const Index = () => {
       {/* Pricing Section */}
       <section ref={pricingSection.ref} className="py-20 bg-black">
         <div className="container mx-auto px-4">
-          <h2 className={`text-3xl md:text-5xl font-astro font-bold text-center mb-4 text-foreground transition-all duration-1000 ${pricingSection.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
-            Cada grande jogador começou com um primeiro passo, dê o seu agora!
+          <h2 className={`text-3xl md:text-5xl font-bebas font-bold text-center mb-4 text-foreground transition-all duration-1000 uppercase ${pricingSection.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+            <span className="text-white">CADA GRANDE JOGADOR</span><br />
+            <span className="text-primary">COMEÇOU COM UM PRIMEIRO PASSO</span><br />
+            <span className="text-primary">DÊ O SEU AGORA!</span>
           </h2>
           <p className={`text-xl text-muted-foreground text-center mb-12 max-w-2xl mx-auto transition-all duration-1000 delay-200 ${pricingSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             Porque todo sonho merece uma chance real.
@@ -502,8 +500,9 @@ const Index = () => {
       {/* CTA Section */}
       <section ref={ctaSection.ref} className="py-20 bg-black">
         <div className="container mx-auto px-4 text-center">
-          <h2 className={`text-3xl md:text-5xl font-astro font-bold mb-6 text-foreground transition-all duration-1000 ${ctaSection.isVisible ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-75 rotate-12'}`}>
-            Pronto para evoluir?
+          <h2 className={`text-3xl md:text-5xl font-bold mb-6 text-foreground transition-all duration-1000 ${ctaSection.isVisible ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-75 rotate-12'}`}>
+            <span className="font-medelyn text-primary text-5xl md:text-6xl">E aí,</span><br />
+            <span className="font-bebas uppercase">PRONTO PARA EVOLUIR?</span>
           </h2>
           <p className={`text-xl text-muted-foreground mb-8 max-w-2xl mx-auto transition-all duration-1000 delay-300 ${ctaSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             Junte-se a milhares de atletas que já melhoraram seu desempenho

@@ -15,6 +15,8 @@ export default {
     extend: {
       fontFamily: {
         'astro': ['Orbitron', 'sans-serif'],
+        'bebas': ['Bebas Neue', 'cursive'],
+        'medelyn': ['Medelyn', 'cursive'],
       },
       colors: {
         border: "hsl(var(--border))",
