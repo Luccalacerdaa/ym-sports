@@ -265,10 +265,10 @@ export default function Design() {
           {motionPortfolio.map((item) => (
             <Card key={item.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group border border-yellow-500/20 bg-gray-900/50">
               <div className="relative overflow-hidden">
-                {/* Vídeo direto */}
+                {/* Vídeo direto com mesmo tamanho das fotos */}
                 <div 
                   className="w-full bg-gray-800"
-                  style={{ aspectRatio: '16/9' }}
+                  style={{ aspectRatio: '9/16' }}
                 >
                   <video 
                     src={item.video} 

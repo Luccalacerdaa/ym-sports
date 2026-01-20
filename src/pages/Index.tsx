@@ -283,7 +283,7 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Feature 1 - Calendário Inteligente */}
             <div className="group relative overflow-hidden rounded-2xl aspect-square cursor-pointer">
-              <img src={new URL('../assets/kids-celebration.jpg', import.meta.url).href} alt="Calendário inteligente para organizar jogos" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <img src="/landing-page/Calendario.JPEG" alt="Calendário inteligente para organizar jogos" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
               
               <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
@@ -301,7 +301,7 @@ const Index = () => {
 
             {/* Feature 2 - Inteligência Artificial */}
             <div className="group relative overflow-hidden rounded-2xl aspect-square cursor-pointer">
-              <img src={new URL('../assets/kids-training.jpg', import.meta.url).href} alt="Treinos personalizados com Inteligência Artificial" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <img src="/landing-page/Foto-IA.JPEG" alt="Treinos personalizados com Inteligência Artificial" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
               
               {/* Content that slides up on hover */}
@@ -320,7 +320,7 @@ const Index = () => {
 
             {/* Feature 3 - Ranking Regional */}
             <div className="group relative overflow-hidden rounded-2xl aspect-square cursor-pointer">
-              <img src={new URL('../assets/kids-match.jpg', import.meta.url).href} alt="Ranking regional e competições" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <img src="/landing-page/Ranking-regional.JPEG" alt="Ranking regional e competições" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
               
               <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
@@ -338,7 +338,7 @@ const Index = () => {
 
             {/* Feature 4 - Portfólio Online */}
             <div className="group relative overflow-hidden rounded-2xl aspect-square cursor-pointer">
-              <img src={new URL('../assets/kid-skill.jpg', import.meta.url).href} alt="Portfólio online profissional" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <img src="/landing-page/Portifolio.JPEG" alt="Portfólio online profissional" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
               
               <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
