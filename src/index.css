@@ -223,12 +223,6 @@ textarea,
   user-select: text;
 }
 
-/* Desabilitar zoom por double-tap */
-body {
-  touch-action: pan-x pan-y;
-  -ms-touch-action: pan-x pan-y;
-}
-
 /* Remover delay de 300ms no touch (melhora responsividade) */
 a,
 button,
@@ -254,29 +248,6 @@ select {
 body {
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
-}
-
-/* Esconder barra de endereço ao rolar (iOS Safari) */
-html,
-body {
-  height: 100%;
-  overflow: auto;
-  position: fixed;
-  width: 100%;
-}
-
-#root {
-  height: 100%;
-  overflow: auto;
-  width: 100%;
-}
-
-/* Suporte para notch e safe areas (iPhone X+) */
-body {
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
 }
 
 /* Prevenir highlight ao tocar (iOS) */
