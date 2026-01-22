@@ -202,3 +202,88 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* ============================================
+   🚀 PWA - EXPERIÊNCIA DE APP NATIVO
+   ============================================ */
+
+/* Desabilitar zoom em todos os elementos */
+* {
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Permitir seleção apenas em inputs e text areas */
+input,
+textarea,
+[contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Desabilitar zoom por double-tap */
+body {
+  touch-action: pan-x pan-y;
+  -ms-touch-action: pan-x pan-y;
+}
+
+/* Remover delay de 300ms no touch (melhora responsividade) */
+a,
+button,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+/* Prevenir zoom em inputs no iOS */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+textarea,
+select {
+  font-size: 16px !important;
+}
+
+/* Desabilitar pull-to-refresh no iOS */
+body {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Esconder barra de endereço ao rolar (iOS Safari) */
+html,
+body {
+  height: 100%;
+  overflow: auto;
+  position: fixed;
+  width: 100%;
+}
+
+#root {
+  height: 100%;
+  overflow: auto;
+  width: 100%;
+}
+
+/* Suporte para notch e safe areas (iPhone X+) */
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Prevenir highlight ao tocar (iOS) */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================
+   ✅ FIM - CONFIGURAÇÕES PWA
+   ============================================ */
