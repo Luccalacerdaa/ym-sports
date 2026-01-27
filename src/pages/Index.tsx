@@ -107,7 +107,7 @@ const Index = () => {
   }];
   return <div className="min-h-screen bg-gradient-to-br from-black via-secondary to-black">
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Video Background - Same for mobile and desktop */}
         <video 
           ref={videoRef} 
@@ -403,7 +403,7 @@ const Index = () => {
       {/* Pricing Section */}
       <section ref={pricingSection.ref} className="py-20 bg-black">
         <div className="container mx-auto px-4">
-          <h2 className={`text-3xl md:text-5xl font-bebas font-bold text-center mb-4 text-foreground transition-all duration-1000 uppercase ${pricingSection.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+          <h2 className={`text-4xl md:text-6xl lg:text-7xl font-bebas font-bold text-center mb-4 text-foreground transition-all duration-1000 uppercase leading-tight ${pricingSection.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
             <span className="text-white">CADA GRANDE JOGADOR</span><br />
             <span className="text-primary">COMEÇOU COM UM PRIMEIRO PASSO</span><br />
             <span className="text-primary">DÊ O SEU AGORA!</span>
@@ -416,18 +416,18 @@ const Index = () => {
             {/* Toggle Group */}
             <div className={`flex justify-center mb-8 transition-all duration-1000 delay-400 ${pricingSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
               <ToggleGroup type="single" value={selectedPlan} onValueChange={value => value && setSelectedPlan(value as typeof selectedPlan)} className="bg-card rounded-xl p-2 gap-2">
-                <ToggleGroupItem value="monthly" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=off]:bg-transparent data-[state=off]:text-muted-foreground px-6 py-3 rounded-lg transition-all">
+                <ToggleGroupItem value="monthly" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=off]:bg-transparent data-[state=off]:text-muted-foreground px-6 py-3 rounded-lg transition-all hover:bg-primary/20">
                   Mensal
                 </ToggleGroupItem>
-                <ToggleGroupItem value="quarterly" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=off]:bg-transparent data-[state=off]:text-muted-foreground px-6 py-3 rounded-lg transition-all relative">
+                <ToggleGroupItem value="quarterly" className="data-[state=on]:bg-green-500 data-[state=on]:text-white data-[state=off]:bg-transparent data-[state=off]:text-muted-foreground px-6 py-3 rounded-lg transition-all relative hover:bg-green-500/20">
                   Trimestral
-                  <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full font-bold">
+                  <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
                     10%
                   </span>
                 </ToggleGroupItem>
-                <ToggleGroupItem value="biannual" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=off]:bg-transparent data-[state=off]:text-muted-foreground px-6 py-3 rounded-lg transition-all relative">
+                <ToggleGroupItem value="biannual" className="data-[state=on]:bg-green-500 data-[state=on]:text-white data-[state=off]:bg-transparent data-[state=off]:text-muted-foreground px-6 py-3 rounded-lg transition-all relative hover:bg-green-500/20">
                   Semestral
-                  <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full font-bold">
+                  <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
                     15%
                   </span>
                 </ToggleGroupItem>

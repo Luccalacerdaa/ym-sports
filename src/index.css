@@ -41,6 +41,12 @@ All colors MUST be HSL.
     --gradient-hero: linear-gradient(135deg, hsl(0, 0%, 0%) 0%, hsl(0, 0%, 13%) 50%, hsl(0, 0%, 26%) 100%);
     --gradient-card: linear-gradient(145deg, hsl(0, 0%, 13%) 0%, hsl(0, 0%, 8%) 100%);
     --shadow-glow: 0 0 40px hsl(47, 99%, 52%, 0.3);
+    
+    /* Safe Area Insets para dispositivos com notch */
+    --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-inset-left: env(safe-area-inset-left, 0px);
+    --safe-area-inset-right: env(safe-area-inset-right, 0px);
   }
 }
 
