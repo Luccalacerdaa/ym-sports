@@ -401,12 +401,20 @@ const Index = () => {
       <ScrollingBanner text="JUNTE-SE À REVOLUÇÃO DO ESPORTE DIGITAL" />
 
       {/* Pricing Section */}
-      <section ref={pricingSection.ref} className="py-20 bg-black">
+      <section ref={pricingSection.ref} className="py-28 md:py-36 bg-black">
         <div className="container mx-auto px-4">
-          <h2 className={`text-4xl md:text-6xl lg:text-7xl font-bebas font-bold text-center mb-4 text-foreground transition-all duration-1000 uppercase leading-tight ${pricingSection.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
-            <span className="text-white">CADA GRANDE JOGADOR</span><br />
-            <span className="text-primary">COMEÇOU COM UM PRIMEIRO PASSO</span><br />
-            <span className="text-primary">DÊ O SEU AGORA!</span>
+          <h2 className={`text-center font-bebas uppercase leading-[0.9] transition-all duration-1000 mb-4 ${pricingSection.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+            <div className="text-white text-[clamp(2.5rem,6vw,5rem)]">
+              CADA GRANDE JOGADOR
+            </div>
+            
+            <div className="text-primary text-[clamp(2.2rem,5vw,4.5rem)]">
+              COMEÇOU COM UM PRIMEIRO PASSO
+            </div>
+            
+            <div className="text-primary font-bold tracking-wide text-[clamp(3.5rem,9vw,7rem)]">
+              DÊ O SEU AGORA!
+            </div>
           </h2>
           <p className={`text-xl text-muted-foreground text-center mb-12 max-w-2xl mx-auto transition-all duration-1000 delay-200 ${pricingSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             Porque todo sonho merece uma chance real.
