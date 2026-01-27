@@ -219,23 +219,32 @@ const Index = () => {
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/70 via-black/60 to-black" />
         
         <div className="relative z-10 container mx-auto px-4">
-          <h2 className={`text-3xl md:text-5xl font-bebas font-bold text-center mb-6 text-foreground transition-all duration-1000 ${benefitsSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-            POR QUE ESCOLHER A YM SPORTS?
+          <h2 className={`text-center font-bebas uppercase leading-[0.9] mb-8 transition-all duration-1000 ${benefitsSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+            <div className="text-white text-[clamp(2.2rem,5vw,4.2rem)]">
+              POR QUE ESCOLHER
+            </div>
+            
+            <div className="text-primary font-bold tracking-wide text-[clamp(3.2rem,8vw,6.5rem)]">
+              A YM SPORTS?
+            </div>
           </h2>
           
           {/* Hero Text Over Image */}
-          <div className={`text-center mb-16 max-w-4xl mx-auto transition-all duration-1000 delay-200 ${benefitsSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-            <p className="text-2xl md:text-3xl font-bold text-primary mb-4">
-              Porque aqui o seu talento vira oportunidade!
+          <div className={`text-center mb-16 max-w-3xl mx-auto transition-all duration-1000 delay-200 ${benefitsSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+            <p className="text-primary font-bold uppercase tracking-wide mb-6 text-[clamp(1.3rem,3vw,2rem)]">
+              PORQUE AQUI O SEU TALENTO VIRA OPORTUNIDADE!
             </p>
-            <p className="text-lg md:text-xl text-foreground mb-3 leading-relaxed">
-              Nosso app conecta atletas, pais e treinadores em um só lugar — mostrando o desempenho, evolução e conquistas de cada jogador.
+            
+            <p className="text-foreground text-[clamp(1rem,2.5vw,1.3rem)] leading-relaxed mb-4">
+              Nosso App conecta atletas, pais e treinadores em um só lugar — focado em evolução e desempenho de cada atleta.
             </p>
-            <p className="text-lg md:text-xl text-foreground mb-3">
+            
+            <p className="text-foreground text-[clamp(1rem,2.5vw,1.3rem)] mb-6">
               Desde o primeiro treino até as grandes conquistas.
             </p>
-            <p className="text-xl md:text-2xl font-bold text-primary">
-              Um impulso pro seu futuro!
+            
+            <p className="text-primary font-bold uppercase tracking-wide text-[clamp(1.2rem,3vw,1.8rem)]">
+              UM IMPULSO PRO SEU FUTURO!
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -404,11 +413,11 @@ const Index = () => {
       <section ref={pricingSection.ref} className="py-28 md:py-36 bg-black">
         <div className="container mx-auto px-4">
           <h2 className={`text-center font-bebas uppercase leading-[0.9] transition-all duration-1000 mb-4 ${pricingSection.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
-            <div className="text-white text-[clamp(2.5rem,6vw,5rem)]">
+            <div className="text-white text-[clamp(2.5rem,6vw,5rem)] mb-1">
               CADA GRANDE JOGADOR
             </div>
             
-            <div className="text-primary text-[clamp(2.2rem,5vw,4.5rem)]">
+            <div className="text-primary text-[clamp(2.2rem,5vw,4.5rem)] mb-2">
               COMEÇOU COM UM PRIMEIRO PASSO
             </div>
             
