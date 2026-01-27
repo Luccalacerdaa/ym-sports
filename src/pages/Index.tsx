@@ -154,11 +154,11 @@ const Index = () => {
         <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in">
           {/* Logo */}
           <div className="flex justify-center mb-6 pt-16 animate-zoom-in">
-            <img src={logoImage} alt="YM SPORTS Logo" className="w-36 h-36 md:w-48 md:h-48 object-contain" />
+            <img src={logoImage} alt="YM SPORTS Logo" className="w-48 h-48 md:w-64 md:h-64 object-contain" />
           </div>
           
           {/* Texto acima do título */}
-          <p className="text-foreground text-[clamp(0.65rem,1.8vw,0.85rem)] uppercase tracking-[0.3em] mb-12 animate-fade-down" style={{
+          <p className="text-foreground text-[clamp(0.55rem,1.5vw,0.75rem)] uppercase tracking-[0.3em] mb-12 animate-fade-down whitespace-nowrap" style={{
           animationDelay: "0.1s"
         }}>
             INTELIGÊNCIA ARTIFICIAL • VISIBILIDADE NACIONAL • EVOLUÇÃO REAL
@@ -170,10 +170,10 @@ const Index = () => {
             YM SPORTS
           </h1>
           
-          <p className="text-primary font-bold uppercase tracking-wide mb-12 text-[clamp(1.2rem,4vw,2rem)] animate-fade-up" style={{
+          <p className="text-primary font-bold uppercase tracking-wide mb-12 text-[clamp(0.9rem,2.5vw,1.2rem)] animate-fade-up" style={{
           animationDelay: "0.4s"
         }}>
-            A evolução do esporte começa aqui.
+            A EVOLUÇÃO DO ESPORTE COMEÇA AQUI.
           </p>
           
           <p className="text-foreground font-semibold text-[clamp(1.1rem,3vw,1.5rem)] mb-2 animate-fade-up" style={{
