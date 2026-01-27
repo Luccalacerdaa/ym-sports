@@ -153,52 +153,52 @@ const Index = () => {
 
         <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in">
           {/* Logo */}
-          <div className="flex justify-center mb-8 animate-zoom-in" style={{
-          marginTop: "2rem"
-        }}>
-            <img src={logoImage} alt="YM SPORTS Logo" className="w-56 h-56 md:w-80 md:h-80 object-contain" />
+          <div className="flex justify-center mb-10 pt-16 animate-zoom-in">
+            <img src={logoImage} alt="YM SPORTS Logo" className="w-36 h-36 md:w-48 md:h-48 object-contain" />
           </div>
           
-          <h1 className="text-3xl md:text-5xl font-astro font-bold mb-4 text-foreground animate-fade-down" style={{
+          <h1 className="text-[clamp(2rem,6vw,3.5rem)] font-astro font-bold mb-6 text-foreground tracking-wide animate-fade-down" style={{
           animationDelay: "0.2s"
         }}>
             YM SPORTS
           </h1>
           
-          <p className="text-xl md:text-2xl font-astro font-bold mb-6 text-primary animate-fade-up" style={{
+          <p className="text-primary font-bold uppercase tracking-wide mb-10 text-[clamp(1.2rem,4vw,2rem)] animate-fade-up" style={{
           animationDelay: "0.4s"
         }}>
             A evolução do esporte<br />
             começa aqui.
           </p>
           
-          <p className="text-base md:text-lg text-muted-foreground mb-4 max-w-3xl mx-auto animate-fade-up leading-relaxed" style={{
+          <p className="text-muted-foreground text-[clamp(0.95rem,2.5vw,1.1rem)] leading-relaxed mb-8 max-w-2xl mx-auto animate-fade-up" style={{
           animationDelay: "0.6s"
         }}>
             Mais do que um aplicativo, a YM SPORTS é a sua nova plataforma de experiências esportivas, feita para aproximar pessoas, inovar o meio digital por meio de conquistas e impulsionar o esporte em todas as áreas.
           </p>
-          <p className="text-lg md:text-xl font-semibold text-foreground mb-2 max-w-2xl mx-auto animate-fade-up" style={{
+          
+          <p className="text-foreground font-semibold text-lg md:text-xl mb-1 animate-fade-up" style={{
           animationDelay: "0.8s"
         }}>
             Algo nunca visto antes,
           </p>
-          <p className="text-lg md:text-xl font-semibold text-primary mb-12 max-w-2xl mx-auto animate-fade-up" style={{
+          <p className="text-primary font-bold text-lg md:text-xl mb-14 animate-fade-up" style={{
           animationDelay: "1s"
         }}>
             Pensando e feito para você!
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-up mb-20" style={{
+          
+          <div className="flex flex-col gap-4 max-w-md mx-auto animate-fade-up mb-20" style={{
           animationDelay: "1.2s"
         }}>
-            <Button variant="hero" size="xl" onClick={() => navigate("/auth/signup")} className="w-full sm:w-auto hover:scale-110 transition-transform duration-300">Começar agora</Button>
-            <Button variant="outline" size="xl" onClick={() => navigate("/auth/login")} className="w-full sm:w-auto hover:scale-110 transition-transform duration-300">
+            <Button variant="hero" size="xl" onClick={() => navigate("/auth/signup")} className="w-full hover:scale-105 transition-transform duration-300">Começar agora</Button>
+            <Button variant="outline" size="xl" onClick={() => navigate("/auth/login")} className="w-full hover:scale-105 transition-transform duration-300">
               Entrar
             </Button>
             <Button 
               variant="outline" 
               size="xl" 
               onClick={() => navigate("/install-guide")} 
-              className="w-full sm:w-auto hover:scale-110 transition-transform duration-300 border-primary/50 text-primary hover:bg-primary/10"
+              className="w-full hover:scale-105 transition-transform duration-300 border-primary/50 text-primary hover:bg-primary/10"
             >
               <Smartphone className="w-5 h-5 mr-2" />
               Como Instalar
