@@ -153,44 +153,51 @@ const Index = () => {
 
         <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in">
           {/* Logo */}
-          <div className="flex justify-center mb-10 pt-16 animate-zoom-in">
+          <div className="flex justify-center mb-6 pt-16 animate-zoom-in">
             <img src={logoImage} alt="YM SPORTS Logo" className="w-36 h-36 md:w-48 md:h-48 object-contain" />
           </div>
           
-          <h1 className="text-[clamp(2rem,6vw,3.5rem)] font-astro font-bold mb-6 text-foreground tracking-wide animate-fade-down" style={{
+          {/* Texto acima do título */}
+          <p className="text-foreground text-[clamp(0.65rem,1.8vw,0.85rem)] uppercase tracking-[0.3em] mb-12 animate-fade-down" style={{
+          animationDelay: "0.1s"
+        }}>
+            INTELIGÊNCIA ARTIFICIAL • VISIBILIDADE NACIONAL • EVOLUÇÃO REAL
+          </p>
+          
+          <h1 className="text-[clamp(2.5rem,8vw,5rem)] font-astro font-bold mb-6 text-foreground tracking-wide animate-fade-down" style={{
           animationDelay: "0.2s"
         }}>
             YM SPORTS
           </h1>
           
-          <p className="text-primary font-bold uppercase tracking-wide mb-10 text-[clamp(1.2rem,4vw,2rem)] animate-fade-up" style={{
+          <p className="text-primary font-bold uppercase tracking-wide mb-12 text-[clamp(1.2rem,4vw,2rem)] animate-fade-up" style={{
           animationDelay: "0.4s"
         }}>
-            A evolução do esporte<br />
-            começa aqui.
+            A evolução do esporte começa aqui.
           </p>
           
-          <p className="text-muted-foreground text-[clamp(0.95rem,2.5vw,1.1rem)] leading-relaxed mb-8 max-w-2xl mx-auto animate-fade-up" style={{
+          <p className="text-foreground font-semibold text-[clamp(1.1rem,3vw,1.5rem)] mb-2 animate-fade-up" style={{
           animationDelay: "0.6s"
         }}>
-            Mais do que um aplicativo, a YM SPORTS é a sua nova plataforma de experiências esportivas, feita para aproximar pessoas, inovar o meio digital por meio de conquistas e impulsionar o esporte em todas as áreas.
+            PLATAFORMA QUE ENTENDE VOCÊ,
           </p>
-          
-          <p className="text-foreground font-semibold text-lg md:text-xl mb-1 animate-fade-up" style={{
+          <p className="text-primary font-bold uppercase text-[clamp(1.1rem,3vw,1.5rem)] mb-16 animate-fade-up" style={{
           animationDelay: "0.8s"
         }}>
-            Algo nunca visto antes,
-          </p>
-          <p className="text-primary font-bold text-lg md:text-xl mb-14 animate-fade-up" style={{
-          animationDelay: "1s"
-        }}>
-            Pensando e feito para você!
+            FOCADO EM EVOLUÇÃO.
           </p>
           
           <div className="flex flex-col gap-4 max-w-md mx-auto animate-fade-up mb-20" style={{
-          animationDelay: "1.2s"
+          animationDelay: "1s"
         }}>
-            <Button variant="hero" size="xl" onClick={() => navigate("/auth/signup")} className="w-full hover:scale-105 transition-transform duration-300">Começar agora</Button>
+            <Button 
+              variant="hero" 
+              size="xl" 
+              onClick={() => navigate("/auth/signup")} 
+              className="w-full hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(252,211,77,0.6)] hover:shadow-[0_0_50px_rgba(252,211,77,0.8)] font-bold text-lg"
+            >
+              Começar agora
+            </Button>
             <Button variant="outline" size="xl" onClick={() => navigate("/auth/login")} className="w-full hover:scale-105 transition-transform duration-300">
               Entrar
             </Button>
