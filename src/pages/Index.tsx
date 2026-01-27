@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Trophy, TrendingUp, Zap, Check, Megaphone, Heart, Volume2, VolumeX, Smartphone } from "lucide-react";
-import logoImage from "@/assets/ym-sports-logo-new.png";
+import logoImage from "@/assets/logo_hero_500x500.png";
 import { useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Card } from "@/components/ui/card";
@@ -158,19 +158,19 @@ const Index = () => {
           </div>
           
           {/* Texto acima do título */}
-          <p className="text-foreground text-[clamp(0.55rem,1.5vw,0.75rem)] uppercase tracking-[0.3em] mb-12 animate-fade-down whitespace-nowrap" style={{
+          <p className="text-foreground text-[clamp(0.5rem,1.2vw,0.65rem)] uppercase tracking-[0.25em] mb-12 animate-fade-down" style={{
           animationDelay: "0.1s"
         }}>
             INTELIGÊNCIA ARTIFICIAL • VISIBILIDADE NACIONAL • EVOLUÇÃO REAL
           </p>
           
-          <h1 className="text-[clamp(2.5rem,8vw,5rem)] font-astro font-bold mb-6 text-foreground tracking-wide animate-fade-down" style={{
+          <h1 className="text-[clamp(2.5rem,8vw,5rem)] font-astro font-bold mb-3 text-foreground tracking-wide animate-fade-down" style={{
           animationDelay: "0.2s"
         }}>
             YM SPORTS
           </h1>
           
-          <p className="text-primary font-bold uppercase tracking-wide mb-12 text-[clamp(0.9rem,2.5vw,1.2rem)] animate-fade-up" style={{
+          <p className="text-primary font-bold uppercase tracking-wide mb-12 text-[clamp(0.75rem,2vw,1rem)] animate-fade-up" style={{
           animationDelay: "0.4s"
         }}>
             A EVOLUÇÃO DO ESPORTE COMEÇA AQUI.
