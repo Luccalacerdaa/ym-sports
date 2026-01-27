@@ -153,24 +153,24 @@ const Index = () => {
 
         <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in">
           {/* Logo */}
-          <div className="flex justify-center mb-6 pt-16 animate-zoom-in">
+          <div className="flex justify-center mb-4 pt-8 animate-zoom-in">
             <img src={logoImage} alt="YM SPORTS Logo" className="w-48 h-48 md:w-64 md:h-64 object-contain" />
           </div>
           
           {/* Texto acima do título */}
-          <p className="text-foreground text-[clamp(0.5rem,1.2vw,0.65rem)] uppercase tracking-[0.25em] mb-12 animate-fade-down" style={{
+          <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] mb-8 animate-fade-down" style={{
           animationDelay: "0.1s"
         }}>
             INTELIGÊNCIA ARTIFICIAL • VISIBILIDADE NACIONAL • EVOLUÇÃO REAL
           </p>
           
-          <h1 className="text-[clamp(2.5rem,8vw,5rem)] font-astro font-bold mb-3 text-foreground tracking-wide animate-fade-down" style={{
+          <h1 className="text-[clamp(2.5rem,8vw,5rem)] font-astro font-bold mb-2 text-foreground tracking-wide animate-fade-down" style={{
           animationDelay: "0.2s"
         }}>
             YM SPORTS
           </h1>
           
-          <p className="text-primary font-bold uppercase tracking-wide mb-12 text-[clamp(0.75rem,2vw,1rem)] animate-fade-up" style={{
+          <p className="text-primary font-bold uppercase tracking-wide mb-10 text-[clamp(0.65rem,1.8vw,0.85rem)] animate-fade-up" style={{
           animationDelay: "0.4s"
         }}>
             A EVOLUÇÃO DO ESPORTE COMEÇA AQUI.
