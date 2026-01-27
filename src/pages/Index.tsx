@@ -153,8 +153,8 @@ const Index = () => {
 
         <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in">
           {/* Logo */}
-          <div className="flex justify-center mb-4 pt-8 animate-zoom-in">
-            <img src={logoImage} alt="YM SPORTS Logo" className="w-48 h-48 md:w-64 md:h-64 object-contain -translate-y-16" />
+          <div className="flex justify-center mb-4 pt-4 animate-zoom-in">
+            <img src={logoImage} alt="YM SPORTS Logo" className="w-48 h-48 md:w-64 md:h-64 object-contain -translate-y-24" />
           </div>
           
           {/* Texto acima do título */}
