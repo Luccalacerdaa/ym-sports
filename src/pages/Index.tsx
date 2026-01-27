@@ -153,12 +153,12 @@ const Index = () => {
 
         <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in">
           {/* Logo */}
-          <div className="flex justify-center mb-4 pt-4 animate-zoom-in">
+          <div className="flex justify-center mb-0 pt-4 animate-zoom-in">
             <img src={logoImage} alt="YM SPORTS Logo" className="w-48 h-48 md:w-64 md:h-64 object-contain -translate-y-24" />
           </div>
           
           {/* Texto acima do título */}
-          <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] mb-8 animate-fade-down" style={{
+          <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] -mt-6 mb-6 animate-fade-down" style={{
           animationDelay: "0.1s"
         }}>
             INTELIGÊNCIA ARTIFICIAL • VISIBILIDADE NACIONAL • EVOLUÇÃO REAL
