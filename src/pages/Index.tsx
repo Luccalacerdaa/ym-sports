@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Trophy, TrendingUp, Zap, Check, Megaphone, Heart, Volume2, VolumeX, Smartphone } from "lucide-react";
-import logoImage from "@/assets/logo_hero_500x500.png";
+import heroBackground from "@/assets/fundo_hero.svg";
 import { useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Card } from "@/components/ui/card";
@@ -152,9 +152,9 @@ const Index = () => {
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/70 via-black/50 to-black" />
 
         <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in">
-          {/* Logo */}
+          {/* Hero Background/Logo */}
           <div className="flex justify-center mb-4 pt-8 animate-zoom-in">
-            <img src={logoImage} alt="YM SPORTS Logo" className="w-48 h-48 md:w-64 md:h-64 object-contain" />
+            <img src={heroBackground} alt="YM SPORTS" className="w-full max-w-4xl object-contain" />
           </div>
           
           {/* Texto acima do título */}
@@ -534,11 +534,6 @@ const Index = () => {
           <Button variant="hero" size="xl" onClick={() => navigate("/auth/signup")} className={`transition-all duration-1000 delay-500 hover:scale-110 ${ctaSection.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
             Começar Agora
           </Button>
-          
-          {/* Logo abaixo do botão */}
-          <div className="mt-12 flex justify-center">
-            <img src={logoImage} alt="YM SPORTS Logo" className="w-56 h-56 md:w-64 md:h-64 object-contain opacity-80" />
-          </div>
         </div>
       </section>
     </div>;
