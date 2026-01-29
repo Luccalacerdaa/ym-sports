@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Trophy, TrendingUp, Zap, Check, Megaphone, Heart, Volume2, VolumeX, Smartphone } from "lucide-react";
-import logoImage from "@/assets/logo_hero_300x300.png";
+import logoImage from "@/assets/logo_hero_final.png";
 import appMockupImage from "@/assets/app-mockup.png";
 import { useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -145,14 +145,14 @@ const Index = () => {
         
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/70 via-black/50 to-black" />
 
-        <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in flex flex-col justify-start min-h-screen pt-8 md:pt-12">
-          {/* Logo */}
-          <div className="flex justify-center mb-0 animate-zoom-in">
-            <img src={logoImage} alt="YM SPORTS Logo" className="w-[200px] h-[200px] md:w-[300px] md:h-[300px] object-contain" />
+        <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in flex flex-col min-h-screen pt-8 md:pt-12">
+          {/* Logo no topo */}
+          <div className="flex justify-center mb-2 animate-zoom-in">
+            <img src={logoImage} alt="YM SPORTS Logo" className="w-24 h-24 md:w-32 md:h-32 object-contain" />
           </div>
           
-          {/* Texto acima do título - Div separada com padding negativo */}
-          <div className="-mt-8 md:-mt-12 mb-2 relative z-20">
+          {/* Frase logo abaixo */}
+          <div className="mb-auto">
             <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] animate-fade-down" style={{
             animationDelay: "0.1s"
           }}>
@@ -160,30 +160,34 @@ const Index = () => {
             </p>
           </div>
           
-          <h1 className="text-[clamp(2.8rem,8vw,5.5rem)] font-astro font-bold mb-1 text-foreground tracking-wide animate-fade-down" style={{
-          animationDelay: "0.2s"
-        }}>
-            YM SPORTS
-          </h1>
+          {/* YM SPORTS no meio */}
+          <div className="flex-1 flex flex-col justify-center">
+            <h1 className="text-[clamp(2.8rem,8vw,5.5rem)] font-astro font-bold mb-1 text-foreground tracking-wide animate-fade-down" style={{
+            animationDelay: "0.2s"
+          }}>
+              YM SPORTS
+            </h1>
+            
+            <p className="text-primary font-bold uppercase tracking-wide mb-20 md:mb-24 text-[clamp(0.65rem,1.8vw,0.85rem)] animate-fade-up" style={{
+            animationDelay: "0.4s"
+          }}>
+              A EVOLUÇÃO DO ESPORTE COMEÇA AQUI.
+            </p>
+            
+            <p className="text-foreground font-semibold text-[clamp(1.1rem,3vw,1.5rem)] mb-2 animate-fade-up" style={{
+            animationDelay: "0.6s"
+          }}>
+              PLATAFORMA QUE ENTENDE VOCÊ,
+            </p>
+            <p className="text-primary font-bold uppercase text-[clamp(1.1rem,3vw,1.5rem)] mb-16 md:mb-20 animate-fade-up" style={{
+            animationDelay: "0.8s"
+          }}>
+              FOCADO EM EVOLUÇÃO.
+            </p>
+          </div>
           
-          <p className="text-primary font-bold uppercase tracking-wide mb-20 md:mb-24 text-[clamp(0.65rem,1.8vw,0.85rem)] animate-fade-up" style={{
-          animationDelay: "0.4s"
-        }}>
-            A EVOLUÇÃO DO ESPORTE COMEÇA AQUI.
-          </p>
-          
-          <p className="text-foreground font-semibold text-[clamp(1.1rem,3vw,1.5rem)] mb-2 animate-fade-up" style={{
-          animationDelay: "0.6s"
-        }}>
-            PLATAFORMA QUE ENTENDE VOCÊ,
-          </p>
-          <p className="text-primary font-bold uppercase text-[clamp(1.1rem,3vw,1.5rem)] mb-16 md:mb-20 animate-fade-up" style={{
-          animationDelay: "0.8s"
-        }}>
-            FOCADO EM EVOLUÇÃO.
-          </p>
-          
-          <div className="flex flex-col gap-4 max-w-xl mx-auto animate-fade-up" style={{
+          {/* Botões mais abaixo */}
+          <div className="flex flex-col gap-4 max-w-xl mx-auto mb-12 animate-fade-up" style={{
           animationDelay: "1s"
         }}>
             <Button 
