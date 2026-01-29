@@ -179,7 +179,7 @@ const Index = () => {
           }}>
               PLATAFORMA QUE ENTENDE VOCÊ,
             </p>
-            <p className="text-primary font-bold uppercase text-[clamp(1.1rem,3vw,1.5rem)] mb-10 md:mb-12 animate-fade-up" style={{
+            <p className="text-primary font-bold uppercase text-[clamp(1.1rem,3vw,1.5rem)] mb-6 md:mb-8 animate-fade-up" style={{
             animationDelay: "0.8s"
           }}>
               FOCADO EM EVOLUÇÃO.
@@ -187,7 +187,7 @@ const Index = () => {
           </div>
           
           {/* Botões mais abaixo */}
-          <div className="flex flex-col gap-4 max-w-xl mx-auto mb-6 md:mb-8 animate-fade-up" style={{
+          <div className="flex flex-col gap-4 max-w-xl mx-auto mb-16 md:mb-20 animate-fade-up" style={{
           animationDelay: "1s"
         }}>
             <Button 
