@@ -148,11 +148,11 @@ const Index = () => {
         <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in flex flex-col justify-center min-h-screen py-20">
           {/* Logo */}
           <div className="flex justify-center mb-0 animate-zoom-in">
-            <img src={logoImage} alt="YM SPORTS Logo" className="w-48 h-48 md:w-64 md:h-64 object-contain -translate-y-32 md:-translate-y-24" />
+            <img src={logoImage} alt="YM SPORTS Logo" className="w-48 h-48 md:w-64 md:h-64 object-contain -translate-y-32 md:-translate-y-24 -mb-20 md:-mb-16" />
           </div>
           
           {/* Texto acima do título */}
-          <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] -mt-24 md:-mt-16 mb-3 animate-fade-down" style={{
+          <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] -mt-20 md:-mt-12 mb-3 animate-fade-down" style={{
           animationDelay: "0.1s"
         }}>
             INTELIGÊNCIA ARTIFICIAL • VISIBILIDADE NACIONAL • EVOLUÇÃO REAL
