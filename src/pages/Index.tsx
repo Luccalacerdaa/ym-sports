@@ -152,19 +152,19 @@ const Index = () => {
           </div>
           
           {/* Texto acima do título */}
-          <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] -mt-16 md:-mt-10 mb-3 animate-fade-down" style={{
+          <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] -mt-24 md:-mt-16 mb-3 animate-fade-down" style={{
           animationDelay: "0.1s"
         }}>
             INTELIGÊNCIA ARTIFICIAL • VISIBILIDADE NACIONAL • EVOLUÇÃO REAL
           </p>
           
-          <h1 className="text-[clamp(3.5rem,10vw,6.5rem)] font-astro font-bold mb-1 text-foreground tracking-wide animate-fade-down" style={{
+          <h1 className="text-[clamp(2.8rem,8vw,5.5rem)] font-astro font-bold mb-1 text-foreground tracking-wide animate-fade-down" style={{
           animationDelay: "0.2s"
         }}>
             YM SPORTS
           </h1>
           
-          <p className="text-primary font-bold uppercase tracking-wide mb-16 md:mb-20 text-[clamp(0.65rem,1.8vw,0.85rem)] animate-fade-up" style={{
+          <p className="text-primary font-bold uppercase tracking-wide mb-20 md:mb-24 text-[clamp(0.65rem,1.8vw,0.85rem)] animate-fade-up" style={{
           animationDelay: "0.4s"
         }}>
             A EVOLUÇÃO DO ESPORTE COMEÇA AQUI.
@@ -175,7 +175,7 @@ const Index = () => {
         }}>
             PLATAFORMA QUE ENTENDE VOCÊ,
           </p>
-          <p className="text-primary font-bold uppercase text-[clamp(1.1rem,3vw,1.5rem)] mb-32 md:mb-40 animate-fade-up" style={{
+          <p className="text-primary font-bold uppercase text-[clamp(1.1rem,3vw,1.5rem)] mb-16 md:mb-20 animate-fade-up" style={{
           animationDelay: "0.8s"
         }}>
             FOCADO EM EVOLUÇÃO.
