@@ -147,16 +147,18 @@ const Index = () => {
 
         <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in flex flex-col justify-start min-h-screen pt-8 md:pt-12">
           {/* Logo */}
-          <div className="flex justify-center mb-2 animate-zoom-in">
+          <div className="flex justify-center mb-0 animate-zoom-in">
             <img src={logoImage} alt="YM SPORTS Logo" className="w-[200px] h-[200px] md:w-[300px] md:h-[300px] object-contain" />
           </div>
           
-          {/* Texto acima do título */}
-          <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] mb-2 animate-fade-down" style={{
-          animationDelay: "0.1s"
-        }}>
-            INTELIGÊNCIA ARTIFICIAL • VISIBILIDADE NACIONAL • EVOLUÇÃO REAL
-          </p>
+          {/* Texto acima do título - Div separada com padding negativo */}
+          <div className="-mt-8 md:-mt-12 mb-2 relative z-20">
+            <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] animate-fade-down" style={{
+            animationDelay: "0.1s"
+          }}>
+              INTELIGÊNCIA ARTIFICIAL • VISIBILIDADE NACIONAL • EVOLUÇÃO REAL
+            </p>
+          </div>
           
           <h1 className="text-[clamp(2.8rem,8vw,5.5rem)] font-astro font-bold mb-1 text-foreground tracking-wide animate-fade-down" style={{
           animationDelay: "0.2s"
