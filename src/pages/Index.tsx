@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Trophy, TrendingUp, Zap, Check, Megaphone, Heart, Volume2, VolumeX, Smartphone } from "lucide-react";
-import logoImage from "@/assets/logo_hero_500x500.png";
+import logoImage from "@/assets/logo_hero_clean.png";
 import appMockupImage from "@/assets/app-mockup.png";
 import { useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -147,12 +147,12 @@ const Index = () => {
 
         <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in flex flex-col justify-center min-h-screen py-20">
           {/* Logo */}
-          <div className="flex justify-center mb-0 animate-zoom-in">
-            <img src={logoImage} alt="YM SPORTS Logo" className="w-48 h-48 md:w-64 md:h-64 object-contain -translate-y-32 md:-translate-y-24 -mb-20 md:-mb-16" />
+          <div className="flex justify-center mb-4 animate-zoom-in">
+            <img src={logoImage} alt="YM SPORTS Logo" className="w-32 h-32 md:w-40 md:h-40 object-contain" />
           </div>
           
           {/* Texto acima do título */}
-          <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] -mt-20 md:-mt-12 mb-3 animate-fade-down" style={{
+          <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] mb-3 animate-fade-down" style={{
           animationDelay: "0.1s"
         }}>
             INTELIGÊNCIA ARTIFICIAL • VISIBILIDADE NACIONAL • EVOLUÇÃO REAL
