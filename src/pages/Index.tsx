@@ -148,17 +148,17 @@ const Index = () => {
         <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in flex flex-col justify-center min-h-screen py-20">
           {/* Logo */}
           <div className="flex justify-center mb-0 animate-zoom-in">
-            <img src={logoImage} alt="YM SPORTS Logo" className="w-48 h-48 md:w-64 md:h-64 object-contain -translate-y-20 md:-translate-y-16" />
+            <img src={logoImage} alt="YM SPORTS Logo" className="w-48 h-48 md:w-64 md:h-64 object-contain -translate-y-32 md:-translate-y-24" />
           </div>
           
           {/* Texto acima do título */}
-          <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] -mt-8 mb-3 animate-fade-down" style={{
+          <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] -mt-16 md:-mt-10 mb-3 animate-fade-down" style={{
           animationDelay: "0.1s"
         }}>
             INTELIGÊNCIA ARTIFICIAL • VISIBILIDADE NACIONAL • EVOLUÇÃO REAL
           </p>
           
-          <h1 className="text-[clamp(2.5rem,8vw,5rem)] font-astro font-bold mb-1 text-foreground tracking-wide animate-fade-down" style={{
+          <h1 className="text-[clamp(3.5rem,10vw,6.5rem)] font-astro font-bold mb-1 text-foreground tracking-wide animate-fade-down" style={{
           animationDelay: "0.2s"
         }}>
             YM SPORTS
@@ -181,7 +181,7 @@ const Index = () => {
             FOCADO EM EVOLUÇÃO.
           </p>
           
-          <div className="flex flex-col gap-4 max-w-md mx-auto animate-fade-up" style={{
+          <div className="flex flex-col gap-4 max-w-xl mx-auto animate-fade-up" style={{
           animationDelay: "1s"
         }}>
             <Button 
