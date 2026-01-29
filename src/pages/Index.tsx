@@ -19,8 +19,8 @@ const Index = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "quarterly" | "biannual">("monthly");
-  const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(0.3);
+  const [isMuted, setIsMuted] = useState(true);
+  const [volume, setVolume] = useState(0.5);
   const benefitsSection = useScrollAnimation();
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -55,6 +55,26 @@ const Index = () => {
       playVideo();
     }
   }, [volume, isMuted]);
+
+  // Ativar som após primeira interação do usuário
+  useEffect(() => {
+    const enableSound = () => {
+      if (videoRef.current && isMuted) {
+        setIsMuted(false);
+        videoRef.current.muted = false;
+        videoRef.current.play().catch(() => {});
+      }
+    };
+
+    // Ativar som no primeiro clique ou toque
+    document.addEventListener('click', enableSound, { once: true });
+    document.addEventListener('touchstart', enableSound, { once: true });
+
+    return () => {
+      document.removeEventListener('click', enableSound);
+      document.removeEventListener('touchstart', enableSound);
+    };
+  }, [isMuted]);
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
@@ -116,7 +136,7 @@ const Index = () => {
           loop 
           muted={isMuted}
           playsInline 
-          preload="metadata"
+          preload="auto"
           className="absolute inset-0 w-full h-full object-cover z-0"
         >
           <source src="/hero-video.mp4" type="video/mp4" />
@@ -127,12 +147,12 @@ const Index = () => {
 
         <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in">
           {/* Logo */}
-          <div className="flex justify-center mb-0 pt-4 animate-zoom-in">
-            <img src={logoImage} alt="YM SPORTS Logo" className="w-48 h-48 md:w-64 md:h-64 object-contain -translate-y-24" />
+          <div className="flex justify-center mb-0 -mt-8 animate-zoom-in">
+            <img src={logoImage} alt="YM SPORTS Logo" className="w-48 h-48 md:w-64 md:h-64 object-contain -translate-y-32" />
           </div>
           
           {/* Texto acima do título */}
-          <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] -mt-6 mb-6 animate-fade-down" style={{
+          <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] -mt-12 mb-6 animate-fade-down" style={{
           animationDelay: "0.1s"
         }}>
             INTELIGÊNCIA ARTIFICIAL • VISIBILIDADE NACIONAL • EVOLUÇÃO REAL
@@ -388,33 +408,37 @@ const Index = () => {
       </section>
 
       {/* App Mockup Section with 3D Effect */}
-      <section className="relative py-32 bg-gradient-to-b from-black/50 via-primary/5 to-black overflow-hidden">
+      <section className="relative py-32 overflow-hidden">
+        {/* Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-secondary/20 to-black" />
+        
         {/* Animated Background Elements */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/30 rounded-full blur-[100px] animate-pulse" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse delay-700" />
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-20 left-10 w-96 h-96 bg-primary/40 rounded-full blur-[150px] animate-pulse" />
+          <div className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-primary/30 rounded-full blur-[180px] animate-pulse delay-700" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[200px]" />
         </div>
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-5xl mx-auto text-center">
             {/* 3D Image with Animations */}
             <div className="relative group perspective-1000">
-              <div className="transform transition-all duration-700 hover:scale-105 hover:rotate-y-5 animate-float">
+              <div className="transform transition-all duration-700 hover:scale-105 animate-float">
                 {/* Glow Effect */}
-                <div className="absolute -inset-4 bg-gradient-to-r from-primary/40 via-primary/20 to-primary/40 rounded-3xl blur-2xl opacity-75 group-hover:opacity-100 transition-opacity duration-500 animate-pulse" />
+                <div className="absolute -inset-8 bg-gradient-to-r from-primary/50 via-primary/30 to-primary/50 rounded-3xl blur-3xl opacity-80 group-hover:opacity-100 transition-opacity duration-500 animate-pulse" />
                 
                 {/* Image Container */}
                 <div className="relative">
                   <img 
                     src={appMockupImage} 
                     alt="YM SPORTS App Mockup" 
-                    className="w-full h-auto drop-shadow-2xl transform transition-transform duration-700 group-hover:scale-[1.02]"
+                    className="w-full h-auto drop-shadow-[0_20px_80px_rgba(252,211,77,0.4)] transform transition-transform duration-700 group-hover:scale-[1.02]"
                   />
                   
                   {/* Floating Particles */}
-                  <div className="absolute top-10 left-10 w-3 h-3 bg-primary rounded-full animate-ping" />
-                  <div className="absolute bottom-20 right-20 w-2 h-2 bg-primary rounded-full animate-ping delay-300" />
-                  <div className="absolute top-1/2 right-10 w-2.5 h-2.5 bg-primary rounded-full animate-ping delay-500" />
+                  <div className="absolute top-10 left-10 w-4 h-4 bg-primary rounded-full animate-ping opacity-75" />
+                  <div className="absolute bottom-20 right-20 w-3 h-3 bg-primary rounded-full animate-ping delay-300 opacity-75" />
+                  <div className="absolute top-1/2 right-10 w-3.5 h-3.5 bg-primary rounded-full animate-ping delay-500 opacity-75" />
                 </div>
               </div>
             </div>
