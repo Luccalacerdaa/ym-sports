@@ -409,14 +409,11 @@ const Index = () => {
 
       {/* App Mockup Section with 3D Effect */}
       <section className="relative py-32 overflow-hidden">
-        {/* Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-secondary/20 to-black" />
-        
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-20 left-10 w-96 h-96 bg-primary/40 rounded-full blur-[150px] animate-pulse" />
-          <div className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-primary/30 rounded-full blur-[180px] animate-pulse delay-700" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[200px]" />
+        {/* Animated Background Elements - Apenas glow amarelo */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none">
+          <div className="absolute top-20 left-10 w-96 h-96 bg-primary/50 rounded-full blur-[150px] animate-pulse" />
+          <div className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-primary/40 rounded-full blur-[180px] animate-pulse delay-700" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/30 rounded-full blur-[200px]" />
         </div>
         
         <div className="container mx-auto px-4 relative z-10">
@@ -425,14 +422,14 @@ const Index = () => {
             <div className="relative group perspective-1000">
               <div className="transform transition-all duration-700 hover:scale-105 animate-float">
                 {/* Glow Effect */}
-                <div className="absolute -inset-8 bg-gradient-to-r from-primary/50 via-primary/30 to-primary/50 rounded-3xl blur-3xl opacity-80 group-hover:opacity-100 transition-opacity duration-500 animate-pulse" />
+                <div className="absolute -inset-8 bg-gradient-to-r from-primary/60 via-primary/40 to-primary/60 rounded-3xl blur-3xl opacity-75 group-hover:opacity-100 transition-opacity duration-500 animate-pulse" />
                 
                 {/* Image Container */}
                 <div className="relative">
                   <img 
                     src={appMockupImage} 
                     alt="YM SPORTS App Mockup" 
-                    className="w-full h-auto drop-shadow-[0_20px_80px_rgba(252,211,77,0.4)] transform transition-transform duration-700 group-hover:scale-[1.02]"
+                    className="w-full h-auto drop-shadow-[0_20px_80px_rgba(252,211,77,0.5)] transform transition-transform duration-700 group-hover:scale-[1.02]"
                   />
                   
                   {/* Floating Particles */}
