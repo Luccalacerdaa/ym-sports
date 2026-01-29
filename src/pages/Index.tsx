@@ -145,14 +145,14 @@ const Index = () => {
         
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/70 via-black/50 to-black" />
 
-        <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in">
+        <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in flex flex-col justify-center min-h-screen py-20">
           {/* Logo */}
-          <div className="flex justify-center mb-0 -mt-16 md:-mt-8 animate-zoom-in">
-            <img src={logoImage} alt="YM SPORTS Logo" className="w-48 h-48 md:w-64 md:h-64 object-contain -translate-y-40 md:-translate-y-32" />
+          <div className="flex justify-center mb-0 animate-zoom-in">
+            <img src={logoImage} alt="YM SPORTS Logo" className="w-48 h-48 md:w-64 md:h-64 object-contain -translate-y-20 md:-translate-y-16" />
           </div>
           
           {/* Texto acima do título */}
-          <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] -mt-20 md:-mt-12 mb-3 animate-fade-down" style={{
+          <p className="text-foreground text-[clamp(0.45rem,1vw,0.6rem)] uppercase tracking-[0.15em] -mt-8 mb-3 animate-fade-down" style={{
           animationDelay: "0.1s"
         }}>
             INTELIGÊNCIA ARTIFICIAL • VISIBILIDADE NACIONAL • EVOLUÇÃO REAL
@@ -175,13 +175,13 @@ const Index = () => {
         }}>
             PLATAFORMA QUE ENTENDE VOCÊ,
           </p>
-          <p className="text-primary font-bold uppercase text-[clamp(1.1rem,3vw,1.5rem)] mb-24 md:mb-32 animate-fade-up" style={{
+          <p className="text-primary font-bold uppercase text-[clamp(1.1rem,3vw,1.5rem)] mb-32 md:mb-40 animate-fade-up" style={{
           animationDelay: "0.8s"
         }}>
             FOCADO EM EVOLUÇÃO.
           </p>
           
-          <div className="flex flex-col gap-4 max-w-md mx-auto animate-fade-up mb-20" style={{
+          <div className="flex flex-col gap-4 max-w-md mx-auto animate-fade-up" style={{
           animationDelay: "1s"
         }}>
             <Button 
@@ -410,13 +410,13 @@ const Index = () => {
       {/* App Mockup Section with Black Background */}
       <section className="relative py-32 overflow-hidden bg-black">
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-5xl mx-auto text-center">
-            {/* Image Container */}
-            <div className="relative">
+          <div className="max-w-6xl mx-auto text-center">
+            {/* Image Container with Animation */}
+            <div className="relative animate-float">
               <img 
                 src={appMockupImage} 
                 alt="YM SPORTS App Mockup" 
-                className="w-full h-auto"
+                className="w-full h-auto transform transition-transform duration-700 hover:scale-105"
               />
             </div>
           </div>
