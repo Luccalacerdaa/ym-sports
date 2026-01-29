@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Trophy, TrendingUp, Zap, Check, Megaphone, Heart, Volume2, VolumeX, Smartphone } from "lucide-react";
 import logoImage from "@/assets/logo_hero_500x500.png";
+import appMockupImage from "@/assets/app-mockup.png";
 import { useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Card } from "@/components/ui/card";
@@ -18,7 +19,7 @@ const Index = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "quarterly" | "biannual">("monthly");
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.3);
   const benefitsSection = useScrollAnimation();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -122,33 +123,6 @@ const Index = () => {
           Seu navegador não suporta vídeos HTML5.
         </video>
         
-        {/* Controles de Volume */}
-        <div className="absolute bottom-8 right-8 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-sm rounded-full px-4 py-3">
-          <button
-            onClick={toggleMute}
-            className="text-white hover:text-primary transition-colors"
-            aria-label={isMuted ? "Ativar som" : "Silenciar"}
-          >
-            {isMuted ? (
-              <VolumeX className="h-6 w-6" />
-            ) : (
-              <Volume2 className="h-6 w-6" />
-            )}
-          </button>
-          {!isMuted && (
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={volume}
-              onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-              className="w-24 accent-primary"
-              aria-label="Controle de volume"
-            />
-          )}
-        </div>
-        
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/70 via-black/50 to-black" />
 
         <div className="relative z-10 container mx-auto px-4 text-center animate-fade-in">
@@ -227,30 +201,30 @@ const Index = () => {
         
         <div className="relative z-10 container mx-auto px-4">
           <h2 className={`text-center font-bebas uppercase leading-[0.9] mb-8 transition-all duration-1000 ${benefitsSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-            <div className="text-white text-[clamp(2.2rem,5vw,4.2rem)]">
+            <div className="text-white text-[clamp(2rem,4.5vw,3.8rem)]">
               POR QUE ESCOLHER
             </div>
             
-            <div className="text-primary font-bold tracking-wide text-[clamp(3.2rem,8vw,6.5rem)]">
+            <div className="text-primary font-bold tracking-wide text-[clamp(3.8rem,9vw,7.5rem)]">
               A YM SPORTS?
             </div>
           </h2>
           
           {/* Hero Text Over Image */}
           <div className={`text-center mb-16 max-w-3xl mx-auto transition-all duration-1000 delay-200 ${benefitsSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-            <p className="text-primary font-bold uppercase tracking-wide mb-6 text-[clamp(1.3rem,3vw,2rem)]">
+            <p className="text-primary font-bold uppercase tracking-wide mb-6 text-[clamp(1.1rem,2.8vw,1.8rem)]">
               PORQUE AQUI O SEU TALENTO VIRA OPORTUNIDADE!
             </p>
             
-            <p className="text-foreground text-[clamp(1rem,2.5vw,1.3rem)] leading-relaxed mb-4">
+            <p className="text-foreground text-[clamp(0.9rem,2.2vw,1.1rem)] leading-relaxed mb-4">
               Nosso App conecta atletas, pais e treinadores em um só lugar — focado em evolução e desempenho de cada atleta.
             </p>
             
-            <p className="text-foreground text-[clamp(1rem,2.5vw,1.3rem)] mb-6">
+            <p className="text-foreground text-[clamp(0.9rem,2.2vw,1.1rem)] mb-6">
               Desde o primeiro treino até as grandes conquistas.
             </p>
             
-            <p className="text-primary font-bold uppercase tracking-wide text-[clamp(1.2rem,3vw,1.8rem)]">
+            <p className="text-primary font-bold uppercase tracking-wide text-[clamp(1rem,2.8vw,1.6rem)]">
               UM IMPULSO PRO SEU FUTURO!
             </p>
           </div>
@@ -413,6 +387,41 @@ const Index = () => {
         </div>
       </section>
 
+      {/* App Mockup Section with 3D Effect */}
+      <section className="relative py-32 bg-gradient-to-b from-black/50 via-primary/5 to-black overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/30 rounded-full blur-[100px] animate-pulse" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse delay-700" />
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto text-center">
+            {/* 3D Image with Animations */}
+            <div className="relative group perspective-1000">
+              <div className="transform transition-all duration-700 hover:scale-105 hover:rotate-y-5 animate-float">
+                {/* Glow Effect */}
+                <div className="absolute -inset-4 bg-gradient-to-r from-primary/40 via-primary/20 to-primary/40 rounded-3xl blur-2xl opacity-75 group-hover:opacity-100 transition-opacity duration-500 animate-pulse" />
+                
+                {/* Image Container */}
+                <div className="relative">
+                  <img 
+                    src={appMockupImage} 
+                    alt="YM SPORTS App Mockup" 
+                    className="w-full h-auto drop-shadow-2xl transform transition-transform duration-700 group-hover:scale-[1.02]"
+                  />
+                  
+                  {/* Floating Particles */}
+                  <div className="absolute top-10 left-10 w-3 h-3 bg-primary rounded-full animate-ping" />
+                  <div className="absolute bottom-20 right-20 w-2 h-2 bg-primary rounded-full animate-ping delay-300" />
+                  <div className="absolute top-1/2 right-10 w-2.5 h-2.5 bg-primary rounded-full animate-ping delay-500" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Scrolling Banner */}
       <ScrollingBanner text="JUNTE-SE À REVOLUÇÃO DO ESPORTE DIGITAL" />
 
@@ -524,9 +533,10 @@ const Index = () => {
       {/* CTA Section */}
       <section ref={ctaSection.ref} className="py-20 bg-black">
         <div className="container mx-auto px-4 text-center">
-          <h2 className={`text-3xl md:text-5xl font-bold mb-6 text-foreground transition-all duration-1000 ${ctaSection.isVisible ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-75 rotate-12'}`}>
-            <span className="font-medelyn text-primary text-5xl md:text-6xl">E aí,</span><br />
-            <span className="font-bebas uppercase">PRONTO PARA EVOLUIR?</span>
+          <h2 className={`font-bebas uppercase leading-[0.95] mb-6 text-foreground transition-all duration-1000 ${ctaSection.isVisible ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-75 rotate-12'}`}>
+            <div className="font-medelyn text-primary text-[clamp(2.5rem,7vw,4rem)] mb-3">E aí,</div>
+            <div className="text-white text-[clamp(3.5rem,9vw,6.5rem)]">PRONTO PARA</div>
+            <div className="text-primary font-bold text-[clamp(3.8rem,10vw,7rem)]">EVOLUIR?</div>
           </h2>
           <p className={`text-xl text-muted-foreground mb-8 max-w-2xl mx-auto transition-all duration-1000 delay-300 ${ctaSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             Junte-se a milhares de atletas que já melhoraram seu desempenho
