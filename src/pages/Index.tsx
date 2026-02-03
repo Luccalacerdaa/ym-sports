@@ -92,19 +92,19 @@ const Index = () => {
   const ctaSection = useScrollAnimation();
   const planPrices = {
     monthly: {
-      value: 15.90,
-      total: 15.90,
+      value: 39.90,
+      total: 39.90,
       label: "Mensal"
     },
     quarterly: {
-      value: 14.63,
-      total: 43.90,
+      value: 33.30,
+      total: 99.90,
       label: "Trimestral",
       discount: "8% OFF"
     },
     biannual: {
-      value: 12.90,
-      total: 77.40,
+      value: 31.50,
+      total: 189.00,
       label: "Semestral",
       discount: "19% OFF"
     }
@@ -413,8 +413,15 @@ const Index = () => {
         </div>
       </section>
 
-      {/* App Mockup Section with Black Background */}
+      {/* App Mockup Section with Glow Effects */}
       <section className="relative py-32 overflow-hidden bg-black">
+        {/* Glow Effects */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute top-1/3 right-1/4 w-80 h-80 bg-primary/15 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute bottom-1/4 left-1/2 w-72 h-72 bg-primary/10 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '2s' }} />
+        </div>
+        
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-6xl mx-auto text-center">
             {/* Image Container with Animation */}
@@ -475,7 +482,7 @@ const Index = () => {
             </div>
 
             {/* Pricing Card */}
-            <Card className={`border-border p-8 md:p-10 text-center relative overflow-hidden shadow-xl transition-all duration-1000 delay-600 ${pricingSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+            <Card className={`border-border p-8 md:p-10 text-center relative overflow-hidden shadow-xl transition-all duration-1000 delay-600 hover:border-primary hover:shadow-[0_0_30px_rgba(252,211,77,0.6)] ${pricingSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
               {/* Background Image with Opacity */}
               <div className="absolute inset-0 bg-cover bg-center opacity-50" style={{
               backgroundImage: `url(${stadiumBwImage})`
