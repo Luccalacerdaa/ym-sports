@@ -24,32 +24,7 @@ supabase db push
 
 ---
 
-### 2. ✅ Tabela de Cache AI
-**Arquivo**: `supabase/migrations/20260203_create_ai_cache_table.sql`
-
-**Impacto**: Economia de 30-50% nos custos da OpenAI
-
-**Como aplicar**:
-```bash
-# Via Supabase Dashboard
-1. Acesse: https://supabase.com/dashboard/project/qfnjgksvpjbuhzwuitzg/editor
-2. Copie o conteúdo do arquivo SQL
-3. Cole na aba "SQL Editor"
-4. Clique em "Run"
-```
-
----
-
-### 3. ✅ Serviço de Cache AI
-**Arquivo**: `src/services/aiCacheService.ts`
-
-**Status**: Criado, mas NÃO integrado ainda
-
-**Impacto**: 30-50% economia OpenAI + respostas instantâneas
-
----
-
-### 4. ✅ Otimização do Bundle (Vite)
+### 2. ✅ Otimização do Bundle (Vite)
 **Arquivo**: `vite.config.ts`
 
 **Status**: ✅ APLICADO
@@ -88,60 +63,11 @@ supabase db push
    WHERE schemaname = 'public' 
    ORDER BY tablename, indexname;
    
-   -- Verificar tabela de cache
-   SELECT * FROM ai_cache LIMIT 1;
    ```
 
 ---
 
-### ETAPA 2: Integrar Cache AI (1-2 horas)
-
-#### A. Atualizar `useAITraining.ts`
-
-**Arquivo**: `src/hooks/useAITraining.ts`
-
-**Mudança**:
-```typescript
-import { getCachedResponse, setCachedResponse } from '@/services/aiCacheService';
-
-// ANTES (dentro da função generateTraining)
-const response = await openai.chat.completions.create({...});
-
-// DEPOIS (com cache)
-const cacheParams = {
-  age: userAge,
-  weight: userWeight,
-  height: userHeight,
-  level: level,
-  focus: focus
-};
-
-// Tentar buscar do cache primeiro
-let trainingData = await getCachedResponse('training', cacheParams);
-
-if (!trainingData) {
-  // Não está no cache, gerar novo
-  const response = await openai.chat.completions.create({...});
-  trainingData = JSON.parse(response.choices[0].message.content);
-  
-  // Salvar no cache para próximas vezes
-  await setCachedResponse('training', cacheParams, trainingData);
-} else {
-  console.log('✅ Usando treino do cache (economia de custo!)');
-}
-
-// Continuar com trainingData...
-```
-
-#### B. Atualizar `useAINutrition.ts`
-
-**Arquivo**: `src/hooks/useAINutrition.ts`
-
-**Mudança**: Similar ao useAITraining, mas com `prompt_type: 'nutrition'`
-
----
-
-### ETAPA 3: Adicionar Rate Limiting (30 minutos)
+### ETAPA 2: Adicionar Rate Limiting (1 hora)
 
 **Criar**: `src/hooks/useRateLimit.ts`
 
@@ -220,7 +146,7 @@ CREATE POLICY "Users can update own rate limits" ON ai_rate_limits
 
 ---
 
-### ETAPA 4: Deploy (5 minutos)
+### ETAPA 3: Deploy (5 minutos)
 
 ```bash
 # 1. Build local para testar
@@ -234,7 +160,7 @@ git add .
 git commit -m "feat: Adicionar otimizações de performance
 
 - Indexes SQL para queries 5-10x mais rápidas
-- Cache AI (economia de 30-50% OpenAI)
+- Rate limiting OpenAI (controle de custos)
 - Otimização bundle Vite (-30-40% tamanho)
 - Code splitting por vendor
 - Remove console.log em produção"
@@ -258,75 +184,65 @@ ANTES:
 
 DEPOIS:
 ├─ Carregamento inicial:     2-3s (-50%)
-├─ Query de rankings:        100-200ms (-85%)
-├─ Geração de treino IA:     <100ms (cache) / 3-5s (novo)
+├─ Queries otimizadas:       100-200ms (-85%)
+├─ Geração de treino IA:     3-5s (cada plano é único)
 └─ Bundle size:              1.5-1.8MB (-30%)
 ```
 
 ### Custos OpenAI
 ```
-SEM CACHE:
+CUSTOS (cada plano é único e personalizado):
 - 1.000 usuários: $20/mês
 - 5.000 usuários: $100/mês
 - 10.000 usuários: $200/mês
 
-COM CACHE (30-50% economia):
-- 1.000 usuários: $10-14/mês (-40%)
-- 5.000 usuários: $50-70/mês (-40%)
-- 10.000 usuários: $100-140/mês (-40%)
+COM RATE LIMITING (controle de uso):
+- 3-5 gerações de treino/dia por usuário
+- Custos previsíveis e controlados
+- Proteção contra abuso
 ```
 
 ---
 
 ## 🎯 CHECKLIST DE APLICAÇÃO
 
-- [ ] 1. Aplicar migration de indexes (SQL Editor Supabase)
-- [ ] 2. Aplicar migration de tabela ai_cache (SQL Editor Supabase)
-- [ ] 3. Integrar aiCacheService no useAITraining
-- [ ] 4. Integrar aiCacheService no useAINutrition
-- [ ] 5. Criar tabela de rate limits (SQL)
-- [ ] 6. Implementar rate limiting nos hooks de IA
-- [ ] 7. Testar localmente (npm run build && npm run preview)
-- [ ] 8. Deploy (git push)
-- [ ] 9. Monitorar logs no Vercel
-- [ ] 10. Verificar cache stats no Supabase
+- [x] 1. Otimizar bundle Vite (code splitting)
+- [ ] 2. Aplicar migration de indexes (SQL Editor Supabase)
+- [ ] 3. Criar tabela de rate limits (SQL)
+- [ ] 4. Implementar rate limiting nos hooks de IA
+- [ ] 5. Testar localmente (npm run build && npm run preview)
+- [ ] 6. Deploy (git push)
+- [ ] 7. Monitorar logs no Vercel
 
 ---
 
 ## 📈 MONITORAMENTO
 
-### Ver estatísticas do cache
+### Ver uso de rate limits
 ```sql
 -- No Supabase SQL Editor
 SELECT 
-  prompt_type,
-  COUNT(*) as total_entries,
-  SUM(hit_count) as total_hits,
-  ROUND(AVG(hit_count), 2) as avg_hits_per_entry,
-  ROUND(SUM(hit_count)::numeric / NULLIF(COUNT(*), 0), 2) as hit_rate
-FROM ai_cache
-GROUP BY prompt_type;
-```
-
-### Ver top 10 prompts mais usados
-```sql
-SELECT 
-  prompt_type,
-  user_params,
-  hit_count,
+  user_id,
+  date,
+  request_count,
   created_at
-FROM ai_cache
-ORDER BY hit_count DESC
-LIMIT 10;
+FROM ai_rate_limits
+WHERE date >= CURRENT_DATE - INTERVAL '7 days'
+ORDER BY request_count DESC
+LIMIT 20;
 ```
 
-### Ver economia estimada
+### Ver estatísticas de uso OpenAI
 ```sql
--- Cada hit = $0.00102 economizado
+-- Usuários que mais geram planos
 SELECT 
-  SUM(hit_count) * 0.00102 as economia_usd,
-  SUM(hit_count) as total_requests_economizados
-FROM ai_cache;
+  user_id,
+  COUNT(*) as total_requests,
+  MAX(date) as last_request
+FROM ai_rate_limits
+GROUP BY user_id
+ORDER BY total_requests DESC
+LIMIT 10;
 ```
 
 ---
@@ -342,14 +258,11 @@ FROM ai_cache;
 # A migration usa IF NOT EXISTS, então é seguro re-executar
 ```
 
-### Cache não está funcionando
+### Rate limiting não está funcionando
 ```typescript
 // Verificar se tabela existe
-const { data } = await supabase.from('ai_cache').select('count');
-console.log('Cache table rows:', data);
-
-// Verificar logs
-console.log('Cache stats:', await getCacheStats());
+const { data } = await supabase.from('ai_rate_limits').select('*').limit(1);
+console.log('Rate limits table:', data);
 ```
 
 ### Build falhando

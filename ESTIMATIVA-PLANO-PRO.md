@@ -152,15 +152,14 @@ Arredondando: ~$0.02 por usuário/mês
 50.000 × $0.02 = $1.000/mês
 ```
 
-### ⚠️ IMPORTANTE: Otimizações OpenAI
+### ⚠️ IMPORTANTE: Controle de Custos OpenAI
 
-**Custos reais podem ser MENORES com**:
-1. **Cache de respostas similares** → Economia de 30-50%
-2. **Rate limiting por usuário** → Evita abuso
-3. **Fallback para respostas pré-geradas** → Para usuários iniciantes
-4. **Batch processing** → Desconto de até 50%
+**Para controlar custos**:
+1. **Rate limiting por usuário** → Limitar a 3-5 gerações/dia
+2. **Monitorar uso** → Dashboard OpenAI
+3. **Alertas de custo** → Configurar limite mensal
 
-**Estimativa otimizada**: $0.01-0.015/usuário/mês
+**NOTA**: Cada plano é único e personalizado, portanto não é possível implementar cache (cada requisição gera um resultado diferente baseado nos dados específicos do usuário).
 
 ---
 
@@ -314,31 +313,18 @@ ON user_achievements(user_id, unlocked);
 
 ---
 
-### 3. OPENAI OPTIMIZATION (IMPACTO MÉDIO) 💰
+### 3. RATE LIMITING OPENAI (IMPACTO ALTO) 💰
 
-#### A. Cache de Planos Similares
-**Arquivo**: Criar `src/services/aiCacheService.ts`
+**Objetivo**: Controlar custos e evitar abuso
 
-**Lógica**:
-1. Gerar hash do prompt (idade, peso, objetivo)
-2. Verificar se existe plano similar no cache
-3. Se sim, retornar do cache (gratuito)
-4. Se não, gerar novo e cachear
-
-**Impacto**:
-- ✅ Economia de 30-50% em custos OpenAI
-- ✅ Respostas instantâneas para prompts similares
-
----
-
-#### B. Rate Limiting por Usuário
-**Arquivo**: `src/hooks/useAITraining.ts`
-
-**Mudança**: Limitar a 3-5 gerações de treino/dia
+**Implementação**: Limitar gerações por usuário/dia
+- Treinos: 3-5 gerações/dia
+- Nutrição: 2-3 gerações/dia
 
 **Impacto**:
 - ✅ Evita abuso da API
 - ✅ Custos previsíveis
+- ✅ Protege orçamento
 - ✅ Incentiva uso consciente
 
 ---
@@ -404,15 +390,13 @@ export default defineConfig({
 |---|------------|-------|---------|----------|
 | 1 | Indexes SQL | 30min | Alto | 50-70% queries |
 | 2 | Cache React Query | 1h | Alto | 60-80% requests |
-| 3 | OpenAI Cache | 2h | Médio | 30-50% custos IA |
-| 4 | Rate Limiting | 1h | Médio | Evita abuso |
-| 5 | Code Splitting | 1h | Médio | 30-40% bundle |
-| 6 | Pagination | 2h | Médio | 80% payload |
-| 7 | Sentry | 30min | Baixo | - |
-| 8 | Service Worker Cache | 1h | Médio | 40% bandwidth |
+| 3 | Rate Limiting OpenAI | 1h | Alto | Controle custos |
+| 4 | Code Splitting | ✅ FEITO | Médio | 30-40% bundle |
+| 5 | Pagination | 2h | Médio | 80% payload |
+| 6 | Sentry | 30min | Baixo | - |
 
-**Total de tempo**: ~9 horas de desenvolvimento
-**Economia total**: ~40-60% nos custos operacionais
+**Total de tempo**: ~5 horas de desenvolvimento
+**Economia total**: ~50-70% nas queries do banco
 
 ---
 
@@ -428,9 +412,9 @@ export default defineConfig({
 💰 CUSTOS (10k DAU):
 ├─ Supabase Pro:             $25/mês
 ├─ Vercel Pro:               $20/mês
-├─ OpenAI (otimizado):       $130/mês (vs $200 sem otimização)
+├─ OpenAI:                   $200/mês (controlado com rate limiting)
 ├─ Outros:                   $30/mês
-└─ TOTAL:                    $205/mês
+└─ TOTAL:                    $275/mês
 
 📊 MÉTRICAS:
 ├─ Custo por usuário:        $0.020/mês
