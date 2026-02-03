@@ -10,6 +10,39 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  build: {
+    // Otimizações de bundle
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Separar vendors grandes
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-select',
+            '@radix-ui/react-avatar'
+          ],
+          'charts': ['recharts'],
+          'maps': ['mapbox-gl', '@mapbox/mapbox-gl-geocoder'],
+          'forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'query': ['@tanstack/react-query'],
+          'supabase': ['@supabase/supabase-js']
+        }
+      }
+    },
+    // Comprimir assets
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production', // Remove console.log em produção
+        drop_debugger: true
+      }
+    },
+    // Otimizar chunks
+    chunkSizeWarningLimit: 1000
+  },
   plugins: [
     react(), 
     mode === "development" && componentTagger(),
