@@ -558,7 +558,7 @@ const Index = () => {
           </div>
 
           <Accordion type="single" collapsible className="space-y-4">
-            <AccordionItem value="item-1" className="border border-border rounded-lg bg-card/50 backdrop-blur-sm overflow-hidden">
+            <AccordionItem value="item-1" className="border border-border rounded-lg bg-card/50 backdrop-blur-sm overflow-hidden transition-all duration-300 data-[state=open]:border-primary data-[state=open]:shadow-[0_0_20px_rgba(252,211,77,0.3)]">
               <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-card/80 transition-colors">
                 <span className="text-lg font-semibold text-left">Por que tão barato?</span>
               </AccordionTrigger>
@@ -567,7 +567,7 @@ const Index = () => {
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-2" className="border border-border rounded-lg bg-card/50 backdrop-blur-sm overflow-hidden">
+            <AccordionItem value="item-2" className="border border-border rounded-lg bg-card/50 backdrop-blur-sm overflow-hidden transition-all duration-300 data-[state=open]:border-primary data-[state=open]:shadow-[0_0_20px_rgba(252,211,77,0.3)]">
               <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-card/80 transition-colors">
                 <span className="text-lg font-semibold text-left">Por que ter o APP se já tenho personal/escolinha?</span>
               </AccordionTrigger>
@@ -576,7 +576,7 @@ const Index = () => {
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-3" className="border border-border rounded-lg bg-card/50 backdrop-blur-sm overflow-hidden">
+            <AccordionItem value="item-3" className="border border-border rounded-lg bg-card/50 backdrop-blur-sm overflow-hidden transition-all duration-300 data-[state=open]:border-primary data-[state=open]:shadow-[0_0_20px_rgba(252,211,77,0.3)]">
               <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-card/80 transition-colors">
                 <span className="text-lg font-semibold text-left">O APP realmente funciona e é confiável?</span>
               </AccordionTrigger>
@@ -585,7 +585,7 @@ const Index = () => {
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-4" className="border border-border rounded-lg bg-card/50 backdrop-blur-sm overflow-hidden">
+            <AccordionItem value="item-4" className="border border-border rounded-lg bg-card/50 backdrop-blur-sm overflow-hidden transition-all duration-300 data-[state=open]:border-primary data-[state=open]:shadow-[0_0_20px_rgba(252,211,77,0.3)]">
               <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-card/80 transition-colors">
                 <span className="text-lg font-semibold text-left">O APP vai melhorar minhas oportunidades e como?</span>
               </AccordionTrigger>
@@ -594,7 +594,7 @@ const Index = () => {
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-5" className="border border-border rounded-lg bg-card/50 backdrop-blur-sm overflow-hidden">
+            <AccordionItem value="item-5" className="border border-border rounded-lg bg-card/50 backdrop-blur-sm overflow-hidden transition-all duration-300 data-[state=open]:border-primary data-[state=open]:shadow-[0_0_20px_rgba(252,211,77,0.3)]">
               <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-card/80 transition-colors">
                 <span className="text-lg font-semibold text-left">Não tenho lugar/equipamentos para treinar, e agora?</span>
               </AccordionTrigger>
