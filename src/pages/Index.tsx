@@ -15,6 +15,7 @@ import stadiumBwImage from "@/assets/stadium-bw.jpg";
 import soccerTrainingFieldImage from "@/assets/soccer-training-field.jpg";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useEffect, useRef } from "react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 const Index = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -543,6 +544,65 @@ const Index = () => {
           <h3 className="text-3xl md:text-5xl font-bebas font-bold text-center text-primary animate-fade-in uppercase">
             A diferença entre tentar e conquistar começa aqui
           </h3>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 bg-black">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="mb-12">
+            <h2 className="text-4xl md:text-5xl font-bebas font-bold text-center mb-2">
+              <span className="text-foreground">Perguntas Frequentes</span>
+            </h2>
+            <p className="text-center text-primary text-2xl md:text-3xl font-bebas">F.A.Q</p>
+          </div>
+
+          <Accordion type="single" collapsible className="space-y-4">
+            <AccordionItem value="item-1" className="border border-border rounded-lg bg-card/50 backdrop-blur-sm overflow-hidden">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-card/80 transition-colors">
+                <span className="text-lg font-semibold text-left">Por que tão barato?</span>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-4 text-muted-foreground">
+                Pensamos exatamente em um valor que todos podem ter acesso. Por aproximadamente 1 real por dia terá disponível nosso APP, onde vai ter a evolução para o seu grande sonho de ser jogador.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-2" className="border border-border rounded-lg bg-card/50 backdrop-blur-sm overflow-hidden">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-card/80 transition-colors">
+                <span className="text-lg font-semibold text-left">Por que ter o APP se já tenho personal/escolinha?</span>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-4 text-muted-foreground">
+                Ter um profissional que já te acompanha é ótimo. Nosso APP vai somar de forma significativa, usando nossas ferramentas em conjunto que de fato vai te levar à evolução ao alto nível.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-3" className="border border-border rounded-lg bg-card/50 backdrop-blur-sm overflow-hidden">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-card/80 transition-colors">
+                <span className="text-lg font-semibold text-left">O APP realmente funciona e é confiável?</span>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-4 text-muted-foreground">
+                É essencial que se preocupe com a veracidade. Nosso APP funciona de forma íntegra e com ferramentas de alta tecnologia. Conhecendo nosso APP e utilizando de tudo que oferece a evolução é certa.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-4" className="border border-border rounded-lg bg-card/50 backdrop-blur-sm overflow-hidden">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-card/80 transition-colors">
+                <span className="text-lg font-semibold text-left">O APP vai melhorar minhas oportunidades e como?</span>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-4 text-muted-foreground">
+                A busca por oportunidades e chances é um ponto que damos muita atenção e exclusividade. Nosso APP disponibiliza uma série de ferramentas para uso em melhorar sua visibilidade, que aplicadas, as chances de sucesso são muito maior.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-5" className="border border-border rounded-lg bg-card/50 backdrop-blur-sm overflow-hidden">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-card/80 transition-colors">
+                <span className="text-lg font-semibold text-left">Não tenho lugar/equipamentos para treinar, e agora?</span>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-4 text-muted-foreground">
+                É normal os atletas não terem grandes estruturas disponíveis. Por isso nossos treinamentos e atividades podem ser feitos em casa, sem nenhum tipo de equipamento e em qualquer horário. Totalmente personalizado e exclusivo para a sua situação.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </section>
 
