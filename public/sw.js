@@ -1,13 +1,24 @@
-// Service Worker Simplificado para YM Sports
-// Foco em notificações que funcionem mesmo com app fechado
+// Service Worker Completo para YM Sports
+// Notificações + Cache Offline
 
-const SW_VERSION = '17.0.0';
+const SW_VERSION = '18.0.0';
 const CACHE_NAME = `ym-sports-v${SW_VERSION}`;
+const RUNTIME_CACHE = `runtime-${SW_VERSION}`;
 
 // Configurações do Supabase (será recebido do app)
 let supabaseUrl = null;
 let supabaseKey = null;
 let userId = null;
+
+// Arquivos essenciais para cache (offline first)
+const ESSENTIAL_FILES = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/logo.svg'
+];
 
 console.log(`[SW] 🚀 YM Sports Service Worker v${SW_VERSION} iniciado!`);
 
@@ -398,4 +409,139 @@ self.addEventListener('push', (event) => {
   );
 });
 
-console.log('[SW] 🎯 Service Worker configurado e pronto!');
+// =============================================
+// EVENTOS DE CACHE PARA OFFLINE
+// =============================================
+
+// INSTALL: Cachear arquivos essenciais
+self.addEventListener('install', (event) => {
+  console.log('[SW] 📦 Instalando Service Worker...');
+  
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('[SW] 💾 Cacheando arquivos essenciais');
+      return cache.addAll(ESSENTIAL_FILES).catch(err => {
+        console.warn('[SW] ⚠️ Alguns arquivos não foram cacheados:', err);
+      });
+    }).then(() => {
+      console.log('[SW] ✅ Instalação completa');
+      return self.skipWaiting(); // Ativar imediatamente
+    })
+  );
+});
+
+// ACTIVATE: Limpar caches antigos
+self.addEventListener('activate', (event) => {
+  console.log('[SW] 🔄 Ativando Service Worker...');
+  
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME && cacheName !== RUNTIME_CACHE) {
+            console.log('[SW] 🗑️ Removendo cache antigo:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => {
+      console.log('[SW] ✅ Ativação completa');
+      return self.clients.claim(); // Controlar todas as páginas
+    })
+  );
+});
+
+// FETCH: Estratégia de cache
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+  
+  // Ignorar requisições de extensões do Chrome e dev tools
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return;
+  }
+  
+  // Ignorar requisições para APIs externas (Supabase, OpenAI, etc)
+  if (url.hostname !== self.location.hostname) {
+    // Network only para APIs externas
+    event.respondWith(fetch(request));
+    return;
+  }
+  
+  // Estratégia: Cache First para assets estáticos
+  if (
+    request.destination === 'image' ||
+    request.destination === 'style' ||
+    request.destination === 'script' ||
+    request.destination === 'font' ||
+    url.pathname.endsWith('.svg') ||
+    url.pathname.endsWith('.png') ||
+    url.pathname.endsWith('.jpg') ||
+    url.pathname.endsWith('.webp') ||
+    url.pathname.endsWith('.woff2')
+  ) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) {
+          // console.log('[SW] 💾 Cache HIT:', url.pathname);
+          return cached;
+        }
+        
+        return fetch(request).then((response) => {
+          // Cachear para futuras requisições
+          if (response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(RUNTIME_CACHE).then((cache) => {
+              cache.put(request, responseClone);
+            });
+          }
+          return response;
+        }).catch(() => {
+          console.log('[SW] ❌ Offline e sem cache para:', url.pathname);
+          // Retornar imagem placeholder se for imagem
+          if (request.destination === 'image') {
+            return caches.match('/icons/icon-192.png');
+          }
+        });
+      })
+    );
+    return;
+  }
+  
+  // Estratégia: Network First para HTML e dados dinâmicos
+  event.respondWith(
+    fetch(request)
+      .then((response) => {
+        // Cachear HTML para offline
+        if (response.status === 200 && request.destination === 'document') {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, responseClone);
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        // Se offline, tentar cache
+        return caches.match(request).then((cached) => {
+          if (cached) {
+            console.log('[SW] 💾 Servindo do cache (offline):', url.pathname);
+            return cached;
+          }
+          
+          // Fallback para index.html (SPA routing)
+          if (request.destination === 'document') {
+            return caches.match('/index.html');
+          }
+          
+          console.log('[SW] ❌ Sem cache disponível para:', url.pathname);
+          return new Response('Offline - recurso não disponível', {
+            status: 503,
+            statusText: 'Service Unavailable'
+          });
+        });
+      })
+  );
+});
+
+console.log('[SW] 🎯 Service Worker configurado e pronto (com cache offline)!');
