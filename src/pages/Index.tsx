@@ -116,7 +116,7 @@ const Index = () => {
   }, {
     icon: TrendingUp,
     title: "treinos",
-    description: "inteligência artificial que produz treinamentos específicos e personalizados pensando na sua melhor versão."
+    description: "Inteligência artificial que produz treinamentos específicos e personalizados pensando na sua melhor versão."
   }, {
     icon: Heart,
     title: "motivação",
@@ -124,7 +124,7 @@ const Index = () => {
   }, {
     icon: Zap,
     title: "portfólio online",
-    description: "plataforma que permite você divulgar sua ficha técnica com empresários, deixando sua apresentação profissional."
+    description: "Plataforma que permite você divulgar sua ficha técnica com empresários, deixando sua apresentação profissional."
   }];
   return <div className="min-h-screen bg-gradient-to-br from-black via-secondary to-black">
       {/* Hero Section */}
@@ -171,7 +171,7 @@ const Index = () => {
             <p className="text-primary font-bold uppercase tracking-wide mb-20 md:mb-24 text-[clamp(0.65rem,1.8vw,0.85rem)] animate-fade-up" style={{
             animationDelay: "0.4s"
           }}>
-              A EVOLUÇÃO DO ESPORTE COMEÇA AQUI.
+              SUA EVOLUÇÃO COMEÇA AQUI.
             </p>
             
             <p className="text-foreground font-semibold text-[clamp(1.1rem,3vw,1.5rem)] mb-2 animate-fade-up" style={{
@@ -215,7 +215,7 @@ const Index = () => {
       </section>
 
       {/* Scrolling Banner */}
-      <ScrollingBanner text="YM SPORTS - A EVOLUÇÃO DO ESPORTE COMEÇA AQUI" />
+      <ScrollingBanner text="YM SPORTS - SUA EVOLUÇÃO COMEÇA AQUI" />
 
       {/* Benefits Section */}
       <section ref={benefitsSection.ref} className="relative py-20 overflow-hidden">
@@ -488,6 +488,8 @@ const Index = () => {
               backgroundImage: `url(${stadiumBwImage})`
             }} />
               <div className="absolute inset-0 bg-gradient-to-br from-black/50 via-black/40 to-black/50" />
+              {/* Yellow Overlay Effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-primary/10" />
               <div className="relative z-10">
                 <div className="mb-6">
                   <div className="text-5xl md:text-6xl font-bold text-foreground mb-2 animate-scale-in">
@@ -538,7 +540,7 @@ const Index = () => {
       {/* Inspirational Quote Section */}
       <section className="py-16 bg-gradient-to-b from-black to-black/50">
         <div className="container mx-auto px-4">
-          <h3 className="text-3xl md:text-5xl font-astro font-bold text-center text-primary animate-fade-in">
+          <h3 className="text-3xl md:text-5xl font-bebas font-bold text-center text-primary animate-fade-in uppercase">
             A diferença entre tentar e conquistar começa aqui
           </h3>
         </div>
@@ -548,7 +550,7 @@ const Index = () => {
       <section ref={ctaSection.ref} className="py-20 bg-black">
         <div className="container mx-auto px-4 text-center">
           <h2 className={`font-bebas uppercase leading-[0.95] mb-6 text-foreground transition-all duration-1000 ${ctaSection.isVisible ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-75 rotate-12'}`}>
-            <div className="font-medelyn text-primary text-[clamp(2.5rem,7vw,4rem)] mb-3">E aí,</div>
+            <div className="font-medelyn text-primary text-[clamp(2.5rem,7vw,4rem)] mb-3">E ai,</div>
             <div className="text-white text-[clamp(3.5rem,9vw,6.5rem)]">PRONTO PARA</div>
             <div className="text-primary font-bold text-[clamp(3.8rem,10vw,7rem)]">EVOLUIR?</div>
           </h2>
