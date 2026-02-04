@@ -50,7 +50,7 @@ select {
 
 /* Garantir que dialogs não afetem a barra inferior */
 .dialog-container {
-  padding-bottom: 80px !important;
+  /* REMOVIDO: padding-bottom causava barra preta */
   max-height: 85vh !important; /* Limitar altura máxima */
   overflow-y: auto !important; /* Garantir scroll */
   -webkit-overflow-scrolling: touch !important; /* Scroll suave em iOS */

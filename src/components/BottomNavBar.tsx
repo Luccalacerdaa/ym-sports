@@ -25,7 +25,6 @@ export function BottomNavBar() {
     >
       <nav 
         className="flex justify-around items-start h-24 sm:h-28 max-w-screen-xl mx-auto px-2 pt-3"
-        style={{ paddingBottom: 'max(28px, calc(env(safe-area-inset-bottom) + 8px))' }}
       >
         {navItems.map((item) => (
           <NavLink
