@@ -14,9 +14,9 @@ export default function DashboardLayout() {
   } = usePWAInstallPrompt();
 
   return (
-    <div className="min-h-screen flex flex-col w-full bg-black">
+    <div className="h-full min-h-screen flex flex-col w-full bg-black">
       <TopNavBar />
-      <main className="flex-1 pb-20 sm:pb-24 overflow-x-hidden">
+      <main className="flex-1 pb-20 sm:pb-24 overflow-x-hidden overflow-y-auto">
         <Outlet />
       </main>
       <BottomNavBar />
