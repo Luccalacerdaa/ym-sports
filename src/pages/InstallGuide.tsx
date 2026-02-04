@@ -119,10 +119,6 @@ const InstallGuide = () => {
                   key={selectedPlatform} // Force re-render when platform changes
                 >
                   <source 
-                    src={`/tutorials/${selectedPlatform}-install.mov`}
-                    type="video/quicktime"
-                  />
-                  <source 
                     src={`/tutorials/${selectedPlatform}-install.mp4`}
                     type="video/mp4"
                   />

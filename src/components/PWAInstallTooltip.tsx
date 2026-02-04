@@ -75,7 +75,7 @@ export function PWAInstallTooltip({ isOpen, onClose }: PWAInstallTooltipProps) {
                   controls
                   autoPlay
                   playsInline
-                  src="/tutorials/ios-install.mov"
+                  src="/tutorials/ios-install.mp4"
                 >
                   Seu navegador não suporta o vídeo de instalação para iOS.
                 </video>
@@ -128,7 +128,7 @@ export function PWAInstallTooltip({ isOpen, onClose }: PWAInstallTooltipProps) {
                   controls
                   autoPlay
                   playsInline
-                  src="/tutorials/android-install.mov"
+                  src="/tutorials/android-install.mp4"
                 >
                   Seu navegador não suporta o vídeo de instalação para Android.
                 </video>
