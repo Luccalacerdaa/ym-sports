@@ -86,28 +86,45 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
     setLoading(true);
     
     try {
+      // Validar campos obrigatórios
+      if (!basicInfo.full_name?.trim()) {
+        toast.error('Nome completo é obrigatório');
+        setLoading(false);
+        return;
+      }
+      
+      if (!basicInfo.position?.trim()) {
+        toast.error('Posição é obrigatória');
+        setLoading(false);
+        return;
+      }
+      
       // Preparar dados limpos para atualização - APENAS campos da tabela player_portfolios
       const updateData: any = {
-        full_name: basicInfo.full_name,
+        full_name: basicInfo.full_name.trim(),
         position: basicInfo.position,
         age: Number(basicInfo.age) || 0,
         height: Number(basicInfo.height) || 0,
         weight: Number(basicInfo.weight) || 0,
-        preferred_foot: basicInfo.preferred_foot,
-        nationality: basicInfo.nationality,
-        city: basicInfo.city || null,
-        state: basicInfo.state || null,
-        biography: basicInfo.biography || null,
-        phone: basicInfo.phone || null,
-        email: basicInfo.email || null,
-        profile_photo: basicInfo.profile_photo || null,
-        highlight_video: basicInfo.highlight_video || null,
-        gallery_photos: Array.isArray(basicInfo.gallery_photos) ? basicInfo.gallery_photos : [],
-        skill_videos: Array.isArray(basicInfo.skill_videos) ? basicInfo.skill_videos : [],
+        preferred_foot: basicInfo.preferred_foot || 'right',
+        nationality: basicInfo.nationality?.trim() || 'Brasil',
+        city: basicInfo.city?.trim() || null,
+        state: basicInfo.state?.trim() || null,
+        biography: basicInfo.biography?.trim() || null,
+        phone: basicInfo.phone?.trim() || null,
+        email: basicInfo.email?.trim() || null,
+        profile_photo: basicInfo.profile_photo?.trim() || null,
+        highlight_video: basicInfo.highlight_video?.trim() || null,
+        gallery_photos: Array.isArray(basicInfo.gallery_photos) 
+          ? basicInfo.gallery_photos.filter(p => p && p.trim()) 
+          : [],
+        skill_videos: Array.isArray(basicInfo.skill_videos) 
+          ? basicInfo.skill_videos.filter(v => v && v.trim()) 
+          : [],
         social_media: {
-          instagram: socialMedia.instagram || null,
-          twitter: socialMedia.twitter || null,
-          youtube: socialMedia.youtube || null
+          instagram: socialMedia.instagram?.trim() || null,
+          twitter: socialMedia.twitter?.trim() || null,
+          youtube: socialMedia.youtube?.trim() || null
         },
         career_stats: {
           total_games: Number(careerStats.total_games) || 0,
@@ -123,10 +140,10 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
         },
         is_public: Boolean(settings.is_public),
         is_seeking_club: Boolean(settings.is_seeking_club),
-        salary_expectation: settings.salary_expectation || null
+        salary_expectation: settings.salary_expectation?.trim() || null
       };
       
-      console.log('Dados a serem enviados:', updateData);
+      console.log('🔍 Dados a serem enviados:', JSON.stringify(updateData, null, 2));
       
       await updatePortfolio(updateData);
       

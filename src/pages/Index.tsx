@@ -127,7 +127,7 @@ const Index = () => {
     title: "portfólio online",
     description: "Plataforma que permite você divulgar sua ficha técnica com empresários, deixando sua apresentação profissional."
   }];
-  return <div className="min-h-screen bg-gradient-to-br from-black via-secondary to-black">
+  return <div className="min-h-screen h-full bg-gradient-to-br from-black via-secondary to-black">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Video Background - Same for mobile and desktop */}
