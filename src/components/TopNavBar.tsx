@@ -30,7 +30,7 @@ export function TopNavBar() {
   const avatarInitials = displayName.split(" ").map(n => n[0]).join("").slice(0, 2);
 
   return (
-    <div className="sticky top-0 z-40 w-full bg-black/95 backdrop-blur-sm border-b border-border" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+    <div className="sticky top-0 z-40 w-full bg-black/95 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4 h-14 flex items-center justify-between">
         <h1 className="text-xl font-bold text-primary">YM SPORTS</h1>
         
