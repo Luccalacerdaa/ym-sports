@@ -215,7 +215,7 @@ export default function Training() {
                 Gerar com IA
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Brain className="h-5 w-5" />
@@ -223,7 +223,7 @@ export default function Training() {
                 </DialogTitle>
               </DialogHeader>
               
-              <div className="space-y-6">
+              <div className="space-y-6 pb-4">
                 {/* Objetivos */}
                 <div className="space-y-3">
                   <Label>Objetivos (selecione um ou mais)</Label>

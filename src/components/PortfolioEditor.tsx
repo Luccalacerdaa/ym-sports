@@ -86,18 +86,39 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
     setLoading(true);
     
     try {
-      await updatePortfolio({
-        ...basicInfo,
+      // Preparar dados limpos para atualização
+      const updateData = {
+        full_name: basicInfo.full_name,
+        position: basicInfo.position,
+        age: basicInfo.age,
+        height: basicInfo.height,
+        weight: basicInfo.weight,
+        preferred_foot: basicInfo.preferred_foot,
+        nationality: basicInfo.nationality,
+        city: basicInfo.city,
+        state: basicInfo.state,
+        biography: basicInfo.biography,
+        phone: basicInfo.phone,
+        email: basicInfo.email,
+        profile_photo: basicInfo.profile_photo || null,
+        highlight_video: basicInfo.highlight_video || null,
+        gallery_photos: basicInfo.gallery_photos || [],
+        skill_videos: basicInfo.skill_videos || [],
         social_media: socialMedia,
         career_stats: careerStats,
         achievements_data: achievements,
-        ...settings
-      });
+        is_public: settings.is_public,
+        is_seeking_club: settings.is_seeking_club,
+        salary_expectation: settings.salary_expectation || null
+      };
+      
+      await updatePortfolio(updateData);
       
       toast.success('Portfólio atualizado com sucesso!');
       onSave();
     } catch (error) {
       console.error('Erro ao salvar:', error);
+      toast.error('Erro ao salvar alterações. Verifique os dados.');
     } finally {
       setLoading(false);
     }
@@ -134,19 +155,19 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Editar Portfólio</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1">
-            <TabsTrigger value="basic" className="text-xs sm:text-sm">Básico</TabsTrigger>
-            <TabsTrigger value="contact" className="text-xs sm:text-sm">Contato</TabsTrigger>
-            <TabsTrigger value="media" className="text-xs sm:text-sm">Mídia</TabsTrigger>
-            <TabsTrigger value="stats" className="text-xs sm:text-sm">Estatísticas</TabsTrigger>
-            <TabsTrigger value="achievements" className="text-xs sm:text-sm">Conquistas</TabsTrigger>
-            <TabsTrigger value="clubs" className="text-xs sm:text-sm">Clubes</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1 h-auto">
+            <TabsTrigger value="basic" className="text-xs sm:text-sm py-2">Básico</TabsTrigger>
+            <TabsTrigger value="contact" className="text-xs sm:text-sm py-2">Contato</TabsTrigger>
+            <TabsTrigger value="media" className="text-xs sm:text-sm py-2">Mídia</TabsTrigger>
+            <TabsTrigger value="stats" className="text-xs sm:text-sm py-2">Estatísticas</TabsTrigger>
+            <TabsTrigger value="achievements" className="text-xs sm:text-sm py-2">Conquistas</TabsTrigger>
+            <TabsTrigger value="clubs" className="text-xs sm:text-sm py-2">Clubes</TabsTrigger>
           </TabsList>
 
           {/* Informações Básicas */}
@@ -1160,11 +1181,11 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
         </Tabs>
 
         {/* Botões de ação */}
-        <div className="flex justify-end gap-2 pt-4 border-t">
-          <Button variant="outline" onClick={onClose}>
+        <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t mt-4">
+          <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
             Cancelar
           </Button>
-          <Button onClick={handleSave} disabled={loading}>
+          <Button onClick={handleSave} disabled={loading} className="w-full sm:w-auto">
             <Save className="h-4 w-4 mr-2" />
             {loading ? 'Salvando...' : 'Salvar'}
           </Button>
