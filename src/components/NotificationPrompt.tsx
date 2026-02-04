@@ -12,6 +12,7 @@ import { toast } from 'sonner';
  */
 export function NotificationPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { isSupported, isSubscribed, permission, subscribe } = usePushSimple();
 
   useEffect(() => {
@@ -30,10 +31,10 @@ export function NotificationPrompt() {
       !hasAskedBefore;
 
     if (shouldShow) {
-      // Aguardar 2 segundos após entrar para não ser invasivo
+      // Aguardar 3 segundos após entrar para não ser invasivo
       const timer = setTimeout(() => {
         setShowPrompt(true);
-      }, 2000);
+      }, 3000);
 
       return () => clearTimeout(timer);
     }
@@ -41,14 +42,26 @@ export function NotificationPrompt() {
 
   const handleAccept = async () => {
     console.log('🔔 Usuário aceitou ativar notificações');
-    const success = await subscribe();
+    setIsLoading(true);
     
-    if (success) {
-      toast.success('✅ Notificações ativadas! Você receberá alertas importantes.');
-      localStorage.setItem('notification_prompt_shown', 'true');
+    try {
+      // Fechar o prompt imediatamente para não bloquear a UI
       setShowPrompt(false);
-    } else {
-      toast.error('❌ Erro ao ativar notificações. Tente novamente.');
+      localStorage.setItem('notification_prompt_shown', 'true');
+      
+      // Subscribe em background
+      const success = await subscribe();
+      
+      if (success) {
+        toast.success('✅ Notificações ativadas! Você receberá alertas importantes.');
+      } else {
+        toast.error('❌ Erro ao ativar notificações. Você pode ativar depois nas configurações.');
+      }
+    } catch (error) {
+      console.error('Erro ao ativar notificações:', error);
+      toast.error('❌ Erro ao ativar notificações. Tente novamente mais tarde.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -109,9 +122,10 @@ export function NotificationPrompt() {
             </Button>
             <Button 
               onClick={handleAccept}
+              disabled={isLoading}
               className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium"
             >
-              🔔 Ativar
+              {isLoading ? '⏳ Ativando...' : '🔔 Ativar'}
             </Button>
           </div>
         </CardContent>
