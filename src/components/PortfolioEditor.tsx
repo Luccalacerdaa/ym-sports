@@ -86,39 +86,56 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
     setLoading(true);
     
     try {
-      // Preparar dados limpos para atualização
-      const updateData = {
+      // Preparar dados limpos para atualização - APENAS campos da tabela player_portfolios
+      const updateData: any = {
         full_name: basicInfo.full_name,
         position: basicInfo.position,
-        age: basicInfo.age,
-        height: basicInfo.height,
-        weight: basicInfo.weight,
+        age: Number(basicInfo.age) || 0,
+        height: Number(basicInfo.height) || 0,
+        weight: Number(basicInfo.weight) || 0,
         preferred_foot: basicInfo.preferred_foot,
         nationality: basicInfo.nationality,
-        city: basicInfo.city,
-        state: basicInfo.state,
-        biography: basicInfo.biography,
-        phone: basicInfo.phone,
-        email: basicInfo.email,
+        city: basicInfo.city || null,
+        state: basicInfo.state || null,
+        biography: basicInfo.biography || null,
+        phone: basicInfo.phone || null,
+        email: basicInfo.email || null,
         profile_photo: basicInfo.profile_photo || null,
         highlight_video: basicInfo.highlight_video || null,
-        gallery_photos: basicInfo.gallery_photos || [],
-        skill_videos: basicInfo.skill_videos || [],
-        social_media: socialMedia,
-        career_stats: careerStats,
-        achievements_data: achievements,
-        is_public: settings.is_public,
-        is_seeking_club: settings.is_seeking_club,
+        gallery_photos: Array.isArray(basicInfo.gallery_photos) ? basicInfo.gallery_photos : [],
+        skill_videos: Array.isArray(basicInfo.skill_videos) ? basicInfo.skill_videos : [],
+        social_media: {
+          instagram: socialMedia.instagram || null,
+          twitter: socialMedia.twitter || null,
+          youtube: socialMedia.youtube || null
+        },
+        career_stats: {
+          total_games: Number(careerStats.total_games) || 0,
+          total_goals: Number(careerStats.total_goals) || 0,
+          total_assists: Number(careerStats.total_assists) || 0,
+          yellow_cards: Number(careerStats.yellow_cards) || 0,
+          red_cards: Number(careerStats.red_cards) || 0
+        },
+        achievements_data: {
+          medals: Array.isArray(achievements.medals) ? achievements.medals : [],
+          championships: Array.isArray(achievements.championships) ? achievements.championships : [],
+          individual_awards: Array.isArray(achievements.individual_awards) ? achievements.individual_awards : []
+        },
+        is_public: Boolean(settings.is_public),
+        is_seeking_club: Boolean(settings.is_seeking_club),
         salary_expectation: settings.salary_expectation || null
       };
+      
+      console.log('Dados a serem enviados:', updateData);
       
       await updatePortfolio(updateData);
       
       toast.success('Portfólio atualizado com sucesso!');
       onSave();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar:', error);
-      toast.error('Erro ao salvar alterações. Verifique os dados.');
+      console.error('Detalhes do erro:', error.message, error.details);
+      toast.error(`Erro ao salvar: ${error.message || 'Verifique os dados'}`);
     } finally {
       setLoading(false);
     }
@@ -155,12 +172,15 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
-        <DialogHeader>
-          <DialogTitle>Editar Portfólio</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+        <div className="p-4 sm:p-6 pb-0">
+          <DialogHeader>
+            <DialogTitle>Editar Portfólio</DialogTitle>
+          </DialogHeader>
+        </div>
 
-        <Tabs defaultValue="basic" className="w-full">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+          <Tabs defaultValue="basic" className="w-full">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1 h-auto">
             <TabsTrigger value="basic" className="text-xs sm:text-sm py-2">Básico</TabsTrigger>
             <TabsTrigger value="contact" className="text-xs sm:text-sm py-2">Contato</TabsTrigger>
@@ -1178,10 +1198,11 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
               </Card>
             )}
           </TabsContent>
-        </Tabs>
+          </Tabs>
+        </div>
 
-        {/* Botões de ação */}
-        <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t mt-4">
+        {/* Botões de ação - fixos no rodapé */}
+        <div className="flex flex-col sm:flex-row justify-end gap-2 p-4 sm:p-6 pt-4 border-t bg-background">
           <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
             Cancelar
           </Button>

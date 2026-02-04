@@ -240,6 +240,17 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    /* Suporte para Safe Area em dispositivos com notch */
+    padding-top: var(--safe-area-inset-top);
+    padding-bottom: var(--safe-area-inset-bottom);
+    padding-left: var(--safe-area-inset-left);
+    padding-right: var(--safe-area-inset-right);
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+
+  html {
+    height: -webkit-fill-available;
   }
 }
 
