@@ -256,6 +256,29 @@ export default function Calendar() {
                     ) : null;
                   }}
                 />
+                
+                {/* Legenda das bolinhas do calendário */}
+                <div className="mt-6 pt-6 border-t">
+                  <h4 className="text-sm font-semibold mb-3 text-muted-foreground">Legenda do Calendário</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                      <span className="text-sm">Jogo</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                      <span className="text-sm">Treino</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                      <span className="text-sm">Pessoal</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-gray-500"></div>
+                      <span className="text-sm">Outro</span>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>

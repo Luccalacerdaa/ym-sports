@@ -9,7 +9,7 @@ import { useNutritionAchievements } from "@/hooks/useNutritionAchievements";
 import { useProfile } from "@/hooks/useProfile";
 import { useNotificationsManager } from "@/hooks/useNotificationsManager";
 import { NutritionPlan, DailyPlan, Meal, FoodItem } from "@/types/nutrition";
-import { Loader2, Plus, Droplet, Award, Utensils, Calendar, ChevronRight, Apple, Trash2, Bell, AlertTriangle } from "lucide-react";
+import { Loader2, Plus, Droplet, Award, Utensils, Calendar, ChevronRight, Apple, Trash2, Bell, AlertTriangle, Info } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -711,6 +711,21 @@ function NutritionContent() {
           <TabsTrigger value="plan">Plano Atual</TabsTrigger>
           <TabsTrigger value="achievements">Conquistas</TabsTrigger>
         </TabsList>
+        
+        {/* Aviso de Recomendação Nutricional */}
+        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm text-gray-300">
+                <span className="font-semibold text-blue-400">Atenção:</span> Esta página oferece apenas 
+                <span className="font-semibold"> recomendações nutricionais gerais</span>. 
+                Não substitui orientação de nutricionista profissional.
+              </p>
+            </div>
+          </div>
+        </div>
+        
         <TabsContent value="overview">
           {renderOverview()}
         </TabsContent>

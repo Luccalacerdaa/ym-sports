@@ -368,7 +368,7 @@ export default function Training() {
                   </div>
                 </div>
 
-                <div className="flex gap-2 pt-4">
+                <div className="flex flex-col sm:flex-row gap-2 pt-4">
                   <Button 
                     onClick={handleGenerateTraining} 
                     disabled={aiLoading}
@@ -390,6 +390,7 @@ export default function Training() {
                     type="button" 
                     variant="outline" 
                     onClick={() => setIsGenerateDialogOpen(false)}
+                    className="w-full sm:w-auto"
                   >
                     Cancelar
                   </Button>
