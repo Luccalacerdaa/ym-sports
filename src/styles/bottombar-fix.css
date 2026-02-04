@@ -4,14 +4,13 @@
 }
 
 html, body {
-  height: var(--app-height);
+  height: 100%;
   overflow-x: hidden !important; /* Previne scroll horizontal */
-  position: relative !important;
   overscroll-behavior-y: none !important; /* Previne scroll elástico que pode causar problemas */
 }
 
 body {
-  padding-bottom: env(safe-area-inset-bottom, 80px) !important;
+  /* REMOVIDO: padding-bottom causava barra preta */
   -webkit-touch-callout: none !important; /* Previne menu de contexto */
   touch-action: manipulation !important; /* Otimiza para toque */
 }
@@ -73,7 +72,6 @@ select {
 /* Corrigir problemas de layout após interação com inputs */
 html, body {
   height: 100% !important;
-  position: relative !important;
 }
 
 /* Forçar posição fixa mesmo após interação com inputs */
@@ -91,13 +89,12 @@ html, body {
   
   /* Garantir que o conteúdo não fique escondido pela barra */
   main {
-    padding-bottom: 80px !important;
+    /* Padding já aplicado no DashboardLayout */
   }
   
   /* Estilo específico para quando o teclado está aberto */
   body.keyboard-open {
-    /* Adicionar padding extra para evitar que o conteúdo fique escondido pelo teclado */
-    padding-bottom: 250px !important;
+    /* Teclado é tratado automaticamente pelo viewport */
   }
   
   /* Evitar que a barra desapareça quando o teclado está aberto */
