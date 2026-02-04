@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
 import logoImage from "@/assets/ym-sports-logo-white-bg.png";
 
 const Signup = () => {
@@ -89,6 +90,15 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-secondary to-black p-4 py-12">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => navigate("/")}
+        className="absolute top-4 left-4 text-foreground hover:text-primary flex items-center gap-2"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Voltar
+      </Button>
       <Card className="w-full max-w-md animate-scale-in border-border bg-card/95 backdrop-blur">
         <CardHeader className="space-y-4 text-center">
           <div className="mx-auto flex items-center justify-center">

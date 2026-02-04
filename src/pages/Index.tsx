@@ -394,16 +394,28 @@ const Index = () => {
           delay: 3000
         })]} className={`w-full max-w-6xl mx-auto transition-all duration-1000 delay-400 ${appScreensSection.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
             <CarouselContent className="-ml-2 md:-ml-4">
-              {[1, 2, 3, 4, 5, 6].map(num => <CarouselItem key={num} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                  <Card className="border-border overflow-hidden group hover:scale-105 transition-all duration-300 hover:shadow-[var(--shadow-glow)]">
-                    <div className="aspect-[9/16] bg-gradient-to-br from-primary/20 via-card to-secondary/20 flex items-center justify-center relative">
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      <div className="text-6xl font-astro font-bold text-primary/30 group-hover:scale-110 transition-transform duration-300">
-                        {num}
+              {[
+                { src: '/screenshots/ym-design.jpg', title: 'YM Design - Arte Digital', alt: 'Design personalizado de artes digitais' },
+                { src: '/screenshots/ranking.jpg', title: 'Rankings', alt: 'Sistema de rankings nacional e regional' },
+                { src: '/screenshots/treinos.jpg', title: 'Treinos com IA', alt: 'Treinos personalizados gerados por inteligência artificial' },
+                { src: '/screenshots/dashboard.jpg', title: 'Dashboard', alt: 'Painel principal do atleta' },
+                { src: '/screenshots/motivacao.jpg', title: 'Motivação', alt: 'Vídeos motivacionais para inspirar' },
+                { src: '/screenshots/calendario.jpg', title: 'Calendário', alt: 'Calendário de eventos e treinos' }
+              ].map((screenshot, index) => <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                  <Card className="border-primary/20 overflow-hidden group hover:scale-105 transition-all duration-300 hover:shadow-[0_0_40px_rgba(252,211,77,0.3)]">
+                    <div className="aspect-[9/16] bg-black relative">
+                      <img 
+                        src={screenshot.src} 
+                        alt={screenshot.alt}
+                        className="w-full h-full object-cover object-top"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
+                      <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                        <p className="text-foreground font-bold text-lg text-center drop-shadow-lg">
+                          {screenshot.title}
+                        </p>
                       </div>
-                      <p className="absolute bottom-4 left-4 right-4 text-foreground font-semibold text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        Screenshot {num}
-                      </p>
                     </div>
                   </Card>
                 </CarouselItem>)}

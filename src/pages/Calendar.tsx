@@ -57,6 +57,13 @@ export default function Calendar() {
     other: "bg-gray-100 text-gray-800 border-gray-200",
   };
 
+  const eventTypeBorderColors = {
+    game: "border-l-4 border-l-red-500",
+    training: "border-l-4 border-l-blue-500",
+    personal: "border-l-4 border-l-green-500",
+    other: "border-l-4 border-l-gray-500",
+  };
+
   // Função para obter eventos de uma data específica
   const getEventsForDate = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0];
@@ -279,7 +286,7 @@ export default function Calendar() {
                 ) : (
                   <div className="space-y-3">
                     {getEventsForDate(selectedDate).map((event) => (
-                      <div key={event.id} className="p-3 border rounded-lg">
+                      <div key={event.id} className={`p-3 border rounded-lg ${eventTypeBorderColors[event.event_type]}`}>
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
@@ -337,6 +344,31 @@ export default function Calendar() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+                
+                {/* Legenda de Cores dos Eventos */}
+                {getEventsForDate(selectedDate).length > 0 && (
+                  <div className="mt-6 pt-6 border-t">
+                    <h4 className="text-sm font-semibold mb-3 text-muted-foreground">Legenda de Cores</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full bg-red-500"></div>
+                        <span className="text-sm">Jogo</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full bg-blue-500"></div>
+                        <span className="text-sm">Treino</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                        <span className="text-sm">Pessoal</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full bg-gray-500"></div>
+                        <span className="text-sm">Outro</span>
+                      </div>
+                    </div>
                   </div>
                 )}
               </CardContent>
