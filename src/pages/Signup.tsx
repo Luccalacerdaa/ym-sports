@@ -89,7 +89,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-secondary to-black p-4 py-12">
+    <div className="h-full min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-secondary to-black p-4 py-12">
       <Button
         variant="ghost"
         size="sm"
