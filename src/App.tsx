@@ -21,7 +21,6 @@ import Training from "./pages/Training";
 import HeightProjection from "./pages/HeightProjection";
 import ExerciseLibrary from "./pages/ExerciseLibrary";
 import Achievements from "./pages/Achievements";
-import Ranking from "./pages/Ranking";
 import Rankings from "./pages/Rankings";
 import Nutrition from "./pages/NutritionNew";
 import NutritionPlanView from "./pages/NutritionPlanView";
