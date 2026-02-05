@@ -70,11 +70,19 @@ export default function Training() {
   const [isTrainingDetailOpen, setIsTrainingDetailOpen] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [isExerciseVisualizerOpen, setIsExerciseVisualizerOpen] = useState(false);
+  // Mapeamento fixo de tempo → quantidade de exercícios
+  const DURATION_EXERCISE_MAP = {
+    15: 2,
+    30: 4,
+    45: 5,
+    60: 6
+  };
+
   const [aiRequest, setAiRequest] = useState({
     goals: [] as string[],
     availableDays: [] as string[],
-    sessionDuration: 60,
-    customDuration: '',
+    sessionDuration: 30,
+    exerciseCount: 4, // Quantidade de exercícios baseada na duração
     difficulty: 'intermediate' as 'beginner' | 'intermediate' | 'advanced',
     equipment: [] as string[],
     focus: [] as string[],
@@ -117,7 +125,8 @@ export default function Training() {
       setAiRequest({
         goals: [],
         availableDays: [],
-        sessionDuration: 60,
+        sessionDuration: 30,
+        exerciseCount: 4,
         difficulty: 'intermediate',
         equipment: [],
         focus: [],
@@ -258,60 +267,36 @@ export default function Training() {
                   </div>
                 </div>
 
-                {/* Duração e Dificuldade */}
+                {/* Duração Fixa e Dificuldade */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="duration">Duração por sessão (minutos)</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="duration"
-                        type="number"
-                        value={aiRequest.customDuration || aiRequest.sessionDuration}
-                        onChange={(e) => {
-                          const inputValue = e.target.value;
-                          const value = parseInt(inputValue);
-                          
-                          // Sempre atualizar o campo de entrada
-                          setAiRequest({...aiRequest, customDuration: inputValue});
-                          
-                          // Validar e atualizar o valor real apenas se for válido
-                          if (!isNaN(value) && value >= 15 && value <= 300) {
-                            setAiRequest(prev => ({...prev, sessionDuration: value}));
-                          }
-                        }}
-                        min="15"
-                        max="300"
-                        placeholder="Mínimo 15 minutos"
-                        className="flex-1"
-                      />
-                      <div className="flex gap-1">
-                        {[15, 30, 45].map(duration => (
-                          <Button
-                            key={duration}
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setAiRequest({
-                              ...aiRequest, 
-                              sessionDuration: duration,
-                              customDuration: duration.toString()
-                            })}
-                            className={aiRequest.sessionDuration === duration ? 'bg-primary/10' : ''}
-                          >
-                            {duration}
-                          </Button>
-                        ))}
-                      </div>
+                    <Label>Duração por sessão</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {Object.entries(DURATION_EXERCISE_MAP).map(([duration, exerciseCount]) => (
+                        <Button
+                          key={duration}
+                          type="button"
+                          variant={aiRequest.sessionDuration === parseInt(duration) ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setAiRequest({
+                            ...aiRequest, 
+                            sessionDuration: parseInt(duration),
+                            exerciseCount: exerciseCount
+                          })}
+                          className={`flex flex-col h-auto py-3 ${
+                            aiRequest.sessionDuration === parseInt(duration) 
+                              ? 'bg-primary text-primary-foreground' 
+                              : ''
+                          }`}
+                        >
+                          <span className="font-bold text-lg">{duration} min</span>
+                          <span className="text-xs opacity-80">{exerciseCount} exercícios</span>
+                        </Button>
+                      ))}
                     </div>
-                    {aiRequest.customDuration && (isNaN(parseInt(aiRequest.customDuration)) || parseInt(aiRequest.customDuration) < 15) && (
-                      <p className="text-xs text-destructive">A duração mínima é de 15 minutos</p>
-                    )}
-                    {aiRequest.customDuration && parseInt(aiRequest.customDuration) > 300 && (
-                      <p className="text-xs text-destructive">A duração máxima é de 300 minutos</p>
-                    )}
-                    {!(aiRequest.customDuration && (isNaN(parseInt(aiRequest.customDuration)) || parseInt(aiRequest.customDuration) < 15 || parseInt(aiRequest.customDuration) > 300)) && (
-                      <p className="text-xs text-muted-foreground">Entre 15 e 300 minutos</p>
-                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Tempo e quantidade de exercícios fixos
+                    </p>
                   </div>
                   
                   <div className="space-y-2">

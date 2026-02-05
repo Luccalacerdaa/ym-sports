@@ -8,6 +8,7 @@ interface AITrainingRequest {
   goals: string[];
   availableDays: string[];
   sessionDuration: number; // em minutos
+  exerciseCount: number; // quantidade FIXA de exercícios por treino
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   equipment: string[];
   focus: string[]; // ['strength', 'cardio', 'flexibility', 'sports_specific']
@@ -80,6 +81,7 @@ SOLICITAÇÃO DE TREINO PERSONALIZADO:
 - Objetivos: ${goalsText}
 - Dias disponíveis: ${daysText}
 - Duração por sessão: ${request.sessionDuration} minutos
+- QUANTIDADE EXATA DE EXERCÍCIOS: ${request.exerciseCount} exercícios (NÃO PODE SER MAIS NEM MENOS)
 - Nível de dificuldade: ${request.difficulty}
 - Equipamentos disponíveis: ${equipmentText || "Apenas peso corporal"}
 - Foco do treino: ${focusText || "Geral"}
@@ -103,23 +105,25 @@ IMPORTANTE - LEIA COM MUITA ATENÇÃO:
   * O atleta informou que tem disponível: ${equipmentText || "apenas peso corporal"}
   * CADA TREINO DEVE USAR TODOS OS EQUIPAMENTOS INFORMADOS
   * DISTRIBUA OS EQUIPAMENTOS entre os exercícios de cada treino
-  * CADA EXERCÍCIO deve usar pelo menos um dos equipamentos informados
-  * NÃO CRIE EXERCÍCIOS que exijam equipamentos não listados acima
-  * Se o atleta tem halteres, OBRIGATORIAMENTE inclua 1-2 exercícios com halteres POR TREINO
-  * Se o atleta tem bicicleta, OBRIGATORIAMENTE inclua 1-2 exercícios com bicicleta POR TREINO
-  * Se o atleta tem barras, OBRIGATORIAMENTE inclua 1-2 exercícios com barras POR TREINO
-  * Se o atleta tem elásticos, OBRIGATORIAMENTE inclua 1-2 exercícios com elásticos POR TREINO
-  * NUNCA inclua exercícios com equipamentos não disponíveis
-  * SEJA CRIATIVO com os equipamentos disponíveis (diferentes formas de uso)
-  * EVITE USAR APENAS PESO CORPORAL quando outros equipamentos estiverem disponíveis
+   * CADA EXERCÍCIO deve usar pelo menos um dos equipamentos informados
+   * NÃO CRIE EXERCÍCIOS que exijam equipamentos não listados acima
+   * Se o atleta tem halteres, inclua 1 exercício com halteres POR TREINO
+   * Se o atleta tem bicicleta, inclua 1 exercício com bicicleta POR TREINO
+   * Se o atleta tem barras, inclua 1 exercício com barras POR TREINO
+   * Se o atleta tem elásticos, inclua 1 exercício com elásticos POR TREINO
+   * NUNCA inclua exercícios com equipamentos não disponíveis
+   * SEJA CRIATIVO com os equipamentos disponíveis (diferentes formas de uso)
+   * EVITE USAR APENAS PESO CORPORAL quando outros equipamentos estiverem disponíveis
+   * IMPORTANTE: O total de exercícios deve ser EXATAMENTE ${request.exerciseCount}
 
 - DURAÇÃO EXATA: O treino completo deve durar exatamente ${request.sessionDuration} minutos, incluindo descansos
+- QUANTIDADE OBRIGATÓRIA DE EXERCÍCIOS: EXATAMENTE ${request.exerciseCount} exercícios por treino (NÃO PODE SER ${request.exerciseCount - 1} NEM ${request.exerciseCount + 1})
 - VARIEDADE MÁXIMA: Cada dia deve ter exercícios COMPLETAMENTE diferentes, sem repetições na semana
 - PROGRESSÃO CIENTÍFICA: Organize os exercícios em ordem lógica (aquecimento → parte principal → finalização)
 - EXPLICAÇÕES DETALHADAS: Inclua o "porquê" de cada escolha de exercício para este atleta específico
 
-LIMITAÇÕES PARA EVITAR CORTE:
-- Inclua 4-5 exercícios por treino
+LIMITAÇÕES CRÍTICAS:
+- Inclua EXATAMENTE ${request.exerciseCount} exercícios por treino (OBRIGATÓRIO)
 - Descrições concisas mas informativas
 - Use vídeos apenas para exercícios complexos
 - Foque na qualidade e variedade dos exercícios
@@ -296,11 +300,8 @@ IMPORTANTE: Responda APENAS com o JSON válido, sem texto adicional. SEMPRE gere
             return false;
           }
           
-          // Verificar se o número de exercícios é suficiente (pelo menos 4)
-          if (planData.exercises.length < 4) {
-            console.warn(`Número insuficiente de exercícios: ${planData.exercises.length} (mínimo 4)`);
-            return false;
-          }
+          // Verificar se o número de exercícios está EXATO (não usar validação aqui, vamos ajustar depois)
+          // Esta validação foi removida para permitir ajuste posterior
           
           // Verificar se há equipamentos específicos solicitados além de "Peso corporal"
           const specificEquipments = requestedEquipment.filter(eq => 
@@ -661,6 +662,64 @@ IMPORTANTE: Responda APENAS com o JSON válido, sem texto adicional. SEMPRE gere
               console.log('Equipamentos não utilizados corretamente, adicionando exercícios específicos');
               processedPlanData = addMissingEquipmentExercises(planData, request.equipment);
             }
+            
+            // GARANTIR QUANTIDADE EXATA DE EXERCÍCIOS
+            console.log(`Verificando quantidade de exercícios: ${processedPlanData.exercises.length} / ${request.exerciseCount}`);
+            
+            if (processedPlanData.exercises.length > request.exerciseCount) {
+              // Se tiver mais, remover os últimos
+              console.log(`Removendo ${processedPlanData.exercises.length - request.exerciseCount} exercícios extras`);
+              processedPlanData.exercises = processedPlanData.exercises.slice(0, request.exerciseCount);
+            } else if (processedPlanData.exercises.length < request.exerciseCount) {
+              // Se tiver menos, adicionar exercícios simples
+              console.log(`Adicionando ${request.exerciseCount - processedPlanData.exercises.length} exercícios para atingir ${request.exerciseCount}`);
+              const neededCount = request.exerciseCount - processedPlanData.exercises.length;
+              
+              const simpleExercises = [
+                {
+                  name: "Prancha Isométrica",
+                  sets: 3,
+                  reps: "30 segundos",
+                  weight: "Peso corporal",
+                  rest_time: "30 segundos",
+                  notes: "Mantenha o corpo alinhado",
+                  description: "Posição de prancha mantendo o core contraído",
+                  benefits: "Fortalecimento do core e estabilidade",
+                  video_url: "https://www.youtube.com/watch?v=ASdvN_XEl_c",
+                  image_url: ""
+                },
+                {
+                  name: "Afundo Alternado",
+                  sets: 3,
+                  reps: "10 cada perna",
+                  weight: "Peso corporal",
+                  rest_time: "45 segundos",
+                  notes: "Mantenha o joelho alinhado",
+                  description: "Passo à frente com flexão de joelhos",
+                  benefits: "Fortalecimento de pernas e equilíbrio",
+                  video_url: "https://www.youtube.com/watch?v=QF0BQS2W80k",
+                  image_url: ""
+                },
+                {
+                  name: "Polichinelos",
+                  sets: 3,
+                  reps: "30 segundos",
+                  weight: "Peso corporal",
+                  rest_time: "30 segundos",
+                  notes: "Mantenha ritmo constante",
+                  description: "Saltos abrindo e fechando pernas e braços",
+                  benefits: "Aquecimento e trabalho cardiovascular",
+                  video_url: "https://www.youtube.com/watch?v=iSSAk4XCsRA",
+                  image_url: ""
+                }
+              ];
+              
+              for (let i = 0; i < neededCount && i < simpleExercises.length; i++) {
+                processedPlanData.exercises.push(simpleExercises[i]);
+              }
+            }
+            
+            console.log(`✅ Quantidade final de exercícios: ${processedPlanData.exercises.length} (objetivo: ${request.exerciseCount})`)
             
             // Criar treino base
             const baseTraining = {
