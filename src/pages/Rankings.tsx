@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -29,13 +29,21 @@ export default function Rankings() {
     isLoading, 
     error,
     loadAllRankings,
-    refreshUserRankings,
     updateLocationFromGPS,
   } = useRankingSystem();
   
   const { progress } = useProgress();
   const [selectedTab, setSelectedTab] = useState('national');
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+
+  // Log quando os rankings mudarem
+  useEffect(() => {
+    console.log('📊 [RANKINGS] Rankings atualizados:', {
+      nacional: nationalRanking.length,
+      regional: regionalRanking.length,
+      local: localRanking.length
+    });
+  }, [nationalRanking, regionalRanking, localRanking]);
 
   const handleGetGPSLocation = async () => {
     setIsGettingLocation(true);
@@ -69,6 +77,8 @@ export default function Rankings() {
   };
 
   const RankingTable = ({ rankings, type }: { rankings: any[], type: string }) => {
+    console.log(`🎯 [RANKING TABLE] Renderizando ${type}:`, rankings.length, 'jogadores');
+    
     if (isLoading) {
       return (
         <div className="space-y-4">
@@ -113,7 +123,7 @@ export default function Rankings() {
       <div className="space-y-2">
         {rankings.map((player) => (
           <Card key={player.id} className={`transition-all hover:shadow-md ${
-            player.isCurrentUser ? 'ring-2 ring-primary' : 
+            player.isCurrentUser ? 'ring-2 ring-primary bg-primary/5' : 
             player.position <= 3 ? 'ring-2 ring-primary/20' : ''
           }`}>
             <CardContent className="p-4">
@@ -127,7 +137,7 @@ export default function Rankings() {
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 overflow-hidden">
                       {player.avatar_url ? (
                         <img 
-                          src={player.avatar_url} 
+                          src={`${player.avatar_url}?t=${new Date().getTime()}`}
                           alt={player.name}
                           className="w-10 h-10 rounded-full object-cover"
                           onError={(e) => {
@@ -172,17 +182,17 @@ export default function Rankings() {
     );
   };
 
-  if (error) {
+  if (isLoading && !progress) {
     return (
       <div className="p-6">
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="p-6 text-center">
-            <p className="text-red-600">Erro ao carregar rankings: {error}</p>
-            <Button onClick={handleRefreshRankings} className="mt-4">
-              Tentar novamente
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-32 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -208,7 +218,7 @@ export default function Rankings() {
             disabled={isLoading}
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Atualizar
+            Atualizar Rankings
           </Button>
           
           <Button 
@@ -223,7 +233,7 @@ export default function Rankings() {
               </>
             ) : (
               <>
-                <Navigation className="h-4 w-4 mr-2" />
+                <MapPin className="h-4 w-4 mr-2" />
                 Atualizar Localização
               </>
             )}
@@ -232,7 +242,7 @@ export default function Rankings() {
       </div>
 
       {/* Estatísticas do Usuário */}
-      {progress && userPosition && (
+      {progress && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4">
@@ -247,7 +257,8 @@ export default function Rankings() {
                      selectedTab === 'local' ? `#${userPosition.local || '-'}` : '-'}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Sua Posição
+                    {selectedTab === 'national' ? 'Nacional' :
+                     selectedTab === 'regional' ? 'Regional' : 'Local'}
                   </p>
                 </div>
               </div>
@@ -318,58 +329,85 @@ export default function Rankings() {
         </TabsList>
 
         <TabsContent value="national">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5 text-primary" />
-                Ranking Nacional
-                <Badge variant="outline" className="ml-2">
-                  {nationalRanking.length} jogadores
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <RankingTable rankings={nationalRanking} type="national" />
-            </CardContent>
-          </Card>
+          <RankingTable rankings={nationalRanking} type="national" />
         </TabsContent>
 
         <TabsContent value="regional">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Flag className="h-5 w-5 text-primary" />
-                Ranking Regional
-                {userPosition.region && (
-                  <Badge variant="outline" className="ml-2">
-                    {userPosition.region}
-                  </Badge>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          {userPosition.region ? (
+            <div>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Ranking Regional - {userPosition.region}</h2>
+                <Badge variant="outline">{regionalRanking.length} jogadores</Badge>
+              </div>
               <RankingTable rankings={regionalRanking} type="regional" />
-            </CardContent>
-          </Card>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <MapPin className="h-12 w-12 text-primary mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Configure sua localização</h3>
+                <p className="text-muted-foreground mb-4">
+                  Para ver o ranking regional, precisamos saber sua localização
+                </p>
+                <Button 
+                  onClick={handleGetGPSLocation}
+                  disabled={isGettingLocation}
+                  className="w-full sm:w-auto"
+                >
+                  {isGettingLocation ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Detectando localização...
+                    </>
+                  ) : (
+                    <>
+                      <Navigation className="h-4 w-4 mr-2" />
+                      Permitir Acesso à Localização
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="local">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-primary" />
-                Ranking Local
-                {userPosition.state && (
-                  <Badge variant="outline" className="ml-2">
-                    {userPosition.state}
-                  </Badge>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          {userPosition.state ? (
+            <div>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Ranking Local - {userPosition.state}</h2>
+                <Badge variant="outline">{localRanking.length} jogadores</Badge>
+              </div>
               <RankingTable rankings={localRanking} type="local" />
-            </CardContent>
-          </Card>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <MapPin className="h-12 w-12 text-primary mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Configure sua localização</h3>
+                <p className="text-muted-foreground mb-4">
+                  Para ver o ranking local, precisamos saber sua localização
+                </p>
+                <Button 
+                  onClick={handleGetGPSLocation}
+                  disabled={isGettingLocation}
+                  className="w-full sm:w-auto"
+                >
+                  {isGettingLocation ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Detectando localização...
+                    </>
+                  ) : (
+                    <>
+                      <Navigation className="h-4 w-4 mr-2" />
+                      Permitir Acesso à Localização
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
     </div>
