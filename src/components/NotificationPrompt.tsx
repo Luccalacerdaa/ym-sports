@@ -47,29 +47,31 @@ export function NotificationPrompt() {
     setShowPrompt(false);
     localStorage.setItem('notification_prompt_shown', 'true');
     
-    // Mostrar feedback imediato
-    toast.info('⏳ Ativando notificações...');
-    
-    // Subscribe em background sem bloquear
-    setIsLoading(true);
-    
-    // Usar setTimeout para garantir que a UI seja atualizada primeiro
-    setTimeout(async () => {
-      try {
-        const success = await subscribe();
+    // Usar requestAnimationFrame para garantir que a UI seja atualizada completamente
+    requestAnimationFrame(() => {
+      // Mostrar feedback após a UI atualizar
+      toast.info('⏳ Ativando notificações...');
+      
+      // Subscribe em background após delay maior
+      setTimeout(async () => {
+        setIsLoading(true);
         
-        if (success) {
-          toast.success('✅ Notificações ativadas! Você receberá alertas importantes.');
-        } else {
-          toast.warning('⚠️ Não foi possível ativar agora. Você pode tentar depois nas configurações.');
+        try {
+          const success = await subscribe();
+          
+          if (success) {
+            toast.success('✅ Notificações ativadas! Você receberá alertas importantes.');
+          } else {
+            toast.warning('⚠️ Não foi possível ativar agora. Você pode tentar depois nas configurações.');
+          }
+        } catch (error) {
+          console.error('Erro ao ativar notificações:', error);
+          toast.warning('⚠️ Notificações podem ser ativadas depois nas configurações.');
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        console.error('Erro ao ativar notificações:', error);
-        toast.warning('⚠️ Notificações podem ser ativadas depois nas configurações.');
-      } finally {
-        setIsLoading(false);
-      }
-    }, 100); // 100ms de delay para garantir que a UI seja atualizada
+      }, 500); // 500ms de delay para garantir que a UI seja completamente atualizada
+    });
   };
 
   const handleDismiss = () => {

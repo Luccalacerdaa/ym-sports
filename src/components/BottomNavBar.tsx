@@ -25,7 +25,7 @@ export function BottomNavBar() {
       }}
     >
       <nav 
-        className="flex justify-around items-start h-16 sm:h-20 max-w-screen-xl mx-auto px-2 pt-3"
+        className="flex justify-around items-start h-16 sm:h-20 max-w-screen-xl mx-auto px-8 pt-3 gap-4"
       >
         {navItems.map((item) => (
           <NavLink
