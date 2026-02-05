@@ -298,19 +298,6 @@ export default function PublicPortfolio() {
               </Card>
             )}
 
-            {/* Habilidades */}
-            <Card className="shadow-lg border border-yellow-500/20 bg-gray-900/80 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center text-yellow-500">
-                  <Star className="h-5 w-5 mr-2 text-yellow-500" />
-                  Habilidades
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {renderSkills()}
-              </CardContent>
-            </Card>
-
             {/* Galeria de Fotos e Vídeos */}
             {((portfolio.gallery_photos && portfolio.gallery_photos.length > 0) || 
               (portfolio.skill_videos && portfolio.skill_videos.length > 0) || 
