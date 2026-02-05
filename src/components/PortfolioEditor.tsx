@@ -208,7 +208,12 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+      <DialogContent 
+        className="max-w-4xl flex flex-col p-0"
+        style={{
+          maxHeight: 'calc(90vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))'
+        }}
+      >
         <div className="p-4 sm:p-6 pb-0">
           <DialogHeader>
             <DialogTitle>Editar Portfólio</DialogTitle>
@@ -1237,8 +1242,13 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
           </Tabs>
         </div>
 
-        {/* Botões de ação - fixos no rodapé */}
-        <div className="flex flex-col sm:flex-row justify-end gap-2 p-4 sm:p-6 pt-4 border-t bg-background">
+        {/* Botões de ação - fixos no rodapé com safe-area */}
+        <div 
+          className="flex flex-col sm:flex-row justify-end gap-2 p-4 sm:p-6 pt-4 border-t bg-background"
+          style={{
+            paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))'
+          }}
+        >
           <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
             Cancelar
           </Button>

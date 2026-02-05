@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { useNutritionPlans } from "@/hooks/useNutritionPlans";
 import { useWaterIntake } from "@/hooks/useWaterIntake";
 import { NutritionPlan } from "@/types/nutrition";
-import { Loader2, Plus, Droplet, Utensils, ChevronRight, Apple, Trash2 } from "lucide-react";
+import { Loader2, Plus, Droplet, Utensils, ChevronRight, Apple, Trash2, X } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { NutritionPlanGenerator } from "@/components/NutritionPlanGenerator";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function Nutrition() {
   console.log('🍎 [NUTRITION-NEW] Componente inicializado');
@@ -32,6 +33,11 @@ export default function Nutrition() {
   const addWaterIntake = waterHooks?.addWaterIntake || (async () => {});
   
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
+  const [showNutritionAlert, setShowNutritionAlert] = useState(() => {
+    // Verificar se o usuário já fechou o alerta antes
+    const dismissed = localStorage.getItem('nutrition_alert_dismissed');
+    return dismissed !== 'true';
+  });
 
   console.log('📊 [NUTRITION-NEW] Estado inicial:', {
     nutritionPlansCount: nutritionPlans.length,
@@ -71,6 +77,12 @@ export default function Nutrition() {
     toast.success(`${amount}ml de água registrados`);
   };
 
+  // Fechar alerta de nutrição
+  const handleDismissAlert = () => {
+    setShowNutritionAlert(false);
+    localStorage.setItem('nutrition_alert_dismissed', 'true');
+  };
+
   return (
     <div className="container max-w-4xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6">
@@ -85,28 +97,36 @@ export default function Nutrition() {
         </Button>
       </div>
 
-      {/* Aviso de Recomendação Nutricional */}
-      <Card className="mb-6 border-orange-200 bg-orange-50">
-        <CardContent className="p-4">
+      {/* Aviso de Recomendação Nutricional - Dismissible */}
+      {showNutritionAlert && (
+        <Alert className="mb-6 border-orange-200 bg-orange-50 relative">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 mt-0.5">
               <span className="text-2xl">⚠️</span>
             </div>
-            <div>
-              <h3 className="font-semibold text-orange-900 mb-1">
+            <div className="flex-1">
+              <AlertTitle className="font-semibold text-orange-900 mb-1">
                 Aviso Importante - Recomendação Nutricional
-              </h3>
-              <p className="text-sm text-orange-800 leading-relaxed">
+              </AlertTitle>
+              <AlertDescription className="text-sm text-orange-800 leading-relaxed">
                 Os planos nutricionais fornecidos são <strong>apenas recomendações gerais</strong> 
                 baseadas em orientações básicas de nutrição esportiva. Este não é um acompanhamento 
                 nutricional profissional. Para um plano personalizado e seguro, <strong>consulte sempre 
                 um nutricionista ou médico qualificado</strong>. A YM Sports não se responsabiliza 
                 por quaisquer decisões tomadas com base nestas sugestões.
-              </p>
+              </AlertDescription>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDismissAlert}
+              className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-orange-100"
+            >
+              <X className="h-4 w-4 text-orange-900" />
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        </Alert>
+      )}
 
       <div className="space-y-6">
         {/* Seção de Hidratação */}

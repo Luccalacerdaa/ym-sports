@@ -16,7 +16,12 @@ export default function DashboardLayout() {
   return (
     <div className="h-full min-h-screen flex flex-col w-full bg-black">
       <TopNavBar />
-      <main className="flex-1 overflow-x-hidden overflow-y-auto pb-24">
+      <main 
+        className="flex-1 overflow-x-hidden overflow-y-auto"
+        style={{
+          paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))'
+        }}
+      >
         <Outlet />
       </main>
       <BottomNavBar />

@@ -525,7 +525,13 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
   
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent 
+        className="sm:max-w-[600px] overflow-y-auto"
+        style={{
+          maxHeight: 'calc(90vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))',
+          paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))'
+        }}
+      >
         {step === 'form' && renderForm()}
         {step === 'generating' && renderGenerating()}
         {step === 'review' && renderReview()}
