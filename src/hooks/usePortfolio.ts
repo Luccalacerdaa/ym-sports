@@ -119,35 +119,64 @@ export const usePortfolio = () => {
 
   // Atualizar portfólio
   const updatePortfolio = async (updates: Partial<PlayerPortfolio>) => {
-    if (!user || !portfolio) throw new Error('Portfólio não encontrado');
+    console.log('═══════════════════════════════════════════════════════');
+    console.log('📝 [UPDATE PORTFOLIO] Iniciando atualização');
+    console.log('📝 [UPDATE PORTFOLIO] User ID:', user?.id);
+    console.log('📝 [UPDATE PORTFOLIO] Portfolio ID:', portfolio?.id);
+    console.log('📝 [UPDATE PORTFOLIO] Dados recebidos:', JSON.stringify(updates, null, 2));
+    console.log('═══════════════════════════════════════════════════════');
+    
+    if (!user || !portfolio) {
+      console.error('❌ [UPDATE PORTFOLIO] Erro: Portfólio ou usuário não encontrado');
+      throw new Error('Portfólio não encontrado');
+    }
     
     setLoading(true);
     setError(null);
     
     try {
+      const dataToUpdate = {
+        ...updates,
+        updated_at: new Date().toISOString()
+      };
+      
+      console.log('📤 [UPDATE PORTFOLIO] Enviando para Supabase:', JSON.stringify(dataToUpdate, null, 2));
+      
       const { data, error } = await supabase
         .from('player_portfolios')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
+        .update(dataToUpdate)
         .eq('id', portfolio.id)
         .select()
         .single();
       
-      if (error) throw error;
+      console.log('📥 [UPDATE PORTFOLIO] Resposta do Supabase:');
+      console.log('   - Error:', error);
+      console.log('   - Data:', data);
       
+      if (error) {
+        console.error('❌ [UPDATE PORTFOLIO] Erro do Supabase:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw error;
+      }
+      
+      console.log('✅ [UPDATE PORTFOLIO] Atualização bem-sucedida!');
       setPortfolio(data);
       toast.success('Portfólio atualizado com sucesso!');
       
       return data;
     } catch (err: any) {
-      console.error('Erro ao atualizar portfólio:', err);
+      console.error('❌ [UPDATE PORTFOLIO] Erro completo:', err);
+      console.error('❌ [UPDATE PORTFOLIO] Stack trace:', err.stack);
       setError(err.message);
-      toast.error('Erro ao atualizar portfólio');
+      toast.error(`Erro ao atualizar portfólio: ${err.message}`);
       throw err;
     } finally {
       setLoading(false);
+      console.log('═══════════════════════════════════════════════════════');
     }
   };
 
