@@ -298,42 +298,6 @@ export default function PublicPortfolio() {
               </Card>
             )}
 
-            {/* Estatísticas de Carreira */}
-            {portfolio.career_stats && (
-              <Card className="shadow-lg border border-yellow-500/20 bg-gray-900/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-yellow-500">
-                    <Trophy className="h-5 w-5 mr-2 text-yellow-500" />
-                    Estatísticas de Carreira
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-                    <div className="text-center p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-                      <p className="text-3xl font-bold text-yellow-500">{portfolio.career_stats.total_games}</p>
-                      <p className="text-sm text-gray-400">Jogos</p>
-                    </div>
-                    <div className="text-center p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-                      <p className="text-3xl font-bold text-yellow-500">{portfolio.career_stats.total_goals}</p>
-                      <p className="text-sm text-gray-400">Gols</p>
-                    </div>
-                    <div className="text-center p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-                      <p className="text-3xl font-bold text-yellow-500">{portfolio.career_stats.total_assists}</p>
-                      <p className="text-sm text-gray-400">Assistências</p>
-                    </div>
-                    <div className="text-center p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-                      <p className="text-3xl font-bold text-yellow-500">{portfolio.career_stats.yellow_cards}</p>
-                      <p className="text-sm text-gray-400">Amarelos</p>
-                    </div>
-                    <div className="text-center p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-                      <p className="text-3xl font-bold text-yellow-500">{portfolio.career_stats.red_cards}</p>
-                      <p className="text-sm text-gray-400">Vermelhos</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Habilidades */}
             <Card className="shadow-lg border border-yellow-500/20 bg-gray-900/80 backdrop-blur-sm">
               <CardHeader>

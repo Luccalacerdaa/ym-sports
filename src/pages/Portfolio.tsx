@@ -41,7 +41,8 @@ export default function Portfolio() {
     createPortfolio, 
     generateShareLink, 
     registerShare,
-    getPortfolioStats 
+    getPortfolioStats,
+    fetchMyPortfolio
   } = usePortfolio();
   
   const [isEditing, setIsEditing] = useState(false);
@@ -444,9 +445,12 @@ export default function Portfolio() {
         <PortfolioEditor 
           portfolio={portfolio}
           onClose={() => setIsEditing(false)}
-          onSave={() => {
+          onSave={async () => {
+            console.log('🔄 Recarregando portfólio após salvar...');
             setIsEditing(false);
-            // Recarregar dados se necessário
+            // Recarregar dados para mostrar alterações imediatamente
+            await fetchMyPortfolio();
+            console.log('✅ Portfólio recarregado!');
           }}
         />
       )}
