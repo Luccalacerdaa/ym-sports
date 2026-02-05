@@ -348,6 +348,13 @@ export const useRanking = () => {
   // Buscar rankings - CORRIGIDO para evitar erro 400
   const fetchRankings = async (type: 'national' | 'regional' | 'local' = 'national', forceRefresh: boolean = false) => {
     try {
+      console.log('═══════════════════════════════════════════════════════');
+      console.log(`🔍 [FETCH RANKINGS] Tipo: ${type}`);
+      console.log(`🔍 [FETCH RANKINGS] ForceRefresh: ${forceRefresh}`);
+      console.log(`🔍 [FETCH RANKINGS] User ID: ${user?.id}`);
+      console.log(`🔍 [FETCH RANKINGS] UserLocation:`, userLocation);
+      console.log('═══════════════════════════════════════════════════════');
+      
       // Verificar se já tem dados no estado (veio do localStorage)
       const currentRankings = type === 'national' ? nationalRanking : type === 'regional' ? regionalRanking : localRanking;
       if (!forceRefresh && currentRankings.length > 0) {
@@ -393,7 +400,7 @@ export const useRanking = () => {
       // Apenas recalcular se não houver rankings existentes
 
       // ALTERAÇÃO: Buscar rankings sem a junção direta com profiles
-      console.log(`Buscando rankings do tipo: ${type}`);
+      console.log(`🔍 [QUERY] Buscando rankings do tipo: ${type}`);
       let query = supabase
         .from('rankings')
         .select('*')
@@ -402,14 +409,28 @@ export const useRanking = () => {
         .order('position', { ascending: true }); // Usar posição como critério secundário
 
       if (type === 'regional' && userLocation) {
+        console.log(`🔍 [QUERY] Filtro REGIONAL: region = ${userLocation.region}`);
         query = query.eq('ranking_type', 'regional').eq('region', userLocation.region);
       } else if (type === 'local' && userLocation) {
+        console.log(`🔍 [QUERY] Filtro LOCAL: region = ${userLocation.state}`);
         query = query.eq('ranking_type', 'local').eq('region', userLocation.state);
       } else if (type === 'national') {
+        console.log(`🔍 [QUERY] Filtro NACIONAL: sem filtro de região`);
         query = query.eq('ranking_type', 'national');
       }
 
+      console.log(`🔍 [QUERY] Executando query com limit(50)...`);
       const { data, error } = await query.limit(50);
+      
+      console.log(`🔍 [QUERY] Resultado:`, {
+        sucesso: !error,
+        totalRegistros: data?.length || 0,
+        erro: error?.message
+      });
+      
+      if (data && data.length > 0) {
+        console.log(`🔍 [QUERY] Primeiros 3 registros:`, data.slice(0, 3));
+      }
 
       if (error) {
         console.error(`Erro na query de ranking ${type}:`, error);
@@ -638,275 +659,159 @@ export const useRanking = () => {
     try {
       setError(null);
 
-      console.log('🗑️ LIMPANDO rankings antigos...');
-      // DELETAR TODOS os rankings antigos antes de recalcular
+      console.log('⚠️⚠️⚠️ [CALCULATE RANKINGS] ESTA FUNÇÃO ESTÁ SENDO CHAMADA! ⚠️⚠️⚠️');
+      console.log('⚠️ [CALCULATE RANKINGS] Isso pode estar DELETANDO os rankings de outros usuários!');
+      console.log('⚠️ [CALCULATE RANKINGS] User ID:', user.id);
+      
+      // IMPORTANTE: NÃO DELETAR TODOS OS RANKINGS!
+      // Vamos deletar apenas os rankings do usuário atual
+      console.log('🗑️ DELETANDO apenas rankings do usuário atual...');
       const { error: deleteError } = await supabase
         .from('rankings')
         .delete()
-        .neq('period', 'NEVER_MATCH'); // Deleta tudo (workaround)
+        .eq('user_id', user.id); // Deletar APENAS os rankings deste usuário
       
       if (deleteError) {
-        console.error('❌ Erro ao deletar rankings antigos:', deleteError);
+        console.error('❌ Erro ao deletar rankings do usuário:', deleteError);
       } else {
-        console.log('✅ Rankings antigos deletados com sucesso');
+        console.log('✅ Rankings do usuário deletados com sucesso');
       }
       
       // Aguardar 500ms para garantir que delete foi processado
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Buscar todos os usuários com progresso
-      console.log('🔍 Buscando user_progress...');
+      console.log('🔍 [CALCULATE] Buscando progresso do usuário atual...');
+      // Buscar apenas o progresso do usuário atual
       const { data: progressData, error: progressError } = await supabase
         .from('user_progress')
         .select('*')
-        .order('total_points', { ascending: false});
+        .eq('user_id', user.id)
+        .single();
 
       if (progressError) {
         console.error('❌ Erro ao buscar user_progress:', progressError);
-        console.error('Detalhes:', {
-          message: progressError.message,
-          code: progressError.code,
-          details: progressError.details,
-          hint: progressError.hint
-        });
         throw progressError;
       }
       
-      console.log(`✅ Encontrados ${progressData?.length || 0} usuários com progresso`);
-      
-      // Buscar perfis separadamente
-      let profilesData: any[] = [];
-      if (progressData && progressData.length > 0) {
-        const userIds = progressData.map(p => p.user_id);
-        const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, name, avatar_url')
-          .in('id', userIds);
-        
-        if (!profilesError && profiles) {
-          profilesData = profiles;
-        }
-      }
-      
-      if (!progressData || progressData.length === 0) {
-        console.log('Nenhum dado de progresso encontrado');
-        return;
-      }
+      console.log(`✅ [CALCULATE] Progresso do usuário:`, progressData);
 
-      // Buscar localizações de todos os usuários
-      const { data: locationsData, error: locationsError } = await supabase
+      // Buscar localização do usuário atual
+      const { data: locationData, error: locationsError } = await supabase
         .from('user_locations')
-        .select('*');
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
       if (locationsError) {
         console.error('❌ Erro ao buscar user_locations:', locationsError);
         throw locationsError;
       }
       
-      console.log(`✅ Encontradas ${locationsData?.length || 0} localizações de usuários`);
+      console.log(`✅ [CALCULATE] Localização do usuário:`, locationData);
 
-      // Calcular rankings
+      // Calcular rankings APENAS PARA ESTE USUÁRIO
       const now = new Date().toISOString();
       const rankingsToInsert = [];
       
-      // Ordenar progresso por pontos (decrescente) para garantir posições corretas
-      console.log('Dados de progresso antes da ordenação:', JSON.stringify(progressData.map(p => ({
-        user_id: p.user_id, 
-        points: p.total_points,
-        profile: profilesData.find(profile => profile.id === p.user_id)?.name || 'Desconhecido'
-      }))));
+      console.log('🔄 [CALCULATE] Calculando posições do usuário...');
       
-      // Verificar se há valores nulos ou indefinidos nos pontos
-      const invalidPoints = progressData.filter(p => p.total_points === null || p.total_points === undefined);
-      if (invalidPoints.length > 0) {
-        console.error('⚠️ ALERTA: Encontrados registros com pontos nulos ou indefinidos:', invalidPoints);
-        
-        // Corrigir pontos nulos/indefinidos para evitar problemas na ordenação
-        invalidPoints.forEach(p => {
-          console.log(`Corrigindo pontos nulos para o usuário ${p.user_id}: 0 pontos`);
-          p.total_points = 0;
-        });
-      }
+      const userPoints = progressData.total_points || 0;
       
-      // Verificar se há pontos não numéricos
-      const nonNumericPoints = progressData.filter(p => typeof p.total_points !== 'number');
-      if (nonNumericPoints.length > 0) {
-        console.error('⚠️ ALERTA: Encontrados registros com pontos não numéricos:', nonNumericPoints);
-        
-        // Corrigir pontos não numéricos
-        nonNumericPoints.forEach(p => {
-          console.log(`Corrigindo pontos não numéricos para o usuário ${p.user_id}: ${p.total_points} -> ${Number(p.total_points) || 0}`);
-          p.total_points = Number(p.total_points) || 0;
-        });
-      }
+      // 1️⃣ RANKING NACIONAL - Calcular posição comparando com todos
+      console.log('🔄 [CALCULATE] Calculando posição nacional...');
+      const { count: nationalAbove } = await supabase
+        .from('user_progress')
+        .select('*', { count: 'exact', head: true })
+        .gt('total_points', userPoints);
       
-      // Ordenação segura com verificação de tipos
-      progressData.sort((a, b) => {
-        const pointsA = typeof a.total_points === 'number' ? a.total_points : 0;
-        const pointsB = typeof b.total_points === 'number' ? b.total_points : 0;
-        
-        // Se os pontos são iguais, desempatar por ID para garantir ordem consistente
-        if (pointsB === pointsA) {
-          return a.user_id.localeCompare(b.user_id);
-        }
-        
-        return pointsB - pointsA;
+      const nationalPosition = (nationalAbove || 0) + 1;
+      console.log(`✅ [CALCULATE] Posição nacional: #${nationalPosition}`);
+      
+      rankingsToInsert.push({
+        user_id: user.id,
+        ranking_type: 'national',
+        region: null,
+        position: nationalPosition,
+        total_points: userPoints,
+        period: 'all_time',
+        calculated_at: now
       });
       
-      console.log('Dados de progresso APÓS ordenação:', JSON.stringify(progressData.map(p => ({
-        user_id: p.user_id, 
-        points: p.total_points,
-        profile: profilesData.find(profile => profile.id === p.user_id)?.name || 'Desconhecido'
-      }))));
-      
-      // Ranking nacional
-      const nationalRankings = progressData.map((progress, index) => {
-        // Buscar perfil do usuário para debug
-        const profile = profilesData.find(p => p.id === progress.user_id);
-        console.log(`Ranking nacional #${index + 1}: ${profile?.name || progress.user_id} - ${progress.total_points} pontos`);
+      // 2️⃣ RANKING REGIONAL - Se tiver localização
+      if (locationData?.region) {
+        console.log(`🔄 [CALCULATE] Calculando posição regional (${locationData.region})...`);
         
-        return {
-          user_id: progress.user_id,
-          ranking_type: 'national',
-          position: index + 1,
-          total_points: progress.total_points,
+        const { count: regionalAbove } = await supabase
+          .from('user_progress')
+          .select('up.*, ul.region', { count: 'exact', head: true })
+          .from('user_progress as up')
+          .innerJoin('user_locations as ul', 'up.user_id', 'ul.user_id')
+          .eq('ul.region', locationData.region)
+          .gt('up.total_points', userPoints);
+        
+        const regionalPosition = (regionalAbove || 0) + 1;
+        console.log(`✅ [CALCULATE] Posição regional: #${regionalPosition}`);
+        
+        rankingsToInsert.push({
+          user_id: user.id,
+          ranking_type: 'regional',
+          region: locationData.region,
+          position: regionalPosition,
+          total_points: userPoints,
           period: 'all_time',
-          calculated_at: now,
-          region: null // Nacional não tem região
-        };
-      });
-      rankingsToInsert.push(...nationalRankings);
-      
-      // Rankings regionais e locais
-      if (locationsData && locationsData.length > 0) {
-        // Agrupar por região
-        const regionGroups: { [key: string]: any[] } = {};
-        const stateGroups: { [key: string]: any[] } = {};
-        
-        // Combinar progresso com localização
-        for (const progress of progressData) {
-          const location = locationsData.find(loc => loc.user_id === progress.user_id);
-          if (location) {
-            // Agrupar por região
-            if (!regionGroups[location.region]) {
-              regionGroups[location.region] = [];
-            }
-            regionGroups[location.region].push({
-              ...progress,
-              region: location.region
-            });
-            
-            // Agrupar por estado
-            if (!stateGroups[location.state]) {
-              stateGroups[location.state] = [];
-            }
-            stateGroups[location.state].push({
-              ...progress,
-              region: location.state
-            });
-          }
-        }
-        
-        // Calcular rankings regionais
-        for (const region in regionGroups) {
-          // Ordenação segura com verificação de tipos e desempate
-          const users = regionGroups[region].sort((a, b) => {
-            const pointsA = typeof a.total_points === 'number' ? a.total_points : 0;
-            const pointsB = typeof b.total_points === 'number' ? b.total_points : 0;
-            
-            // Se os pontos são iguais, desempatar por ID para garantir ordem consistente
-            if (pointsB === pointsA) {
-              return a.user_id.localeCompare(b.user_id);
-            }
-            
-            return pointsB - pointsA;
-          });
-          
-          console.log(`Ranking regional ${region} (ordenado):`, JSON.stringify(users.map(u => ({
-            user_id: u.user_id,
-            points: u.total_points,
-            profile: profilesData.find(profile => profile.id === u.user_id)?.name || 'Desconhecido'
-          }))));
-          
-          // CORREÇÃO: Para ranking regional, salvar a REGIÃO GEOGRÁFICA na coluna region (Sudeste, Sul, etc)
-          const regionalRankings = users.map((user, index) => {
-            return {
-              user_id: user.user_id,
-              ranking_type: 'regional',
-              region: region, // Salvar a REGIÃO GEOGRÁFICA (Sudeste, Sul, Norte, etc)
-              position: index + 1,
-              total_points: typeof user.total_points === 'number' ? user.total_points : 0,
-              period: 'all_time',
-              calculated_at: now
-            };
-          });
-          rankingsToInsert.push(...regionalRankings);
-        }
-        
-        // Calcular rankings locais (por estado)
-        for (const state in stateGroups) {
-          // Ordenação segura com verificação de tipos e desempate
-          const users = stateGroups[state].sort((a, b) => {
-            const pointsA = typeof a.total_points === 'number' ? a.total_points : 0;
-            const pointsB = typeof b.total_points === 'number' ? b.total_points : 0;
-            
-            // Se os pontos são iguais, desempatar por ID para garantir ordem consistente
-            if (pointsB === pointsA) {
-              return a.user_id.localeCompare(b.user_id);
-            }
-            
-            return pointsB - pointsA;
-          });
-          
-          console.log(`Ranking local ${state} (ordenado):`, JSON.stringify(users.map(u => ({
-            user_id: u.user_id,
-            points: u.total_points,
-            profile: profilesData.find(profile => profile.id === u.user_id)?.name || 'Desconhecido'
-          }))));
-          
-          // Para ranking local, salvar formato: CIDADE, ESTADO (ex: "Vitória, ES")
-          const localRankings = users.map((user, index) => {
-            const userLocation = locationsData.find(loc => loc.user_id === user.user_id);
-            const cityState = userLocation?.city_approximate && userLocation?.state 
-              ? `${userLocation.city_approximate}, ${userLocation.state}`
-              : userLocation?.state || 'XX';
-            
-            return {
-              user_id: user.user_id,
-              ranking_type: 'local',
-              region: cityState, // Salvar "CIDADE, ESTADO"
-              position: index + 1,
-              total_points: typeof user.total_points === 'number' ? user.total_points : 0,
-              period: 'all_time',
-              calculated_at: now
-            };
-          });
-          rankingsToInsert.push(...localRankings);
-        }
+          calculated_at: now
+        });
       }
       
-      console.log(`✅ Calculados ${rankingsToInsert.length} rankings`);
-      
-      // Inserir rankings (já deletamos tudo, então INSERT simples)
-      const BATCH_SIZE = 50; // Reduzir batch size
-      for (let i = 0; i < rankingsToInsert.length; i += BATCH_SIZE) {
-        const batch = rankingsToInsert.slice(i, i + BATCH_SIZE);
+      // 3️⃣ RANKING LOCAL - Se tiver estado
+      if (locationData?.state) {
+        console.log(`🔄 [CALCULATE] Calculando posição local (${locationData.state})...`);
         
-        // Usar INSERT simples já que deletamos tudo
+        const { count: localAbove } = await supabase
+          .from('user_progress')
+          .select('up.*, ul.state', { count: 'exact', head: true })
+          .from('user_progress as up')
+          .innerJoin('user_locations as ul', 'up.user_id', 'ul.user_id')
+          .eq('ul.state', locationData.state)
+          .gt('up.total_points', userPoints);
+        
+        const localPosition = (localAbove || 0) + 1;
+        console.log(`✅ [CALCULATE] Posição local: #${localPosition}`);
+        
+        const cityState = locationData.city_approximate && locationData.state 
+          ? `${locationData.city_approximate}, ${locationData.state}`
+          : locationData.state;
+        
+        rankingsToInsert.push({
+          user_id: user.id,
+          ranking_type: 'local',
+          region: cityState,
+          position: localPosition,
+          total_points: userPoints,
+          period: 'all_time',
+          calculated_at: now
+        });
+      }
+      
+      console.log(`✅ [CALCULATE] Calculados ${rankingsToInsert.length} rankings para o usuário`);
+      console.log(`📊 [CALCULATE] Rankings a inserir:`, rankingsToInsert);
+      
+      // Inserir rankings do usuário
+      if (rankingsToInsert.length > 0) {
         const { error: insertError } = await supabase
           .from('rankings')
-          .insert(batch);
+          .insert(rankingsToInsert);
         
         if (insertError) {
-          console.error(`❌ Erro ao inserir lote ${Math.floor(i/BATCH_SIZE) + 1}:`, insertError);
-          console.log('Continuando com o próximo lote...');
-          continue;
+          console.error(`❌ Erro ao inserir rankings:`, insertError);
+          throw insertError;
         } else {
-          console.log(`✅ Lote ${Math.floor(i/BATCH_SIZE) + 1} processado com sucesso`);
+          console.log(`✅ [CALCULATE] Rankings do usuário inseridos com sucesso!`);
         }
       }
       
-      console.log('✅ Rankings calculados e atualizados com sucesso!');
+      console.log('✅ [CALCULATE] Atualização concluída com sucesso!');
+      console.log('⚠️ [CALCULATE] IMPORTANTE: Esta função agora só atualiza o usuário atual, não todos os usuários');
       
       // Verificar conquistas regionais (SEM notificações para evitar spam)
       await checkRegionalAchievements(false);
