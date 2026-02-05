@@ -85,6 +85,29 @@ export default function Nutrition() {
         </Button>
       </div>
 
+      {/* Aviso de Recomendação Nutricional */}
+      <Card className="mb-6 border-orange-200 bg-orange-50">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <span className="text-2xl">⚠️</span>
+            </div>
+            <div>
+              <h3 className="font-semibold text-orange-900 mb-1">
+                Aviso Importante - Recomendação Nutricional
+              </h3>
+              <p className="text-sm text-orange-800 leading-relaxed">
+                Os planos nutricionais fornecidos são <strong>apenas recomendações gerais</strong> 
+                baseadas em orientações básicas de nutrição esportiva. Este não é um acompanhamento 
+                nutricional profissional. Para um plano personalizado e seguro, <strong>consulte sempre 
+                um nutricionista ou médico qualificado</strong>. A YM Sports não se responsabiliza 
+                por quaisquer decisões tomadas com base nestas sugestões.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="space-y-6">
         {/* Seção de Hidratação */}
         <Card>

@@ -21,7 +21,8 @@ import {
   Target,
   Star,
   Share2,
-  Download
+  Download,
+  ArrowLeft
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -187,6 +188,16 @@ export default function PublicPortfolio() {
         <div className="container max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
+              {/* Botão Voltar */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.history.back()}
+                className="text-gray-300 hover:text-yellow-500"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              
               <img 
                 src="/icons/logo.png" 
                 alt="YM Sports" 
