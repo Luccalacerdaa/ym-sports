@@ -67,114 +67,122 @@ export const usePushSimple = () => {
 
     setLoading(true);
     try {
-      // Primeiro, limpar qualquer subscription antiga
-      await unsubscribe();
-
-      // Solicitar permissão
+      // Solicitar permissão PRIMEIRO (não bloqueia)
       const perm = await Notification.requestPermission();
       setPermission(perm);
 
       if (perm !== 'granted') {
         console.log('❌ Permissão negada');
+        setLoading(false);
         return false;
       }
 
-      // Registrar SW
-      const registration = await navigator.serviceWorker.register('/sw.js');
-      await navigator.serviceWorker.ready;
+      // Timeout de 10 segundos para evitar congelamento
+      const timeoutPromise = new Promise<boolean>((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout ao ativar notificações')), 10000)
+      );
 
-      // Criar subscription
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-      });
+      const subscribePromise = (async () => {
+        // Limpar subscription antiga (com timeout)
+        try {
+          const registration = await navigator.serviceWorker.ready;
+          const oldSubscription = await registration.pushManager.getSubscription();
+          if (oldSubscription) {
+            await oldSubscription.unsubscribe();
+            console.log('🗑️ Subscription antiga removida');
+          }
+        } catch (err) {
+          console.warn('⚠️ Erro ao limpar subscription antiga, continuando...', err);
+        }
 
-      console.log('📝 Nova subscription criada:', subscription.endpoint.substring(0, 50) + '...');
+        // Registrar SW se necessário
+        let registration = await navigator.serviceWorker.getRegistration();
+        if (!registration) {
+          registration = await navigator.serviceWorker.register('/sw.js');
+        }
+        await navigator.serviceWorker.ready;
 
-      // Salvar no backend
-      const response = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: user.id,
-          subscription: subscription.toJSON()
-        })
-      });
+        // Criar nova subscription
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+        });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Falha ao salvar subscription');
-      }
+        console.log('📝 Nova subscription criada');
 
-      setIsSubscribed(true);
-      console.log('✅ Push ativado com sucesso!');
-      return true;
+        // Salvar no backend (com timeout)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        try {
+          const response = await fetch('/api/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_id: user.id,
+              subscription: subscription.toJSON()
+            }),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          if (!response.ok) {
+            throw new Error('Falha ao salvar no servidor');
+          }
+        } catch (fetchError) {
+          clearTimeout(timeoutId);
+          console.warn('⚠️ Erro ao salvar no backend, mas subscription local criada', fetchError);
+          // Continuar mesmo se o backend falhar
+        }
+
+        return true;
+      })();
+
+      const result = await Promise.race([subscribePromise, timeoutPromise]);
+      setIsSubscribed(result);
+      console.log('✅ Push ativado!');
+      return result;
     } catch (error: any) {
       console.error('❌ Erro ao subscrever:', error);
-      alert(`Erro ao ativar push: ${error.message}`);
+      // Não mostrar alert que bloqueia a UI
+      console.error(`Erro: ${error.message}`);
       return false;
     } finally {
       setLoading(false);
     }
-  }, [user, isSupported, unsubscribe]);
+  }, [user, isSupported]);
 
-  // Verificar e atualizar subscriptions antigas automaticamente
+  // Verificar subscription status (SEM auto-update que causa congelamento)
   useEffect(() => {
-    const checkAndUpdateSubscription = async () => {
+    const checkSubscription = async () => {
       if (!isSupported || !user) return;
 
       try {
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.getSubscription();
-        setIsSubscribed(!!subscription);
-        setPermission(Notification.permission);
+        // Timeout de 5 segundos para evitar congelamento
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), 5000)
+        );
+        
+        const checkPromise = (async () => {
+          const registration = await navigator.serviceWorker.ready;
+          const subscription = await registration.pushManager.getSubscription();
+          setIsSubscribed(!!subscription);
+          setPermission(Notification.permission);
+        })();
 
-        // 🔄 AUTO-UPDATE: Verificar se há subscription antiga no backend
-        if (subscription) {
-          console.log('🔍 Verificando se subscription precisa ser atualizada...');
-          
-          // Verificar no backend se esta subscription é antiga
-          const checkResponse = await fetch('/api/list-devices', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-          });
-
-          if (checkResponse.ok) {
-            const data = await checkResponse.json();
-            const userDevices = data.devices_by_user?.[user.id] || [];
-            
-            // Verificar se algum dispositivo deste usuário é antigo (sem updated_at)
-            const hasOldDevice = userDevices.some((d: any) => d.is_old);
-            
-            if (hasOldDevice) {
-              console.log('🔄 Subscription antiga detectada! Atualizando automaticamente...');
-              
-              // Reenviar a subscription atual para atualizar no backend
-              const updateResponse = await fetch('/api/subscribe', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  user_id: user.id,
-                  subscription: subscription.toJSON()
-                })
-              });
-
-              if (updateResponse.ok) {
-                console.log('✅ Subscription atualizada automaticamente para o novo sistema!');
-              } else {
-                console.warn('⚠️ Falha ao atualizar subscription antiga');
-              }
-            } else {
-              console.log('✅ Subscription já está no novo sistema');
-            }
-          }
-        }
+        await Promise.race([checkPromise, timeoutPromise]);
       } catch (error) {
-        console.error('Erro ao verificar/atualizar subscription:', error);
+        if (error instanceof Error && error.message === 'Timeout') {
+          console.warn('⚠️ Timeout ao verificar subscription, continuando...');
+        } else {
+          console.error('Erro ao verificar subscription:', error);
+        }
+        // Não bloquear a UI mesmo em caso de erro
+        setPermission(Notification.permission);
       }
     };
 
-    checkAndUpdateSubscription();
+    checkSubscription();
   }, [isSupported, user]);
 
   return {

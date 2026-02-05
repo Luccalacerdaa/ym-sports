@@ -258,9 +258,14 @@ All colors MUST be HSL.
     flex-direction: column;
   }
   
-  /* Safe Area apenas para a bottom navigation (navbar fixa) */
+  /* Safe Area apenas para a TOP (status bar) */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  
+  /* Safe Area para a bottom navigation (navbar fixa) - SEM padding extra */
   .safe-area-bottom {
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 

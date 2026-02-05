@@ -12,7 +12,7 @@ const navItems = [
 export function BottomNavBar() {
   return (
     <div 
-      className="fixed left-0 right-0 z-[999] bg-black border-t border-border safe-area-bottom fixed-bottom-bar bottom-nav-exception"
+      className="fixed left-0 right-0 z-[999] bg-black border-t border-border fixed-bottom-bar bottom-nav-exception"
       style={{ 
         position: 'fixed',
         bottom: '0px',
@@ -20,11 +20,12 @@ export function BottomNavBar() {
         zIndex: 9999,
         transform: 'translateZ(0)',
         willChange: 'transform',
-        backfaceVisibility: 'hidden'
+        backfaceVisibility: 'hidden',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)'
       }}
     >
       <nav 
-        className="flex justify-around items-start h-24 sm:h-28 max-w-screen-xl mx-auto px-2 pt-3"
+        className="flex justify-around items-start h-16 sm:h-20 max-w-screen-xl mx-auto px-2 pt-3"
       >
         {navItems.map((item) => (
           <NavLink

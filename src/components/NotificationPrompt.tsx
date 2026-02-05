@@ -42,27 +42,34 @@ export function NotificationPrompt() {
 
   const handleAccept = async () => {
     console.log('🔔 Usuário aceitou ativar notificações');
+    
+    // Fechar o prompt IMEDIATAMENTE para não bloquear a UI
+    setShowPrompt(false);
+    localStorage.setItem('notification_prompt_shown', 'true');
+    
+    // Mostrar feedback imediato
+    toast.info('⏳ Ativando notificações...');
+    
+    // Subscribe em background sem bloquear
     setIsLoading(true);
     
-    try {
-      // Fechar o prompt imediatamente para não bloquear a UI
-      setShowPrompt(false);
-      localStorage.setItem('notification_prompt_shown', 'true');
-      
-      // Subscribe em background
-      const success = await subscribe();
-      
-      if (success) {
-        toast.success('✅ Notificações ativadas! Você receberá alertas importantes.');
-      } else {
-        toast.error('❌ Erro ao ativar notificações. Você pode ativar depois nas configurações.');
+    // Usar setTimeout para garantir que a UI seja atualizada primeiro
+    setTimeout(async () => {
+      try {
+        const success = await subscribe();
+        
+        if (success) {
+          toast.success('✅ Notificações ativadas! Você receberá alertas importantes.');
+        } else {
+          toast.warning('⚠️ Não foi possível ativar agora. Você pode tentar depois nas configurações.');
+        }
+      } catch (error) {
+        console.error('Erro ao ativar notificações:', error);
+        toast.warning('⚠️ Notificações podem ser ativadas depois nas configurações.');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Erro ao ativar notificações:', error);
-      toast.error('❌ Erro ao ativar notificações. Tente novamente mais tarde.');
-    } finally {
-      setIsLoading(false);
-    }
+    }, 100); // 100ms de delay para garantir que a UI seja atualizada
   };
 
   const handleDismiss = () => {

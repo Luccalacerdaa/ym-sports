@@ -43,8 +43,6 @@ select {
   transform: translateZ(0) !important;
   will-change: transform !important;
   backface-visibility: hidden !important;
-  height: auto !important; /* Impedir que a altura seja alterada */
-  min-height: 60px !important; /* Altura mínima */
   transition: none !important; /* Previne animações que podem causar problemas */
 }
 
