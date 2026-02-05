@@ -42,7 +42,8 @@ const Login = () => {
         variant="ghost"
         size="sm"
         onClick={() => navigate("/")}
-        className="absolute top-4 left-4 text-foreground hover:text-primary flex items-center gap-2"
+        className="absolute left-4 text-foreground hover:text-primary flex items-center gap-2"
+        style={{ top: 'calc(1rem + env(safe-area-inset-top, 0px))' }}
       >
         <ArrowLeft className="h-4 w-4" />
         Voltar
