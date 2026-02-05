@@ -19,7 +19,7 @@ export default function DashboardLayout() {
       <main 
         className="flex-1 overflow-x-hidden overflow-y-auto"
         style={{
-          paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))'
+          paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))'
         }}
       >
         <Outlet />
