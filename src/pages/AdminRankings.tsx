@@ -23,9 +23,9 @@ export default function AdminRankings() {
     try {
       // Deletar TODOS os rankings
       const { error: deleteError } = await supabase
-        .from('rankings')
+        .from('rankings_cache')
         .delete()
-        .neq('period', 'NEVER_MATCH');
+        .neq('user_id', '00000000-0000-0000-0000-000000000000');
 
       if (deleteError) throw deleteError;
 
@@ -58,9 +58,9 @@ export default function AdminRankings() {
       // 1. Limpar rankings antigos
       console.log('🗑️ Limpando rankings antigos...');
       const { error: deleteError } = await supabase
-        .from('rankings')
+        .from('rankings_cache')
         .delete()
-        .neq('period', 'NEVER_MATCH');
+        .neq('user_id', '00000000-0000-0000-0000-000000000000');
 
       if (deleteError) throw deleteError;
 
@@ -94,11 +94,10 @@ export default function AdminRankings() {
         rankingsToInsert.push({
           user_id: progress.user_id,
           ranking_type: 'national',
-          position: index + 1,
-          total_points: progress.total_points,
-          period: 'all_time',
+          points: progress.total_points,
           calculated_at: now,
-          region: null
+          region: null,
+          city: null
         });
       });
 
@@ -140,11 +139,10 @@ export default function AdminRankings() {
             rankingsToInsert.push({
               user_id: user.user_id,
               ranking_type: 'regional',
-              position: index + 1,
-              total_points: user.total_points,
-              period: 'all_time',
+              points: user.total_points,
               calculated_at: now,
-              region: user.state // ESTADO, não região geográfica
+              region: user.state, // ESTADO, não região geográfica
+              city: null
             });
           });
         }
@@ -156,11 +154,10 @@ export default function AdminRankings() {
             rankingsToInsert.push({
               user_id: user.user_id,
               ranking_type: 'local',
-              position: index + 1,
-              total_points: user.total_points,
-              period: 'all_time',
+              points: user.total_points,
               calculated_at: now,
-              region: user.city && user.state ? `${user.city}, ${user.state}` : user.state
+              region: user.state,
+              city: user.city
             });
           });
         }
@@ -171,7 +168,7 @@ export default function AdminRankings() {
       for (let i = 0; i < rankingsToInsert.length; i += BATCH_SIZE) {
         const batch = rankingsToInsert.slice(i, i + BATCH_SIZE);
         const { error: insertError } = await supabase
-          .from('rankings')
+          .from('rankings_cache')
           .insert(batch);
 
         if (insertError) {

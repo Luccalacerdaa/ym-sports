@@ -377,7 +377,7 @@ export const useRanking = () => {
 
       // Verificar se existem rankings, se não, calcular primeiro
       const { data: existingRankings, error: checkError } = await supabase
-        .from('rankings')
+        .from('rankings_cache')
         .select('id')
         .limit(1);
 
@@ -395,11 +395,10 @@ export const useRanking = () => {
       // ALTERAÇÃO: Buscar rankings sem a junção direta com profiles
       console.log(`Buscando rankings do tipo: ${type}`);
       let query = supabase
-        .from('rankings')
+        .from('rankings_cache')
         .select('*')
-        .eq('period', 'all_time')
-        .order('total_points', { ascending: false }) // Ordenar por pontos, não por posição
-        .order('position', { ascending: true }); // Usar posição como critério secundário
+        .eq('ranking_type', type)
+        .order('points', { ascending: false }); // Ordenar por pontos
 
       if (type === 'regional' && userLocation) {
         query = query.eq('ranking_type', 'regional').eq('region', userLocation.region);
@@ -529,7 +528,7 @@ export const useRanking = () => {
       const uniqueRankings = data.filter(entry => {
         const key = `${entry.user_id}-${entry.ranking_type}`;
         if (uniqueKey.has(key)) {
-          console.log(`⚠️ Ranking duplicado encontrado: ${entry.user_id} - Tipo: ${entry.ranking_type} - Posição: ${entry.position}`);
+          console.log(`⚠️ Ranking duplicado encontrado: ${entry.user_id} - Tipo: ${entry.ranking_type}`);
           return false; // Filtrar duplicatas
         }
         uniqueKey.add(key);
@@ -538,8 +537,14 @@ export const useRanking = () => {
       
       console.log(`Rankings únicos após remoção de duplicatas: ${uniqueRankings.length}`);
       
+      // Calcular posições dinamicamente baseado nos pontos (rankings já vêm ordenados por pontos DESC)
+      const rankingsWithPositions = uniqueRankings.map((entry, index) => ({
+        ...entry,
+        position: index + 1 // Posição calculada dinamicamente
+      }));
+      
       // Agora mapear os rankings únicos para adicionar informações de usuário
-      const rankingsWithUserInfo = uniqueRankings.map(entry => {
+      const rankingsWithUserInfo = rankingsWithPositions.map(entry => {
         const profile = allProfiles.find(p => p.id === entry.user_id);
         const progress = progressData?.find(p => p.user_id === entry.user_id);
         const location = locationsData?.find(l => l.user_id === entry.user_id);
@@ -559,7 +564,7 @@ export const useRanking = () => {
         }
         
         // Usar pontos do progresso se disponíveis (mais atualizados)
-        const points = progress?.total_points || entry.total_points;
+        const points = progress?.total_points || entry.points;
         
         // Definir localização baseado no tipo de ranking
         let displayLocation = 'Brasil';
@@ -595,7 +600,8 @@ export const useRanking = () => {
           user_name: displayName,
           user_avatar: profile?.avatar_url,
           user_location: displayLocation,
-          total_points: points, // Atualizar pontos com o valor mais recente
+          points: points, // Usar o campo 'points' consistente com a nova tabela
+          total_points: points, // Manter compatibilidade com código existente
         };
       });
 
@@ -641,9 +647,9 @@ export const useRanking = () => {
       console.log('🗑️ LIMPANDO rankings antigos...');
       // DELETAR TODOS os rankings antigos antes de recalcular
       const { error: deleteError } = await supabase
-        .from('rankings')
+        .from('rankings_cache')
         .delete()
-        .neq('period', 'NEVER_MATCH'); // Deleta tudo (workaround)
+        .neq('user_id', '00000000-0000-0000-0000-000000000000'); // Deleta tudo (workaround)
       
       if (deleteError) {
         console.error('❌ Erro ao deletar rankings antigos:', deleteError);
@@ -768,11 +774,10 @@ export const useRanking = () => {
         return {
           user_id: progress.user_id,
           ranking_type: 'national',
-          position: index + 1,
-          total_points: progress.total_points,
-          period: 'all_time',
+          points: progress.total_points,
           calculated_at: now,
-          region: null // Nacional não tem região
+          region: null, // Nacional não tem região
+          city: null
         };
       });
       rankingsToInsert.push(...nationalRankings);
@@ -835,10 +840,9 @@ export const useRanking = () => {
               user_id: user.user_id,
               ranking_type: 'regional',
               region: userLocation?.state || 'XX', // Salvar o ESTADO, não a região geográfica
-              position: index + 1,
-              total_points: typeof user.total_points === 'number' ? user.total_points : 0,
-              period: 'all_time',
-              calculated_at: now
+              points: typeof user.total_points === 'number' ? user.total_points : 0,
+              calculated_at: now,
+              city: null
             };
           });
           rankingsToInsert.push(...regionalRankings);
@@ -868,17 +872,13 @@ export const useRanking = () => {
           // Para ranking local, salvar formato: CIDADE, ESTADO (ex: "Vitória, ES")
           const localRankings = users.map((user, index) => {
             const userLocation = locationsData.find(loc => loc.user_id === user.user_id);
-            const cityState = userLocation?.city_approximate && userLocation?.state 
-              ? `${userLocation.city_approximate}, ${userLocation.state}`
-              : userLocation?.state || 'XX';
             
             return {
               user_id: user.user_id,
               ranking_type: 'local',
-              region: cityState, // Salvar "CIDADE, ESTADO"
-              position: index + 1,
-              total_points: typeof user.total_points === 'number' ? user.total_points : 0,
-              period: 'all_time',
+              region: userLocation?.state || 'XX', // Salvar o ESTADO na coluna region
+              city: userLocation?.city_approximate || null, // Cidade na coluna city
+              points: typeof user.total_points === 'number' ? user.total_points : 0,
               calculated_at: now
             };
           });
@@ -895,7 +895,7 @@ export const useRanking = () => {
         
         // Usar INSERT simples já que deletamos tudo
         const { error: insertError } = await supabase
-          .from('rankings')
+          .from('rankings_cache')
           .insert(batch);
         
         if (insertError) {
@@ -1107,10 +1107,9 @@ export const useRanking = () => {
 
       // Buscar posições nos rankings - ORDENAR por calculated_at DESC e pegar apenas o mais recente de cada tipo
       let { data: allRankings, error: rankingsError } = await supabase
-        .from('rankings')
-        .select('ranking_type, position, region, calculated_at')
+        .from('rankings_cache')
+        .select('ranking_type, region, calculated_at')
         .eq('user_id', user.id)
-        .eq('period', 'all_time')
         .order('calculated_at', { ascending: false });
 
       if (rankingsError) throw rankingsError;
@@ -1134,10 +1133,9 @@ export const useRanking = () => {
         
         // Buscar novamente com a mesma lógica
         const { data: updatedAllRankings, error: updatedError } = await supabase
-          .from('rankings')
-          .select('ranking_type, position, region, calculated_at')
+          .from('rankings_cache')
+          .select('ranking_type, region, calculated_at')
           .eq('user_id', user.id)
-          .eq('period', 'all_time')
           .order('calculated_at', { ascending: false });
           
         if (!updatedError && updatedAllRankings) {

@@ -36,7 +36,7 @@
     // 1. LIMPAR rankings antigos
     console.log('🗑️ Limpando rankings antigos...');
     const { error: deleteError } = await supabase
-      .from('rankings')
+      .from('rankings_cache')
       .delete()
       .neq('period', 'NEVER_MATCH');
     
@@ -166,7 +166,7 @@
     for (let i = 0; i < rankingsToInsert.length; i += BATCH_SIZE) {
       const batch = rankingsToInsert.slice(i, i + BATCH_SIZE);
       const { error: insertError } = await supabase
-        .from('rankings')
+        .from('rankings_cache')
         .insert(batch);
       
       if (insertError) {
