@@ -28,7 +28,7 @@
     // 1. Deletar TODOS os rankings
     console.log('🗑️ Deletando todos os rankings...');
     const { error: deleteError } = await supabase
-      .from('rankings_cache')
+      .from('rankings')
       .delete()
       .neq('period', 'NEVER_MATCH'); // Workaround para deletar tudo
     
@@ -44,7 +44,7 @@
     
     // 3. Verificar se está vazio
     const { data: checkData, error: checkError } = await supabase
-      .from('rankings_cache')
+      .from('rankings')
       .select('id')
       .limit(1);
     
