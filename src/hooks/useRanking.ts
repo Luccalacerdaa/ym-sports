@@ -828,13 +828,12 @@ export const useRanking = () => {
             profile: profilesData.find(profile => profile.id === u.user_id)?.name || 'Desconhecido'
           }))));
           
-          // CORREÇÃO: Para ranking regional, salvar o ESTADO do usuário na coluna region, não a região geográfica
+          // CORREÇÃO: Para ranking regional, salvar a REGIÃO GEOGRÁFICA na coluna region (Sudeste, Sul, etc)
           const regionalRankings = users.map((user, index) => {
-            const userLocation = locationsData.find(loc => loc.user_id === user.user_id);
             return {
               user_id: user.user_id,
               ranking_type: 'regional',
-              region: userLocation?.state || 'XX', // Salvar o ESTADO, não a região geográfica
+              region: region, // Salvar a REGIÃO GEOGRÁFICA (Sudeste, Sul, Norte, etc)
               position: index + 1,
               total_points: typeof user.total_points === 'number' ? user.total_points : 0,
               period: 'all_time',
