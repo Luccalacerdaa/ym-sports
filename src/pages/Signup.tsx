@@ -45,8 +45,6 @@ const Signup = () => {
 
       // Se o usuário foi criado, salvar dados do perfil
       if (data.user) {
-        console.log("Usuário criado:", data.user.id);
-        console.log("Dados do formulário:", formData);
         
         try {
           const profileData = {

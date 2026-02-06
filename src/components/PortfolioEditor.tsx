@@ -83,34 +83,23 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
 
   // Salvar alterações
   const handleSave = async () => {
-    console.log('═══════════════════════════════════════════════════════');
-    console.log('💾 [HANDLE SAVE] Botão Salvar clicado!');
-    console.log('═══════════════════════════════════════════════════════');
-    
     setLoading(true);
     
     try {
       // Validar campos obrigatórios
-      console.log('✅ [HANDLE SAVE] Validando campos obrigatórios...');
-      
       if (!basicInfo.full_name?.trim()) {
-        console.error('❌ [HANDLE SAVE] Nome completo vazio!');
         toast.error('Nome completo é obrigatório');
         setLoading(false);
         return;
       }
       
       if (!basicInfo.position?.trim()) {
-        console.error('❌ [HANDLE SAVE] Posição vazia!');
         toast.error('Posição é obrigatória');
         setLoading(false);
         return;
       }
       
-      console.log('✅ [HANDLE SAVE] Campos obrigatórios OK');
-      
       // Preparar dados limpos para atualização - APENAS campos da tabela player_portfolios
-      console.log('📦 [HANDLE SAVE] Preparando dados para envio...');
       
       const updateData: any = {
         full_name: basicInfo.full_name.trim(),
@@ -155,25 +144,14 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
         salary_expectation: settings.salary_expectation?.trim() || null
       };
       
-      console.log('📋 [HANDLE SAVE] Dados preparados:', JSON.stringify(updateData, null, 2));
-      console.log('🚀 [HANDLE SAVE] Chamando updatePortfolio...');
-      
       await updatePortfolio(updateData);
       
-      console.log('✅ [HANDLE SAVE] Update Portfolio retornou com sucesso!');
       toast.success('Portfólio atualizado com sucesso!');
       onSave();
-      
-      console.log('✅ [HANDLE SAVE] Salvamento concluído com sucesso!');
     } catch (error: any) {
-      console.error('❌ [HANDLE SAVE] Erro capturado:', error);
-      console.error('❌ [HANDLE SAVE] Mensagem:', error.message);
-      console.error('❌ [HANDLE SAVE] Detalhes:', error.details);
-      console.error('❌ [HANDLE SAVE] Stack:', error.stack);
       toast.error(`Erro ao salvar: ${error.message || 'Verifique os dados e tente novamente'}`);
     } finally {
       setLoading(false);
-      console.log('═══════════════════════════════════════════════════════');
     }
   };
 

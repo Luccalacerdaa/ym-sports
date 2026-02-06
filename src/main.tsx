@@ -3,6 +3,10 @@ import App from "./App.tsx";
 import "./index.css";
 import "./styles/bottombar-fix.css"; // Importar estilos para corrigir a barra inferior
 import { setupMobileViewportFix } from "./utils/mobileViewportFix"; // Importar correção de viewport para dispositivos móveis
+import { disableConsoleLogs } from "./lib/logger"; // Sistema de logging seguro
+
+// Desabilitar logs sensíveis em produção
+disableConsoleLogs();
 
 // Inicializar correção de viewport para dispositivos móveis
 setupMobileViewportFix();

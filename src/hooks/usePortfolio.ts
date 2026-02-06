@@ -119,12 +119,6 @@ export const usePortfolio = () => {
 
   // Atualizar portfólio
   const updatePortfolio = async (updates: Partial<PlayerPortfolio>) => {
-    console.log('═══════════════════════════════════════════════════════');
-    console.log('📝 [UPDATE PORTFOLIO] Iniciando atualização');
-    console.log('📝 [UPDATE PORTFOLIO] User ID:', user?.id);
-    console.log('📝 [UPDATE PORTFOLIO] Portfolio ID:', portfolio?.id);
-    console.log('📝 [UPDATE PORTFOLIO] Dados recebidos:', JSON.stringify(updates, null, 2));
-    console.log('═══════════════════════════════════════════════════════');
     
     if (!user || !portfolio) {
       console.error('❌ [UPDATE PORTFOLIO] Erro: Portfólio ou usuário não encontrado');
@@ -140,8 +134,6 @@ export const usePortfolio = () => {
         updated_at: new Date().toISOString()
       };
       
-      console.log('📤 [UPDATE PORTFOLIO] Enviando para Supabase:', JSON.stringify(dataToUpdate, null, 2));
-      
       const { data, error } = await supabase
         .from('player_portfolios')
         .update(dataToUpdate)
@@ -149,34 +141,19 @@ export const usePortfolio = () => {
         .select()
         .single();
       
-      console.log('📥 [UPDATE PORTFOLIO] Resposta do Supabase:');
-      console.log('   - Error:', error);
-      console.log('   - Data:', data);
-      
       if (error) {
-        console.error('❌ [UPDATE PORTFOLIO] Erro do Supabase:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
         throw error;
       }
-      
-      console.log('✅ [UPDATE PORTFOLIO] Atualização bem-sucedida!');
       setPortfolio(data);
       toast.success('Portfólio atualizado com sucesso!');
       
       return data;
     } catch (err: any) {
-      console.error('❌ [UPDATE PORTFOLIO] Erro completo:', err);
-      console.error('❌ [UPDATE PORTFOLIO] Stack trace:', err.stack);
       setError(err.message);
       toast.error(`Erro ao atualizar portfólio: ${err.message}`);
       throw err;
     } finally {
       setLoading(false);
-      console.log('═══════════════════════════════════════════════════════');
     }
   };
 
