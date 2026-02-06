@@ -460,35 +460,59 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
                 <FileUpload
                   accept="images"
                   multiple={true}
-                  maxFiles={8}
+                  maxFiles={5}
                   bucket="portfolio-photos"
                   folder="gallery"
                   onUploadComplete={(urls) => {
+                    const currentPhotos = basicInfo.gallery_photos || [];
+                    const remainingSlots = 5 - currentPhotos.length;
+                    const newPhotos = urls.slice(0, remainingSlots);
+                    
                     setBasicInfo(prev => ({ 
                       ...prev, 
-                      gallery_photos: [...(prev.gallery_photos || []), ...urls]
+                      gallery_photos: [...currentPhotos, ...newPhotos].slice(0, 5)
                     }));
                   }}
                 />
+                <p className="text-xs text-muted-foreground mt-2">
+                  {(basicInfo.gallery_photos || []).length}/5 fotos
+                </p>
               </CardContent>
             </Card>
 
-            {/* Vídeo de Destaque */}
+            {/* Vídeo de Destaque - YouTube */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Video className="h-5 w-5" />
-                  Vídeo de Destaque
+                  Vídeo de Destaque (YouTube)
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="highlight_video">Link do vídeo no YouTube</Label>
+                  <Input
+                    id="highlight_video"
+                    type="url"
+                    value={basicInfo.highlight_video}
+                    onChange={(e) => setBasicInfo(prev => ({ ...prev, highlight_video: e.target.value }))}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Cole o link completo do seu vídeo no YouTube
+                  </p>
+                </div>
+                
                 {basicInfo.highlight_video && (
                   <div className="space-y-2">
-                    <video 
-                      src={basicInfo.highlight_video} 
-                      controls
-                      className="w-full h-40 object-cover rounded border"
-                    />
+                    <div className="aspect-video w-full rounded border overflow-hidden">
+                      <iframe
+                        src={basicInfo.highlight_video.replace('watch?v=', 'embed/')}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
                     <Button 
                       variant="outline" 
                       size="sm"
@@ -499,70 +523,66 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
                     </Button>
                   </div>
                 )}
-                
-                <FileUpload
-                  accept="videos"
-                  multiple={false}
-                  maxFiles={1}
-                  bucket="portfolio-videos"
-                  folder="highlights"
-                  onUploadComplete={(urls) => {
-                    if (urls[0]) {
-                      setBasicInfo(prev => ({ ...prev, highlight_video: urls[0] }));
-                    }
-                  }}
-                />
               </CardContent>
             </Card>
 
-            {/* Vídeos de Habilidades */}
+            {/* Vídeos de Habilidades - YouTube */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Video className="h-5 w-5" />
-                  Vídeos de Habilidades
+                  Vídeos de Habilidades (YouTube)
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {basicInfo.skill_videos && basicInfo.skill_videos.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-3">
                     {basicInfo.skill_videos.map((video, index) => (
-                      <div key={index} className="relative group">
-                        <video 
-                          src={video} 
-                          className="w-full h-20 object-cover rounded border"
-                          muted
+                      <div key={index} className="flex items-center gap-2">
+                        <Input
+                          value={video}
+                          onChange={(e) => {
+                            const newVideos = [...(basicInfo.skill_videos || [])];
+                            newVideos[index] = e.target.value;
+                            setBasicInfo(prev => ({ ...prev, skill_videos: newVideos }));
+                          }}
+                          placeholder="https://www.youtube.com/watch?v=..."
                         />
                         <Button
                           variant="destructive"
                           size="sm"
-                          className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-6 w-6"
                           onClick={() => {
                             const newVideos = [...(basicInfo.skill_videos || [])];
                             newVideos.splice(index, 1);
                             setBasicInfo(prev => ({ ...prev, skill_videos: newVideos }));
                           }}
                         >
-                          <X className="h-3 w-3" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     ))}
                   </div>
                 )}
                 
-                <FileUpload
-                  accept="videos"
-                  multiple={true}
-                  maxFiles={4}
-                  bucket="portfolio-videos"
-                  folder="skills"
-                  onUploadComplete={(urls) => {
-                    setBasicInfo(prev => ({ 
-                      ...prev, 
-                      skill_videos: [...(prev.skill_videos || []), ...urls]
-                    }));
-                  }}
-                />
+                {(!basicInfo.skill_videos || basicInfo.skill_videos.length < 4) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setBasicInfo(prev => ({ 
+                        ...prev, 
+                        skill_videos: [...(prev.skill_videos || []), '']
+                      }));
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Adicionar Link do YouTube
+                  </Button>
+                )}
+                
+                <p className="text-xs text-muted-foreground">
+                  Adicione até 4 links de vídeos do YouTube mostrando suas habilidades
+                </p>
               </CardContent>
             </Card>
 

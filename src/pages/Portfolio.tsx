@@ -117,6 +117,11 @@ export default function Portfolio() {
   // Compartilhar portfólio
   const handleShare = async (platform: 'link' | 'whatsapp' | 'email' | 'social') => {
     if (!portfolio) return;
+    
+    if (!portfolio.slug) {
+      toast.error('Seu portfólio ainda não tem um link. Salve as alterações primeiro.');
+      return;
+    }
 
     const shareUrl = generateShareLink(portfolio.slug);
     
@@ -372,7 +377,13 @@ export default function Portfolio() {
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => window.open(generateShareLink(portfolio.slug), '_blank')}
+            onClick={() => {
+              if (!portfolio.slug) {
+                toast.error('Seu portfólio ainda não tem um link. Salve as alterações primeiro.');
+                return;
+              }
+              window.open(generateShareLink(portfolio.slug), '_blank');
+            }}
             className="flex-1 sm:flex-none"
           >
             <ExternalLink className="h-4 w-4 mr-2" />
