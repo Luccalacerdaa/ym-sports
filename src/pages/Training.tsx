@@ -80,7 +80,7 @@ export default function Training() {
 
   const [aiRequest, setAiRequest] = useState({
     goals: [] as string[],
-    availableDays: [] as string[],
+    selectedDay: 'monday' as string, // Apenas 1 dia por vez
     sessionDuration: 30,
     exerciseCount: 4, // Quantidade de exercícios baseada na duração
     difficulty: 'intermediate' as 'beginner' | 'intermediate' | 'advanced',
@@ -92,23 +92,32 @@ export default function Training() {
   const weeklyTrainings = getWeeklyTrainings();
 
   const handleGenerateTraining = async () => {
-    if (aiRequest.goals.length === 0 || aiRequest.availableDays.length === 0) {
-      toast.error("Selecione pelo menos um objetivo e um dia disponível");
-      return;
-    }
-
-    // Limitar a 5 dias para evitar resposta muito longa
-    if (aiRequest.availableDays.length > 5) {
-      toast.error("Selecione no máximo 5 dias para evitar problemas de geração");
+    if (aiRequest.goals.length === 0) {
+      toast.error("Selecione pelo menos um objetivo");
       return;
     }
 
     try {
-      console.log('Iniciando geração de treinos...', aiRequest);
-      const generatedTrainings = await generateTrainingPlan(aiRequest);
-      console.log('Treinos gerados pela IA:', generatedTrainings);
+      console.log('Iniciando geração de treino para', aiRequest.selectedDay, '...', aiRequest);
       
-      // Criar todos os treinos gerados
+      // Verificar se já existe treino neste dia e deletar
+      const existingTraining = trainings.find(t => t.day_of_week === aiRequest.selectedDay);
+      if (existingTraining) {
+        console.log('Treino existente encontrado para', aiRequest.selectedDay, '- Deletando...', existingTraining.id);
+        await deleteTraining(existingTraining.id);
+        toast.info(`Treino anterior de ${getDayLabel(aiRequest.selectedDay)} removido`);
+      }
+      
+      // Gerar novo treino com array de 1 dia
+      const requestWithArray = {
+        ...aiRequest,
+        availableDays: [aiRequest.selectedDay]
+      };
+      
+      const generatedTrainings = await generateTrainingPlan(requestWithArray);
+      console.log('Treino gerado pela IA:', generatedTrainings);
+      
+      // Criar o novo treino
       for (const training of generatedTrainings) {
         console.log('Criando treino:', training);
         const result = await createTraining(training);
@@ -118,13 +127,13 @@ export default function Training() {
       // Recarregar treinos após criação
       await fetchTrainings();
 
-      toast.success(`Plano de treinos gerado com sucesso! ${generatedTrainings.length} treinos criados.`);
+      toast.success(`Treino para ${getDayLabel(aiRequest.selectedDay)} criado com sucesso!`);
       setIsGenerateDialogOpen(false);
       
       // Reset form
       setAiRequest({
         goals: [],
-        availableDays: [],
+        selectedDay: 'monday',
         sessionDuration: 30,
         exerciseCount: 4,
         difficulty: 'intermediate',
@@ -132,8 +141,8 @@ export default function Training() {
         focus: [],
       });
     } catch (error) {
-      console.error('Erro na geração de treinos:', error);
-      toast.error("Erro ao gerar plano de treinos");
+      console.error('Erro na geração de treino:', error);
+      toast.error("Erro ao gerar treino");
     }
   };
 
@@ -250,21 +259,27 @@ export default function Training() {
                   </div>
                 </div>
 
-                {/* Dias Disponíveis */}
+                {/* Dia da Semana */}
                 <div className="space-y-3">
-                  <Label>Dias da semana disponíveis</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {DAYS_OF_WEEK.map((day) => (
-                      <div key={day.value} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={day.value}
-                          checked={aiRequest.availableDays.includes(day.value)}
-                          onCheckedChange={() => toggleArrayItem(aiRequest.availableDays, day.value, (value) => setAiRequest({...aiRequest, availableDays: value}))}
-                        />
-                        <Label htmlFor={day.value} className="text-sm">{day.label}</Label>
-                      </div>
-                    ))}
-                  </div>
+                  <Label htmlFor="selectedDay">Dia da semana para o treino</Label>
+                  <Select 
+                    value={aiRequest.selectedDay} 
+                    onValueChange={(value) => setAiRequest({...aiRequest, selectedDay: value})}
+                  >
+                    <SelectTrigger id="selectedDay">
+                      <SelectValue placeholder="Selecione o dia" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DAYS_OF_WEEK.map((day) => (
+                        <SelectItem key={day.value} value={day.value}>
+                          {day.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Gere um treino por vez. Se já existe treino neste dia, será substituído.
+                  </p>
                 </div>
 
                 {/* Duração Fixa e Dificuldade */}
