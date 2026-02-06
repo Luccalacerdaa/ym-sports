@@ -283,7 +283,7 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
           
           {/* Duração do Plano */}
           <div className="space-y-3">
-            <Label htmlFor="days">Duração do Plano (dias)</Label>
+            <Label htmlFor="days">Duração do Plano</Label>
             <Select 
               value={daysCount.toString()} 
               onValueChange={(value) => setDaysCount(parseInt(value))}
@@ -293,10 +293,12 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="1">1 dia</SelectItem>
-                <SelectItem value="3">3 dias</SelectItem>
-                <SelectItem value="7">7 dias</SelectItem>
+                <SelectItem value="2">2 dias</SelectItem>
               </SelectContent>
             </Select>
+            <p className="text-xs text-muted-foreground">
+              Gere planos de 1 ou 2 dias por vez
+            </p>
           </div>
           
           <Separator />
