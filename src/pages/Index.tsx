@@ -622,7 +622,7 @@ const Index = () => {
       <section ref={ctaSection.ref} className="py-20 bg-black">
         <div className="container mx-auto px-4 text-center">
           <h2 className={`font-bebas uppercase leading-[0.95] mb-6 text-foreground transition-all duration-1000 ${ctaSection.isVisible ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-75 rotate-12'}`}>
-            <div className="font-medelyn text-primary text-[clamp(2.5rem,7vw,4rem)] mb-3">E ai,</div>
+            <div className="text-primary text-[clamp(2.5rem,7vw,4rem)] mb-3">E AI,</div>
             <div className="text-white text-[clamp(3.5rem,9vw,6.5rem)]">PRONTO PARA</div>
             <div className="text-primary font-bold text-[clamp(3.8rem,10vw,7rem)]">EVOLUIR?</div>
           </h2>
