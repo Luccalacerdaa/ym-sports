@@ -254,8 +254,8 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
     if (!user) throw new Error("Usuário não autenticado");
 
     const fileExt = 'jpg';
-    const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-    const filePath = `profile/${fileName}`;
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = `profile/${user.id}/${fileName}`; // Estrutura: profile/{user_id}/{filename}
 
     const { error: uploadError } = await supabase.storage
       .from('portfolio-photos')
