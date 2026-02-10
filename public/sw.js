@@ -1,7 +1,7 @@
 // Service Worker Completo para YM Sports
 // Notificações + Cache Offline
 
-const SW_VERSION = '18.0.0';
+const SW_VERSION = '19.0.0';
 const CACHE_NAME = `ym-sports-v${SW_VERSION}`;
 const RUNTIME_CACHE = `runtime-${SW_VERSION}`;
 
@@ -131,61 +131,36 @@ async function checkUpcomingEvents() {
       const minutesUntil = Math.round((eventDate.getTime() - now.getTime()) / 60000);
       
       const notificationKey30 = `event_30min_${event.id}`;
-      const notificationKey5 = `event_5min_${event.id}`;
       const notificationKeyNow = `event_now_${event.id}`;
       
-      // Notificar 30 minutos antes
-      if (!eventsNotified.has(notificationKey30) && minutesUntil <= 30 && minutesUntil > 10) {
-        console.log(`[SW] 📤 Enviando notificação: ${event.title} em ${minutesUntil}min`);
-        
+      // Notificar 30 minutos antes (APENAS UMA VEZ)
+      if (!eventsNotified.has(notificationKey30) && minutesUntil >= 28 && minutesUntil <= 32) {
         await self.registration.showNotification(`📅 ${event.title}`, {
-          body: `Começa em ${minutesUntil} minutos${event.location ? ` - ${event.location}` : ''}`,
+          body: `Começa em 30 minutos${event.location ? ` - ${event.location}` : ''}`,
           icon: '/icons/icon-192.png',
           badge: '/icons/icon-96.png',
-          tag: `event-${event.id}`,
+          tag: `event-30-${event.id}`,
           requireInteraction: true,
           vibrate: [200, 100, 200],
-          data: { url: '/calendar', eventId: event.id }
+          data: { url: '/dashboard/calendar', eventId: event.id }
         });
         
         eventsNotified.add(notificationKey30);
-        console.log(`[SW] ✅ Notificação enviada: ${event.title} (30min)`);
       }
       
-      // Notificar 5 minutos antes
-      if (!eventsNotified.has(notificationKey5) && minutesUntil <= 10 && minutesUntil > 1) {
-        console.log(`[SW] 📤 Enviando notificação: ${event.title} em ${minutesUntil}min`);
-        
-        await self.registration.showNotification(`⚠️ ${event.title}`, {
-          body: `Faltam apenas ${minutesUntil} minutos!${event.location ? ` - ${event.location}` : ''}`,
+      // Notificar no horário do evento (APENAS UMA VEZ)
+      if (!eventsNotified.has(notificationKeyNow) && minutesUntil >= -1 && minutesUntil <= 1) {
+        await self.registration.showNotification(`🚨 ${event.title} AGORA!`, {
+          body: `Seu evento está começando${event.location ? ` em ${event.location}` : ''}!`,
           icon: '/icons/icon-192.png',
           badge: '/icons/icon-96.png',
-          tag: `event-${event.id}-warning`,
-          requireInteraction: true,
-          vibrate: [200, 100, 200, 100, 200],
-          data: { url: '/calendar', eventId: event.id }
-        });
-        
-        eventsNotified.add(notificationKey5);
-        console.log(`[SW] ✅ Notificação enviada: ${event.title} (5min)`);
-      }
-      
-      // Notificar quando começar (0-1 minuto)
-      if (!eventsNotified.has(notificationKeyNow) && minutesUntil <= 1 && minutesUntil >= 0) {
-        console.log(`[SW] 📤 Enviando notificação: ${event.title} AGORA`);
-        
-        await self.registration.showNotification(`🚀 ${event.title}`, {
-          body: `Está começando AGORA!${event.location ? ` - ${event.location}` : ''}`,
-          icon: '/icons/icon-192.png',
-          badge: '/icons/icon-96.png',
-          tag: `event-${event.id}-start`,
+          tag: `event-now-${event.id}`,
           requireInteraction: true,
           vibrate: [300, 100, 300, 100, 300],
-          data: { url: '/calendar', eventId: event.id }
+          data: { url: '/dashboard/calendar', eventId: event.id }
         });
         
         eventsNotified.add(notificationKeyNow);
-        console.log(`[SW] ✅ Notificação enviada: ${event.title} (AGORA)`);
       }
     }
     

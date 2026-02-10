@@ -66,10 +66,16 @@ export default function Calendar() {
 
   // Função para obter eventos de uma data específica
   const getEventsForDate = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0];
+    // Usa data local para comparação (sem conversão UTC)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+    
     return events.filter(event => {
-      const eventDate = new Date(event.start_date).toISOString().split('T')[0];
-      return eventDate === dateStr;
+      // Extrai apenas a parte da data do evento (YYYY-MM-DD) do UTC
+      const eventDateStr = event.start_date.split('T')[0];
+      return eventDateStr === dateStr;
     });
   };
 
@@ -110,12 +116,24 @@ export default function Calendar() {
     }
 
     try {
+      // Criar data UTC sem conversão de timezone
+      // Se formData.start_date = "2026-02-09T14:30", queremos que salve exatamente isso em UTC
+      const startDate = formData.start_date.includes('T') 
+        ? formData.start_date + ':00.000Z'  // Adiciona segundos e marcador UTC
+        : formData.start_date + 'T12:00:00.000Z'; // Se for só data, usa meio-dia UTC
+      
+      const endDate = formData.end_date 
+        ? (formData.end_date.includes('T') 
+            ? formData.end_date + ':00.000Z' 
+            : formData.end_date + 'T13:00:00.000Z')
+        : undefined;
+
       const eventData = {
         title: formData.title,
         description: formData.description,
         event_type: formData.event_type,
-        start_date: new Date(formData.start_date).toISOString(),
-        end_date: formData.end_date ? new Date(formData.end_date).toISOString() : undefined,
+        start_date: startDate,
+        end_date: endDate,
         location: formData.location,
         opponent: formData.opponent,
         is_recurring: formData.is_recurring,

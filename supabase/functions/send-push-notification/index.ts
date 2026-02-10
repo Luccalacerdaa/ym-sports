@@ -107,21 +107,21 @@ serve(async (req) => {
         try {
           const subscription = JSON.parse(sub.subscription);
           await webpush.sendNotification(subscription, JSON.stringify(pushPayload));
-          console.log(`✅ Enviado para user_id: ${sub.user_id}`);
-          return { success: true, userId: sub.user_id };
+          console.log(`✅ Enviado para usuário`);
+          return { success: true };
         } catch (error) {
-          console.error(`❌ Erro ao enviar para user_id: ${sub.user_id}`, error);
+          console.error(`❌ Erro ao enviar notificação`, error);
           
           // Se a subscription expirou ou é inválida, remover do banco
           if (error.statusCode === 410 || error.statusCode === 404) {
-            console.log(`🗑️ Removendo subscription inválida: ${sub.user_id}`);
+            console.log(`🗑️ Removendo subscription inválida`);
             await supabase
               .from('push_subscriptions')
               .delete()
               .eq('id', sub.id);
           }
           
-          return { success: false, userId: sub.user_id, error: error.message };
+          return { success: false, error: error.message };
         }
       })
     );

@@ -169,14 +169,14 @@ export default async function handler(req, res) {
           })
         );
 
-        console.log(`   ✅ Enviado para: ${sub.user_id.substring(0, 20)}...`);
+        console.log(`✅ Enviado para user`);
         successCount++;
-        results.push({ user_id: sub.user_id, status: 'success' });
+        results.push({ status: 'success' });
 
       } catch (pushError) {
-        console.error(`   ❌ Erro para ${sub.user_id.substring(0, 20)}...:`, pushError.message);
+        console.error(`❌ Erro ao enviar notificação:`, pushError.message);
         failCount++;
-        results.push({ user_id: sub.user_id, status: 'failed', error: pushError.message });
+        results.push({ status: 'failed', error: pushError.message });
 
         // Se o erro for 410 Gone (subscription expirada), remover do banco
         if (pushError.statusCode === 410) {
