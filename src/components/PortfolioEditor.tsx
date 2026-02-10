@@ -46,7 +46,6 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
 
   const [socialMedia, setSocialMedia] = useState({
     instagram: portfolio.social_media?.instagram || '',
-    twitter: portfolio.social_media?.twitter || '',
     youtube: portfolio.social_media?.youtube || ''
   });
 
@@ -124,7 +123,6 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
           : [],
         social_media: {
           instagram: socialMedia.instagram?.trim() || null,
-          twitter: socialMedia.twitter?.trim() || null,
           youtube: socialMedia.youtube?.trim() || null
         },
         career_stats: {
@@ -474,75 +472,124 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
                     type="url"
                     value={basicInfo.highlight_video}
                     onChange={(e) => setBasicInfo(prev => ({ ...prev, highlight_video: e.target.value }))}
-                    placeholder="https://www.youtube.com/watch?v=..."
+                    placeholder="https://www.youtube.com/watch?v=... ou https://youtu.be/..."
                   />
                   <p className="text-xs text-muted-foreground mt-1">
                     Cole o link completo do seu vídeo no YouTube
                   </p>
                 </div>
                 
-                {basicInfo.highlight_video && (
-                  <div className="space-y-2">
-                    <div className="aspect-video w-full rounded border overflow-hidden">
-                      <iframe
-                        src={basicInfo.highlight_video.replace('watch?v=', 'embed/')}
-                        className="w-full h-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
+                {basicInfo.highlight_video && (() => {
+                  // Extrair ID do YouTube
+                  let videoId = '';
+                  try {
+                    const url = new URL(basicInfo.highlight_video);
+                    if (url.hostname.includes('youtube.com')) {
+                      videoId = url.searchParams.get('v') || '';
+                    } else if (url.hostname.includes('youtu.be')) {
+                      videoId = url.pathname.slice(1);
+                    }
+                  } catch (e) {
+                    // URL inválida
+                  }
+                  
+                  return videoId ? (
+                    <div className="space-y-2">
+                      <div className="aspect-video w-full rounded border overflow-hidden">
+                        <iframe
+                          src={`https://www.youtube.com/embed/${videoId}`}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setBasicInfo(prev => ({ ...prev, highlight_video: '' }))}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Remover Vídeo
+                      </Button>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setBasicInfo(prev => ({ ...prev, highlight_video: '' }))}
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Remover Vídeo
-                    </Button>
-                  </div>
-                )}
+                  ) : (
+                    <p className="text-xs text-red-500">Link inválido. Use um link do YouTube.</p>
+                  );
+                })()}
               </CardContent>
             </Card>
 
-            {/* Vídeos de Habilidades - YouTube */}
+            {/* Vídeos Melhores Momentos - YouTube */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Video className="h-5 w-5" />
-                  Vídeos de Habilidades (YouTube)
+                  Vídeos Melhores Momentos
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {basicInfo.skill_videos && basicInfo.skill_videos.length > 0 && (
                   <div className="space-y-3">
-                    {basicInfo.skill_videos.map((video, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <Input
-                          value={video}
-                          onChange={(e) => {
-                            const newVideos = [...(basicInfo.skill_videos || [])];
-                            newVideos[index] = e.target.value;
-                            setBasicInfo(prev => ({ ...prev, skill_videos: newVideos }));
-                          }}
-                          placeholder="https://www.youtube.com/watch?v=..."
-                        />
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            const newVideos = [...(basicInfo.skill_videos || [])];
-                            newVideos.splice(index, 1);
-                            setBasicInfo(prev => ({ ...prev, skill_videos: newVideos }));
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
+                    {basicInfo.skill_videos.map((video, index) => {
+                      // Extrair ID do YouTube para preview
+                      let videoId = '';
+                      try {
+                        const url = new URL(video);
+                        if (url.hostname.includes('youtube.com')) {
+                          videoId = url.searchParams.get('v') || '';
+                        } else if (url.hostname.includes('youtu.be')) {
+                          videoId = url.pathname.slice(1);
+                        }
+                      } catch (e) {
+                        // URL inválida
+                      }
+                      
+                      return (
+                        <div key={index} className="p-3 border rounded-lg space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Input
+                              value={video}
+                              onChange={(e) => {
+                                const newVideos = [...(basicInfo.skill_videos || [])];
+                                newVideos[index] = e.target.value;
+                                setBasicInfo(prev => ({ ...prev, skill_videos: newVideos }));
+                              }}
+                              placeholder="https://www.youtube.com/watch?v=... ou https://youtu.be/..."
+                            />
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                const newVideos = [...(basicInfo.skill_videos || [])];
+                                newVideos.splice(index, 1);
+                                setBasicInfo(prev => ({ ...prev, skill_videos: newVideos }));
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          
+                          {videoId && (
+                            <div className="aspect-video w-full rounded border overflow-hidden">
+                              <iframe
+                                src={`https://www.youtube.com/embed/${videoId}`}
+                                className="w-full h-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                              />
+                            </div>
+                          )}
+                          
+                          {video && !videoId && (
+                            <p className="text-xs text-red-500">Link inválido. Use um link do YouTube.</p>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
                 
-                {(!basicInfo.skill_videos || basicInfo.skill_videos.length < 4) && (
+                {(!basicInfo.skill_videos || basicInfo.skill_videos.length < 3) && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -559,7 +606,7 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
                 )}
                 
                 <p className="text-xs text-muted-foreground">
-                  Adicione até 4 links de vídeos do YouTube mostrando suas habilidades
+                  {(basicInfo.skill_videos || []).length}/3 vídeos • Adicione links de vídeos do YouTube mostrando seus melhores momentos
                 </p>
               </CardContent>
             </Card>
@@ -616,15 +663,6 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
                         id="instagram"
                         value={socialMedia.instagram}
                         onChange={(e) => setSocialMedia(prev => ({ ...prev, instagram: e.target.value }))}
-                        placeholder="seu_usuario"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="twitter">Twitter</Label>
-                      <Input
-                        id="twitter"
-                        value={socialMedia.twitter}
-                        onChange={(e) => setSocialMedia(prev => ({ ...prev, twitter: e.target.value }))}
                         placeholder="seu_usuario"
                       />
                     </div>
