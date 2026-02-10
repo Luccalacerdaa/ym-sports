@@ -175,6 +175,21 @@ export const useEvents = () => {
   // Carregar eventos quando o usuário mudar
   useEffect(() => {
     fetchEvents();
+    
+    // Configurar Service Worker com credenciais do Supabase
+    if (user && 'serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SET_SUPABASE_CONFIG',
+        supabaseUrl,
+        supabaseKey,
+        userId: user.id
+      });
+      
+      console.log('[useEvents] ⚙️ Configuração do Supabase enviada ao Service Worker');
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 

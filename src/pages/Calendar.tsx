@@ -66,15 +66,20 @@ export default function Calendar() {
 
   // Função para obter eventos de uma data específica
   const getEventsForDate = (date: Date) => {
-    // Usa data local para comparação (sem conversão UTC)
+    // Converter a data selecionada para string no formato YYYY-MM-DD
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const dateStr = `${year}-${month}-${day}`;
     
     return events.filter(event => {
-      // Extrai apenas a parte da data do evento (YYYY-MM-DD) do UTC
-      const eventDateStr = event.start_date.split('T')[0];
+      // Converter o timestamp UTC para data local
+      const eventDate = new Date(event.start_date);
+      const eventYear = eventDate.getFullYear();
+      const eventMonth = String(eventDate.getMonth() + 1).padStart(2, '0');
+      const eventDay = String(eventDate.getDate()).padStart(2, '0');
+      const eventDateStr = `${eventYear}-${eventMonth}-${eventDay}`;
+      
       return eventDateStr === dateStr;
     });
   };
@@ -116,16 +121,25 @@ export default function Calendar() {
     }
 
     try {
-      // Criar data UTC sem conversão de timezone
-      // Se formData.start_date = "2026-02-09T14:30", queremos que salve exatamente isso em UTC
-      const startDate = formData.start_date.includes('T') 
-        ? formData.start_date + ':00.000Z'  // Adiciona segundos e marcador UTC
-        : formData.start_date + 'T12:00:00.000Z'; // Se for só data, usa meio-dia UTC
+      // Converter datetime-local para ISO (UTC) corretamente
+      // Input do usuário vem em formato: "2026-02-09T21:30"
+      // Precisamos converter para UTC considerando o fuso horário local
+      
+      let startDate;
+      if (formData.start_date.includes('T')) {
+        // Criar Date a partir do input local e converter para ISO (UTC)
+        const localDate = new Date(formData.start_date);
+        startDate = localDate.toISOString();
+      } else {
+        // Se for só data, usar meio-dia local
+        const localDate = new Date(formData.start_date + 'T12:00');
+        startDate = localDate.toISOString();
+      }
       
       const endDate = formData.end_date 
         ? (formData.end_date.includes('T') 
-            ? formData.end_date + ':00.000Z' 
-            : formData.end_date + 'T13:00:00.000Z')
+            ? new Date(formData.end_date).toISOString()
+            : new Date(formData.end_date + 'T13:00').toISOString())
         : undefined;
 
       const eventData = {
