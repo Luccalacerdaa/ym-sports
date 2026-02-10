@@ -195,8 +195,20 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
 
   const handleCropComplete = async (croppedImageUrl: string) => {
     try {
+      setLoading(true);
+      
+      // Validar que recebemos uma URL válida
+      if (!croppedImageUrl || !croppedImageUrl.startsWith('data:image')) {
+        throw new Error("Imagem inválida recebida do cropper");
+      }
+      
       // Converter a URL de dados para um Blob
       const blob = dataURLtoBlob(croppedImageUrl);
+      
+      // Validar tamanho (máximo 5MB)
+      if (blob.size > 5 * 1024 * 1024) {
+        throw new Error("Imagem muito grande. Máximo 5MB.");
+      }
       
       // Criar um arquivo a partir do Blob
       const file = new File([blob], "portfolio-profile.jpg", { type: "image/jpeg" });
@@ -208,10 +220,11 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
         setBasicInfo(prev => ({ ...prev, profile_photo: photoUrl }));
         toast.success("Foto de perfil atualizada!");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao processar imagem:", error);
-      toast.error("Erro ao processar imagem");
+      toast.error(error.message || "Erro ao processar imagem");
     } finally {
+      setLoading(false);
       if (selectedImage) {
         URL.revokeObjectURL(selectedImage);
       }

@@ -87,39 +87,50 @@ export default async function handler(req, res) {
       // Determinar se deve notificar e qual mensagem
       let emoji = '';
       let message = '';
-      let notificationTag = '';  // Tag única para cada tipo de notificação
+      let notificationTag = '';
       
-      // AGORA ou evento recente (já começou há até 2 minutos)
-      if (minutesUntil <= 2 && minutesUntil >= -2) {
+      // Determinar o tipo de notificação baseado em RANGES (para evitar duplicatas)
+      // 30min = 25-35 min | 15min = 12-18 min | 5min = 3-7 min | now = -1 a 2 min
+      
+      if (minutesUntil >= -1 && minutesUntil <= 2) {
         emoji = '🚀';
         message = `Está começando AGORA!${event.location ? ` - ${event.location}` : ''}`;
         notificationTag = 'now';
         console.log(`   🎯 Tipo: AGORA (${minutesUntil}min)`);
       } 
-      // 3-5 minutos antes
-      else if (minutesUntil <= 5) {
+      else if (minutesUntil >= 3 && minutesUntil <= 7) {
         emoji = '🚨';
-        message = `Faltam apenas ${minutesUntil} minutos!${event.location ? ` - ${event.location}` : ''}`;
+        message = `Faltam apenas 5 minutos!${event.location ? ` - ${event.location}` : ''}`;
         notificationTag = '5min';
         console.log(`   ⚠️ Tipo: 5 MINUTOS (${minutesUntil}min)`);
       } 
-      // 6-15 minutos antes
-      else if (minutesUntil <= 15) {
+      else if (minutesUntil >= 12 && minutesUntil <= 18) {
         emoji = '⚠️';
-        message = `Começa em ${minutesUntil} minutos${event.location ? ` - ${event.location}` : ''}`;
+        message = `Começa em 15 minutos${event.location ? ` - ${event.location}` : ''}`;
         notificationTag = '15min';
         console.log(`   📢 Tipo: 15 MINUTOS (${minutesUntil}min)`);
       } 
-      // 16-30 minutos antes
-      else if (minutesUntil <= 30) {
+      else if (minutesUntil >= 25 && minutesUntil <= 35) {
         emoji = '📅';
-        message = `Começa em ${minutesUntil} minutos${event.location ? ` - ${event.location}` : ''}`;
+        message = `Começa em 30 minutos${event.location ? ` - ${event.location}` : ''}`;
         notificationTag = '30min';
         console.log(`   📆 Tipo: 30 MINUTOS (${minutesUntil}min)`);
       } 
-      // Evento muito distante ou muito antigo
       else {
-        console.log(`   ⏭️ Evento fora do intervalo (${minutesUntil}min), pulando...`);
+        console.log(`   ⏭️ Fora do intervalo de notificação (${minutesUntil}min), pulando...`);
+        continue;
+      }
+
+      // Verificar se já enviamos essa notificação
+      const { data: alreadySent } = await supabase
+        .from('event_notifications_sent')
+        .select('id')
+        .eq('event_id', event.id)
+        .eq('notification_type', notificationTag)
+        .single();
+
+      if (alreadySent) {
+        console.log(`   ⏭️ Notificação ${notificationTag} já enviada, pulando...`);
         continue;
       }
 
@@ -127,7 +138,6 @@ export default async function handler(req, res) {
       try {
         console.log(`   📤 Enviando notificação: ${emoji} ${event.title}`);
         
-        // SEMPRE usar o domínio principal (deployment previews não têm /api/notify)
         const baseUrl = 'https://ym-sports.vercel.app';
         
         const notifyResponse = await fetch(`${baseUrl}/api/notify`, {
@@ -145,10 +155,21 @@ export default async function handler(req, res) {
         
         if (notifyResponse.ok) {
           console.log(`   ✅ Notificação enviada! Dispositivos: ${notifyResult.sent || 0}`);
+          
+          // Registrar no cache para evitar duplicatas
+          await supabase
+            .from('event_notifications_sent')
+            .insert({
+              event_id: event.id,
+              user_id: event.user_id,
+              notification_type: notificationTag
+            });
+          
           notifications.push({
             event_id: event.id,
             title: event.title,
             minutes_until: minutesUntil,
+            type: notificationTag,
             status: 'sent',
             devices_notified: notifyResult.sent || 0
           });
@@ -158,6 +179,7 @@ export default async function handler(req, res) {
             event_id: event.id,
             title: event.title,
             minutes_until: minutesUntil,
+            type: notificationTag,
             status: 'failed',
             error: notifyResult.error
           });
@@ -168,6 +190,7 @@ export default async function handler(req, res) {
           event_id: event.id,
           title: event.title,
           minutes_until: minutesUntil,
+          type: notificationTag,
           status: 'error',
           error: error.message
         });
