@@ -555,69 +555,6 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
               </CardContent>
             </Card>
 
-            {/* Vídeo de Destaque - YouTube */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Video className="h-5 w-5" />
-                  Vídeo de Destaque (YouTube)
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="highlight_video">Link do vídeo no YouTube</Label>
-                  <Input
-                    id="highlight_video"
-                    type="url"
-                    value={basicInfo.highlight_video}
-                    onChange={(e) => setBasicInfo(prev => ({ ...prev, highlight_video: e.target.value }))}
-                    placeholder="https://www.youtube.com/watch?v=... ou https://youtu.be/..."
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Cole o link completo do seu vídeo no YouTube
-                  </p>
-                </div>
-                
-                {basicInfo.highlight_video && (() => {
-                  // Extrair ID do YouTube
-                  let videoId = '';
-                  try {
-                    const url = new URL(basicInfo.highlight_video);
-                    if (url.hostname.includes('youtube.com')) {
-                      videoId = url.searchParams.get('v') || '';
-                    } else if (url.hostname.includes('youtu.be')) {
-                      videoId = url.pathname.slice(1);
-                    }
-                  } catch (e) {
-                    // URL inválida
-                  }
-                  
-                  return videoId ? (
-                    <div className="space-y-2">
-                      <div className="aspect-video w-full rounded border overflow-hidden">
-                        <iframe
-                          src={`https://www.youtube.com/embed/${videoId}`}
-                          className="w-full h-full"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
-                      </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setBasicInfo(prev => ({ ...prev, highlight_video: '' }))}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Remover Vídeo
-                      </Button>
-                    </div>
-                  ) : (
-                    <p className="text-xs text-red-500">Link inválido. Use um link do YouTube.</p>
-                  );
-                })()}
-              </CardContent>
-            </Card>
-
             {/* Vídeos Melhores Momentos - YouTube */}
             <Card>
               <CardHeader>
@@ -707,20 +644,6 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
                 <p className="text-xs text-muted-foreground">
                   {(basicInfo.skill_videos || []).length}/3 vídeos • Adicione links de vídeos do YouTube mostrando seus melhores momentos
                 </p>
-              </CardContent>
-            </Card>
-
-            {/* Informações sobre Upload */}
-            <Card className="bg-blue-50 border-blue-200">
-              <CardContent className="p-4">
-                <h4 className="font-medium text-blue-800 mb-2">📤 Sistema de Upload</h4>
-                <ul className="text-sm text-blue-700 space-y-1">
-                  <li>• <strong>Fotos:</strong> Compressão automática, máximo 10MB</li>
-                  <li>• <strong>Vídeos:</strong> Máximo 100MB, formato MP4 recomendado</li>
-                  <li>• <strong>Armazenamento:</strong> Seguro no Supabase Storage</li>
-                  <li>• <strong>URLs:</strong> Geradas automaticamente após upload</li>
-                  <li>• <strong>Acesso:</strong> Público para visualização no portfólio</li>
-                </ul>
               </CardContent>
             </Card>
           </TabsContent>

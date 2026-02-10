@@ -1,7 +1,7 @@
 // Service Worker Completo para YM Sports
 // Notificações + Cache Offline
 
-const SW_VERSION = '19.0.0';
+const SW_VERSION = '20.0.0';
 const CACHE_NAME = `ym-sports-v${SW_VERSION}`;
 const RUNTIME_CACHE = `runtime-${SW_VERSION}`;
 
@@ -288,15 +288,10 @@ self.addEventListener('message', (event) => {
   }
   
   if (event.data.type === 'SET_SUPABASE_CONFIG') {
-    console.log('[SW] ⚙️ Configurando Supabase');
     supabaseUrl = event.data.supabaseUrl;
     supabaseKey = event.data.supabaseKey;
     userId = event.data.userId;
-    console.log('[SW] ✅ Supabase configurado!', { 
-      url: supabaseUrl ? '✓' : '✗', 
-      key: supabaseKey ? '✓' : '✗', 
-      userId: userId ? '✓' : '✗' 
-    });
+    console.log('[SW] ✅ Supabase configurado!');
     // Verificar eventos imediatamente após configurar
     checkUpcomingEvents();
   }

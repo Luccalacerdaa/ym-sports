@@ -311,47 +311,42 @@ export default function PublicPortfolio() {
 
             {/* Galeria de Fotos e Vídeos */}
             {((portfolio.gallery_photos && portfolio.gallery_photos.length > 0) || 
-              (portfolio.skill_videos && portfolio.skill_videos.length > 0) || 
-              portfolio.highlight_video) && (
+              (portfolio.skill_videos && portfolio.skill_videos.length > 0)) && (
               <Card className="shadow-lg border border-yellow-500/20 bg-gray-900/80 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="text-yellow-500">Galeria</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {/* Vídeo de Destaque */}
-                  {portfolio.highlight_video && (
-                    <div className="mb-6">
-                      <h4 className="text-yellow-500 font-medium mb-3">Vídeo de Destaque</h4>
-                      <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden">
-                        <video 
-                          controls 
-                          className="w-full h-full object-cover"
-                          poster="/icons/logo.png"
-                        >
-                          <source src={portfolio.highlight_video} type="video/mp4" />
-                          Seu navegador não suporta vídeos.
-                        </video>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Vídeos de Habilidades */}
+                  {/* Vídeos Melhores Momentos */}
                   {portfolio.skill_videos && portfolio.skill_videos.length > 0 && (
                     <div className="mb-6">
-                      <h4 className="text-yellow-500 font-medium mb-3">Vídeos de Habilidades</h4>
+                      <h4 className="text-yellow-500 font-medium mb-3">Vídeos Melhores Momentos</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {portfolio.skill_videos.slice(0, 4).map((video, index) => (
-                          <div key={index} className="aspect-video bg-gray-800 rounded-lg overflow-hidden">
-                            <video 
-                              controls 
-                              className="w-full h-full object-cover"
-                              poster="/icons/logo.png"
-                            >
-                              <source src={video} type="video/mp4" />
-                              Seu navegador não suporta vídeos.
-                            </video>
-                          </div>
-                        ))}
+                        {portfolio.skill_videos.slice(0, 3).map((video, index) => {
+                          // Extrair ID do YouTube
+                          let videoId = '';
+                          try {
+                            const url = new URL(video);
+                            if (url.hostname.includes('youtube.com')) {
+                              videoId = url.searchParams.get('v') || '';
+                            } else if (url.hostname.includes('youtu.be')) {
+                              videoId = url.pathname.slice(1);
+                            }
+                          } catch (e) {
+                            // URL inválida
+                          }
+
+                          return videoId ? (
+                            <div key={index} className="aspect-video bg-gray-800 rounded-lg overflow-hidden">
+                              <iframe
+                                src={`https://www.youtube.com/embed/${videoId}`}
+                                className="w-full h-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                              />
+                            </div>
+                          ) : null;
+                        })}
                       </div>
                     </div>
                   )}
