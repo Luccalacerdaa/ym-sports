@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS event_notifications_sent (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  notification_type TEXT NOT NULL, -- '30min', '15min', '5min', 'now'
+  notification_type TEXT NOT NULL, -- '30min' ou 'now'
   sent_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   
   -- Índices para performance
@@ -51,4 +51,4 @@ END;
 $$;
 
 COMMENT ON TABLE event_notifications_sent IS 'Rastreia notificações de eventos enviadas para evitar duplicatas';
-COMMENT ON COLUMN event_notifications_sent.notification_type IS 'Tipo: 30min, 15min, 5min, now';
+COMMENT ON COLUMN event_notifications_sent.notification_type IS 'Tipo: 30min (30 minutos antes) ou now (na hora do evento)';

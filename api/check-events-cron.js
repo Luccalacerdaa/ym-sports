@@ -89,26 +89,15 @@ export default async function handler(req, res) {
       let message = '';
       let notificationTag = '';
       
-      // Determinar o tipo de notificação baseado em RANGES (para evitar duplicatas)
-      // 30min = 25-35 min | 15min = 12-18 min | 5min = 3-7 min | now = -1 a 2 min
+      // APENAS 2 NOTIFICAÇÕES:
+      // 1) 30 minutos antes (range: 25-35 min)
+      // 2) Na hora do evento (range: -1 a 2 min)
       
       if (minutesUntil >= -1 && minutesUntil <= 2) {
         emoji = '🚀';
         message = `Está começando AGORA!${event.location ? ` - ${event.location}` : ''}`;
         notificationTag = 'now';
         console.log(`   🎯 Tipo: AGORA (${minutesUntil}min)`);
-      } 
-      else if (minutesUntil >= 3 && minutesUntil <= 7) {
-        emoji = '🚨';
-        message = `Faltam apenas 5 minutos!${event.location ? ` - ${event.location}` : ''}`;
-        notificationTag = '5min';
-        console.log(`   ⚠️ Tipo: 5 MINUTOS (${minutesUntil}min)`);
-      } 
-      else if (minutesUntil >= 12 && minutesUntil <= 18) {
-        emoji = '⚠️';
-        message = `Começa em 15 minutos${event.location ? ` - ${event.location}` : ''}`;
-        notificationTag = '15min';
-        console.log(`   📢 Tipo: 15 MINUTOS (${minutesUntil}min)`);
       } 
       else if (minutesUntil >= 25 && minutesUntil <= 35) {
         emoji = '📅';
