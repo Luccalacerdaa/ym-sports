@@ -27,6 +27,10 @@ CREATE INDEX IF NOT EXISTS idx_event_notifications_sent_at
 -- RLS (Row Level Security)
 ALTER TABLE event_notifications_sent ENABLE ROW LEVEL SECURITY;
 
+-- Remover policies antigas se existirem
+DROP POLICY IF EXISTS "Users can view own notification history" ON event_notifications_sent;
+DROP POLICY IF EXISTS "Service can insert notifications" ON event_notifications_sent;
+
 -- Política: usuários podem ver suas próprias notificações
 CREATE POLICY "Users can view own notification history"
   ON event_notifications_sent
