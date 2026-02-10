@@ -13,6 +13,8 @@ import { usePortfolio } from "@/hooks/usePortfolio";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, Upload, Image, Video, X } from "lucide-react";
 import FileUpload from "@/components/FileUpload";
+import { ImageCropper } from "@/components/ImageCropper";
+import { supabase } from "@/lib/supabase";
 
 interface PortfolioEditorProps {
   portfolio: PlayerPortfolio;
@@ -23,6 +25,8 @@ interface PortfolioEditorProps {
 export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorProps) {
   const { updatePortfolio, addClubHistory, updateClubHistory, removeClubHistory } = usePortfolio();
   const [loading, setLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
   
   // Estados para os dados do portfólio
   const [basicInfo, setBasicInfo] = useState({
@@ -64,8 +68,6 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
   });
 
   const [settings, setSettings] = useState({
-    is_public: portfolio.is_public,
-    is_seeking_club: portfolio.is_seeking_club,
     salary_expectation: portfolio.salary_expectation || ''
   });
 
@@ -137,8 +139,8 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
           championships: Array.isArray(achievements.championships) ? achievements.championships : [],
           individual_awards: Array.isArray(achievements.individual_awards) ? achievements.individual_awards : []
         },
-        is_public: Boolean(settings.is_public),
-        is_seeking_club: Boolean(settings.is_seeking_club),
+        is_public: true, // Sempre público
+        is_seeking_club: true, // Sempre procurando clube
         salary_expectation: settings.salary_expectation?.trim() || null
       };
       
@@ -181,6 +183,80 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
     }
   };
 
+  // Função para processar imagem com crop
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setSelectedImage(imageUrl);
+      setIsCropperOpen(true);
+    }
+  };
+
+  const handleCropComplete = async (croppedImageUrl: string) => {
+    try {
+      // Converter a URL de dados para um Blob
+      const blob = dataURLtoBlob(croppedImageUrl);
+      
+      // Criar um arquivo a partir do Blob
+      const file = new File([blob], "portfolio-profile.jpg", { type: "image/jpeg" });
+      
+      // Upload para Supabase Storage
+      const photoUrl = await uploadProfilePhoto(file);
+      
+      if (photoUrl) {
+        setBasicInfo(prev => ({ ...prev, profile_photo: photoUrl }));
+        toast.success("Foto de perfil atualizada!");
+      }
+    } catch (error) {
+      console.error("Erro ao processar imagem:", error);
+      toast.error("Erro ao processar imagem");
+    } finally {
+      if (selectedImage) {
+        URL.revokeObjectURL(selectedImage);
+      }
+      setSelectedImage(null);
+      setIsCropperOpen(false);
+    }
+  };
+
+  // Função auxiliar para converter URL de dados para Blob
+  const dataURLtoBlob = (dataURL: string): Blob => {
+    const arr = dataURL.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    
+    return new Blob([u8arr], { type: mime });
+  };
+
+  // Upload da foto de perfil
+  const uploadProfilePhoto = async (file: File): Promise<string> => {
+    const user = (await supabase.auth.getUser()).data.user;
+    if (!user) throw new Error("Usuário não autenticado");
+
+    const fileExt = 'jpg';
+    const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+    const filePath = `profile/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('portfolio-photos')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from('portfolio-photos')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
+
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -199,12 +275,42 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
           <Tabs defaultValue="basic" className="w-full">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1 h-auto">
-            <TabsTrigger value="basic" className="text-xs sm:text-sm py-2">Básico</TabsTrigger>
-            <TabsTrigger value="contact" className="text-xs sm:text-sm py-2">Contato</TabsTrigger>
-            <TabsTrigger value="media" className="text-xs sm:text-sm py-2">Mídia</TabsTrigger>
-            <TabsTrigger value="stats" className="text-xs sm:text-sm py-2">Estatísticas</TabsTrigger>
-            <TabsTrigger value="achievements" className="text-xs sm:text-sm py-2">Conquistas</TabsTrigger>
-            <TabsTrigger value="clubs" className="text-xs sm:text-sm py-2">Clubes</TabsTrigger>
+            <TabsTrigger 
+              value="basic" 
+              className="text-xs sm:text-sm py-2 data-[state=active]:bg-yellow-500 data-[state=active]:text-black"
+            >
+              Básico
+            </TabsTrigger>
+            <TabsTrigger 
+              value="contact" 
+              className="text-xs sm:text-sm py-2 data-[state=active]:bg-yellow-500 data-[state=active]:text-black"
+            >
+              Contato
+            </TabsTrigger>
+            <TabsTrigger 
+              value="media" 
+              className="text-xs sm:text-sm py-2 data-[state=active]:bg-yellow-500 data-[state=active]:text-black"
+            >
+              Mídia
+            </TabsTrigger>
+            <TabsTrigger 
+              value="stats" 
+              className="text-xs sm:text-sm py-2 data-[state=active]:bg-yellow-500 data-[state=active]:text-black"
+            >
+              Estatísticas
+            </TabsTrigger>
+            <TabsTrigger 
+              value="achievements" 
+              className="text-xs sm:text-sm py-2 data-[state=active]:bg-yellow-500 data-[state=active]:text-black"
+            >
+              Conquistas
+            </TabsTrigger>
+            <TabsTrigger 
+              value="clubs" 
+              className="text-xs sm:text-sm py-2 data-[state=active]:bg-yellow-500 data-[state=active]:text-black"
+            >
+              Clubes
+            </TabsTrigger>
           </TabsList>
 
           {/* Informações Básicas */}
@@ -331,32 +437,13 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
                     rows={4}
                   />
                 </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="is_public"
-                      checked={settings.is_public}
-                      onCheckedChange={(checked) => setSettings(prev => ({ ...prev, is_public: !!checked }))}
-                    />
-                    <Label htmlFor="is_public">Portfólio público (visível para todos)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="is_seeking_club"
-                      checked={settings.is_seeking_club}
-                      onCheckedChange={(checked) => setSettings(prev => ({ ...prev, is_seeking_club: !!checked }))}
-                    />
-                    <Label htmlFor="is_seeking_club">Procurando clube</Label>
-                  </div>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Mídia - Fotos e Vídeos */}
           <TabsContent value="media" className="space-y-4">
-            {/* Foto de Perfil */}
+            {/* Foto de Perfil com Crop */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -383,18 +470,17 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
                   </div>
                 )}
                 
-                <FileUpload
-                  accept="images"
-                  multiple={false}
-                  maxFiles={1}
-                  bucket="portfolio-photos"
-                  folder="profile"
-                  onUploadComplete={(urls) => {
-                    if (urls[0]) {
-                      setBasicInfo(prev => ({ ...prev, profile_photo: urls[0] }));
-                    }
-                  }}
-                />
+                <div>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Clique para selecionar uma foto. Você poderá ajustar, dar zoom e recortar.
+                  </p>
+                </div>
               </CardContent>
             </Card>
 
@@ -1293,6 +1379,20 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
             {loading ? 'Salvando...' : 'Salvar'}
           </Button>
         </div>
+
+        {/* Image Cropper Modal */}
+        {selectedImage && (
+          <ImageCropper
+            open={isCropperOpen}
+            onClose={() => {
+              setIsCropperOpen(false);
+              if (selectedImage) URL.revokeObjectURL(selectedImage);
+              setSelectedImage(null);
+            }}
+            onCropComplete={handleCropComplete}
+            imageSrc={selectedImage}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
