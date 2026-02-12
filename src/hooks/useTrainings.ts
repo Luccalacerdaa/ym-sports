@@ -85,16 +85,29 @@ export const useTrainings = () => {
   // Criar novo treino
   const createTraining = async (trainingData: Omit<Training, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
     if (!user) {
-      throw new Error('Usuário não autenticado');
+      const error = new Error('Usuário não autenticado');
+      console.error('❌ createTraining: Usuário não autenticado');
+      throw error;
     }
 
     try {
       setError(null);
 
-      console.log('Criando treino:', { user_id: user.id, ...trainingData });
+      console.log('📝 createTraining: Iniciando criação de treino');
+      console.log('📅 Dia:', trainingData.day_of_week);
+      console.log('🏋️ Exercícios:', trainingData.exercises?.length || 0);
+
+      // Validar dados obrigatórios
+      if (!trainingData.day_of_week) {
+        throw new Error('day_of_week é obrigatório');
+      }
+      
+      if (!trainingData.exercises || trainingData.exercises.length === 0) {
+        throw new Error('Treino deve ter pelo menos 1 exercício');
+      }
 
       // Remover campos vazios e garantir tipos corretos
-      const { user_id: _, id: __, created_at: ___, updated_at: ____, ...cleanTrainingData } = trainingData;
+      const { user_id: _, id: __, created_at: ___, updated_at: ____, ...cleanTrainingData } = trainingData as any;
       
       const trainingToInsert = {
         user_id: user.id,
@@ -103,7 +116,12 @@ export const useTrainings = () => {
         exercises: Array.isArray(trainingData.exercises) ? trainingData.exercises : []
       };
 
-      console.log('Dados para inserção:', trainingToInsert);
+      console.log('💾 Dados para inserção no Supabase:', {
+        user_id: trainingToInsert.user_id,
+        day_of_week: trainingToInsert.day_of_week,
+        title: trainingToInsert.title,
+        exercises_count: trainingToInsert.exercises.length
+      });
 
       const { data, error: createError } = await supabase
         .from('trainings')
@@ -112,21 +130,34 @@ export const useTrainings = () => {
         .single();
 
       if (createError) {
-        console.error('Erro ao criar treino:', createError);
-      } else {
-        console.log('Treino criado com sucesso:', data);
-      }
-
-      if (createError) {
+        console.error('❌ Erro do Supabase ao criar treino:', {
+          code: createError.code,
+          message: createError.message,
+          details: createError.details,
+          hint: createError.hint
+        });
         throw createError;
       }
+
+      if (!data) {
+        console.error('❌ Supabase não retornou dados após inserção');
+        throw new Error('Treino não foi criado (sem dados retornados)');
+      }
+
+      console.log('✅ Treino criado com sucesso:', {
+        id: data.id,
+        day_of_week: data.day_of_week,
+        title: data.title
+      });
 
       setTrainings(prev => [...prev, data]);
       return { data, error: null };
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao criar treino';
+      console.error('❌ createTraining: Erro capturado:', errorMessage);
+      console.error('Detalhes do erro:', err);
       setError(errorMessage);
-      return { data: null, error: err };
+      throw err; // Re-throw para Promise.allSettled capturar
     }
   };
 
@@ -168,11 +199,28 @@ export const useTrainings = () => {
   // Deletar treino
   const deleteTraining = async (trainingId: string) => {
     if (!user) {
-      throw new Error('Usuário não autenticado');
+      const error = new Error('Usuário não autenticado');
+      console.error('❌ deleteTraining: Usuário não autenticado');
+      throw error;
+    }
+
+    if (!trainingId) {
+      const error = new Error('ID do treino é obrigatório');
+      console.error('❌ deleteTraining: ID não fornecido');
+      throw error;
     }
 
     try {
       setError(null);
+      
+      // Buscar informações do treino antes de deletar (para log)
+      const trainingToDelete = trainings.find(t => t.id === trainingId);
+      
+      console.log('🗑️ deleteTraining: Deletando treino', {
+        id: trainingId,
+        day: trainingToDelete?.day_of_week,
+        title: trainingToDelete?.title
+      });
 
       const { error: deleteError } = await supabase
         .from('trainings')
@@ -181,15 +229,23 @@ export const useTrainings = () => {
         .eq('user_id', user.id);
 
       if (deleteError) {
+        console.error('❌ Erro do Supabase ao deletar treino:', {
+          code: deleteError.code,
+          message: deleteError.message,
+          details: deleteError.details
+        });
         throw deleteError;
       }
+
+      console.log('✅ Treino deletado com sucesso:', trainingId);
 
       setTrainings(prev => prev.filter(training => training.id !== trainingId));
       return { error: null };
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao deletar treino';
+      console.error('❌ deleteTraining: Erro capturado:', errorMessage);
       setError(errorMessage);
-      return { error: err };
+      throw err; // Re-throw para Promise.allSettled capturar
     }
   };
 

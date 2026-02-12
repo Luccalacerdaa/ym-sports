@@ -107,32 +107,113 @@ export default function Training() {
       return;
     }
 
+    const toastId = toast.loading("Gerando treinos personalizados...");
+
     try {
-      // Deletar treinos existentes nos dias selecionados
-      for (const day of aiRequest.availableDays) {
-        const existingTraining = trainings.find(t => t.day_of_week === day);
-        if (existingTraining) {
-          await deleteTraining(existingTraining.id);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('🏋️ INICIANDO GERAÇÃO DE TREINOS');
+      console.log('📅 Dias selecionados:', aiRequest.availableDays);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      
+      // ETAPA 1: Deletar treinos existentes (Promise.all para paralelizar)
+      const existingTrainings = aiRequest.availableDays
+        .map(day => trainings.find(t => t.day_of_week === day))
+        .filter(t => t !== undefined);
+      
+      if (existingTrainings.length > 0) {
+        console.log('🗑️ Deletando treinos existentes:', existingTrainings.map(t => t.day_of_week));
+        toast.loading('Removendo treinos antigos...', { id: toastId });
+        
+        const deleteResults = await Promise.allSettled(
+          existingTrainings.map(training => deleteTraining(training.id))
+        );
+        
+        // Verificar se houve erros ao deletar
+        const deleteFailed = deleteResults.filter(r => r.status === 'rejected');
+        if (deleteFailed.length > 0) {
+          console.error('❌ Erro ao deletar alguns treinos:', deleteFailed);
+          toast.error('Erro ao remover treinos antigos', { id: toastId });
+          return;
         }
+        
+        console.log('✅ Treinos antigos removidos com sucesso');
       }
       
-      if (aiRequest.availableDays.length > 1) {
-        toast.info('Treinos anteriores removidos');
-      }
+      // Aguardar um momento para o banco processar as deleções
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Gerar novos treinos
+      // ETAPA 2: Gerar novos treinos com IA
+      console.log('🤖 Gerando treinos com IA...');
+      toast.loading('Criando treinos personalizados...', { id: toastId });
+      
       const generatedTrainings = await generateTrainingPlan(aiRequest);
       
-      // Criar os novos treinos
-      for (const training of generatedTrainings) {
-        await createTraining(training);
+      if (!generatedTrainings || generatedTrainings.length === 0) {
+        console.error('❌ IA não retornou treinos');
+        toast.error('Erro: nenhum treino foi gerado', { id: toastId });
+        return;
+      }
+      
+      console.log(`✅ IA gerou ${generatedTrainings.length} treino(s)`);
+      console.log('📋 Treinos gerados:', generatedTrainings.map(t => `${t.day_of_week} (${t.exercises.length} exercícios)`));
+      
+      // Verificar se a IA gerou treinos para TODOS os dias solicitados
+      const generatedDays = generatedTrainings.map(t => t.day_of_week);
+      const missingDays = aiRequest.availableDays.filter(day => !generatedDays.includes(day));
+      
+      if (missingDays.length > 0) {
+        console.warn('⚠️ IA não gerou treinos para:', missingDays);
+        toast.error(`IA não gerou treinos para: ${missingDays.map(getDayLabel).join(', ')}`, { id: toastId });
+        return;
+      }
+      
+      // ETAPA 3: Criar os novos treinos no banco (Promise.allSettled para detectar falhas)
+      console.log('💾 Salvando treinos no banco...');
+      toast.loading('Salvando treinos...', { id: toastId });
+      
+      const createResults = await Promise.allSettled(
+        generatedTrainings.map(training => {
+          console.log(`📝 Criando treino para ${training.day_of_week}:`, {
+            title: training.title,
+            exercises: training.exercises.length,
+            duration: training.duration_minutes
+          });
+          return createTraining(training);
+        })
+      );
+      
+      // Verificar resultados individuais
+      const createSuccesses = createResults.filter(r => r.status === 'fulfilled');
+      const createFailures = createResults.filter(r => r.status === 'rejected');
+      
+      console.log(`✅ ${createSuccesses.length} treino(s) criado(s) com sucesso`);
+      
+      if (createFailures.length > 0) {
+        console.error('❌ Erro ao criar alguns treinos:');
+        createFailures.forEach((failure, index) => {
+          if (failure.status === 'rejected') {
+            console.error(`  - Treino ${index + 1}:`, failure.reason);
+          }
+        });
+        
+        toast.error(`Apenas ${createSuccesses.length} de ${generatedTrainings.length} treinos foram criados`, { id: toastId });
       }
 
-      // Recarregar treinos após criação
+      // ETAPA 4: Recarregar treinos do banco
+      console.log('🔄 Recarregando treinos...');
       await fetchTrainings();
 
       const dayLabels = aiRequest.availableDays.map(getDayLabel).join(' e ');
-      toast.success(`Treino${aiRequest.availableDays.length > 1 ? 's' : ''} para ${dayLabels} criado${aiRequest.availableDays.length > 1 ? 's' : ''} com sucesso!`);
+      
+      if (createFailures.length === 0) {
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('✅ TODOS OS TREINOS CRIADOS COM SUCESSO!');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        toast.success(`Treino${aiRequest.availableDays.length > 1 ? 's' : ''} para ${dayLabels} criado${aiRequest.availableDays.length > 1 ? 's' : ''} com sucesso!`, { id: toastId });
+      } else {
+        toast.warning(`Alguns treinos não foram criados. Tente novamente.`, { id: toastId });
+      }
+      
       setIsGenerateDialogOpen(false);
       
       // Reset form
@@ -145,8 +226,12 @@ export default function Training() {
         equipment: [],
         focus: [],
       });
-    } catch (error) {
-      toast.error("Erro ao gerar treino");
+    } catch (error: any) {
+      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.error('❌ ERRO CRÍTICO AO GERAR TREINOS');
+      console.error('Erro:', error);
+      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      toast.error(error.message || "Erro ao gerar treino. Tente novamente.", { id: toastId });
     }
   };
 

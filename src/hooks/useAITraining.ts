@@ -128,14 +128,26 @@ LIMITAÇÕES CRÍTICAS:
 - Use vídeos apenas para exercícios complexos
 - Foque na qualidade e variedade dos exercícios
 
+⚠️ DIAS ESPECÍFICOS SOLICITADOS:
+Gere treinos APENAS para os seguintes dias: ${request.availableDays.join(', ')}
+Cada dia deve ter um treino ÚNICO e COMPLETO.
+NÃO gere treinos para outros dias além destes.
+
 FORMATO DE RESPOSTA (JSON):
 {
   "weeklyPlan": {
-    "monday": {
+    ${request.availableDays.map(day => `"${day}": { ... }`).join(',\n    ')}
+  }
+}
+
+EXEMPLO COMPLETO DO FORMATO:
+{
+  "weeklyPlan": {
+    "${request.availableDays[0] || 'monday'}": {
       "title": "Nome específico do treino",
       "description": "Descrição detalhada do treino",
-      "duration_minutes": 60,
-      "difficulty_level": "intermediate",
+      "duration_minutes": ${request.sessionDuration},
+      "difficulty_level": "${request.difficulty}",
       "muscle_groups": ["legs", "core"],
       "training_rationale": "Explicação detalhada do por que este treino específico é ideal para este atleta baseado na idade, altura, peso e posição",
       "performance_benefits": "Como este treino específico vai melhorar a performance do atleta no futebol",
@@ -154,7 +166,7 @@ FORMATO DE RESPOSTA (JSON):
           "image_url": "https://example.com/exercise-image.jpg"
         }
       ]
-    }
+    }${request.availableDays.length > 1 ? `,\n    "${request.availableDays[1]}": { ... }` : ''}
   }
 }
 
