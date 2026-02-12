@@ -7,11 +7,72 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
+// Planos padrão (fallback caso o banco ainda não esteja configurado)
+const DEFAULT_PLANS = [
+  {
+    id: 'mensal',
+    name: 'Mensal',
+    description: 'Acesso completo por 30 dias',
+    price_brl: 39.90,
+    duration_days: 30,
+    hotmart_product_id: 'PENDING',
+    hotmart_offer_code: '',
+    features: [
+      'Treinos personalizados',
+      'Planos nutricionais',
+      'Ranking nacional',
+      'Portfólio profissional',
+      'Suporte prioritário'
+    ],
+    is_active: true
+  },
+  {
+    id: 'trimestral',
+    name: 'Trimestral',
+    description: 'Acesso completo por 90 dias - Apenas R$ 33,30/mês',
+    price_brl: 99.90,
+    duration_days: 90,
+    hotmart_product_id: 'PENDING',
+    hotmart_offer_code: '',
+    features: [
+      'Treinos personalizados',
+      'Planos nutricionais',
+      'Ranking nacional',
+      'Portfólio profissional',
+      'Suporte prioritário',
+      'Economia de 16%'
+    ],
+    is_active: true
+  },
+  {
+    id: 'semestral',
+    name: 'Semestral',
+    description: 'Acesso completo por 6 meses - Melhor custo-benefício',
+    price_brl: 189.90,
+    duration_days: 180,
+    hotmart_product_id: 'PENDING',
+    hotmart_offer_code: '',
+    features: [
+      'Treinos personalizados',
+      'Planos nutricionais',
+      'Ranking nacional',
+      'Portfólio profissional',
+      'Suporte prioritário',
+      'Economia de 21%',
+      'Bônus exclusivos'
+    ],
+    is_active: true
+  }
+];
+
 export function PricingSection() {
-  const { plans, hasActiveSubscription, redirectToCheckout } = useSubscription();
+  const { plans: dbPlans, hasActiveSubscription, redirectToCheckout } = useSubscription();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [affiliateCode, setAffiliateCode] = useState<string | null>(null);
+  
+  // Usar planos do banco se disponível, senão usar planos padrão
+  const plans = dbPlans.length > 0 ? dbPlans : DEFAULT_PLANS;
 
   // Detectar código de afiliado na URL ao montar componente
   useEffect(() => {
@@ -33,6 +94,12 @@ export function PricingSection() {
   }, []);
 
   const handleSubscribe = (plan: any) => {
+    // Verificar se o sistema de pagamentos está configurado
+    if (plan.hotmart_product_id === 'PENDING' || plan.hotmart_product_id.startsWith('SEU_PRODUCT_ID')) {
+      alert('Sistema de pagamentos em configuração. Em breve você poderá assinar!');
+      return;
+    }
+
     // Se usuário não está logado, redirecionar para cadastro
     if (!user) {
       // Salvar o plano selecionado para depois
@@ -75,10 +142,6 @@ export function PricingSection() {
         return null;
     }
   };
-
-  if (plans.length === 0) {
-    return null;
-  }
 
   return (
     <section id="pricing" className="py-20 bg-gradient-to-b from-black via-gray-950 to-black">
@@ -137,15 +200,33 @@ export function PricingSection() {
 
                   {/* Preço */}
                   <div className="mt-6">
-                    <div className="flex items-baseline justify-center gap-2">
-                      <span className="text-gray-400 text-lg">R$</span>
-                      <span className="text-5xl font-bold text-yellow-500">
-                        {plan.price_brl.toFixed(2).replace('.', ',')}
-                      </span>
-                    </div>
-                    <p className="text-gray-500 text-sm mt-2">
-                      {plan.duration_days} dias de acesso completo
-                    </p>
+                    {/* Mostrar preço mensal dividido para planos Trimestral e Semestral */}
+                    {plan.duration_days > 30 ? (
+                      <>
+                        <div className="flex items-baseline justify-center gap-2">
+                          <span className="text-gray-400 text-lg">R$</span>
+                          <span className="text-5xl font-bold text-yellow-500">
+                            {(plan.price_brl / (plan.duration_days / 30)).toFixed(2).replace('.', ',')}
+                          </span>
+                          <span className="text-gray-400 text-lg">/mês</span>
+                        </div>
+                        <p className="text-gray-500 text-sm mt-2">
+                          Total: R$ {plan.price_brl.toFixed(2).replace('.', ',')} por {plan.duration_days} dias
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-baseline justify-center gap-2">
+                          <span className="text-gray-400 text-lg">R$</span>
+                          <span className="text-5xl font-bold text-yellow-500">
+                            {plan.price_brl.toFixed(2).replace('.', ',')}
+                          </span>
+                        </div>
+                        <p className="text-gray-500 text-sm mt-2">
+                          Acesso por 30 dias
+                        </p>
+                      </>
+                    )}
                   </div>
                 </CardHeader>
 

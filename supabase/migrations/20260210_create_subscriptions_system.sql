@@ -48,11 +48,7 @@ CREATE TABLE IF NOT EXISTS user_subscriptions (
   -- Metadata
   metadata JSONB DEFAULT '{}'::jsonb, -- Informações extras do webhook
   created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  
-  -- Constraint: usuário só pode ter uma assinatura ativa por vez
-  CONSTRAINT unique_active_subscription UNIQUE (user_id, status) 
-    WHERE (status = 'active')
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- Tabela de histórico de pagamentos/eventos da Hotmart
@@ -83,6 +79,11 @@ CREATE INDEX IF NOT EXISTS idx_user_subscriptions_affiliate ON user_subscription
 CREATE INDEX IF NOT EXISTS idx_hotmart_webhooks_transaction ON hotmart_webhooks(transaction_id);
 CREATE INDEX IF NOT EXISTS idx_hotmart_webhooks_user ON hotmart_webhooks(user_id);
 CREATE INDEX IF NOT EXISTS idx_hotmart_webhooks_processed ON hotmart_webhooks(processed);
+
+-- Índice único parcial: usuário só pode ter uma assinatura ativa por vez
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_subscriptions_unique_active 
+  ON user_subscriptions(user_id) 
+  WHERE status = 'active';
 
 -- RLS (Row Level Security)
 ALTER TABLE subscription_plans ENABLE ROW LEVEL SECURITY;
@@ -161,7 +162,7 @@ VALUES
   (
     'Mensal',
     'Acesso completo por 30 dias',
-    29.90,
+    39.90,
     30,
     'SEU_PRODUCT_ID_HOTMART_MENSAL',
     'OFFER_CODE_MENSAL',
@@ -170,22 +171,22 @@ VALUES
   ),
   (
     'Trimestral',
-    'Acesso completo por 90 dias com desconto',
-    79.90,
+    'Acesso completo por 90 dias - Apenas R$ 33,30/mês',
+    99.90,
     90,
     'SEU_PRODUCT_ID_HOTMART_TRIMESTRAL',
     'OFFER_CODE_TRIMESTRAL',
-    '["Treinos personalizados", "Planos nutricionais", "Ranking nacional", "Portfólio profissional", "Suporte prioritário", "15% de economia"]'::jsonb,
+    '["Treinos personalizados", "Planos nutricionais", "Ranking nacional", "Portfólio profissional", "Suporte prioritário", "Economia de 16%"]'::jsonb,
     true
   ),
   (
-    'Anual',
-    'Acesso completo por 12 meses - Melhor custo-benefício',
-    299.90,
-    365,
-    'SEU_PRODUCT_ID_HOTMART_ANUAL',
-    'OFFER_CODE_ANUAL',
-    '["Treinos personalizados", "Planos nutricionais", "Ranking nacional", "Portfólio profissional", "Suporte prioritário", "30% de economia", "Bônus exclusivos"]'::jsonb,
+    'Semestral',
+    'Acesso completo por 6 meses - Melhor custo-benefício',
+    189.90,
+    180,
+    'SEU_PRODUCT_ID_HOTMART_SEMESTRAL',
+    'OFFER_CODE_SEMESTRAL',
+    '["Treinos personalizados", "Planos nutricionais", "Ranking nacional", "Portfólio profissional", "Suporte prioritário", "Economia de 21%", "Bônus exclusivos"]'::jsonb,
     true
   )
 ON CONFLICT (hotmart_product_id) DO NOTHING;
