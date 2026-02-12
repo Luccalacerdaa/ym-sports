@@ -14,6 +14,7 @@ import { useEventNotifications } from "./hooks/useEventNotifications";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Calendar from "./pages/Calendar";
@@ -61,6 +62,7 @@ const AppContent = () => {
             <Route path="/install-guide" element={<InstallGuide />} />
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/signup" element={<Signup />} />
+            <Route path="/payment/success" element={<PaymentSuccess />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <DashboardLayout />
