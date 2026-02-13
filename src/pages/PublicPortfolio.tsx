@@ -182,7 +182,7 @@ export default function PublicPortfolio() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black pb-safe" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 4rem)' }}>
       {/* Header */}
       <div className="bg-black/90 backdrop-blur-sm shadow-lg border-b border-yellow-500/20">
         <div className="container max-w-6xl mx-auto px-4 py-6">
@@ -226,7 +226,7 @@ export default function PublicPortfolio() {
         </div>
       </div>
 
-      <div className="container max-w-6xl mx-auto px-4 py-8">
+      <div className="container max-w-6xl mx-auto px-4 py-8" style={{ minHeight: 'calc(100vh - 100px)' }}>
         {/* Hero Section */}
         <Card className="mb-8 overflow-hidden shadow-2xl border border-yellow-500/20">
           <div className="bg-gradient-to-r from-black via-gray-900 to-yellow-500 text-white p-8 relative overflow-hidden">
@@ -307,6 +307,154 @@ export default function PublicPortfolio() {
                   <p className="text-gray-300 leading-relaxed">{portfolio.biography}</p>
                 </CardContent>
               </Card>
+            )}
+
+            {/* Estatísticas de Carreira */}
+            {portfolio.career_stats && (
+              <Card className="shadow-lg border border-yellow-500/20 bg-gray-900/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-yellow-500 flex items-center gap-2">
+                    <Trophy className="h-5 w-5" />
+                    Estatísticas de Carreira
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    {portfolio.career_stats.total_games > 0 && (
+                      <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+                        <div className="text-3xl font-bold text-yellow-500">
+                          {portfolio.career_stats.total_games}
+                        </div>
+                        <div className="text-sm text-gray-400 mt-1">Jogos</div>
+                      </div>
+                    )}
+                    {portfolio.career_stats.total_goals > 0 && (
+                      <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+                        <div className="text-3xl font-bold text-yellow-500">
+                          {portfolio.career_stats.total_goals}
+                        </div>
+                        <div className="text-sm text-gray-400 mt-1">Gols</div>
+                      </div>
+                    )}
+                    {portfolio.career_stats.total_assists > 0 && (
+                      <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+                        <div className="text-3xl font-bold text-yellow-500">
+                          {portfolio.career_stats.total_assists}
+                        </div>
+                        <div className="text-sm text-gray-400 mt-1">Assistências</div>
+                      </div>
+                    )}
+                    {portfolio.career_stats.yellow_cards > 0 && (
+                      <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+                        <div className="text-3xl font-bold text-yellow-400">
+                          {portfolio.career_stats.yellow_cards}
+                        </div>
+                        <div className="text-sm text-gray-400 mt-1">Cartões Amarelos</div>
+                      </div>
+                    )}
+                    {portfolio.career_stats.red_cards > 0 && (
+                      <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+                        <div className="text-3xl font-bold text-red-500">
+                          {portfolio.career_stats.red_cards}
+                        </div>
+                        <div className="text-sm text-gray-400 mt-1">Cartões Vermelhos</div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Conquistas e Títulos */}
+            {portfolio.achievements_data && (
+              (portfolio.achievements_data.medals?.length > 0 || 
+               portfolio.achievements_data.championships?.length > 0 || 
+               portfolio.achievements_data.individual_awards?.length > 0) && (
+                <Card className="shadow-lg border border-yellow-500/20 bg-gray-900/80 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-yellow-500 flex items-center gap-2">
+                      <Trophy className="h-5 w-5" />
+                      Conquistas e Títulos
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Medalhas */}
+                    {portfolio.achievements_data.medals && portfolio.achievements_data.medals.length > 0 && (
+                      <div>
+                        <h4 className="text-yellow-400 font-medium mb-3">Medalhas e Troféus</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {portfolio.achievements_data.medals.map((medal) => (
+                            <div key={medal.id} className="p-3 bg-gray-800/50 rounded-lg flex items-start gap-3">
+                              <Trophy className={`h-5 w-5 flex-shrink-0 ${
+                                medal.category === 'gold' ? 'text-yellow-500' :
+                                medal.category === 'silver' ? 'text-gray-400' :
+                                'text-amber-700'
+                              }`} />
+                              <div className="flex-1">
+                                <div className="font-medium text-white">{medal.name}</div>
+                                {medal.competition && (
+                                  <div className="text-sm text-gray-400">{medal.competition}</div>
+                                )}
+                                {medal.date_received && (
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    {format(new Date(medal.date_received), 'MMM yyyy', { locale: ptBR })}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Campeonatos */}
+                    {portfolio.achievements_data.championships && portfolio.achievements_data.championships.length > 0 && (
+                      <div>
+                        <h4 className="text-yellow-400 font-medium mb-3">Campeonatos</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {portfolio.achievements_data.championships.map((championship) => (
+                            <div key={championship.id} className="p-3 bg-gray-800/50 rounded-lg flex items-start gap-3">
+                              <Trophy className="h-5 w-5 flex-shrink-0 text-yellow-500" />
+                              <div className="flex-1">
+                                <div className="font-medium text-white">{championship.name}</div>
+                                {championship.club_name && (
+                                  <div className="text-sm text-gray-400">{championship.club_name}</div>
+                                )}
+                                {championship.year && (
+                                  <div className="text-xs text-gray-500 mt-1">{championship.year}</div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Prêmios Individuais */}
+                    {portfolio.achievements_data.individual_awards && portfolio.achievements_data.individual_awards.length > 0 && (
+                      <div>
+                        <h4 className="text-yellow-400 font-medium mb-3">Prêmios Individuais</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {portfolio.achievements_data.individual_awards.map((award) => (
+                            <div key={award.id} className="p-3 bg-gray-800/50 rounded-lg flex items-start gap-3">
+                              <Star className="h-5 w-5 flex-shrink-0 text-yellow-500" />
+                              <div className="flex-1">
+                                <div className="font-medium text-white">{award.name}</div>
+                                {award.competition && (
+                                  <div className="text-sm text-gray-400">{award.competition}</div>
+                                )}
+                                {award.year && (
+                                  <div className="text-xs text-gray-500 mt-1">{award.year}</div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )
             )}
 
             {/* Galeria de Fotos e Vídeos */}

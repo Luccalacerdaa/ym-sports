@@ -31,57 +31,69 @@ const Index = () => {
   const benefitsSection = useScrollAnimation();
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Configurar volume do vídeo e forçar play
+  // Configurar volume do vídeo e forçar play (com fallback para autoplay)
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.volume = volume;
-      videoRef.current.muted = isMuted;
+      videoRef.current.muted = true; // Sempre começar mudo para autoplay funcionar
+      videoRef.current.playsInline = true; // Importante para iOS
+      videoRef.current.setAttribute('playsinline', 'true');
+      videoRef.current.setAttribute('webkit-playsinline', 'true');
       
-      // Forçar play do vídeo com verificação se ainda está no DOM
+      // Tentar reproduzir assim que possível
       const playVideo = async () => {
         try {
-          // Verificar se o elemento ainda está no DOM e está pronto antes de tentar reproduzir
           if (videoRef.current && 
               document.contains(videoRef.current) && 
-              videoRef.current.readyState >= 2) { // HAVE_CURRENT_DATA ou maior
+              videoRef.current.readyState >= 2) {
             await videoRef.current.play();
+            console.log('✅ Vídeo reproduzindo automaticamente');
           }
         } catch (error) {
-          // Só logar se não for um erro conhecido de reprodução de vídeo
-          if (error instanceof DOMException) {
-            // Ignorar erros comuns de reprodução de vídeo
-            if (!['AbortError', 'NotAllowedError', 'NotSupportedError'].includes(error.name)) {
-              console.warn('Erro ao reproduzir vídeo:', error.name);
-            }
-          } else {
-            console.warn('Erro inesperado ao reproduzir vídeo:', error);
-          }
+          console.log('⚠️ Autoplay bloqueado, aguardando interação do usuário');
+          // Não mostrar erro, é normal em alguns navegadores
         }
       };
       
+      // Tentar múltiplas vezes
       playVideo();
+      const timer1 = setTimeout(playVideo, 500);
+      const timer2 = setTimeout(playVideo, 1000);
+      
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+      };
     }
-  }, [volume, isMuted]);
+  }, []);
 
   // Ativar som após primeira interação do usuário
   useEffect(() => {
-    const enableSound = () => {
-      if (videoRef.current && isMuted) {
-        setIsMuted(false);
-        videoRef.current.muted = false;
-        videoRef.current.play().catch(() => {});
+    const enableSoundAndPlay = async () => {
+      if (videoRef.current) {
+        try {
+          videoRef.current.muted = false;
+          videoRef.current.volume = volume;
+          await videoRef.current.play();
+          setIsMuted(false);
+          console.log('✅ Som ativado e vídeo reproduzindo');
+        } catch (error) {
+          console.log('⚠️ Erro ao ativar som:', error);
+        }
       }
     };
 
-    // Ativar som no primeiro clique ou toque
-    document.addEventListener('click', enableSound, { once: true });
-    document.addEventListener('touchstart', enableSound, { once: true });
+    // Ativar som no primeiro clique, toque ou scroll
+    document.addEventListener('click', enableSoundAndPlay, { once: true });
+    document.addEventListener('touchstart', enableSoundAndPlay, { once: true });
+    document.addEventListener('scroll', enableSoundAndPlay, { once: true, passive: true });
 
     return () => {
-      document.removeEventListener('click', enableSound);
-      document.removeEventListener('touchstart', enableSound);
+      document.removeEventListener('click', enableSoundAndPlay);
+      document.removeEventListener('touchstart', enableSoundAndPlay);
+      document.removeEventListener('scroll', enableSoundAndPlay);
     };
-  }, [isMuted]);
+  }, [volume]);
 
   const toggleMute = () => {
     setIsMuted(!isMuted);

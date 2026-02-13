@@ -500,9 +500,24 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
             {/* Galeria de Fotos */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Image className="h-5 w-5" />
-                  Galeria de Fotos
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Image className="h-5 w-5" />
+                    Galeria de Fotos
+                  </div>
+                  {basicInfo.gallery_photos && basicInfo.gallery_photos.length > 0 && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => {
+                        setBasicInfo(prev => ({ ...prev, gallery_photos: [] }));
+                        toast.success('Todas as fotos foram removidas');
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Remover Todas
+                    </Button>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -539,18 +554,32 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
                   bucket="portfolio-photos"
                   folder="gallery"
                   onUploadComplete={(urls) => {
+                    // Se já tem fotos e seleciona 5 novas, substitui todas
                     const currentPhotos = basicInfo.gallery_photos || [];
-                    const remainingSlots = 5 - currentPhotos.length;
-                    const newPhotos = urls.slice(0, remainingSlots);
                     
-                    setBasicInfo(prev => ({ 
-                      ...prev, 
-                      gallery_photos: [...currentPhotos, ...newPhotos].slice(0, 5)
-                    }));
+                    if (urls.length === 5 && currentPhotos.length > 0) {
+                      // Substituir todas se selecionar 5 novas
+                      setBasicInfo(prev => ({ 
+                        ...prev, 
+                        gallery_photos: urls.slice(0, 5)
+                      }));
+                      toast.success('Fotos substituídas com sucesso!');
+                    } else {
+                      // Adicionar até o limite de 5
+                      const remainingSlots = 5 - currentPhotos.length;
+                      const newPhotos = urls.slice(0, remainingSlots);
+                      
+                      setBasicInfo(prev => ({ 
+                        ...prev, 
+                        gallery_photos: [...currentPhotos, ...newPhotos].slice(0, 5)
+                      }));
+                    }
                   }}
+                  disabled={(basicInfo.gallery_photos || []).length >= 5}
                 />
                 <p className="text-xs text-muted-foreground mt-2">
                   {(basicInfo.gallery_photos || []).length}/5 fotos
+                  {(basicInfo.gallery_photos || []).length >= 5 && ' (Máximo atingido - remova fotos para adicionar novas)'}
                 </p>
               </CardContent>
             </Card>
@@ -716,7 +745,10 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
                     <Input
                       id="total_games"
                       type="number"
-                      value={careerStats.total_games}
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      placeholder="0"
+                      value={careerStats.total_games === 0 ? '' : careerStats.total_games}
                       onChange={(e) => setCareerStats(prev => ({ ...prev, total_games: parseInt(e.target.value) || 0 }))}
                     />
                   </div>
@@ -725,7 +757,10 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
                     <Input
                       id="total_goals"
                       type="number"
-                      value={careerStats.total_goals}
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      placeholder="0"
+                      value={careerStats.total_goals === 0 ? '' : careerStats.total_goals}
                       onChange={(e) => setCareerStats(prev => ({ ...prev, total_goals: parseInt(e.target.value) || 0 }))}
                     />
                   </div>
@@ -734,7 +769,10 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
                     <Input
                       id="total_assists"
                       type="number"
-                      value={careerStats.total_assists}
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      placeholder="0"
+                      value={careerStats.total_assists === 0 ? '' : careerStats.total_assists}
                       onChange={(e) => setCareerStats(prev => ({ ...prev, total_assists: parseInt(e.target.value) || 0 }))}
                     />
                   </div>
@@ -743,17 +781,24 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
                     <Input
                       id="yellow_cards"
                       type="number"
-                      value={careerStats.yellow_cards}
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      placeholder="0"
+                      value={careerStats.yellow_cards === 0 ? '' : careerStats.yellow_cards}
                       onChange={(e) => setCareerStats(prev => ({ ...prev, yellow_cards: parseInt(e.target.value) || 0 }))}
                     />
                   </div>
-                  <div>
+                  <div className="col-span-2">
                     <Label htmlFor="red_cards">Cartões Vermelhos</Label>
                     <Input
                       id="red_cards"
                       type="number"
-                      value={careerStats.red_cards}
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      placeholder="0"
+                      value={careerStats.red_cards === 0 ? '' : careerStats.red_cards}
                       onChange={(e) => setCareerStats(prev => ({ ...prev, red_cards: parseInt(e.target.value) || 0 }))}
+                      className="mb-safe"
                     />
                   </div>
                 </div>
