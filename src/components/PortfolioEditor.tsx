@@ -274,18 +274,20 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-4xl flex flex-col p-0"
+        className="max-w-4xl flex flex-col p-0 max-h-screen overflow-hidden"
         style={{
-          maxHeight: 'calc(90vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))'
+          maxHeight: 'calc(90vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))',
+          width: 'calc(100vw - 2rem)',
+          maxWidth: '56rem'
         }}
       >
-        <div className="p-4 sm:p-6 pb-0">
+        <div className="p-4 sm:p-6 pb-0 flex-shrink-0">
           <DialogHeader>
             <DialogTitle>Editar Portfólio</DialogTitle>
           </DialogHeader>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4">
           <Tabs defaultValue="basic" className="w-full">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1 h-auto">
             <TabsTrigger 
@@ -327,8 +329,8 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
           </TabsList>
 
           {/* Informações Básicas */}
-          <TabsContent value="basic" className="space-y-4">
-            <Card>
+          <TabsContent value="basic" className="space-y-4 overflow-x-hidden w-full max-w-full">
+            <Card className="w-full max-w-full overflow-hidden">
               <CardHeader>
                 <CardTitle>Informações Pessoais</CardTitle>
               </CardHeader>
@@ -455,7 +457,7 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
           </TabsContent>
 
           {/* Mídia - Fotos e Vídeos */}
-          <TabsContent value="media" className="space-y-4">
+          <TabsContent value="media" className="space-y-4 overflow-x-hidden w-full max-w-full">
             {/* Foto de Perfil com Crop */}
             <Card>
               <CardHeader>
@@ -498,9 +500,9 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
             </Card>
 
             {/* Galeria de Fotos */}
-            <Card>
+            <Card className="w-full max-w-full overflow-hidden">
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <Image className="h-5 w-5" />
                     Galeria de Fotos
@@ -520,15 +522,15 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
                   )}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 overflow-x-hidden">
                 {basicInfo.gallery_photos && basicInfo.gallery_photos.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-2 w-full">
                     {basicInfo.gallery_photos.map((photo, index) => (
-                      <div key={index} className="relative group">
+                      <div key={index} className="relative group aspect-square overflow-hidden">
                         <img 
                           src={photo} 
                           alt={`Foto ${index + 1}`}
-                          className="w-full h-20 object-cover rounded border"
+                          className="w-full h-full object-cover rounded border"
                         />
                         <Button
                           variant="destructive"
@@ -678,7 +680,7 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
           </TabsContent>
 
           {/* Contato e Redes Sociais */}
-          <TabsContent value="contact" className="space-y-4">
+          <TabsContent value="contact" className="space-y-4 overflow-x-hidden w-full max-w-full">
             <Card>
               <CardHeader>
                 <CardTitle>Informações de Contato</CardTitle>
@@ -733,7 +735,7 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
           </TabsContent>
 
           {/* Estatísticas */}
-          <TabsContent value="stats" className="space-y-4">
+          <TabsContent value="stats" className="space-y-4 overflow-x-hidden w-full max-w-full">
             <Card>
               <CardHeader>
                 <CardTitle>Estatísticas de Carreira</CardTitle>
@@ -807,7 +809,7 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
           </TabsContent>
 
           {/* Conquistas */}
-          <TabsContent value="achievements" className="space-y-4">
+          <TabsContent value="achievements" className="space-y-4 overflow-x-hidden w-full max-w-full">
             <div className="grid grid-cols-1 gap-6">
               {/* Medalhas */}
               <Card>
@@ -1246,7 +1248,7 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
           </TabsContent>
 
           {/* Clubes */}
-          <TabsContent value="clubs" className="space-y-4">
+          <TabsContent value="clubs" className="space-y-4 overflow-x-hidden w-full max-w-full">
             <Card>
               <CardHeader>
                 <CardTitle>Adicionar Clube</CardTitle>
