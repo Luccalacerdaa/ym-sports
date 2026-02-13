@@ -16,12 +16,18 @@ import soccerTrainingFieldImage from "@/assets/soccer-training-field.jpg";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useEffect, useRef } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { PricingSection } from "@/components/PricingSection";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
+import { toast } from "sonner";
 const Index = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { plans, hasActiveSubscription, redirectToCheckout } = useSubscription();
   const isMobile = useIsMobile();
+  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "quarterly" | "biannual">("monthly");
   const [isMuted, setIsMuted] = useState(true);
   const [volume, setVolume] = useState(0.5);
+  const [affiliateCode, setAffiliateCode] = useState<string | null>(null);
   const benefitsSection = useScrollAnimation();
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -89,7 +95,78 @@ const Index = () => {
   };
   const carouselSection = useScrollAnimation();
   const appScreensSection = useScrollAnimation();
+  const pricingSection = useScrollAnimation();
   const ctaSection = useScrollAnimation();
+  
+  const planPrices = {
+    monthly: {
+      value: 39.90,
+      total: 39.90,
+      label: "Mensal"
+    },
+    quarterly: {
+      value: 33.30,
+      total: 99.90,
+      label: "Trimestral",
+      discount: "16% OFF"
+    },
+    biannual: {
+      value: 31.65,
+      total: 189.90,
+      label: "Semestral",
+      discount: "21% OFF"
+    }
+  };
+  
+  // Detectar código de afiliado na URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const srcParam = urlParams.get('src') || urlParams.get('ref') || urlParams.get('aff');
+    
+    if (srcParam) {
+      setAffiliateCode(srcParam);
+      localStorage.setItem('affiliate_code', srcParam);
+    } else {
+      const savedCode = localStorage.getItem('affiliate_code');
+      if (savedCode) {
+        setAffiliateCode(savedCode);
+      }
+    }
+  }, []);
+  
+  const handleSubscribe = () => {
+    // Buscar plano correspondente no banco
+    const planDurations = {
+      monthly: 30,
+      quarterly: 90,
+      biannual: 180
+    };
+    
+    const selectedDuration = planDurations[selectedPlan];
+    const matchingPlan = plans.find(p => p.duration_days === selectedDuration);
+    
+    if (!matchingPlan) {
+      toast.error('Sistema de pagamentos em configuração. Em breve você poderá assinar!');
+      return;
+    }
+    
+    // Se usuário não está logado, redirecionar para cadastro
+    if (!user) {
+      localStorage.setItem('selected_plan_id', matchingPlan.id);
+      navigate('/signup');
+      return;
+    }
+    
+    // Se já tem assinatura ativa
+    if (hasActiveSubscription) {
+      toast.info('Você já possui uma assinatura ativa!');
+      navigate('/dashboard');
+      return;
+    }
+    
+    // Redirecionar para checkout da Hotmart
+    redirectToCheckout(matchingPlan, affiliateCode || undefined);
+  };
   
   const benefits = [{
     icon: Megaphone,
@@ -434,8 +511,99 @@ const Index = () => {
       <ScrollingBanner text="JUNTE-SE À REVOLUÇÃO DO ESPORTE DIGITAL" />
 
       {/* Pricing Section */}
-      {/* Pricing Section - Planos integrados com Hotmart */}
-      <PricingSection />
+      <section ref={pricingSection.ref} className="py-28 md:py-36 bg-black">
+        <div className="container mx-auto px-4">
+          <h2 className={`text-center font-bebas uppercase leading-[0.9] transition-all duration-1000 mb-4 ${pricingSection.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+            <div className="text-white text-[clamp(2.5rem,6vw,5rem)] mb-1">
+              CADA GRANDE JOGADOR
+            </div>
+            
+            <div className="text-primary text-[clamp(2.2rem,5vw,4.5rem)] mb-2">
+              COMEÇOU COM UM PRIMEIRO PASSO
+            </div>
+            
+            <div className="text-primary font-bold tracking-wide text-[clamp(3.5rem,9vw,7rem)]">
+              DÊ O SEU AGORA!
+            </div>
+          </h2>
+          <p className={`text-xl text-muted-foreground text-center mb-12 max-w-2xl mx-auto transition-all duration-1000 delay-200 ${pricingSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            Porque todo sonho merece uma chance real.
+          </p>
+
+          <div className="max-w-2xl mx-auto">
+            {/* Toggle Group */}
+            <div className={`flex justify-center mb-8 transition-all duration-1000 delay-400 ${pricingSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+              <ToggleGroup type="single" value={selectedPlan} onValueChange={value => value && setSelectedPlan(value as typeof selectedPlan)} className="bg-card rounded-xl p-2 gap-2">
+                <ToggleGroupItem value="monthly" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=off]:bg-transparent data-[state=off]:text-muted-foreground px-6 py-3 rounded-lg transition-all hover:bg-primary/20">
+                  Mensal
+                </ToggleGroupItem>
+                <ToggleGroupItem value="quarterly" className="data-[state=on]:bg-green-500 data-[state=on]:text-white data-[state=off]:bg-transparent data-[state=off]:text-muted-foreground px-6 py-3 rounded-lg transition-all relative hover:bg-green-500/20">
+                  Trimestral
+                  <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                    16%
+                  </span>
+                </ToggleGroupItem>
+                <ToggleGroupItem value="biannual" className="data-[state=on]:bg-green-500 data-[state=on]:text-white data-[state=off]:bg-transparent data-[state=off]:text-muted-foreground px-6 py-3 rounded-lg transition-all relative hover:bg-green-500/20">
+                  Semestral
+                  <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                    21%
+                  </span>
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+
+            {/* Pricing Card */}
+            <Card className={`border-border p-8 md:p-10 text-center relative overflow-hidden shadow-xl transition-all duration-1000 delay-600 hover:border-primary hover:shadow-[0_0_30px_rgba(252,211,77,0.6)] ${pricingSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+              {/* Background Image with Opacity */}
+              <div className="absolute inset-0 bg-cover bg-center opacity-50" style={{
+              backgroundImage: `url(${stadiumBwImage})`
+            }} />
+              <div className="absolute inset-0 bg-gradient-to-br from-black/50 via-black/40 to-black/50" />
+              {/* Yellow Overlay Effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-primary/10" />
+              <div className="relative z-10">
+                <div className="mb-6">
+                  <div className="text-5xl md:text-6xl font-bold text-foreground mb-2 animate-scale-in">
+                    R$ {planPrices[selectedPlan].value.toFixed(2).replace(".", ",")}
+                    <span className="text-2xl text-muted-foreground">/mês</span>
+                  </div>
+                  {selectedPlan !== "monthly" && <div className="text-muted-foreground">
+                      Total: R$ {planPrices[selectedPlan].total.toFixed(2).replace(".", ",")} por{" "}
+                      {selectedPlan === "quarterly" ? "3 meses" : "6 meses"}
+                    </div>}
+                </div>
+
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-center justify-center gap-2 text-foreground">
+                    <Check className="w-5 h-5 text-primary" />
+                    Calendário inteligente de jogos
+                  </li>
+                  <li className="flex items-center justify-center gap-2 text-foreground">
+                    <Check className="w-5 h-5 text-primary" />
+                    Treinos personalizados com IA
+                  </li>
+                  <li className="flex items-center justify-center gap-2 text-foreground">
+                    <Check className="w-5 h-5 text-primary" />
+                    Ranking regional atualizado
+                  </li>
+                  <li className="flex items-center justify-center gap-2 text-foreground">
+                    <Check className="w-5 h-5 text-primary" />
+                    Portfólio de divulgação pessoal
+                  </li>
+                  <li className="flex items-center justify-center gap-2 text-foreground">
+                    <Check className="w-5 h-5 text-primary" />
+                    Benefícios e oportunidades de divulgação de atletas
+                  </li>
+                </ul>
+
+                <Button variant="hero" size="xl" onClick={handleSubscribe} className="w-full md:w-auto">
+                  Assinar {planPrices[selectedPlan].label}
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
 
       {/* Scrolling Banner */}
       <ScrollingBanner text="COMECE SUA JORNADA HOJE" />
