@@ -184,7 +184,7 @@ export default function PublicPortfolio() {
   return (
     <div className="min-h-screen bg-black pb-safe" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 4rem)' }}>
       {/* Header */}
-      <div className="bg-black/90 backdrop-blur-sm shadow-lg border-b border-yellow-500/20">
+      <div className="bg-black/90 backdrop-blur-sm shadow-lg border-b border-yellow-500/20" style={{ paddingTop: 'max(env(safe-area-inset-top), 1rem)' }}>
         <div className="container max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
