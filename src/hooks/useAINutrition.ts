@@ -192,16 +192,21 @@ FORMATO DE RESPOSTA (JSON):
   };
 
   const generateNutritionPlan = async (request: NutritionRequest): Promise<NutritionPlan> => {
+    console.log('🚀 [useAINutrition] generateNutritionPlan CHAMADO');
+    console.log('📦 [useAINutrition] Request recebido:', request);
+    
     setLoading(true);
     setError(null);
     
     try {
+      console.log('📝 [useAINutrition] Gerando prompt personalizado...');
       const prompt = generatePersonalizedPrompt(request);
       
+      console.log('🤖 [useAINutrition] Chamando OpenAI...');
       // Usar API real da OpenAI ou ChatGPT
       const response = await callOpenAI(prompt);
       
-      console.log('Resposta da IA:', response);
+      console.log('✅ [useAINutrition] Resposta da IA:', response);
       
       // Validar e processar a resposta
       let days = response.days || [];

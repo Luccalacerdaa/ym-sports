@@ -84,9 +84,9 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
     { value: 'sunday', label: 'Domingo' },
   ];
   
-  // Carregar preferências do usuário
+  // Carregar preferências do usuário (comentado temporariamente até RLS ser configurado)
   useEffect(() => {
-    fetchFoodPreferences();
+    // fetchFoodPreferences(); // Desabilitado temporariamente
   }, []);
   
   // Atualizar preferências de alimentos quando as preferências do usuário forem carregadas
@@ -183,7 +183,8 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
     try {
       // Salvar preferências alimentares
       console.log('💾 [GENERATOR] Salvando preferências...');
-      await saveFoodPreferences(processedPreferences);
+      const saveResult = await saveFoodPreferences(processedPreferences);
+      console.log('💾 [GENERATOR] Resultado do save:', saveResult);
       
       // Preparar solicitação
       const request: NutritionRequest = {
@@ -201,6 +202,7 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
       // Mudar para fase de geração
       setLoadingPhase('generating');
       console.log('⏳ [GENERATOR] Gerando plano...');
+      console.log('⏳ [GENERATOR] Chamando generateNutritionPlan agora...');
       
       // Gerar plano
       const plan = await generateNutritionPlan(request);
