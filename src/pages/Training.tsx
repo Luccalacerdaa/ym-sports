@@ -13,6 +13,8 @@ import { useAITraining } from "@/hooks/useAITraining";
 import { useProfile } from "@/hooks/useProfile";
 import { useProgress } from "@/hooks/useProgress";
 import ExerciseVisualizer from "@/components/ExerciseVisualizer";
+import { TrainingLoadingAnimation } from "@/components/TrainingLoadingAnimation";
+import { LightningStrikeSuccess } from "@/components/LightningStrikeSuccess";
 import { toast } from "sonner";
 import { 
   Dumbbell, 
@@ -70,6 +72,13 @@ export default function Training() {
   const [isTrainingDetailOpen, setIsTrainingDetailOpen] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [isExerciseVisualizerOpen, setIsExerciseVisualizerOpen] = useState(false);
+  
+  // Estados para animações
+  const [showLoadingAnimation, setShowLoadingAnimation] = useState(false);
+  const [loadingPhase, setLoadingPhase] = useState<'deleting' | 'generating' | 'saving'>('generating');
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  
   // Mapeamento fixo de tempo → quantidade de exercícios
   const DURATION_EXERCISE_MAP = {
     15: 2,
@@ -107,7 +116,9 @@ export default function Training() {
       return;
     }
 
-    const toastId = toast.loading("Gerando treinos personalizados...");
+    // Fechar dialog e iniciar animação de loading
+    setIsGenerateDialogOpen(false);
+    setShowLoadingAnimation(true);
 
     try {
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -122,7 +133,7 @@ export default function Training() {
       
       if (existingTrainings.length > 0) {
         console.log('🗑️ Deletando treinos existentes:', existingTrainings.map(t => t.day_of_week));
-        toast.loading('Removendo treinos antigos...', { id: toastId });
+        setLoadingPhase('deleting');
         
         const deleteResults = await Promise.allSettled(
           existingTrainings.map(training => deleteTraining(training.id))
@@ -132,7 +143,8 @@ export default function Training() {
         const deleteFailed = deleteResults.filter(r => r.status === 'rejected');
         if (deleteFailed.length > 0) {
           console.error('❌ Erro ao deletar alguns treinos:', deleteFailed);
-          toast.error('Erro ao remover treinos antigos', { id: toastId });
+          setShowLoadingAnimation(false);
+          toast.error('Erro ao remover treinos antigos');
           return;
         }
         
@@ -144,13 +156,14 @@ export default function Training() {
       
       // ETAPA 2: Gerar novos treinos com IA
       console.log('🤖 Gerando treinos com IA...');
-      toast.loading('Criando treinos personalizados...', { id: toastId });
+      setLoadingPhase('generating');
       
       const generatedTrainings = await generateTrainingPlan(aiRequest);
       
       if (!generatedTrainings || generatedTrainings.length === 0) {
         console.error('❌ IA não retornou treinos');
-        toast.error('Erro: nenhum treino foi gerado', { id: toastId });
+        setShowLoadingAnimation(false);
+        toast.error('Erro: nenhum treino foi gerado');
         return;
       }
       
@@ -163,13 +176,14 @@ export default function Training() {
       
       if (missingDays.length > 0) {
         console.warn('⚠️ IA não gerou treinos para:', missingDays);
-        toast.error(`IA não gerou treinos para: ${missingDays.map(getDayLabel).join(', ')}`, { id: toastId });
+        setShowLoadingAnimation(false);
+        toast.error(`IA não gerou treinos para: ${missingDays.map(getDayLabel).join(', ')}`);
         return;
       }
       
       // ETAPA 3: Criar os novos treinos no banco (Promise.allSettled para detectar falhas)
       console.log('💾 Salvando treinos no banco...');
-      toast.loading('Salvando treinos...', { id: toastId });
+      setLoadingPhase('saving');
       
       const createResults = await Promise.allSettled(
         generatedTrainings.map(training => {
@@ -196,7 +210,9 @@ export default function Training() {
           }
         });
         
-        toast.error(`Apenas ${createSuccesses.length} de ${generatedTrainings.length} treinos foram criados`, { id: toastId });
+        setShowLoadingAnimation(false);
+        toast.error(`Apenas ${createSuccesses.length} de ${generatedTrainings.length} treinos foram criados`);
+        return;
       }
 
       // ETAPA 4: Recarregar treinos do banco
@@ -205,16 +221,14 @@ export default function Training() {
 
       const dayLabels = aiRequest.availableDays.map(getDayLabel).join(' e ');
       
-      if (createFailures.length === 0) {
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('✅ TODOS OS TREINOS CRIADOS COM SUCESSO!');
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        toast.success(`Treino${aiRequest.availableDays.length > 1 ? 's' : ''} para ${dayLabels} criado${aiRequest.availableDays.length > 1 ? 's' : ''} com sucesso!`, { id: toastId });
-      } else {
-        toast.warning(`Alguns treinos não foram criados. Tente novamente.`, { id: toastId });
-      }
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('✅ TODOS OS TREINOS CRIADOS COM SUCESSO!');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       
-      setIsGenerateDialogOpen(false);
+      // Esconder loading e mostrar animação de sucesso
+      setShowLoadingAnimation(false);
+      setSuccessMessage(`Treino${aiRequest.availableDays.length > 1 ? 's' : ''} para ${dayLabels} criado${aiRequest.availableDays.length > 1 ? 's' : ''}!`);
+      setShowSuccessAnimation(true);
       
       // Reset form
       setAiRequest({
@@ -231,7 +245,8 @@ export default function Training() {
       console.error('❌ ERRO CRÍTICO AO GERAR TREINOS');
       console.error('Erro:', error);
       console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      toast.error(error.message || "Erro ao gerar treino. Tente novamente.", { id: toastId });
+      setShowLoadingAnimation(false);
+      toast.error(error.message || "Erro ao gerar treino. Tente novamente.");
     }
   };
 
@@ -824,6 +839,22 @@ export default function Training() {
           onClose={() => {
             setIsExerciseVisualizerOpen(false);
             setSelectedExercise(null);
+          }}
+        />
+      )}
+
+      {/* Animação de Loading */}
+      {showLoadingAnimation && (
+        <TrainingLoadingAnimation phase={loadingPhase} />
+      )}
+
+      {/* Animação de Sucesso */}
+      {showSuccessAnimation && (
+        <LightningStrikeSuccess
+          message={successMessage}
+          onComplete={() => {
+            setShowSuccessAnimation(false);
+            fetchTrainings();
           }}
         />
       )}
