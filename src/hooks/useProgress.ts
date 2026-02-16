@@ -380,7 +380,7 @@ export const useProgress = () => {
         }
       }
 
-      return { levelIncreased, newLevel };
+      return { levelIncreased, newLevel, points: pointsToAdd };
     } catch (err: any) {
       console.error('Erro ao adicionar pontos:', err);
       setError(err.message);

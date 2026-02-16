@@ -91,6 +91,23 @@ ALTER TABLE public.water_intake_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nutrition_achievements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_food_preferences ENABLE ROW LEVEL SECURITY;
 
+-- Políticas para preferências alimentares
+CREATE POLICY "Users can view their own food preferences" 
+ON public.user_food_preferences FOR SELECT 
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own food preferences" 
+ON public.user_food_preferences FOR INSERT 
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own food preferences" 
+ON public.user_food_preferences FOR UPDATE 
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own food preferences" 
+ON public.user_food_preferences FOR DELETE 
+USING (auth.uid() = user_id);
+
 -- Políticas para planos nutricionais
 CREATE POLICY "Users can view their own nutrition plans" 
 ON public.nutrition_plans FOR SELECT 
