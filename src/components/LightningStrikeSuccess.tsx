@@ -157,7 +157,7 @@ export function LightningStrikeSuccess({ message, onComplete }: LightningStrikeS
         {/* Etapa 3: Mensagem de sucesso */}
         {stage === 'success' && (
           <motion.div
-            className="relative text-center"
+            className="relative text-center px-8"
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.5, type: "spring", bounce: 0.4 }}
@@ -231,31 +231,15 @@ export function LightningStrikeSuccess({ message, onComplete }: LightningStrikeS
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
+              className="relative z-10"
             >
-              <h2 className="text-3xl font-bold text-yellow-400 mb-2">
+              <h2 className="text-3xl font-bold text-yellow-400 mb-2 drop-shadow-[0_0_20px_rgba(252,211,77,0.8)]">
                 Treinos Criados!
               </h2>
-              <p className="text-xl text-yellow-300/80">
+              <p className="text-xl text-yellow-300/90 drop-shadow-[0_0_15px_rgba(252,211,77,0.6)]">
                 {message}
               </p>
             </motion.div>
-
-            {/* Brilho de fundo pulsante */}
-            <motion.div
-              className="absolute inset-0 -z-10"
-              animate={{
-                boxShadow: [
-                  '0 0 100px rgba(252, 211, 77, 0.3)',
-                  '0 0 200px rgba(252, 211, 77, 0.5)',
-                  '0 0 100px rgba(252, 211, 77, 0.3)',
-                ],
-              }}
-              transition={{
-                repeat: Infinity,
-                duration: 2,
-                ease: "easeInOut",
-              }}
-            />
           </motion.div>
         )}
       </motion.div>

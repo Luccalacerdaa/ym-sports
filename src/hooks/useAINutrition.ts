@@ -110,9 +110,26 @@ ${favoritesText !== 'Não informado' ? `
 ` : '- Não informado - Use ampla variedade de alimentos saudáveis'}
 
 NÍVEL DE COMPLEXIDADE:
-- "simples": Receitas rápidas e práticas, poucos ingredientes, preparo fácil
+- "simples": COMIDA BRASILEIRA COMUM E FÁCIL DE ENCONTRAR
+  - Arroz branco, feijão preto/carioca, carne moída, frango grelhado
+  - Ovo mexido/cozido, pão francês/integral, manteiga, queijo
+  - Batata, macarrão, banana, maçã, laranja
+  - Alface, tomate, cenoura, chuchu
+  - Leite, iogurte natural, aveia
+  - Preparos simples: grelhado, cozido, no vapor
+  - Exemplo: Arroz + Feijão + Frango grelhado + Salada de alface e tomate
+  
 - "intermediario": Equilíbrio entre praticidade e variedade, preparo moderado
+  - Pode incluir: batata doce, arroz integral, quinoa
+  - Proteínas: peixes, carne vermelha magra, peru
+  - Vegetais: brócolis, couve, espinafre, abobrinha
+  - Frutas: abacate, morango, kiwi, mamão
+  - Preparos: assado, refogado, salteado
+  
 - "avancado": Receitas elaboradas, maior variedade de alimentos, preparo mais complexo
+  - Alimentos gourmet e importados
+  - Técnicas culinárias avançadas
+  - Ingredientes especiais
 
 ADAPTAÇÕES POR PERFIL:
 - Para atletas jovens (<18 anos): Foco em crescimento e desenvolvimento
