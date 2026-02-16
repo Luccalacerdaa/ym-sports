@@ -180,28 +180,28 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
     setShowLoadingAnimation(true);
     setLoadingPhase('saving');
 
-    // Salvar preferências alimentares
-    console.log('💾 [GENERATOR] Salvando preferências...');
-    await saveFoodPreferences(processedPreferences);
-    
-    // Preparar solicitação
-    const request: NutritionRequest = {
-      goals,
-      mealTypes,
-      complexityLevel,
-      preferences: processedPreferences,
-      daysCount: selectedDays.length, // Usar quantidade de dias selecionados
-      selectedDays, // Adicionar dias específicos
-      waterReminder
-    };
-    
-    console.log('📦 [GENERATOR] Request preparado:', request);
-    
-    // Mudar para fase de geração
-    setLoadingPhase('generating');
-    console.log('⏳ [GENERATOR] Gerando plano...');
-    
     try {
+      // Salvar preferências alimentares
+      console.log('💾 [GENERATOR] Salvando preferências...');
+      await saveFoodPreferences(processedPreferences);
+      
+      // Preparar solicitação
+      const request: NutritionRequest = {
+        goals,
+        mealTypes,
+        complexityLevel,
+        preferences: processedPreferences,
+        daysCount: selectedDays.length, // Usar quantidade de dias selecionados
+        selectedDays, // Adicionar dias específicos
+        waterReminder
+      };
+      
+      console.log('📦 [GENERATOR] Request preparado:', request);
+      
+      // Mudar para fase de geração
+      setLoadingPhase('generating');
+      console.log('⏳ [GENERATOR] Gerando plano...');
+      
       // Gerar plano
       const plan = await generateNutritionPlan(request);
       console.log('✅ [GENERATOR] Plano gerado com sucesso:', {
