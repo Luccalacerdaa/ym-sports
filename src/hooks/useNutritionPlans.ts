@@ -280,17 +280,6 @@ export const useNutritionPlans = () => {
     if (!user) return;
     
     try {
-      // Verificar se a tabela existe primeiro
-      const { error: tableCheckError } = await supabase
-        .from('user_food_preferences')
-        .select('count(*)', { count: 'exact', head: true });
-      
-      // Se a tabela não existir, não prosseguir
-      if (tableCheckError) {
-        console.warn('Tabela user_food_preferences pode não existir:', tableCheckError);
-        return;
-      }
-      
       const { data, error } = await supabase
         .from('user_food_preferences')
         .select('favorites, avoid, allergies')
@@ -299,7 +288,8 @@ export const useNutritionPlans = () => {
       
       if (error && error.code !== 'PGRST116') { // PGRST116 = not found
         console.error('Erro ao buscar preferências:', error);
-        throw error;
+        // Não lançar erro, apenas logar - tabela pode não ter políticas ainda
+        return;
       }
       
       if (data) {
@@ -311,6 +301,7 @@ export const useNutritionPlans = () => {
       }
     } catch (err: any) {
       console.error('Erro ao buscar preferências alimentares:', err);
+      // Silenciosamente ignorar erros de RLS
     }
   };
 
@@ -319,87 +310,27 @@ export const useNutritionPlans = () => {
     if (!user) return false;
     
     try {
-      // Verificar se a tabela existe primeiro
-      const { error: tableCheckError } = await supabase
+      // Tentar upsert diretamente (ignora verificações de tabela)
+      const { error: upsertError } = await supabase
         .from('user_food_preferences')
-        .select('count(*)', { count: 'exact', head: true });
+        .upsert({
+          user_id: user.id,
+          favorites: newPreferences.favorites,
+          avoid: newPreferences.avoid,
+          allergies: newPreferences.allergies,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
+        });
       
-      // Se a tabela não existir, criar a tabela com o SQL
-      if (tableCheckError) {
-        console.warn('Tabela user_food_preferences pode não existir. Tentando usar upsert diretamente.');
-        
-        // Usar upsert diretamente, que criará o registro se não existir
-        const { error: upsertError } = await supabase
-          .from('user_food_preferences')
-          .upsert({
-            user_id: user.id,
-            favorites: newPreferences.favorites,
-            avoid: newPreferences.avoid,
-            allergies: newPreferences.allergies,
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'user_id'
-          });
-        
-        if (upsertError) {
-          console.error('Erro no upsert de preferências:', upsertError);
-          throw upsertError;
-        }
-        
-        // Atualizar estado local
-        setPreferences(newPreferences);
-        return true;
-      }
-      
-      // Verificar se já existem preferências
-      const { data: existingData, error: checkError } = await supabase
-        .from('user_food_preferences')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      
-      if (checkError && checkError.code !== 'PGRST116') {
-        console.error('Erro ao verificar preferências existentes:', checkError);
-        throw checkError;
-      }
-      
-      let saveError;
-      
-      if (!existingData) {
-        // Inserir novas preferências
-        const { error } = await supabase
-          .from('user_food_preferences')
-          .insert({
-            user_id: user.id,
-            favorites: newPreferences.favorites,
-            avoid: newPreferences.avoid,
-            allergies: newPreferences.allergies
-          });
-        
-        saveError = error;
-      } else {
-        // Atualizar preferências existentes
-        const { error } = await supabase
-          .from('user_food_preferences')
-          .update({
-            favorites: newPreferences.favorites,
-            avoid: newPreferences.avoid,
-            allergies: newPreferences.allergies,
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', user.id);
-        
-        saveError = error;
-      }
-      
-      if (saveError) {
-        console.error('Erro ao salvar preferências:', saveError);
-        throw saveError;
+      if (upsertError) {
+        console.error('Erro ao salvar preferências:', upsertError);
+        // Não lançar erro, apenas logar - pode ser problema de RLS temporário
+        return false;
       }
       
       // Atualizar estado local
       setPreferences(newPreferences);
-      
       return true;
     } catch (err: any) {
       console.error('Erro ao salvar preferências alimentares:', err);
