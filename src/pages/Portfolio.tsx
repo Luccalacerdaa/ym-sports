@@ -399,10 +399,9 @@ export default function Portfolio() {
             Copiar Link
           </Button>
           <Button 
-            variant="outline" 
             size="sm"
             onClick={() => setIsEditing(true)}
-            className="flex-1 sm:flex-none"
+            className="flex-1 sm:flex-none bg-yellow-500 hover:bg-yellow-600 text-black font-bold shadow-[0_0_20px_rgba(252,211,77,0.6)] hover:shadow-[0_0_30px_rgba(252,211,77,0.9)] transition-all"
           >
             <Edit className="h-4 w-4 mr-2" />
             Editar

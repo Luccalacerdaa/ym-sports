@@ -39,7 +39,7 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
   const [goals, setGoals] = useState<string[]>([]);
   const [mealTypes, setMealTypes] = useState<MealType[]>([]);
   const [complexityLevel, setComplexityLevel] = useState<ComplexityLevel>('intermediario');
-  const [daysCount, setDaysCount] = useState<number>(3);
+  const [selectedDays, setSelectedDays] = useState<string[]>([]); // Mudado de daysCount
   const [waterReminder, setWaterReminder] = useState<boolean>(true);
   const [foodPreferences, setFoodPreferences] = useState<FoodPreference>({
     favorites: [],
@@ -64,6 +64,16 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
     { id: 'jantar', label: 'Jantar' },
     { id: 'pre_treino', label: 'Pré-treino' },
     { id: 'pos_treino', label: 'Pós-treino' }
+  ];
+  
+  const DAYS_OF_WEEK = [
+    { value: 'monday', label: 'Segunda-feira' },
+    { value: 'tuesday', label: 'Terça-feira' },
+    { value: 'wednesday', label: 'Quarta-feira' },
+    { value: 'thursday', label: 'Quinta-feira' },
+    { value: 'friday', label: 'Sexta-feira' },
+    { value: 'saturday', label: 'Sábado' },
+    { value: 'sunday', label: 'Domingo' },
   ];
   
   // Carregar preferências do usuário
@@ -114,7 +124,7 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
     console.log('📝 [GENERATOR] Objetivos:', goals);
     console.log('🍽️ [GENERATOR] Tipos de refeição:', mealTypes);
     console.log('⚙️ [GENERATOR] Complexidade:', complexityLevel);
-    console.log('📅 [GENERATOR] Dias:', daysCount);
+    console.log('📅 [GENERATOR] Dias:', selectedDays);
     
     // Validar formulário
     if (goals.length === 0) {
@@ -126,6 +136,16 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
     if (mealTypes.length === 0) {
       console.warn('⚠️ [GENERATOR] Nenhum tipo de refeição selecionado');
       toast.error("Selecione pelo menos um tipo de refeição");
+      return;
+    }
+    
+    if (selectedDays.length === 0) {
+      toast.error("Selecione pelo menos um dia");
+      return;
+    }
+    
+    if (selectedDays.length > 2) {
+      toast.error("Selecione no máximo 2 dias");
       return;
     }
     
@@ -157,7 +177,8 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
       mealTypes,
       complexityLevel,
       preferences: processedPreferences,
-      daysCount,
+      daysCount: selectedDays.length, // Usar quantidade de dias selecionados
+      selectedDays, // Adicionar dias específicos
       waterReminder
     };
     
@@ -281,23 +302,39 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
             </Select>
           </div>
           
-          {/* Duração do Plano */}
+          {/* Dias da Semana - Máximo 2 */}
           <div className="space-y-3">
-            <Label htmlFor="days">Duração do Plano</Label>
-            <Select 
-              value={daysCount.toString()} 
-              onValueChange={(value) => setDaysCount(parseInt(value))}
-            >
-              <SelectTrigger id="days">
-                <SelectValue placeholder="Selecione a duração do plano" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">1 dia</SelectItem>
-                <SelectItem value="2">2 dias</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label>Dias da semana (máximo 2)</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {DAYS_OF_WEEK.map((day) => (
+                <div key={day.value} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`nutrition-${day.value}`}
+                    checked={selectedDays.includes(day.value)}
+                    onCheckedChange={(checked) => {
+                      if (checked && selectedDays.length >= 2) {
+                        toast.warning("Selecione no máximo 2 dias");
+                        return;
+                      }
+                      if (checked) {
+                        setSelectedDays([...selectedDays, day.value]);
+                      } else {
+                        setSelectedDays(selectedDays.filter(d => d !== day.value));
+                      }
+                    }}
+                    disabled={!selectedDays.includes(day.value) && selectedDays.length >= 2}
+                  />
+                  <Label 
+                    htmlFor={`nutrition-${day.value}`} 
+                    className={`text-sm ${!selectedDays.includes(day.value) && selectedDays.length >= 2 ? 'opacity-50' : ''}`}
+                  >
+                    {day.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
             <p className="text-xs text-muted-foreground">
-              Gere planos de 1 ou 2 dias por vez
+              Selecione até 2 dias específicos para o plano nutricional
             </p>
           </div>
           

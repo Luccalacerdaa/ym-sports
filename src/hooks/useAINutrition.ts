@@ -87,9 +87,27 @@ IMPORTANTE - LEIA COM MUITA ATENÇÃO:
 - Cada dia deve ter TODAS as refeições solicitadas (${mealTypesText})
 - Adapte as refeições ao nível de complexidade solicitado (${request.complexityLevel})
 - NUNCA inclua alimentos listados como "a evitar" ou "alergias"
-- PRIORIZE os alimentos listados como "favoritos"
+- USE os alimentos favoritos como PREFERÊNCIA, mas NÃO SE LIMITE apenas a eles
+- IMPORTANTE: Mesmo que o atleta tenha alimentos favoritos, você DEVE incluir VARIEDADE nutricional
+- Se o atleta informou 2-3 favoritos, use PELO MENOS 5-8 alimentos DIFERENTES por dia
+- Alimentos favoritos devem aparecer em 30-40% das refeições, NÃO em 100%
 - Use MÁXIMO 2-3 alimentos por refeição para garantir resposta completa
 - Calcule calorias e macronutrientes básicos
+- VARIEDADE é ESSENCIAL: inclua verduras, legumes, frutas, proteínas variadas, carboidratos diferentes
+
+EXEMPLO DE BOA VARIEDADE:
+- Café: Pão integral + Ovo + Abacate (não apenas "frango")
+- Almoço: Arroz + Feijão + Carne (favorito) + Salada
+- Lanche: Iogurte + Granola + Banana
+- Jantar: Batata doce (favorito) + Frango + Brócolis
+
+ALIMENTOS FAVORITOS (use como base, mas adicione OUTROS):
+${favoritesText !== 'Não informado' ? `
+- Favoritos do atleta: ${favoritesText}
+- ATENÇÃO: Estes são PREFERÊNCIAS, não uma LISTA EXCLUSIVA
+- Inclua estes alimentos em 2-3 refeições do plano
+- Complete com OUTROS alimentos nutritivos e variados
+` : '- Não informado - Use ampla variedade de alimentos saudáveis'}
 
 NÍVEL DE COMPLEXIDADE:
 - "simples": Receitas rápidas e práticas, poucos ingredientes, preparo fácil

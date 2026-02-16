@@ -18,6 +18,7 @@ export interface NutritionRequest {
   complexityLevel: ComplexityLevel; // Nível de complexidade das receitas
   preferences: FoodPreference;    // Preferências alimentares
   daysCount: number;              // Número de dias do plano
+  selectedDays?: string[];        // Dias específicos (opcional)
   waterReminder: boolean;         // Incluir lembretes de hidratação
 }
 

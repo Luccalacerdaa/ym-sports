@@ -24,7 +24,7 @@ const Index = () => {
   const { user } = useAuth();
   const { plans, hasActiveSubscription, redirectToCheckout } = useSubscription();
   const isMobile = useIsMobile();
-  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "quarterly" | "biannual">("monthly");
+  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "quarterly" | "biannual">("quarterly");
   const [isMuted, setIsMuted] = useState(true);
   const [volume, setVolume] = useState(0.5);
   const [affiliateCode, setAffiliateCode] = useState<string | null>(null);
@@ -565,7 +565,11 @@ const Index = () => {
             </div>
 
             {/* Pricing Card */}
-            <Card className={`border-border p-8 md:p-10 text-center relative overflow-hidden shadow-xl transition-all duration-1000 delay-600 hover:border-primary hover:shadow-[0_0_30px_rgba(252,211,77,0.6)] ${pricingSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+            <Card className={`p-8 md:p-10 text-center relative overflow-hidden shadow-xl transition-all duration-1000 delay-600 ${
+              selectedPlan === 'quarterly' 
+                ? 'border-2 border-yellow-500 shadow-[0_0_40px_rgba(252,211,77,0.8)]' 
+                : 'border-border hover:border-primary hover:shadow-[0_0_30px_rgba(252,211,77,0.6)]'
+            } ${pricingSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
               {/* Background Image with Opacity */}
               <div className="absolute inset-0 bg-cover bg-center opacity-50" style={{
               backgroundImage: `url(${stadiumBwImage})`
