@@ -128,6 +128,9 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
   
   // Gerar plano nutricional
   const handleGeneratePlan = async () => {
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🎯 [GENERATOR] FUNÇÃO CHAMADA - handleGeneratePlan');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('🎯 [GENERATOR] Iniciando geração de plano nutricional...');
     console.log('📝 [GENERATOR] Objetivos:', goals);
     console.log('🍽️ [GENERATOR] Tipos de refeição:', mealTypes);
@@ -175,10 +178,13 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
     
     console.log('✅ [GENERATOR] Preferências processadas:', processedPreferences);
 
-    // Fechar dialog e iniciar animação
-    onClose();
+    // Iniciar animação e esconder dialog
+    console.log('🎬 [GENERATOR] Iniciando animação de loading...');
     setShowLoadingAnimation(true);
     setLoadingPhase('saving');
+    
+    // Pequeno delay antes de continuar
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     try {
       // Salvar preferências alimentares
@@ -594,7 +600,14 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
   
   return (
     <>
-      <Dialog open={step === 'form' || step === 'review'} onOpenChange={(open) => !open && onClose()}>
+      <Dialog 
+        open={(step === 'form' || step === 'review') && !showLoadingAnimation && !showSuccessAnimation} 
+        onOpenChange={(open) => {
+          if (!open && !showLoadingAnimation && !showSuccessAnimation) {
+            onClose();
+          }
+        }}
+      >
         <DialogContent 
           className="sm:max-w-[600px] overflow-y-auto"
           style={{
