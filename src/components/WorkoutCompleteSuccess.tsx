@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Star, TrendingUp, Award } from 'lucide-react';
+import { Trophy, Star, Award } from 'lucide-react';
 
 interface WorkoutCompleteSuccessProps {
-  points: number;
   levelIncreased: boolean;
   newLevel?: number;
   onComplete: () => void;
 }
 
 export function WorkoutCompleteSuccess({ 
-  points, 
   levelIncreased, 
   newLevel, 
   onComplete 
@@ -244,25 +242,12 @@ export function WorkoutCompleteSuccess({
               </h2>
               
               {levelIncreased && newLevel && (
-                <p className="text-2xl text-yellow-300 mb-2 drop-shadow-[0_0_15px_rgba(252,211,77,0.6)]">
+                <p className="text-2xl text-yellow-300 mb-4 drop-shadow-[0_0_15px_rgba(252,211,77,0.6)]">
                   Você subiu para o nível {newLevel}!
                 </p>
               )}
 
-              {/* Pontos ganhos */}
-              <motion.div
-                className="flex items-center justify-center gap-2 mb-3"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.7, type: "spring", bounce: 0.5 }}
-              >
-                <TrendingUp className="w-6 h-6 text-green-400" />
-                <span className="text-2xl font-bold text-green-400">
-                  +{points} pontos
-                </span>
-              </motion.div>
-
-              <p className="text-lg text-yellow-200/80">
+              <p className="text-xl text-yellow-200/90 drop-shadow-[0_0_15px_rgba(252,211,77,0.5)]">
                 Pontos adicionados ao ranking!
               </p>
             </motion.div>

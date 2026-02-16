@@ -81,7 +81,6 @@ export default function Training() {
   const [successMessage, setSuccessMessage] = useState('');
   const [showWorkoutCompleteAnimation, setShowWorkoutCompleteAnimation] = useState(false);
   const [workoutCompleteData, setWorkoutCompleteData] = useState<{
-    points: number;
     levelIncreased: boolean;
     newLevel?: number;
   } | null>(null);
@@ -294,7 +293,6 @@ export default function Training() {
 
       // Mostrar animação de sucesso
       setWorkoutCompleteData({
-        points: result?.points || 0,
         levelIncreased: result?.levelIncreased || false,
         newLevel: result?.newLevel,
       });
@@ -874,7 +872,6 @@ export default function Training() {
       {/* Animação de Treino Completado */}
       {showWorkoutCompleteAnimation && workoutCompleteData && (
         <WorkoutCompleteSuccess
-          points={workoutCompleteData.points}
           levelIncreased={workoutCompleteData.levelIncreased}
           newLevel={workoutCompleteData.newLevel}
           onComplete={() => {
