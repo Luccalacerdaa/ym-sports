@@ -27,6 +27,7 @@ import {
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
+import { SharePortfolioAnimation } from "@/components/SharePortfolioAnimation";
 
 export default function PublicPortfolio() {
   const { slug } = useParams<{ slug: string }>();
@@ -34,6 +35,8 @@ export default function PublicPortfolio() {
   const [portfolio, setPortfolio] = useState<PlayerPortfolio | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showShareAnimation, setShowShareAnimation] = useState(false);
+  const [sharePlatform, setSharePlatform] = useState<'link' | 'whatsapp' | 'email'>('link');
 
   useEffect(() => {
     if (slug) {
@@ -71,14 +74,19 @@ export default function PublicPortfolio() {
     try {
       if (platform === 'link') {
         await navigator.clipboard.writeText(shareUrl);
-        toast.success('Link copiado!');
+        setSharePlatform('link');
+        setShowShareAnimation(true);
       } else if (platform === 'whatsapp') {
         const message = `Confira o portfólio de ${portfolio.full_name}: ${shareUrl}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+        setSharePlatform('whatsapp');
+        setShowShareAnimation(true);
       } else if (platform === 'email') {
         const subject = `Portfólio de ${portfolio.full_name}`;
         const body = `Confira o portfólio de ${portfolio.full_name}: ${shareUrl}`;
         window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+        setSharePlatform('email');
+        setShowShareAnimation(true);
       }
       
       await registerShare(portfolio.id, platform);
@@ -684,6 +692,16 @@ export default function PublicPortfolio() {
           </div>
         </div>
       </div>
+
+      {/* Animação de compartilhamento */}
+      {showShareAnimation && (
+        <SharePortfolioAnimation
+          platform={sharePlatform}
+          onComplete={() => {
+            setShowShareAnimation(false);
+          }}
+        />
+      )}
     </div>
   );
 }

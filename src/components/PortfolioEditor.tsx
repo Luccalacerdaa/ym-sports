@@ -15,6 +15,8 @@ import { Plus, Trash2, Save, Upload, Image, Video, X } from "lucide-react";
 import FileUpload from "@/components/FileUpload";
 import { ImageCropper } from "@/components/ImageCropper";
 import { supabase } from "@/lib/supabase";
+import { PortfolioSaveLoadingAnimation } from "@/components/PortfolioSaveLoadingAnimation";
+import { PortfolioSaveSuccess } from "@/components/PortfolioSaveSuccess";
 
 interface PortfolioEditorProps {
   portfolio: PlayerPortfolio;
@@ -27,6 +29,8 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isCropperOpen, setIsCropperOpen] = useState(false);
+  const [showSaveLoadingAnimation, setShowSaveLoadingAnimation] = useState(false);
+  const [showSaveSuccessAnimation, setShowSaveSuccessAnimation] = useState(false);
   
   // Estados para os dados do portfólio
   const [basicInfo, setBasicInfo] = useState({
@@ -100,6 +104,9 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
         return;
       }
       
+      // Mostrar animação de loading
+      setShowSaveLoadingAnimation(true);
+      
       // Preparar dados limpos para atualização - APENAS campos da tabela player_portfolios
       
       const updateData: any = {
@@ -146,9 +153,14 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
       
       await updatePortfolio(updateData);
       
-      toast.success('Portfólio atualizado com sucesso!');
+      // Esconder loading e mostrar sucesso
+      setShowSaveLoadingAnimation(false);
+      setShowSaveSuccessAnimation(true);
+      
+      // Chamar onSave para atualizar a página pai
       onSave();
     } catch (error: any) {
+      setShowSaveLoadingAnimation(false);
       toast.error(`Erro ao salvar: ${error.message || 'Verifique os dados e tente novamente'}`);
     } finally {
       setLoading(false);
@@ -272,6 +284,7 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
 
 
   return (
+    <>
     <Dialog open onOpenChange={onClose}>
       <DialogContent 
         className="max-w-4xl flex flex-col p-0 max-h-screen overflow-hidden"
@@ -1378,5 +1391,16 @@ export function PortfolioEditor({ portfolio, onClose, onSave }: PortfolioEditorP
         )}
       </DialogContent>
     </Dialog>
+
+    {/* Animações de salvamento */}
+    {showSaveLoadingAnimation && <PortfolioSaveLoadingAnimation />}
+    {showSaveSuccessAnimation && (
+      <PortfolioSaveSuccess
+        onComplete={() => {
+          setShowSaveSuccessAnimation(false);
+        }}
+      />
+    )}
+    </>
   );
 }

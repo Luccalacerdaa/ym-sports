@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { PortfolioEditor } from "@/components/PortfolioEditor";
+import { SharePortfolioAnimation } from "@/components/SharePortfolioAnimation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -47,6 +48,8 @@ export default function Portfolio() {
   
   const [isEditing, setIsEditing] = useState(false);
   const [stats, setStats] = useState({ totalViews: 0, totalShares: 0 });
+  const [showShareAnimation, setShowShareAnimation] = useState(false);
+  const [sharePlatform, setSharePlatform] = useState<'link' | 'whatsapp' | 'email'>('link');
 
   // Carregar estatísticas
   useEffect(() => {
@@ -128,14 +131,19 @@ export default function Portfolio() {
     try {
       if (platform === 'link') {
         await navigator.clipboard.writeText(shareUrl);
-        toast.success('Link copiado para a área de transferência!');
+        setSharePlatform('link');
+        setShowShareAnimation(true);
       } else if (platform === 'whatsapp') {
         const message = `Confira meu portfólio de jogador: ${shareUrl}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+        setSharePlatform('whatsapp');
+        setShowShareAnimation(true);
       } else if (platform === 'email') {
         const subject = `Portfólio de ${portfolio.full_name}`;
         const body = `Olá!\n\nConfira meu portfólio de jogador: ${shareUrl}\n\nObrigado!`;
         window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+        setSharePlatform('email');
+        setShowShareAnimation(true);
       }
       
       await registerShare(portfolio.id, platform);
@@ -461,6 +469,16 @@ export default function Portfolio() {
             // Recarregar dados para mostrar alterações imediatamente
             await fetchMyPortfolio();
             console.log('✅ Portfólio recarregado!');
+          }}
+        />
+      )}
+
+      {/* Animação de compartilhamento */}
+      {showShareAnimation && (
+        <SharePortfolioAnimation
+          platform={sharePlatform}
+          onComplete={() => {
+            setShowShareAnimation(false);
           }}
         />
       )}
