@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { useAINutrition } from "@/hooks/useAINutrition";
 import { useNutritionPlans } from "@/hooks/useNutritionPlans";
 import { useProfile } from "@/hooks/useProfile";
+import { NutritionLoadingAnimation } from "@/components/NutritionLoadingAnimation";
+import { TrophyNutritionSuccess } from "@/components/TrophyNutritionSuccess";
 import { 
   NutritionRequest, 
   NutritionPlan, 
@@ -34,6 +36,12 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
   const [step, setStep] = useState<'form' | 'generating' | 'review'>('form');
   const [generatedPlan, setGeneratedPlan] = useState<NutritionPlan | null>(null);
   const [savingPlan, setSavingPlan] = useState(false);
+  
+  // Estados para animações
+  const [showLoadingAnimation, setShowLoadingAnimation] = useState(false);
+  const [loadingPhase, setLoadingPhase] = useState<'saving' | 'generating'>('saving');
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   
   // Formulário
   const [goals, setGoals] = useState<string[]>([]);
@@ -167,6 +175,11 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
     
     console.log('✅ [GENERATOR] Preferências processadas:', processedPreferences);
 
+    // Fechar dialog e iniciar animação
+    onClose();
+    setShowLoadingAnimation(true);
+    setLoadingPhase('saving');
+
     // Salvar preferências alimentares
     console.log('💾 [GENERATOR] Salvando preferências...');
     await saveFoodPreferences(processedPreferences);
@@ -184,8 +197,8 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
     
     console.log('📦 [GENERATOR] Request preparado:', request);
     
-    // Mudar para o estado de geração
-    setStep('generating');
+    // Mudar para fase de geração
+    setLoadingPhase('generating');
     console.log('⏳ [GENERATOR] Gerando plano...');
     
     try {
@@ -197,13 +210,28 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
         daysCount: plan?.days?.length || 0
       });
       setGeneratedPlan(plan);
-      setStep('review');
-      console.log('📋 [GENERATOR] Mudando para review');
+      
+      // Esconder loading e mostrar animação de sucesso
+      setShowLoadingAnimation(false);
+      const dayLabels = selectedDays
+        .map(day => DAYS_OF_WEEK.find(d => d.value === day)?.label)
+        .join(' e ');
+      setSuccessMessage(`Plano para ${dayLabels} criado!`);
+      setShowSuccessAnimation(true);
+      
+      console.log('📋 [GENERATOR] Animação de sucesso ativada');
     } catch (error: any) {
       console.error('❌ [GENERATOR] Erro ao gerar plano:', error);
+      setShowLoadingAnimation(false);
       toast.error(`Erro ao gerar plano: ${error.message}`);
-      setStep('form');
     }
+  };
+  
+  // Callback quando animação de sucesso completa
+  const handleSuccessComplete = () => {
+    setShowSuccessAnimation(false);
+    setStep('review');
+    // Dialog será reaberto automaticamente porque step = 'review'
   };
   
   // Salvar plano
@@ -563,18 +591,33 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
   };
   
   return (
-    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent 
-        className="sm:max-w-[600px] overflow-y-auto"
-        style={{
-          maxHeight: 'calc(90vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))',
-          paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))'
-        }}
-      >
-        {step === 'form' && renderForm()}
-        {step === 'generating' && renderGenerating()}
-        {step === 'review' && renderReview()}
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={step !== 'form' || true} onOpenChange={(open) => !open && onClose()}>
+        <DialogContent 
+          className="sm:max-w-[600px] overflow-y-auto"
+          style={{
+            maxHeight: 'calc(90vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))',
+            paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))'
+          }}
+        >
+          {step === 'form' && renderForm()}
+          {step === 'generating' && renderGenerating()}
+          {step === 'review' && renderReview()}
+        </DialogContent>
+      </Dialog>
+
+      {/* Animação de Loading */}
+      {showLoadingAnimation && (
+        <NutritionLoadingAnimation phase={loadingPhase} />
+      )}
+
+      {/* Animação de Sucesso */}
+      {showSuccessAnimation && (
+        <TrophyNutritionSuccess
+          message={successMessage}
+          onComplete={handleSuccessComplete}
+        />
+      )}
+    </>
   );
 }
