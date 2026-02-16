@@ -15,6 +15,7 @@ import { useProgress } from "@/hooks/useProgress";
 import ExerciseVisualizer from "@/components/ExerciseVisualizer";
 import { TrainingLoadingAnimation } from "@/components/TrainingLoadingAnimation";
 import { LightningStrikeSuccess } from "@/components/LightningStrikeSuccess";
+import { WorkoutCompleteSuccess } from "@/components/WorkoutCompleteSuccess";
 import { toast } from "sonner";
 import { 
   Dumbbell, 
@@ -78,6 +79,12 @@ export default function Training() {
   const [loadingPhase, setLoadingPhase] = useState<'deleting' | 'generating' | 'saving'>('generating');
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [showWorkoutCompleteAnimation, setShowWorkoutCompleteAnimation] = useState(false);
+  const [workoutCompleteData, setWorkoutCompleteData] = useState<{
+    points: number;
+    levelIncreased: boolean;
+    newLevel?: number;
+  } | null>(null);
   
   // Mapeamento fixo de tempo → quantidade de exercícios
   const DURATION_EXERCISE_MAP = {
@@ -282,11 +289,16 @@ export default function Training() {
         training_id: training.id,
       });
 
-      if (result?.levelIncreased) {
-        toast.success(`🎉 Parabéns! Você subiu para o nível ${result.newLevel}!`);
-      } else {
-        toast.success("Treino completado! Pontos adicionados ao seu progresso.");
-      }
+      // Fechar o dialog de detalhes se estiver aberto
+      setIsTrainingDetailOpen(false);
+
+      // Mostrar animação de sucesso
+      setWorkoutCompleteData({
+        points: result?.points || 0,
+        levelIncreased: result?.levelIncreased || false,
+        newLevel: result?.newLevel,
+      });
+      setShowWorkoutCompleteAnimation(true);
     } catch (error: any) {
       console.error('Erro ao registrar treino:', error);
       toast.error(error.message || "Erro ao registrar progresso do treino");
@@ -855,6 +867,19 @@ export default function Training() {
           onComplete={() => {
             setShowSuccessAnimation(false);
             fetchTrainings();
+          }}
+        />
+      )}
+
+      {/* Animação de Treino Completado */}
+      {showWorkoutCompleteAnimation && workoutCompleteData && (
+        <WorkoutCompleteSuccess
+          points={workoutCompleteData.points}
+          levelIncreased={workoutCompleteData.levelIncreased}
+          newLevel={workoutCompleteData.newLevel}
+          onComplete={() => {
+            setShowWorkoutCompleteAnimation(false);
+            setWorkoutCompleteData(null);
           }}
         />
       )}

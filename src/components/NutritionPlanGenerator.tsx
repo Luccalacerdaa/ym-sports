@@ -592,7 +592,7 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
   
   return (
     <>
-      <Dialog open={step !== 'form' || true} onOpenChange={(open) => !open && onClose()}>
+      <Dialog open={step === 'form' || step === 'review'} onOpenChange={(open) => !open && onClose()}>
         <DialogContent 
           className="sm:max-w-[600px] overflow-y-auto"
           style={{
