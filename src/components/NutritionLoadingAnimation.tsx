@@ -17,7 +17,6 @@ export function NutritionLoadingAnimation({ phase }: NutritionLoadingAnimationPr
     { icon: <div className="w-8 h-8 rounded-full bg-amber-700" />, delay: 1, position: { top: '35%', right: '35%' } }, // Feijão
     { icon: <Beef className="w-10 h-10 text-red-400" />, delay: 2, position: { bottom: '35%', left: '35%' } }, // Carne
     { icon: <Salad className="w-10 h-10 text-green-400" />, delay: 3, position: { bottom: '35%', right: '35%' } }, // Salada
-    { icon: <Apple className="w-9 h-9 text-red-500" />, delay: 4, position: { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' } }, // Fruta
   ];
 
   // Partículas flutuantes ao redor

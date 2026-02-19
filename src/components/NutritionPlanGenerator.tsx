@@ -68,10 +68,7 @@ export function NutritionPlanGenerator({ onClose, onPlanCreated }: NutritionPlan
   const availableMealTypes = [
     { id: 'cafe_da_manha', label: 'Café da manhã' },
     { id: 'almoco', label: 'Almoço' },
-    { id: 'lanche', label: 'Lanche' },
-    { id: 'jantar', label: 'Jantar' },
-    { id: 'pre_treino', label: 'Pré-treino' },
-    { id: 'pos_treino', label: 'Pós-treino' }
+    { id: 'jantar', label: 'Jantar' }
   ];
   
   const DAYS_OF_WEEK = [

@@ -303,7 +303,7 @@ function NutritionContent() {
               <Button 
                 size="sm" 
                 onClick={() => setIsGeneratorOpen(true)}
-                className="bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-black font-semibold shadow-lg shadow-green-500/50"
+                className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold shadow-[0_0_20px_rgba(252,211,77,0.6)] hover:shadow-[0_0_30px_rgba(252,211,77,0.9)] transition-all"
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Novo Plano
@@ -697,7 +697,7 @@ function NutritionContent() {
             variant="outline" 
             size="sm"
             onClick={() => setIsGeneratorOpen(true)}
-            className="bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-black font-semibold shadow-lg shadow-green-500/50 border-0"
+            className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold shadow-[0_0_20px_rgba(252,211,77,0.6)] hover:shadow-[0_0_30px_rgba(252,211,77,0.9)] transition-all border-0"
           >
             <Plus className="h-4 w-4 mr-2" />
             Novo Plano
