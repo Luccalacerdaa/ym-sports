@@ -1,4 +1,4 @@
-import { User, Settings, LogOut, Apple, TrendingUp, Dumbbell, Trophy, FileUser, Palette } from "lucide-react";
+import { User, Settings, LogOut, Apple, TrendingUp, Dumbbell, Trophy, FileUser, Palette, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
@@ -73,6 +73,10 @@ export function TopNavBar() {
             <DropdownMenuItem onClick={() => navigate("/dashboard/design")} className="py-3 px-4 text-base">
               <Palette className="mr-3 h-5 w-5 text-yellow-500" />
               <span>YM Design</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/dashboard/tutorials")} className="py-3 px-4 text-base">
+              <BookOpen className="mr-3 h-5 w-5 text-yellow-500" />
+              <span>Tutoriais</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/dashboard/settings")} className="py-3 px-4 text-base">
               <Settings className="mr-3 h-5 w-5 text-yellow-500" />

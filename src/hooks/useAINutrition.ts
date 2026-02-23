@@ -82,18 +82,19 @@ SOLICITAÇÃO DE PLANO NUTRICIONAL:
 INSTRUÇÕES:
 Você é um nutricionista esportivo especializado em futebol com 15+ anos de experiência. Crie um plano nutricional ULTRA PERSONALIZADO baseado no perfil específico do atleta.
 
-IMPORTANTE - LEIA COM MUITA ATENÇÃO:
-- Gere planos para TODOS os dias solicitados (${request.daysCount} dias)
-- Cada dia deve ter TODAS as refeições solicitadas (${mealTypesText})
-- Adapte as refeições ao nível de complexidade solicitado (${request.complexityLevel})
-- NUNCA inclua alimentos listados como "a evitar" ou "alergias"
-- USE os alimentos favoritos como PREFERÊNCIA, mas NÃO SE LIMITE apenas a eles
-- IMPORTANTE: Mesmo que o atleta tenha alimentos favoritos, você DEVE incluir VARIEDADE nutricional
-- Se o atleta informou 2-3 favoritos, use PELO MENOS 5-8 alimentos DIFERENTES por dia
-- Alimentos favoritos devem aparecer em 30-40% das refeições, NÃO em 100%
-- Use MÁXIMO 2-3 alimentos por refeição para garantir resposta completa
-- Calcule calorias e macronutrientes básicos
-- VARIEDADE é ESSENCIAL: inclua verduras, legumes, frutas, proteínas variadas, carboidratos diferentes
+REGRAS ABSOLUTAS - NUNCA DESCUMPRA:
+1. Gere planos para TODOS os dias solicitados (${request.daysCount} dias)
+2. OBRIGATÓRIO: Cada dia DEVE conter EXATAMENTE as refeições: ${mealTypesText}
+   - Se foram pedidas 3 refeições (café, almoço, jantar), CADA DIA deve ter as 3
+   - Se foi pedida 1 refeição, CADA DIA deve ter essa 1 refeição
+   - NUNCA pule ou omita uma refeição solicitada
+3. Use MÁXIMO 2 alimentos por refeição para garantir resposta completa e não truncada
+4. NUNCA corte o JSON no meio — finalize sempre com chaves/colchetes fechados corretamente
+5. NUNCA inclua alimentos listados como "a evitar" ou "alergias"
+6. USE os alimentos favoritos como PREFERÊNCIA, mas NÃO SE LIMITE apenas a eles
+7. Alimentos favoritos devem aparecer em 30-40% das refeições, NÃO em 100%
+8. Calcule calorias e macronutrientes básicos
+9. VARIEDADE é ESSENCIAL: inclua verduras, legumes, frutas, proteínas variadas, carboidratos diferentes
 
 EXEMPLO DE BOA VARIEDADE:
 - Café: Pão integral + Ovo + Abacate (não apenas "frango")
@@ -333,11 +334,11 @@ FORMATO DE RESPOSTA (JSON):
 
     try {
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-3.5-turbo-16k",
         messages: [
           {
             role: "system",
-            content: "Você é um nutricionista esportivo especializado em futebol. Responda SEMPRE com JSON válido seguindo exatamente o formato solicitado. CRÍTICO: NUNCA corte a resposta no meio - termine sempre com } válido. Se necessário, use menos alimentos por refeição (máximo 2-3) para garantir resposta completa. Priorize completude sobre quantidade."
+            content: "Você é um nutricionista esportivo especializado em futebol. Responda SEMPRE com JSON válido seguindo exatamente o formato solicitado. CRÍTICO: NUNCA corte a resposta no meio - termine sempre com } válido. OBRIGATÓRIO: Gere TODAS as refeições solicitadas para TODOS os dias - se foram pedidos café da manhã, almoço e jantar, TODOS os 3 devem aparecer em CADA dia. Use no máximo 2 alimentos por refeição para garantir resposta completa. Priorize completude sobre quantidade de alimentos."
           },
           {
             role: "user",
@@ -345,7 +346,7 @@ FORMATO DE RESPOSTA (JSON):
           }
         ],
         temperature: 0.7,
-        max_tokens: 4096,
+        max_tokens: 8000,
       });
 
       const responseText = completion.choices[0]?.message?.content;

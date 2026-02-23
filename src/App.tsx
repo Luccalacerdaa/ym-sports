@@ -35,6 +35,7 @@ import AdminRankings from "./pages/AdminRankings";
 import DashboardLayout from "./pages/DashboardLayout";
 import NotFound from "./pages/NotFound";
 import InstallGuide from "./pages/InstallGuide";
+import Tutorials from "./pages/Tutorials";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +85,7 @@ const AppContent = () => {
                 <Route path="settings" element={<Settings />} />
                 <Route path="notification-test" element={<NotificationTest />} />
                 <Route path="admin-rankings" element={<AdminRankings />} />
+                <Route path="tutorials" element={<Tutorials />} />
             </Route>
             <Route path="/portfolio/:slug" element={<PublicPortfolio />} />
             <Route path="*" element={<NotFound />} />
