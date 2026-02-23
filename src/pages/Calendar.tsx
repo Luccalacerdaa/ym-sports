@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEvents } from "@/hooks/useEvents";
 import { toast } from "sonner";
+import { CalendarEventSuccess } from "@/components/CalendarEventSuccess";
 import ReactCalendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import './Calendar.css';
@@ -31,6 +32,8 @@ export default function Calendar() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [dialogHeight, setDialogHeight] = useState<number>(0);
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [createdEventData, setCreatedEventData] = useState<{ title: string; type: 'game' | 'training' | 'personal' | 'other' } | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -172,8 +175,9 @@ export default function Calendar() {
         if (error) {
           toast.error("Erro ao criar evento: " + error.message);
         } else {
-          toast.success("Evento criado com sucesso!");
           setIsCreateDialogOpen(false);
+          setCreatedEventData({ title: formData.title, type: formData.event_type });
+          setShowSuccessAnimation(true);
           resetForm();
         }
       }
@@ -604,6 +608,18 @@ export default function Calendar() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Animação de evento criado */}
+      {showSuccessAnimation && createdEventData && (
+        <CalendarEventSuccess
+          eventTitle={createdEventData.title}
+          eventType={createdEventData.type}
+          onComplete={() => {
+            setShowSuccessAnimation(false);
+            setCreatedEventData(null);
+          }}
+        />
+      )}
     </div>
   );
 }
