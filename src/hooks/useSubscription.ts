@@ -89,14 +89,19 @@ export const useSubscription = () => {
   };
 
   // Gerar link de checkout da Hotmart
-  // Usa go.hotmart.com/{checkout_code} que aceita query params e redireciona para o checkout real
+  // Usa pay.hotmart.com/{checkout_code} com offer code e sck para rastrear o usuário
   const generateCheckoutLink = (plan: SubscriptionPlan, affiliateCode?: string): string => {
     const checkoutCode = plan.hotmart_checkout_code || plan.hotmart_product_id;
-    const baseUrl = `https://go.hotmart.com/${checkoutCode}`;
+    const baseUrl = `https://pay.hotmart.com/${checkoutCode}`;
     
     const params = new URLSearchParams();
     
-    // Passar user_id como parâmetro customizado (a Hotmart devolve no webhook via sck)
+    // Offer code (obrigatório para ir para a oferta correta)
+    if (plan.hotmart_offer_code) {
+      params.append('off', plan.hotmart_offer_code);
+    }
+    
+    // Passar user_id como sck — a Hotmart devolve em purchase.origin.sck no webhook
     if (user?.id) {
       params.append('sck', user.id);
     }
@@ -106,7 +111,7 @@ export const useSubscription = () => {
       params.append('ap', affiliateCode);
     }
     
-    // Adicionar email do usuário para pré-preencher checkout
+    // Pré-preencher email no checkout
     if (user?.email) {
       params.append('email', user.email);
     }

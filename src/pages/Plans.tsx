@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
-import { Check, Star, Zap, Shield, LogOut } from "lucide-react";
+import { Check, LogOut, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase";
+import { Card } from "@/components/ui/card";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import logoImage from "@/assets/ym-sports-logo-white-bg.png";
+import stadiumBwImage from "@/assets/stadium-bw.jpg";
 
 type PlanKey = "monthly" | "quarterly" | "biannual";
 
@@ -15,10 +17,10 @@ const planDurations: Record<PlanKey, number> = {
   biannual: 180,
 };
 
-const planLabels: Record<PlanKey, { name: string; badge?: string; savings?: string }> = {
-  monthly: { name: "Mensal" },
-  quarterly: { name: "Trimestral", badge: "MAIS POPULAR", savings: "Economia de 16%" },
-  biannual: { name: "Semestral", savings: "Economia de 21%" },
+const planPrices: Record<PlanKey, { value: number; total?: number; label: string; discount?: string }> = {
+  monthly: { value: 39.90, label: "Mensal" },
+  quarterly: { value: 33.30, total: 99.90, label: "Trimestral", discount: "16% OFF" },
+  biannual: { value: 31.65, total: 189.90, label: "Semestral", discount: "21% OFF" },
 };
 
 export default function Plans() {
@@ -34,38 +36,35 @@ export default function Plans() {
     }
   }, [loading, hasActiveSubscription, navigate]);
 
-  // Pegar afiliado do localStorage se houver
   const affiliateCode = localStorage.getItem("affiliate_code");
 
   const handleSelectPlan = () => {
     const duration = planDurations[selectedPlan];
     const matchingPlan = plans.find((p) => p.duration_days === duration);
 
-    if (!matchingPlan) return;
+    if (!matchingPlan) {
+      // Se não há planos no banco ainda, ir para signup/plans depois
+      if (!user) {
+        navigate("/auth/signup");
+        return;
+      }
+      return;
+    }
 
-    if (user) {
+    if (!user) {
       localStorage.setItem("selected_plan_id", matchingPlan.id);
-      redirectToCheckout(matchingPlan, affiliateCode || undefined);
-    } else {
       localStorage.setItem("selected_plan_duration", String(duration));
       navigate("/auth/signup");
+      return;
     }
+
+    redirectToCheckout(matchingPlan, affiliateCode || undefined);
   };
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
   };
-
-  const features = [
-    "Treinos personalizados com IA",
-    "Planos nutricionais completos",
-    "Ranking nacional de jogadores",
-    "Portfólio profissional de atleta",
-    "Calendário de eventos e lembretes",
-    "Projeção de altura",
-    "Suporte prioritário via WhatsApp",
-  ];
 
   if (loading) {
     return (
@@ -76,9 +75,12 @@ export default function Plans() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-gray-950 to-black flex flex-col">
+    <div className="min-h-screen bg-black flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-safe-top pb-4 pt-6">
+      <div
+        className="flex items-center justify-between px-5 pb-4"
+        style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 1.5rem)' }}
+      >
         <img src={logoImage} alt="YM Sports" className="h-10 object-contain" />
         {user && (
           <button
@@ -91,156 +93,120 @@ export default function Plans() {
         )}
       </div>
 
-      <div className="flex-1 flex flex-col items-center px-5 pb-10">
+      <div className="flex-1 flex flex-col items-center px-4 pb-10">
         {/* Title */}
-        <div className="text-center mb-8 mt-4">
-          {user ? (
-            <>
-              <p className="text-yellow-400 text-sm font-semibold mb-2 tracking-widest uppercase">
-                Quase lá!
-              </p>
-              <h1 className="text-3xl font-black text-white leading-tight">
-                Escolha seu plano
-              </h1>
-              <p className="text-gray-400 mt-2 text-sm">
-                Selecione o plano e complete o pagamento para ativar sua conta
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="text-yellow-400 text-sm font-semibold mb-2 tracking-widest uppercase">
-                Comece agora
-              </p>
-              <h1 className="text-3xl font-black text-white leading-tight">
-                Escolha seu plano
-              </h1>
-              <p className="text-gray-400 mt-2 text-sm">
-                Acesso completo a todas as ferramentas do atleta
-              </p>
-            </>
-          )}
-        </div>
-
-        {/* Plan cards */}
-        <div className="w-full max-w-md space-y-3 mb-6">
-          {(["monthly", "quarterly", "biannual"] as PlanKey[]).map((key) => {
-            const duration = planDurations[key];
-            const plan = plans.find((p) => p.duration_days === duration);
-            const label = planLabels[key];
-            const isSelected = selectedPlan === key;
-            const isPopular = key === "quarterly";
-
-            return (
-              <button
-                key={key}
-                onClick={() => setSelectedPlan(key)}
-                className={`w-full text-left rounded-2xl border-2 p-4 transition-all duration-200 relative ${
-                  isSelected
-                    ? "border-yellow-500 bg-yellow-500/10 shadow-[0_0_20px_rgba(234,179,8,0.3)]"
-                    : "border-gray-800 bg-gray-900/50 hover:border-gray-600"
-                }`}
-              >
-                {/* Badge */}
-                {label.badge && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-xs font-black px-3 py-0.5 rounded-full">
-                    {label.badge}
-                  </span>
-                )}
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {/* Radio */}
-                    <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                        isSelected
-                          ? "border-yellow-500 bg-yellow-500"
-                          : "border-gray-600"
-                      }`}
-                    >
-                      {isSelected && (
-                        <div className="w-2 h-2 bg-black rounded-full" />
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-white text-base">
-                          {label.name}
-                        </span>
-                        {label.savings && (
-                          <span className="text-xs text-green-400 font-medium">
-                            {label.savings}
-                          </span>
-                        )}
-                      </div>
-                      {plan && key === "quarterly" && (
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          Apenas R$ 33,30/mês
-                        </p>
-                      )}
-                      {plan && key === "biannual" && (
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          Apenas R$ 31,65/mês
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    {plan ? (
-                      <>
-                        <span className="text-xl font-black text-white">
-                          R$ {plan.price_brl.toFixed(2).replace(".", ",")}
-                        </span>
-                        {key === "monthly" && (
-                          <p className="text-xs text-gray-500">/mês</p>
-                        )}
-                      </>
-                    ) : (
-                      <span className="text-gray-500 text-sm">Carregando...</span>
-                    )}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Features */}
-        <div className="w-full max-w-md mb-8">
-          <p className="text-gray-500 text-xs uppercase tracking-widest mb-3 text-center">
-            Incluso em todos os planos
+        <div className="text-center mb-8 mt-2">
+          <h2 className="font-bebas uppercase leading-[0.9] mb-4">
+            <div className="text-white text-[clamp(2rem,6vw,4rem)] mb-1">CADA GRANDE JOGADOR</div>
+            <div className="text-yellow-500 text-[clamp(1.8rem,5vw,3.5rem)] mb-2">
+              COMEÇOU COM UM PRIMEIRO PASSO
+            </div>
+            <div className="text-yellow-500 font-bold tracking-wide text-[clamp(2.8rem,7vw,5rem)]">
+              DÊ O SEU AGORA!
+            </div>
+          </h2>
+          <p className="text-lg text-gray-400 max-w-md mx-auto">
+            Porque todo sonho merece uma chance real.
           </p>
-          <div className="space-y-2">
-            {features.map((feature) => (
-              <div key={feature} className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded-full bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
-                  <Check className="w-3 h-3 text-yellow-500" strokeWidth={3} />
-                </div>
-                <span className="text-gray-300 text-sm">{feature}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
-        {/* CTA Button */}
-        <div className="w-full max-w-md space-y-3">
-          <Button
-            onClick={handleSelectPlan}
-            className="w-full h-14 text-lg font-black bg-yellow-500 hover:bg-yellow-400 text-black rounded-2xl shadow-[0_0_30px_rgba(234,179,8,0.5)] hover:shadow-[0_0_40px_rgba(234,179,8,0.7)] transition-all"
-            disabled={plans.length === 0}
-          >
-            <Zap className="mr-2 h-5 w-5" />
-            Assinar agora
-          </Button>
+        <div className="w-full max-w-xl">
+          {/* Toggle Group — idêntico à landing */}
+          <div className="flex justify-center mb-8">
+            <ToggleGroup
+              type="single"
+              value={selectedPlan}
+              onValueChange={(v) => v && setSelectedPlan(v as PlanKey)}
+              className="bg-card rounded-xl p-2 gap-2"
+            >
+              <ToggleGroupItem
+                value="monthly"
+                className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=off]:bg-transparent data-[state=off]:text-muted-foreground px-6 py-3 rounded-lg transition-all hover:bg-primary/20"
+              >
+                Mensal
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="quarterly"
+                className="data-[state=on]:bg-green-500 data-[state=on]:text-white data-[state=off]:bg-transparent data-[state=off]:text-muted-foreground px-6 py-3 rounded-lg transition-all relative hover:bg-green-500/20"
+              >
+                Trimestral
+                <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                  16%
+                </span>
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="biannual"
+                className="data-[state=on]:bg-green-500 data-[state=on]:text-white data-[state=off]:bg-transparent data-[state=off]:text-muted-foreground px-6 py-3 rounded-lg transition-all relative hover:bg-green-500/20"
+              >
+                Semestral
+                <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                  21%
+                </span>
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
 
-          <div className="flex items-center justify-center gap-2 text-gray-600 text-xs">
+          {/* Pricing Card — idêntico à landing */}
+          <Card
+            className={`p-8 md:p-10 text-center relative overflow-hidden shadow-xl transition-all duration-300 ${
+              selectedPlan === "quarterly"
+                ? "border-2 border-yellow-500 shadow-[0_0_40px_rgba(252,211,77,0.8)]"
+                : "border-border hover:border-primary hover:shadow-[0_0_30px_rgba(252,211,77,0.6)]"
+            }`}
+          >
+            {/* Background */}
+            <div
+              className="absolute inset-0 bg-cover bg-center opacity-50"
+              style={{ backgroundImage: `url(${stadiumBwImage})` }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-black/50 via-black/40 to-black/50" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-primary/10" />
+
+            <div className="relative z-10">
+              {/* Preço */}
+              <div className="mb-6">
+                <div className="text-5xl md:text-6xl font-bold text-foreground mb-2">
+                  R$ {planPrices[selectedPlan].value.toFixed(2).replace(".", ",")}
+                  <span className="text-2xl text-muted-foreground">/mês</span>
+                </div>
+                {selectedPlan !== "monthly" && (
+                  <div className="text-muted-foreground">
+                    Total: R$ {planPrices[selectedPlan].total!.toFixed(2).replace(".", ",")} por{" "}
+                    {selectedPlan === "quarterly" ? "3 meses" : "6 meses"}
+                  </div>
+                )}
+              </div>
+
+              {/* Features */}
+              <ul className="space-y-3 mb-8">
+                {[
+                  "Calendário inteligente de jogos",
+                  "Treinos personalizados com IA",
+                  "Ranking regional atualizado",
+                  "Portfólio de divulgação pessoal",
+                  "Benefícios e oportunidades de divulgação de atletas",
+                ].map((feature) => (
+                  <li key={feature} className="flex items-center justify-center gap-2 text-foreground">
+                    <Check className="w-5 h-5 text-primary" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+
+              <Button variant="hero" size="xl" onClick={handleSelectPlan} className="w-full md:w-auto">
+                Assinar {planPrices[selectedPlan].label}
+              </Button>
+            </div>
+          </Card>
+
+          {/* Segurança */}
+          <div className="flex items-center justify-center gap-2 text-gray-600 text-xs mt-4">
             <Shield className="h-3 w-3" />
             <span>Pagamento 100% seguro via Hotmart</span>
           </div>
 
           {!user && (
-            <p className="text-center text-gray-600 text-xs">
+            <p className="text-center text-gray-600 text-xs mt-3">
               Já tem uma conta?{" "}
               <button
                 onClick={() => navigate("/auth/login")}

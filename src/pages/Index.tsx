@@ -165,7 +165,8 @@ const Index = () => {
     // Se usuário não está logado, redirecionar para cadastro
     if (!user) {
       localStorage.setItem('selected_plan_id', matchingPlan.id);
-      navigate('/signup');
+      localStorage.setItem('selected_plan_duration', String(selectedDuration));
+      navigate('/auth/signup');
       return;
     }
     

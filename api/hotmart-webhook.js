@@ -51,24 +51,23 @@ export default async function handler(req, res) {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Extrair dados do payload
+    // Extrair dados do payload (Hotmart v2.0.0)
     const data = payload.data || payload;
     const buyer = data.buyer || {};
     const product = data.product || {};
     const purchase = data.purchase || {};
-    const affiliates = data.affiliates || data.commissions?.[0] || {};
+    const affiliates = data.affiliates?.[0] || data.commissions?.[0] || {};
     
     // Transaction ID único da Hotmart
     const transactionId = purchase.transaction || data.transaction;
     
-    // Extrair user_id customizado (passado no checkout via sck param)
-    // A Hotmart devolve o parâmetro 'sck' dentro de tracking_parameters ou custom_fields
-    const userId = purchase.tracking_parameters?.sck ||
+    // Extrair user_id via parâmetro sck (passado no checkout URL)
+    // Na v2.0.0, o sck fica em purchase.origin.sck
+    const userId = purchase.origin?.sck ||
+                   purchase.tracking_parameters?.sck ||
                    data.tracking_parameters?.sck ||
                    purchase.custom_fields?.sck ||
                    data.custom_fields?.sck ||
-                   purchase.custom_fields?.sck_user_id || 
-                   data.custom_fields?.sck_user_id ||
                    null;
 
     console.log('🆔 Transaction ID:', transactionId);
@@ -245,6 +244,24 @@ async function handlePurchaseComplete(supabase, payload, userId, webhookId) {
 
     console.log('✅ Assinatura criada/atualizada:', subscription.id);
     console.log('📅 Válida até:', expiresAt.toISOString());
+
+    // Atualizar profiles com status da assinatura (acesso rápido sem JOIN)
+    const planNameLower = plan.name?.toLowerCase() || 'mensal';
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        subscription_status: 'active',
+        subscription_plan: planNameLower,
+        subscription_expires_at: expiresAt.toISOString(),
+        hotmart_subscriber_code: data.subscription?.subscriber?.code || null,
+      })
+      .eq('id', finalUserId);
+
+    if (profileError) {
+      console.warn('⚠️ Erro ao atualizar profiles (não crítico):', profileError.message);
+    } else {
+      console.log('✅ Profile atualizado com subscription_status=active');
+    }
     
     if (affiliates.affiliate_code) {
       console.log('👥 Venda via afiliado:', affiliates.name, '(' + affiliates.affiliate_code + ')');
@@ -291,6 +308,12 @@ async function handleSubscriptionCancellation(supabase, payload, userId, webhook
     }
 
     console.log('✅ Assinatura cancelada:', subscription.id);
+
+    // Atualizar profile
+    if (subscription?.user_id) {
+      await supabase.from('profiles').update({ subscription_status: 'cancelled' }).eq('id', subscription.user_id);
+    }
+
     return { success: true, message: 'Subscription cancelled', subscriptionId: subscription.id };
 
   } catch (error) {
@@ -323,6 +346,12 @@ async function handleRefund(supabase, payload, userId, webhookId) {
     }
 
     console.log('✅ Reembolso processado:', subscription.id);
+
+    // Atualizar profile
+    if (subscription?.user_id) {
+      await supabase.from('profiles').update({ subscription_status: 'refunded' }).eq('id', subscription.user_id);
+    }
+
     return { success: true, message: 'Refund processed', subscriptionId: subscription.id };
 
   } catch (error) {
