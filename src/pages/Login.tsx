@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import logoImage from "@/assets/ym-sports-logo-white-bg.png";
@@ -27,7 +28,26 @@ const Login = () => {
         toast.error("Erro ao fazer login: " + error.message);
       } else {
         toast.success("Login realizado com sucesso!");
-        navigate("/dashboard");
+        
+        // Verificar se o usuário tem assinatura ativa
+        const userId = data?.user?.id;
+        if (userId) {
+          const { data: sub } = await supabase
+            .from('user_subscriptions')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .gt('expires_at', new Date().toISOString())
+            .maybeSingle();
+
+          if (sub) {
+            navigate("/dashboard");
+          } else {
+            navigate("/plans");
+          }
+        } else {
+          navigate("/plans");
+        }
       }
     } catch (error) {
       toast.error("Erro inesperado ao fazer login");

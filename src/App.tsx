@@ -8,6 +8,8 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { SplashScreen } from "./components/SplashScreen";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import SubscriptionGate from "./components/SubscriptionGate";
+import Plans from "./pages/Plans";
 import { useSimpleNotifications } from "./hooks/useSimpleNotifications";
 import { useDailyNotifications } from "./hooks/useDailyNotifications";
 import { useEventNotifications } from "./hooks/useEventNotifications";
@@ -63,10 +65,13 @@ const AppContent = () => {
             <Route path="/install-guide" element={<InstallGuide />} />
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/signup" element={<Signup />} />
+            <Route path="/plans" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
             <Route path="/payment/success" element={<PaymentSuccess />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
-                <DashboardLayout />
+                <SubscriptionGate>
+                  <DashboardLayout />
+                </SubscriptionGate>
               </ProtectedRoute>
             }>
               <Route index element={<Dashboard />} />

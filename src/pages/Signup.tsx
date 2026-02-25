@@ -77,8 +77,8 @@ const Signup = () => {
         }
       }
 
-      toast.success("Conta criada com sucesso! Você já pode fazer login.");
-      navigate("/auth/login");
+      toast.success("Conta criada com sucesso!");
+      navigate("/plans");
     } catch (error) {
       toast.error("Erro inesperado ao criar conta");
     } finally {
