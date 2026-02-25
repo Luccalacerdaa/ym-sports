@@ -9,6 +9,7 @@ export interface SubscriptionPlan {
   price_brl: number;
   duration_days: number;
   hotmart_product_id: string;
+  hotmart_checkout_code: string;
   hotmart_offer_code: string;
   features: string[];
   is_active: boolean;
@@ -88,24 +89,21 @@ export const useSubscription = () => {
   };
 
   // Gerar link de checkout da Hotmart
+  // Usa go.hotmart.com/{checkout_code} que aceita query params e redireciona para o checkout real
   const generateCheckoutLink = (plan: SubscriptionPlan, affiliateCode?: string): string => {
-    const baseUrl = `https://pay.hotmart.com/${plan.hotmart_product_id}`;
+    const checkoutCode = plan.hotmart_checkout_code || plan.hotmart_product_id;
+    const baseUrl = `https://go.hotmart.com/${checkoutCode}`;
     
     const params = new URLSearchParams();
     
-    // Adicionar offer code se disponível
-    if (plan.hotmart_offer_code) {
-      params.append('off', plan.hotmart_offer_code);
-    }
-    
-    // Passar user_id como parâmetro customizado (a Hotmart devolve no webhook)
+    // Passar user_id como parâmetro customizado (a Hotmart devolve no webhook via sck)
     if (user?.id) {
-      params.append('sck_user_id', user.id); // sck = source key
+      params.append('sck', user.id);
     }
     
     // Adicionar código do afiliado se houver
     if (affiliateCode) {
-      params.append('src', affiliateCode); // src = source (afiliado)
+      params.append('ap', affiliateCode);
     }
     
     // Adicionar email do usuário para pré-preencher checkout
@@ -113,12 +111,8 @@ export const useSubscription = () => {
       params.append('email', user.email);
     }
     
-    // Adicionar nome se disponível
-    if (user?.user_metadata?.name) {
-      params.append('name', user.user_metadata.name);
-    }
-    
-    return `${baseUrl}?${params.toString()}`;
+    const queryString = params.toString();
+    return queryString ? `${baseUrl}?${queryString}` : baseUrl;
   };
 
   // Redirecionar para checkout

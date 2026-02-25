@@ -61,8 +61,13 @@ export default async function handler(req, res) {
     // Transaction ID único da Hotmart
     const transactionId = purchase.transaction || data.transaction;
     
-    // Extrair user_id customizado (passado no checkout)
-    const userId = purchase.custom_fields?.sck_user_id || 
+    // Extrair user_id customizado (passado no checkout via sck param)
+    // A Hotmart devolve o parâmetro 'sck' dentro de tracking_parameters ou custom_fields
+    const userId = purchase.tracking_parameters?.sck ||
+                   data.tracking_parameters?.sck ||
+                   purchase.custom_fields?.sck ||
+                   data.custom_fields?.sck ||
+                   purchase.custom_fields?.sck_user_id || 
                    data.custom_fields?.sck_user_id ||
                    null;
 
