@@ -226,8 +226,21 @@ async function handlePurchaseComplete(supabase, payload, userId, webhookId) {
               email: buyer.email,
             }).select().single();
 
-            // TODO: Enviar email de boas-vindas com link para definir senha
-            console.log('📧 Conta criada. Usuário precisa redefinir senha via:', buyer.email);
+            // Enviar email para o usuário definir sua senha
+            try {
+              const siteUrl = process.env.VITE_APP_URL || 'https://ym-sports.vercel.app';
+              const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+                buyer.email,
+                { redirectTo: `${siteUrl}/auth/reset-password` }
+              );
+              if (resetError) {
+                console.warn('⚠️ Erro ao enviar email de redefinição:', resetError.message);
+              } else {
+                console.log('📧 Email de definição de senha enviado para:', buyer.email);
+              }
+            } catch (emailErr) {
+              console.warn('⚠️ Exceção ao enviar email:', emailErr.message);
+            }
           }
         } catch (createErr) {
           console.error('❌ Exceção ao criar conta:', createErr.message);

@@ -115,7 +115,16 @@ const Login = () => {
               {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
-          <div className="mt-6 text-center">
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => navigate("/auth/forgot-password")}
+              className="text-sm text-muted-foreground hover:text-primary hover:underline"
+            >
+              Esqueci minha senha / Primeiro acesso
+            </button>
+          </div>
+          <div className="mt-4 text-center">
             <p className="text-sm text-muted-foreground">
               Ainda não tem conta?{" "}
               <button

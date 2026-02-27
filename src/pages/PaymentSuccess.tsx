@@ -3,14 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { CheckCircle2, Loader2, AlertCircle, RefreshCw, Mail, LogIn } from "lucide-react";
 import logoImage from "@/assets/ym-sports-logo-white-bg.png";
 
-type Status = "checking" | "success" | "pending";
+type Status = "checking" | "success" | "pending" | "no-session";
 
 // Verifica diretamente no Supabase se a assinatura foi ativada
 async function checkActiveSubscription(userId: string): Promise<boolean> {
-  // 1. Verificar profiles.subscription_status (atualizado pelo webhook)
   const { data: profile } = await supabase
     .from("profiles")
     .select("subscription_status, subscription_expires_at")
@@ -25,7 +24,6 @@ async function checkActiveSubscription(userId: string): Promise<boolean> {
     return true;
   }
 
-  // 2. Fallback: verificar user_subscriptions
   const { data: sub } = await supabase
     .from("user_subscriptions")
     .select("id")
@@ -78,12 +76,13 @@ export default function PaymentSuccess() {
 
   useEffect(() => {
     if (authLoading) return;
+
+    // Compra via afiliado: usuário chegou aqui sem estar logado no app
     if (!user) {
-      navigate("/auth/login");
+      setStatus("no-session");
       return;
     }
 
-    // Primeira verificação após 3 segundos
     scheduleNextCheck(0, user.id);
 
     return () => {
@@ -106,6 +105,9 @@ export default function PaymentSuccess() {
   };
 
   const handleGoToDashboard = () => navigate("/dashboard");
+  const handleGoToLogin = () => navigate("/auth/login");
+  const handleGoToForgotPassword = () => navigate("/auth/forgot-password");
+
 
   if (authLoading) {
     return (
@@ -117,10 +119,63 @@ export default function PaymentSuccess() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-950 to-black flex flex-col items-center justify-center p-4">
-      {/* Logo */}
       <img src={logoImage} alt="YM Sports" className="h-12 object-contain mb-8" />
 
       <div className="w-full max-w-sm">
+
+        {/* NO SESSION — compra via link de afiliado sem login prévio */}
+        {status === "no-session" && (
+          <div className="text-center space-y-6">
+            <div className="relative mx-auto w-28 h-28">
+              <div className="relative w-full h-full rounded-full bg-green-500/10 flex items-center justify-center border-2 border-green-500/60">
+                <CheckCircle2 className="h-12 w-12 text-green-500" />
+              </div>
+            </div>
+
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-2">
+                Pagamento confirmado!
+              </h1>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Sua compra foi aprovada. Agora é só acessar sua conta para começar.
+              </p>
+            </div>
+
+            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-4 text-left space-y-2">
+              <div className="flex items-start gap-3">
+                <Mail className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm text-yellow-400 font-semibold">Verifique seu email</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Se é sua primeira compra, enviamos um email para você criar sua senha. Cheque a caixa de entrada e o spam.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Button
+                onClick={handleGoToLogin}
+                className="w-full h-14 text-base font-black bg-yellow-500 hover:bg-yellow-400 text-black rounded-2xl shadow-[0_0_30px_rgba(234,179,8,0.4)]"
+              >
+                <LogIn className="mr-2 h-5 w-5" />
+                Já tenho conta — Entrar
+              </Button>
+
+              <Button
+                onClick={handleGoToForgotPassword}
+                variant="outline"
+                className="w-full h-12 border-yellow-500/40 text-yellow-500 hover:bg-yellow-500/10 rounded-2xl text-sm"
+              >
+                Esqueci minha senha / Primeiro acesso
+              </Button>
+            </div>
+
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Sua assinatura já está ativa no sistema. Assim que você entrar na conta, o acesso será liberado automaticamente.
+            </p>
+          </div>
+        )}
 
         {/* CHECKING */}
         {status === "checking" && (
