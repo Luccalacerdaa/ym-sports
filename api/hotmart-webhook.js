@@ -149,7 +149,14 @@ export default async function handler(req, res) {
   }
 }
 
-// Handler: Compra completa
+// Mapa fixo de product_id → plano (fallback quando subscription_plans não tem o dado)
+const PRODUCT_PLAN_MAP = {
+  '7196326': { name: 'mensal',     duration_days: 30,  price: 39.90 },
+  '7196731': { name: 'trimestral', duration_days: 90,  price: 99.90 },
+  '7196777': { name: 'semestral',  duration_days: 180, price: 189.90 },
+};
+
+// Handler: Compra completa — resiliente a falhas em tabelas auxiliares
 async function handlePurchaseComplete(supabase, payload, userId, webhookId) {
   console.log('\n💰 Processando compra completa...');
 
@@ -158,127 +165,131 @@ async function handlePurchaseComplete(supabase, payload, userId, webhookId) {
     const product = data.product || {};
     const purchase = data.purchase || {};
     const buyer = data.buyer || {};
-    const affiliates = data.affiliates || data.commissions?.[0] || {};
-    
+    const affiliates = data.affiliates?.[0] || {};
+
     const transactionId = purchase.transaction || data.transaction;
     const productId = product.id?.toString();
-    const subscriberCode = data.subscriber_code || buyer.email;
-    
-    // Se não temos user_id, tentar buscar por email
+
+    // ── 1. Identificar usuário ───────────────────────────────────────────
     let finalUserId = userId;
+
     if (!finalUserId && buyer.email) {
-      console.log('🔍 User ID não informado, buscando por email:', buyer.email);
-      const { data: profile } = await supabase
+      console.log('🔍 sck ausente, buscando por email:', buyer.email);
+      const { data: profileByEmail } = await supabase
         .from('profiles')
-        .select('user_id')
+        .select('id')
         .eq('email', buyer.email)
-        .single();
-      
-      if (profile) {
-        finalUserId = profile.user_id;
-        console.log('✅ Usuário encontrado:', finalUserId);
+        .maybeSingle();
+      if (profileByEmail) {
+        finalUserId = profileByEmail.id;
+        console.log('✅ Usuário encontrado por email:', finalUserId);
       }
     }
 
     if (!finalUserId) {
-      console.error('❌ Não foi possível identificar o usuário');
-      return { 
-        success: false, 
-        error: 'User ID not found. Configure sck_user_id no checkout da Hotmart.' 
-      };
+      console.error('❌ Usuário não identificado. sck:', userId, '| email:', buyer.email);
+      return { success: false, error: 'User not found' };
     }
 
-    // Buscar plano pelo product_id da Hotmart
-    const { data: plan, error: planError } = await supabase
+    // ── 2. Determinar plano ──────────────────────────────────────────────
+    // Tenta no banco primeiro; se falhar, usa mapa fixo como fallback
+    let planInfo = PRODUCT_PLAN_MAP[productId];
+    let planId = null;
+
+    const { data: planFromDB } = await supabase
       .from('subscription_plans')
-      .select('*')
+      .select('id, name, duration_days, price_brl')
       .eq('hotmart_product_id', productId)
-      .single();
+      .maybeSingle();
 
-    if (planError || !plan) {
-      console.error('❌ Plano não encontrado:', productId);
-      return { success: false, error: 'Plan not found' };
+    if (planFromDB) {
+      console.log('📦 Plano encontrado no banco:', planFromDB.name);
+      planId = planFromDB.id;
+      planInfo = {
+        name: planFromDB.name.toLowerCase(),
+        duration_days: planFromDB.duration_days,
+        price: planFromDB.price_brl,
+      };
+    } else {
+      console.warn('⚠️ Plano não encontrado no banco para product_id:', productId, '— usando mapa fixo');
+      if (!planInfo) {
+        console.error('❌ Product ID desconhecido:', productId);
+        planInfo = { name: 'mensal', duration_days: 30, price: 39.90 }; // safe default
+      }
     }
 
-    console.log('📦 Plano encontrado:', plan.name);
-
-    // Calcular data de expiração
+    // ── 3. Calcular expiração ────────────────────────────────────────────
     const startDate = new Date();
     const expiresAt = new Date(startDate);
-    expiresAt.setDate(expiresAt.getDate() + plan.duration_days);
+    expiresAt.setDate(expiresAt.getDate() + planInfo.duration_days);
 
-    // Criar ou atualizar assinatura
-    const { data: subscription, error: subError } = await supabase
-      .from('user_subscriptions')
-      .upsert({
-        user_id: finalUserId,
-        plan_id: plan.id,
-        status: 'active',
-        started_at: startDate.toISOString(),
-        expires_at: expiresAt.toISOString(),
-        hotmart_transaction_id: transactionId,
-        hotmart_subscriber_code: subscriberCode,
-        hotmart_purchase_date: purchase.approved_date || new Date().toISOString(),
-        affiliate_code: affiliates.affiliate_code || null,
-        affiliate_name: affiliates.name || null,
-        affiliate_commission_percentage: affiliates.commission_percentage || null,
-        payment_method: purchase.payment_type || null,
-        amount_paid: purchase.price?.value || plan.price_brl,
-        currency: purchase.price?.currency_code || 'BRL',
-        metadata: {
-          hotmart_payload: payload,
-          buyer_info: buyer
-        },
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'hotmart_transaction_id',
-        ignoreDuplicates: false
-      })
-      .select()
-      .single();
+    console.log('📅 Plano:', planInfo.name, '| Expira em:', expiresAt.toISOString());
 
-    if (subError) {
-      console.error('❌ Erro ao criar assinatura:', subError);
-      return { success: false, error: subError.message };
-    }
-
-    console.log('✅ Assinatura criada/atualizada:', subscription.id);
-    console.log('📅 Válida até:', expiresAt.toISOString());
-
-    // Atualizar profiles com status da assinatura (acesso rápido sem JOIN)
-    const planNameLower = plan.name?.toLowerCase() || 'mensal';
+    // ── 4. Atualizar profiles IMEDIATAMENTE (crítico para o SubscriptionGate) ──
     const { error: profileError } = await supabase
       .from('profiles')
       .update({
         subscription_status: 'active',
-        subscription_plan: planNameLower,
+        subscription_plan: planInfo.name,
         subscription_expires_at: expiresAt.toISOString(),
         hotmart_subscriber_code: data.subscription?.subscriber?.code || null,
       })
       .eq('id', finalUserId);
 
     if (profileError) {
-      console.warn('⚠️ Erro ao atualizar profiles (não crítico):', profileError.message);
+      console.error('❌ CRÍTICO: Erro ao atualizar profile:', profileError.message, profileError);
     } else {
-      console.log('✅ Profile atualizado com subscription_status=active');
-    }
-    
-    if (affiliates.affiliate_code) {
-      console.log('👥 Venda via afiliado:', affiliates.name, '(' + affiliates.affiliate_code + ')');
-    } else {
-      console.log('👥 Venda direta (sem afiliado)');
+      console.log('✅ Profile atualizado com sucesso → subscription_status=active');
     }
 
-    return { 
-      success: true, 
+    // ── 5. Registrar em user_subscriptions (histórico, não crítico para acesso) ──
+    let subscriptionId = null;
+    try {
+      const upsertData = {
+        user_id: finalUserId,
+        status: 'active',
+        started_at: startDate.toISOString(),
+        expires_at: expiresAt.toISOString(),
+        hotmart_transaction_id: transactionId,
+        hotmart_subscriber_code: data.subscription?.subscriber?.code || null,
+        hotmart_purchase_date: purchase.approved_date
+          ? new Date(purchase.approved_date).toISOString()
+          : startDate.toISOString(),
+        affiliate_code: affiliates.affiliate_code || null,
+        affiliate_name: affiliates.name || null,
+        payment_method: purchase.payment?.type || null,
+        amount_paid: purchase.price?.value || planInfo.price,
+        currency: purchase.price?.currency_value || 'BRL',
+        updated_at: new Date().toISOString(),
+      };
+
+      if (planId) upsertData.plan_id = planId;
+
+      const { data: subscription, error: subError } = await supabase
+        .from('user_subscriptions')
+        .upsert(upsertData, { onConflict: 'hotmart_transaction_id', ignoreDuplicates: false })
+        .select('id')
+        .single();
+
+      if (subError) {
+        console.warn('⚠️ Erro ao registrar user_subscriptions (não crítico):', subError.message);
+      } else {
+        subscriptionId = subscription?.id;
+        console.log('✅ user_subscriptions registrado:', subscriptionId);
+      }
+    } catch (subErr) {
+      console.warn('⚠️ Exceção em user_subscriptions (não crítico):', subErr.message);
+    }
+
+    return {
+      success: true,
       message: 'Subscription activated',
-      subscriptionId: subscription.id,
+      subscriptionId,
       userId: finalUserId,
-      affiliateCode: affiliates.affiliate_code
     };
 
   } catch (error) {
-    console.error('❌ Erro no handlePurchaseComplete:', error);
+    console.error('❌ Erro crítico no handlePurchaseComplete:', error);
     return { success: false, error: error.message };
   }
 }
