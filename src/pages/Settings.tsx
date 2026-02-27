@@ -3,7 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { usePushSimple } from "@/hooks/usePushSimple";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   Settings as SettingsIcon, 
   Bell, 
@@ -11,13 +15,68 @@ import {
   Shield, 
   Smartphone,
   Info,
-  ExternalLink
+  ExternalLink,
+  CreditCard,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  RefreshCw
 } from "lucide-react";
+
+interface SubscriptionData {
+  status: string | null;
+  plan: string | null;
+  expires_at: string | null;
+}
 
 export default function Settings() {
   const appVersion = "1.0.0";
   const buildDate = new Date().toLocaleDateString('pt-BR');
   const { isSupported, isSubscribed, permission, loading, subscribe } = usePushSimple();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('profiles')
+      .select('subscription_status, subscription_plan, subscription_expires_at')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setSubscription({
+            status: data.subscription_status,
+            plan: data.subscription_plan,
+            expires_at: data.subscription_expires_at,
+          });
+        }
+      });
+  }, [user]);
+
+  const planLabels: Record<string, string> = {
+    mensal: 'Mensal',
+    trimestral: 'Trimestral',
+    semestral: 'Semestral',
+  };
+
+  const isActiveSubscription =
+    subscription?.status === 'active' &&
+    subscription.expires_at &&
+    new Date(subscription.expires_at) > new Date();
+
+  const isExpired =
+    subscription?.expires_at &&
+    new Date(subscription.expires_at) <= new Date();
+
+  const expiresDateStr = subscription?.expires_at
+    ? new Date(subscription.expires_at).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      })
+    : null;
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -28,6 +87,77 @@ export default function Settings() {
           <h1 className="text-3xl font-bold">Configurações</h1>
           <p className="text-muted-foreground">Personalize sua experiência no YM Sports</p>
         </div>
+      </div>
+
+      {/* Assinatura */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <CreditCard className="h-5 w-5 text-primary" />
+          <h2 className="text-xl font-semibold">Minha Assinatura</h2>
+        </div>
+
+        <Card className={`border ${isActiveSubscription ? 'border-yellow-500/40 bg-yellow-500/5' : isExpired ? 'border-red-500/40 bg-red-500/5' : 'border-gray-800 bg-gray-900/40'}`}>
+          <CardContent className="p-5 space-y-4">
+            {/* Status badge */}
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400 text-sm">Status</span>
+              {isActiveSubscription ? (
+                <Badge className="bg-green-500/20 text-green-400 border-green-500/40 gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> Ativo
+                </Badge>
+              ) : isExpired ? (
+                <Badge className="bg-red-500/20 text-red-400 border-red-500/40 gap-1">
+                  <AlertCircle className="w-3 h-3" /> Expirado
+                </Badge>
+              ) : (
+                <Badge variant="secondary">Sem plano</Badge>
+              )}
+            </div>
+
+            {/* Plano */}
+            {subscription?.plan && (
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400 text-sm">Plano</span>
+                <span className="text-white font-semibold">
+                  {planLabels[subscription.plan] ?? subscription.plan}
+                </span>
+              </div>
+            )}
+
+            {/* Data de expiração */}
+            {expiresDateStr && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1 text-gray-400 text-sm">
+                  <Clock className="w-3.5 h-3.5" />
+                  {isActiveSubscription ? 'Válido até' : 'Expirou em'}
+                </div>
+                <span className={`text-sm font-medium ${isActiveSubscription ? 'text-yellow-400' : 'text-red-400'}`}>
+                  {expiresDateStr}
+                </span>
+              </div>
+            )}
+
+            {/* Dias restantes */}
+            {isActiveSubscription && subscription?.expires_at && (
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3 text-center">
+                <p className="text-yellow-400 text-sm font-medium">
+                  {Math.ceil((new Date(subscription.expires_at).getTime() - Date.now()) / 86400000)} dias restantes
+                </p>
+              </div>
+            )}
+
+            {/* Botão renovar se expirado ou sem plano */}
+            {(!isActiveSubscription) && (
+              <Button
+                onClick={() => navigate('/plans')}
+                className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-xl gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                {isExpired ? 'Renovar Assinatura' : 'Assinar Agora'}
+              </Button>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Notificações */}
