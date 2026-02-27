@@ -179,23 +179,60 @@ async function handlePurchaseComplete(supabase, payload, userId, webhookId) {
 
     // ── 1. Identificar usuário ───────────────────────────────────────────
     let finalUserId = userId;
+    let userCreatedNow = false;
 
     if (!finalUserId && buyer.email) {
-      console.log('🔍 sck ausente, buscando por email:', buyer.email);
+      console.log('🔍 sck ausente (compra via link de afiliado), buscando por email:', buyer.email);
+
+      // Tentar achar conta existente pelo email
       const { data: profileByEmail } = await supabase
         .from('profiles')
         .select('id')
         .eq('email', buyer.email)
         .maybeSingle();
+
       if (profileByEmail) {
         finalUserId = profileByEmail.id;
-        console.log('✅ Usuário encontrado por email:', finalUserId);
+        console.log('✅ Conta existente encontrada por email:', finalUserId);
+      } else {
+        // Usuário comprou sem ter conta no app → criar conta automaticamente
+        console.log('📝 Usuário sem conta, criando automaticamente via admin...');
+        try {
+          const tempPassword = Math.random().toString(36).slice(-12) + 'A1!';
+          const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+            email: buyer.email,
+            password: tempPassword,
+            email_confirm: true,
+            user_metadata: { name: buyer.name || buyer.first_name || 'Atleta' }
+          });
+
+          if (createError) {
+            console.error('❌ Erro ao criar usuário:', createError.message);
+          } else if (newUser?.user) {
+            finalUserId = newUser.user.id;
+            userCreatedNow = true;
+            console.log('✅ Conta criada automaticamente:', finalUserId);
+
+            // Criar perfil básico
+            await supabase.from('profiles').insert({
+              id: finalUserId,
+              name: buyer.name || buyer.first_name || 'Atleta',
+              email: buyer.email,
+            }).select().single();
+
+            // TODO: Enviar email de boas-vindas com link para definir senha
+            console.log('📧 Conta criada. Usuário precisa redefinir senha via:', buyer.email);
+          }
+        } catch (createErr) {
+          console.error('❌ Exceção ao criar conta:', createErr.message);
+        }
       }
     }
 
     if (!finalUserId) {
       console.error('❌ Usuário não identificado. sck:', userId, '| email:', buyer.email);
-      return { success: false, error: 'User not found' };
+      // Salvar para processamento manual posterior
+      return { success: false, error: 'User not found - manual activation needed' };
     }
 
     // ── 2. Determinar plano ──────────────────────────────────────────────
