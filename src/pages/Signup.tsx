@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { useSubscription } from "@/hooks/useSubscription";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import logoImage from "@/assets/ym-sports-logo-white-bg.png";
@@ -13,6 +14,7 @@ import logoImage from "@/assets/ym-sports-logo-white-bg.png";
 const Signup = () => {
   const navigate = useNavigate();
   const { signUp } = useAuth();
+  const { plans, generateCheckoutLink } = useSubscription();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -78,6 +80,23 @@ const Signup = () => {
       }
 
       toast.success("Conta criada com sucesso!");
+
+      // Se havia um plano selecionado antes do cadastro, ir direto ao checkout
+      const savedDuration = localStorage.getItem('selected_plan_duration');
+      if (savedDuration && data.user) {
+        const duration = Number(savedDuration);
+        const matchingPlan = plans.find(p => p.duration_days === duration);
+        if (matchingPlan) {
+          const affiliateCode = localStorage.getItem('affiliate_code') || undefined;
+          // generateCheckoutLink precisa do user — criar objeto mínimo compatível
+          const checkoutUrl = `https://pay.hotmart.com/${matchingPlan.hotmart_checkout_code || matchingPlan.hotmart_product_id}?off=${matchingPlan.hotmart_offer_code || ''}&sck=${data.user.id}&email=${encodeURIComponent(formData.email)}${affiliateCode ? `&ap=${affiliateCode}` : ''}`;
+          localStorage.removeItem('selected_plan_duration');
+          localStorage.removeItem('selected_plan_id');
+          window.location.href = checkoutUrl;
+          return;
+        }
+      }
+
       navigate("/plans");
     } catch (error) {
       toast.error("Erro inesperado ao criar conta");

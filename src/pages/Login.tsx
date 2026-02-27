@@ -29,9 +29,26 @@ const Login = () => {
       } else {
         toast.success("Login realizado com sucesso!");
         
-        // Verificar se o usuário tem assinatura ativa
         const userId = data?.user?.id;
         if (userId) {
+          // 1. Verificar profiles.subscription_status (mais rápido e confiável)
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('subscription_status, subscription_expires_at')
+            .eq('id', userId)
+            .maybeSingle();
+
+          const activeInProfile =
+            profile?.subscription_status === 'active' &&
+            profile?.subscription_expires_at &&
+            new Date(profile.subscription_expires_at) > new Date();
+
+          if (activeInProfile) {
+            navigate("/dashboard");
+            return;
+          }
+
+          // 2. Fallback: verificar user_subscriptions
           const { data: sub } = await supabase
             .from('user_subscriptions')
             .select('id')
@@ -40,11 +57,7 @@ const Login = () => {
             .gt('expires_at', new Date().toISOString())
             .maybeSingle();
 
-          if (sub) {
-            navigate("/dashboard");
-          } else {
-            navigate("/plans");
-          }
+          navigate(sub ? "/dashboard" : "/plans");
         } else {
           navigate("/plans");
         }
