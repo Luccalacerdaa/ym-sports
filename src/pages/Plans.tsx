@@ -36,28 +36,36 @@ export default function Plans() {
     }
   }, [loading, hasActiveSubscription, navigate]);
 
+  // Pré-selecionar plano escolhido antes do signup
+  useEffect(() => {
+    const savedDuration = localStorage.getItem("selected_plan_duration");
+    if (savedDuration) {
+      const duration = Number(savedDuration);
+      if (duration === 30) setSelectedPlan("monthly");
+      else if (duration === 90) setSelectedPlan("quarterly");
+      else if (duration === 180) setSelectedPlan("biannual");
+    }
+  }, []);
+
   const affiliateCode = localStorage.getItem("affiliate_code");
 
   const handleSelectPlan = () => {
     const duration = planDurations[selectedPlan];
     const matchingPlan = plans.find((p) => p.duration_days === duration);
 
-    if (!matchingPlan) {
-      // Se não há planos no banco ainda, ir para signup/plans depois
-      if (!user) {
-        navigate("/auth/signup");
-        return;
-      }
-      return;
-    }
+    // Salvar plano selecionado para retomar após signup
+    localStorage.setItem("selected_plan_duration", String(duration));
+    if (matchingPlan) localStorage.setItem("selected_plan_id", matchingPlan.id);
 
     if (!user) {
-      localStorage.setItem("selected_plan_id", matchingPlan.id);
-      localStorage.setItem("selected_plan_duration", String(duration));
+      // Sem login → criar conta primeiro (sck só existe após ter user_id)
       navigate("/auth/signup");
       return;
     }
 
+    if (!matchingPlan) return;
+
+    // Usuário logado → ir direto ao checkout com sck embutido
     redirectToCheckout(matchingPlan, affiliateCode || undefined);
   };
 
@@ -94,6 +102,22 @@ export default function Plans() {
       </div>
 
       <div className="flex-1 flex flex-col items-center px-4 pb-10">
+        {/* Banner pós-cadastro */}
+        {user && (
+          <div className="w-full max-w-xl mb-6 bg-green-500/10 border border-green-500/30 rounded-2xl px-5 py-4 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span className="text-green-400 text-sm font-bold">✓</span>
+            </div>
+            <div>
+              <p className="text-green-400 font-semibold text-sm">Conta criada com sucesso!</p>
+              <p className="text-gray-400 text-xs mt-0.5">
+                Agora selecione seu plano e complete o pagamento para ativar o acesso.
+                Após o pagamento, sua conta é ativada automaticamente.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Title */}
         <div className="text-center mb-8 mt-2">
           <h2 className="font-bebas uppercase leading-[0.9] mb-4">
