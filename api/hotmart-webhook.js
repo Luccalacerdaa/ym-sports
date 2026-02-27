@@ -98,17 +98,24 @@ export default async function handler(req, res) {
     switch (event) {
       case 'PURCHASE_COMPLETE':
       case 'PURCHASE_APPROVED':
+        // Cobre primeira compra E renovações automáticas (recurrence_number > 1)
         result = await handlePurchaseComplete(supabase, payload, userId, webhookRecord?.id);
         break;
-        
+
       case 'SUBSCRIPTION_CANCELLATION':
       case 'PURCHASE_CANCELED':
+      case 'PURCHASE_CHARGEBACK':
         result = await handleSubscriptionCancellation(supabase, payload, userId, webhookRecord?.id);
         break;
         
       case 'PURCHASE_REFUNDED':
       case 'REFUND_REQUESTED':
         result = await handleRefund(supabase, payload, userId, webhookRecord?.id);
+        break;
+
+      case 'SUBSCRIPTION_REACTIVATED':
+        // Assinatura reativada após suspensão (ex: cartão atualizado)
+        result = await handlePurchaseComplete(supabase, payload, userId, webhookRecord?.id);
         break;
         
       default:
@@ -294,15 +301,20 @@ async function handlePurchaseComplete(supabase, payload, userId, webhookId) {
   }
 }
 
-// Handler: Cancelamento
+// Handler: Cancelamento — robusto mesmo sem registro em user_subscriptions
 async function handleSubscriptionCancellation(supabase, payload, userId, webhookId) {
-  console.log('\n❌ Processando cancelamento...');
+  console.log('\n❌ Processando cancelamento/chargeback...');
 
   try {
     const data = payload.data || payload;
-    const transactionId = data.transaction || data.purchase?.transaction;
+    const purchase = data.purchase || {};
+    const buyer = data.buyer || {};
+    const transactionId = purchase.transaction || data.transaction;
 
-    const { data: subscription, error } = await supabase
+    // ── 1. Tentar atualizar user_subscriptions pelo transaction_id ──
+    let finalUserId = userId;
+    
+    const { data: subscription } = await supabase
       .from('user_subscriptions')
       .update({
         status: 'cancelled',
@@ -310,22 +322,38 @@ async function handleSubscriptionCancellation(supabase, payload, userId, webhook
         updated_at: new Date().toISOString()
       })
       .eq('hotmart_transaction_id', transactionId)
-      .select()
-      .single();
+      .select('id, user_id')
+      .maybeSingle();
 
-    if (error) {
-      console.error('❌ Erro ao cancelar:', error);
-      return { success: false, error: error.message };
-    }
-
-    console.log('✅ Assinatura cancelada:', subscription.id);
-
-    // Atualizar profile
     if (subscription?.user_id) {
-      await supabase.from('profiles').update({ subscription_status: 'cancelled' }).eq('id', subscription.user_id);
+      finalUserId = subscription.user_id;
+      console.log('✅ user_subscriptions cancelada:', subscription.id);
     }
 
-    return { success: true, message: 'Subscription cancelled', subscriptionId: subscription.id };
+    // ── 2. Se não achou pelo transaction, tentar pelo sck ou email ──
+    if (!finalUserId && buyer.email) {
+      const { data: profileByEmail } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', buyer.email)
+        .maybeSingle();
+      if (profileByEmail) finalUserId = profileByEmail.id;
+    }
+
+    // ── 3. Atualizar profile ──
+    if (finalUserId) {
+      await supabase
+        .from('profiles')
+        .update({
+          subscription_status: 'cancelled',
+        })
+        .eq('id', finalUserId);
+      console.log('✅ Profile atualizado → subscription_status=cancelled');
+    } else {
+      console.warn('⚠️ Usuário não identificado para cancelamento');
+    }
+
+    return { success: true, message: 'Subscription cancelled', subscriptionId: subscription?.id };
 
   } catch (error) {
     console.error('❌ Erro no handleSubscriptionCancellation:', error);
@@ -339,31 +367,32 @@ async function handleRefund(supabase, payload, userId, webhookId) {
 
   try {
     const data = payload.data || payload;
-    const transactionId = data.transaction || data.purchase?.transaction;
+    const purchase = data.purchase || {};
+    const buyer = data.buyer || {};
+    const transactionId = purchase.transaction || data.transaction;
 
-    const { data: subscription, error } = await supabase
+    let finalUserId = userId;
+
+    const { data: subscription } = await supabase
       .from('user_subscriptions')
-      .update({
-        status: 'refunded',
-        updated_at: new Date().toISOString()
-      })
+      .update({ status: 'refunded', updated_at: new Date().toISOString() })
       .eq('hotmart_transaction_id', transactionId)
-      .select()
-      .single();
+      .select('id, user_id')
+      .maybeSingle();
 
-    if (error) {
-      console.error('❌ Erro ao processar reembolso:', error);
-      return { success: false, error: error.message };
+    if (subscription?.user_id) finalUserId = subscription.user_id;
+
+    if (!finalUserId && buyer.email) {
+      const { data: p } = await supabase.from('profiles').select('id').eq('email', buyer.email).maybeSingle();
+      if (p) finalUserId = p.id;
     }
 
-    console.log('✅ Reembolso processado:', subscription.id);
-
-    // Atualizar profile
-    if (subscription?.user_id) {
-      await supabase.from('profiles').update({ subscription_status: 'refunded' }).eq('id', subscription.user_id);
+    if (finalUserId) {
+      await supabase.from('profiles').update({ subscription_status: 'refunded' }).eq('id', finalUserId);
+      console.log('✅ Reembolso processado, profile atualizado');
     }
 
-    return { success: true, message: 'Refund processed', subscriptionId: subscription.id };
+    return { success: true, message: 'Refund processed', subscriptionId: subscription?.id };
 
   } catch (error) {
     console.error('❌ Erro no handleRefund:', error);
