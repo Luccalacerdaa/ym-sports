@@ -31,33 +31,23 @@ const Login = () => {
         
         const userId = data?.user?.id;
         if (userId) {
-          // 1. Verificar profiles.subscription_status (mais rápido e confiável)
           const { data: profile } = await supabase
             .from('profiles')
             .select('subscription_status, subscription_expires_at')
             .eq('id', userId)
             .maybeSingle();
 
-          const activeInProfile =
-            profile?.subscription_status === 'active' &&
-            profile?.subscription_expires_at &&
-            new Date(profile.subscription_expires_at) > new Date();
+          const status = profile?.subscription_status;
 
-          if (activeInProfile) {
+          // Já teve assinatura (ativa, expirada, cancelada, reembolso)
+          // → vai para /dashboard (SubscriptionGate mostra overlay se necessário)
+          if (status && status !== 'none') {
             navigate("/dashboard");
             return;
           }
 
-          // 2. Fallback: verificar user_subscriptions
-          const { data: sub } = await supabase
-            .from('user_subscriptions')
-            .select('id')
-            .eq('user_id', userId)
-            .eq('status', 'active')
-            .gt('expires_at', new Date().toISOString())
-            .maybeSingle();
-
-          navigate(sub ? "/dashboard" : "/plans");
+          // Nunca assinou → /plans para escolher plano
+          navigate("/plans");
         } else {
           navigate("/plans");
         }
