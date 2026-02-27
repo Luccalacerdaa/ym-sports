@@ -178,8 +178,14 @@ async function handlePurchaseComplete(supabase, payload, userId, webhookId) {
     const productId = product.id?.toString();
 
     // ── 1. Identificar usuário ───────────────────────────────────────────
-    let finalUserId = userId;
+    // Validar que userId é um UUID real (sck pode vir como "HOTMART_PRODUCT_PAGE" ou similar)
+    const isValidUUID = (str) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str || '');
+    let finalUserId = isValidUUID(userId) ? userId : null;
     let userCreatedNow = false;
+
+    if (userId && !isValidUUID(userId)) {
+      console.log('⚠️ sck não é um UUID válido:', userId, '— ignorando e buscando por email');
+    }
 
     if (!finalUserId && buyer.email) {
       console.log('🔍 sck ausente (compra via link de afiliado), buscando por email:', buyer.email);
