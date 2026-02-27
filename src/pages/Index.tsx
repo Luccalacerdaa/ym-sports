@@ -162,23 +162,25 @@ const Index = () => {
       return;
     }
     
-    // Se usuário não está logado, redirecionar para cadastro
+    // Salvar plano selecionado
+    localStorage.setItem('selected_plan_id', matchingPlan.id);
+    localStorage.setItem('selected_plan_duration', String(selectedDuration));
+
+    // Se usuário não está logado → criar conta primeiro
     if (!user) {
-      localStorage.setItem('selected_plan_id', matchingPlan.id);
-      localStorage.setItem('selected_plan_duration', String(selectedDuration));
       navigate('/auth/signup');
       return;
     }
     
-    // Se já tem assinatura ativa
+    // Se já tem assinatura ativa → ir para o dashboard
     if (hasActiveSubscription) {
       toast.info('Você já possui uma assinatura ativa!');
       navigate('/dashboard');
       return;
     }
     
-    // Redirecionar para checkout da Hotmart
-    redirectToCheckout(matchingPlan, affiliateCode || undefined);
+    // Logado mas sem assinatura → ir para /plans (que vai direto ao checkout)
+    navigate('/plans');
   };
   
   const benefits = [{

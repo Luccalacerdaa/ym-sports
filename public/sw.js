@@ -1,7 +1,7 @@
 // Service Worker Completo para YM Sports
 // Notificações + Cache Offline
 
-const SW_VERSION = '20.0.0';
+const SW_VERSION = '21.0.0';
 const CACHE_NAME = `ym-sports-v${SW_VERSION}`;
 const RUNTIME_CACHE = `runtime-${SW_VERSION}`;
 
