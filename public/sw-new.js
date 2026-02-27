@@ -112,7 +112,7 @@ self.addEventListener('notificationclose', (event) => {
 
 // Mensagens do app
 self.addEventListener('message', (event) => {
-  console.log('[SW] 💬 Mensagem recebida:', event.data);
+  console.log('[SW] 💬 Mensagem recebida:', event.data?.type);
   
   if (event.data.type === 'TEST_NOTIFICATION') {
     console.log('[SW] 🧪 Teste de notificação solicitado');

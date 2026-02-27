@@ -250,7 +250,8 @@ self.addEventListener('notificationclose', (event) => {
 
 // Mensagens do app
 self.addEventListener('message', (event) => {
-  console.log('[SW] 💬 Mensagem recebida:', event.data);
+  // Não logar o payload completo — pode conter chaves sensíveis
+  console.log('[SW] 💬 Mensagem recebida:', event.data?.type);
   
   if (event.data.type === 'SHOW_NOTIFICATION') {
     console.log('[SW] 🔔 Notificação solicitada:', event.data.title);

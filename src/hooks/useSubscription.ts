@@ -64,18 +64,13 @@ export const useSubscription = () => {
 
       const { data, error } = await supabase
         .from('user_subscriptions')
-        .select(`
-          *,
-          plan:plan_id (*)
-        `)
+        .select(`*, plan:plan_id (*)`)
         .eq('user_id', user.id)
         .eq('status', 'active')
         .gt('expires_at', new Date().toISOString())
-        .single();
+        .maybeSingle(); // evita 406 quando não há assinatura
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows
-        throw error;
-      }
+      if (error) throw error;
 
       setCurrentSubscription(data);
       setHasActiveSubscription(!!data);
