@@ -84,9 +84,10 @@ export const useSubscription = () => {
   };
 
   // Gerar link de checkout da Hotmart
-  // Usa pay.hotmart.com/{checkout_code} com offer code e sck para rastrear o usuário
+  // Todos os planos estão no mesmo produto (W104403854A), diferenciados pelo offer_code
   const generateCheckoutLink = (plan: SubscriptionPlan, affiliateCode?: string): string => {
-    const checkoutCode = plan.hotmart_checkout_code || plan.hotmart_product_id;
+    // Produto único — usar sempre o checkout_code do plano (todos apontam para W104403854A)
+    const checkoutCode = plan.hotmart_checkout_code || 'W104403854A';
     const baseUrl = `https://pay.hotmart.com/${checkoutCode}`;
     
     const params = new URLSearchParams();

@@ -156,7 +156,15 @@ export default async function handler(req, res) {
   }
 }
 
-// Mapa fixo de product_id → plano (fallback quando subscription_plans não tem o dado)
+// Mapa por offer.code (prioritário — todos os planos estão no mesmo produto agora)
+const OFFER_PLAN_MAP = {
+  'olbidtw7': { name: 'mensal',     duration_days: 30,  price: 39.90 },
+  'gfag0jsh': { name: 'mensal',     duration_days: 30,  price: 1.00  }, // oferta de teste R$1
+  'fpxzoplr': { name: 'trimestral', duration_days: 90,  price: 99.90 },
+  'nh5b7zqg': { name: 'semestral',  duration_days: 180, price: 189.90 },
+};
+
+// Fallback por product_id (caso venha de produto antigo separado)
 const PRODUCT_PLAN_MAP = {
   '7196326': { name: 'mensal',     duration_days: 30,  price: 39.90 },
   '7196731': { name: 'trimestral', duration_days: 90,  price: 99.90 },
@@ -255,30 +263,58 @@ async function handlePurchaseComplete(supabase, payload, userId, webhookId) {
     }
 
     // ── 2. Determinar plano ──────────────────────────────────────────────
-    // Tenta no banco primeiro; se falhar, usa mapa fixo como fallback
-    let planInfo = PRODUCT_PLAN_MAP[productId];
+    // Prioridade: offer.code > hotmart_offer_code no banco > product_id
+    const offerCode = purchase.offer?.code || null;
+    console.log('🏷️  Offer code:', offerCode || 'não informado');
+
+    let planInfo = null;
     let planId = null;
 
-    const { data: planFromDB } = await supabase
-      .from('subscription_plans')
-      .select('id, name, duration_days, price_brl')
-      .eq('hotmart_product_id', productId)
-      .maybeSingle();
+    // 2a. Tentar pelo offer_code no banco
+    if (offerCode) {
+      const { data: planByOffer } = await supabase
+        .from('subscription_plans')
+        .select('id, name, duration_days, price_brl')
+        .eq('hotmart_offer_code', offerCode)
+        .maybeSingle();
 
-    if (planFromDB) {
-      console.log('📦 Plano encontrado no banco:', planFromDB.name);
-      planId = planFromDB.id;
-      planInfo = {
-        name: planFromDB.name.toLowerCase(),
-        duration_days: planFromDB.duration_days,
-        price: planFromDB.price_brl,
-      };
-    } else {
-      console.warn('⚠️ Plano não encontrado no banco para product_id:', productId, '— usando mapa fixo');
-      if (!planInfo) {
-        console.error('❌ Product ID desconhecido:', productId);
-        planInfo = { name: 'mensal', duration_days: 30, price: 39.90 }; // safe default
+      if (planByOffer) {
+        console.log('📦 Plano encontrado pelo offer_code:', planByOffer.name);
+        planId = planByOffer.id;
+        planInfo = { name: planByOffer.name.toLowerCase(), duration_days: planByOffer.duration_days, price: planByOffer.price_brl };
       }
+    }
+
+    // 2b. Fallback: pelo offer_code no mapa fixo
+    if (!planInfo && offerCode && OFFER_PLAN_MAP[offerCode]) {
+      console.log('📦 Plano encontrado no mapa de ofertas (fallback):', offerCode);
+      planInfo = OFFER_PLAN_MAP[offerCode];
+    }
+
+    // 2c. Fallback: pelo product_id no banco
+    if (!planInfo) {
+      const { data: planByProduct } = await supabase
+        .from('subscription_plans')
+        .select('id, name, duration_days, price_brl')
+        .eq('hotmart_product_id', productId)
+        .maybeSingle();
+
+      if (planByProduct) {
+        console.log('📦 Plano encontrado pelo product_id:', planByProduct.name);
+        planId = planByProduct.id;
+        planInfo = { name: planByProduct.name.toLowerCase(), duration_days: planByProduct.duration_days, price: planByProduct.price_brl };
+      }
+    }
+
+    // 2d. Fallback final: mapa fixo por product_id
+    if (!planInfo) {
+      planInfo = PRODUCT_PLAN_MAP[productId];
+      console.warn('⚠️ Usando mapa fixo por product_id:', productId);
+    }
+
+    if (!planInfo) {
+      console.error('❌ Plano não identificado. offer_code:', offerCode, '| product_id:', productId);
+      planInfo = { name: 'mensal', duration_days: 30, price: 39.90 }; // safe default
     }
 
     // ── 3. Calcular expiração ────────────────────────────────────────────

@@ -20,11 +20,13 @@ import { toast } from "sonner";
 import { Loader2, ShieldCheck, Star, Zap } from "lucide-react";
 import logoImage from "@/assets/ym-sports-logo-white-bg.png";
 
-// Planos locais como fallback enquanto busca do banco
+// Produto único na Hotmart — os 3 planos são ofertas dentro do mesmo produto
+const HOTMART_CHECKOUT_CODE = "W104403854A";
+
 const PLAN_FALLBACK: Record<string, { checkout_code: string; offer_code: string; label: string; price: string }> = {
-  mensal:      { checkout_code: "W104403854A", offer_code: "gfag0jsh", label: "Mensal",     price: "R$ 39,90/mês" },
-  trimestral:  { checkout_code: "N104404912H", offer_code: "oqu2blky", label: "Trimestral", price: "R$ 99,90/trimestre" },
-  semestral:   { checkout_code: "Q104405037F", offer_code: "lpzvw837", label: "Semestral",  price: "R$ 189,90/semestre" },
+  mensal:     { checkout_code: HOTMART_CHECKOUT_CODE, offer_code: "olbidtw7", label: "Mensal",     price: "R$ 39,90/mês" },
+  trimestral: { checkout_code: HOTMART_CHECKOUT_CODE, offer_code: "fpxzoplr", label: "Trimestral", price: "R$ 99,90/trimestre" },
+  semestral:  { checkout_code: HOTMART_CHECKOUT_CODE, offer_code: "nh5b7zqg", label: "Semestral",  price: "R$ 189,90/semestre" },
 };
 
 type Mode = "signup" | "login";
