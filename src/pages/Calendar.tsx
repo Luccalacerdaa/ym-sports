@@ -536,12 +536,12 @@ export default function Calendar() {
                       size="sm"
                       className="text-xs"
                       onClick={() => {
-                        const date = new Date(selectedDate);
-                        date.setHours(hour, 0, 0, 0);
-                        const localDateTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-                          .toISOString()
-                          .slice(0, 16);
-                        setFormData({...formData, start_date: localDateTime});
+                        // Usar a data já definida no formulário, não a do calendário visual
+                        const currentDate = formData.start_date.includes('T')
+                          ? formData.start_date.split('T')[0]
+                          : formData.start_date || selectedDate.toISOString().split('T')[0];
+                        const timeStr = `${String(hour).padStart(2, '0')}:00`;
+                        setFormData({...formData, start_date: `${currentDate}T${timeStr}`});
                       }}
                     >
                       {label}

@@ -346,7 +346,7 @@ FORMATO DE RESPOSTA (JSON):
           }
         ],
         temperature: 0.7,
-        max_tokens: 8000,
+        max_tokens: 4000,
       });
 
       const responseText = completion.choices[0]?.message?.content;
