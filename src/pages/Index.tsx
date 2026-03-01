@@ -147,40 +147,39 @@ const Index = () => {
   }, []);
   
   const handleSubscribe = () => {
-    // Buscar plano correspondente no banco
-    const planDurations = {
-      monthly: 30,
-      quarterly: 90,
-      biannual: 180
-    };
-    
-    const selectedDuration = planDurations[selectedPlan];
-    const matchingPlan = plans.find(p => p.duration_days === selectedDuration);
-    
-    if (!matchingPlan) {
-      toast.error('Sistema de pagamentos em configuração. Em breve você poderá assinar!');
-      return;
-    }
-    
-    // Salvar plano selecionado
-    localStorage.setItem('selected_plan_id', matchingPlan.id);
-    localStorage.setItem('selected_plan_duration', String(selectedDuration));
-
-    // Se usuário não está logado → criar conta primeiro
-    if (!user) {
-      navigate('/auth/signup');
-      return;
-    }
-    
-    // Se já tem assinatura ativa → ir para o dashboard
+    // Se já tem assinatura ativa → dashboard
     if (hasActiveSubscription) {
-      toast.info('Você já possui uma assinatura ativa!');
       navigate('/dashboard');
       return;
     }
-    
-    // Logado mas sem assinatura → ir para /plans (que vai direto ao checkout)
-    navigate('/plans');
+
+    const planKeyMap: Record<string, string> = {
+      monthly:  'mensal',
+      quarterly: 'trimestral',
+      biannual:  'semestral',
+    };
+    const planKey = planKeyMap[selectedPlan] ?? 'mensal';
+    const ref = affiliateCode || localStorage.getItem('affiliate_code') || undefined;
+
+    // Não logado → /checkout com plano já selecionado
+    if (!user) {
+      const params = new URLSearchParams({ plan: planKey });
+      if (ref) params.set('ref', ref);
+      navigate(`/checkout?${params.toString()}`);
+      return;
+    }
+
+    // Logado → buscar plano e ir direto ao Hotmart
+    const planDurations: Record<string, number> = { monthly: 30, quarterly: 90, biannual: 180 };
+    const matchingPlan = plans.find(p => p.duration_days === planDurations[selectedPlan]);
+    if (matchingPlan) {
+      redirectToCheckout(matchingPlan, ref);
+    } else {
+      // Fallback: ir para /checkout que lida com isso
+      const params = new URLSearchParams({ plan: planKey });
+      if (ref) params.set('ref', ref);
+      navigate(`/checkout?${params.toString()}`);
+    }
   };
   
   const benefits = [{

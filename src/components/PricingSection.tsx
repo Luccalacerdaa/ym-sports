@@ -94,29 +94,25 @@ export function PricingSection() {
   }, []);
 
   const handleSubscribe = (plan: any) => {
-    // Verificar se o sistema de pagamentos está configurado
-    if (plan.hotmart_product_id === 'PENDING' || plan.hotmart_product_id.startsWith('SEU_PRODUCT_ID')) {
-      alert('Sistema de pagamentos em configuração. Em breve você poderá assinar!');
-      return;
-    }
-
-    // Se usuário não está logado, redirecionar para cadastro
-    if (!user) {
-      // Salvar o plano selecionado para depois
-      localStorage.setItem('selected_plan_id', plan.id);
-      navigate('/signup');
-      return;
-    }
-
-    // Se já tem assinatura ativa, mostrar mensagem
+    // Se já tem assinatura ativa
     if (hasActiveSubscription) {
-      alert('Você já possui uma assinatura ativa!');
       navigate('/dashboard');
       return;
     }
 
-    // Redirecionar para checkout da Hotmart
-    redirectToCheckout(plan, affiliateCode || undefined);
+    const planKey = plan.name.toLowerCase(); // 'mensal' | 'trimestral' | 'semestral'
+    const ref = affiliateCode || localStorage.getItem('affiliate_code') || undefined;
+
+    // Não logado → /checkout com o plano já selecionado
+    if (!user) {
+      const params = new URLSearchParams({ plan: planKey });
+      if (ref) params.set('ref', ref);
+      navigate(`/checkout?${params.toString()}`);
+      return;
+    }
+
+    // Logado → ir direto ao Hotmart
+    redirectToCheckout(plan, ref);
   };
 
   const getPlanIcon = (index: number) => {
