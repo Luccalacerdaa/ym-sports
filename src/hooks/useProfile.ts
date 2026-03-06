@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { saveCache, loadCache } from '@/lib/offlineCache';
 
 export interface Profile {
   id: string;
@@ -35,6 +36,16 @@ export const useProfile = () => {
       return;
     }
 
+    // Offline: usar cache
+    if (!navigator.onLine) {
+      const cached = loadCache<Profile>('profile', user.id);
+      if (cached) {
+        setProfile(cached);
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -47,19 +58,28 @@ export const useProfile = () => {
 
       if (fetchError) {
         if (fetchError.code === 'PGRST116') {
-          // Perfil não encontrado - criar perfil básico
           console.log('Perfil não encontrado, criando perfil básico...');
           await createBasicProfile();
         } else {
           console.error('Erro ao buscar perfil:', fetchError);
-          setError(fetchError.message);
+          // Tentar cache como fallback
+          const cached = loadCache<Profile>('profile', user.id);
+          if (cached) setProfile(cached);
+          else setError(fetchError.message);
         }
       } else {
         setProfile(data);
+        saveCache('profile', user.id, data);
       }
     } catch (err) {
-      setError('Erro ao carregar perfil');
-      console.error('Erro ao carregar perfil:', err);
+      // Falha de rede — usar cache
+      const cached = loadCache<Profile>('profile', user.id);
+      if (cached) {
+        setProfile(cached);
+      } else {
+        setError('Erro ao carregar perfil');
+        console.error('Erro ao carregar perfil:', err);
+      }
     } finally {
       setLoading(false);
     }
@@ -89,6 +109,7 @@ export const useProfile = () => {
       }
 
       setProfile(data);
+      saveCache('profile', user.id, data);
       return { data, error: null };
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao atualizar perfil';

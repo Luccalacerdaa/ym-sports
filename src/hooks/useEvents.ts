@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { saveCache, loadCache } from '@/lib/offlineCache';
 
 export interface Event {
   id: string;
@@ -32,11 +33,19 @@ export const useEvents = () => {
       return;
     }
 
+    // Offline: usar cache
+    if (!navigator.onLine) {
+      const cached = loadCache<Event[]>('events', user.id);
+      if (cached) {
+        setEvents(cached);
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       setLoading(true);
       setError(null);
-
-      console.log('Buscando eventos para usuário:', user.id);
 
       const { data, error: fetchError } = await supabase
         .from('events')
@@ -46,14 +55,21 @@ export const useEvents = () => {
 
       if (fetchError) {
         console.error('Erro ao buscar eventos:', fetchError);
-        setError(fetchError.message);
+        const cached = loadCache<Event[]>('events', user.id);
+        if (cached) setEvents(cached);
+        else setError(fetchError.message);
       } else {
-        console.log('Eventos encontrados:', data);
-        setEvents(data || []);
+        const eventsData = data || [];
+        setEvents(eventsData);
+        saveCache('events', user.id, eventsData);
       }
     } catch (err) {
-      setError('Erro ao carregar eventos');
-      console.error('Erro ao carregar eventos:', err);
+      const cached = loadCache<Event[]>('events', user.id);
+      if (cached) setEvents(cached);
+      else {
+        setError('Erro ao carregar eventos');
+        console.error('Erro ao carregar eventos:', err);
+      }
     } finally {
       setLoading(false);
     }
@@ -85,7 +101,11 @@ export const useEvents = () => {
       }
 
       console.log('Evento criado com sucesso:', data);
-      setEvents(prev => [...prev, data]);
+      setEvents(prev => {
+        const updated = [...prev, data];
+        saveCache('events', user.id, updated);
+        return updated;
+      });
       return { data, error: null };
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao criar evento';
@@ -119,9 +139,11 @@ export const useEvents = () => {
         throw updateError;
       }
 
-      setEvents(prev => prev.map(event => 
-        event.id === eventId ? data : event
-      ));
+      setEvents(prev => {
+        const updated = prev.map(event => event.id === eventId ? data : event);
+        saveCache('events', user.id, updated);
+        return updated;
+      });
       return { data, error: null };
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao atualizar evento';
@@ -149,7 +171,11 @@ export const useEvents = () => {
         throw deleteError;
       }
 
-      setEvents(prev => prev.filter(event => event.id !== eventId));
+      setEvents(prev => {
+        const updated = prev.filter(event => event.id !== eventId);
+        saveCache('events', user.id, updated);
+        return updated;
+      });
       return { error: null };
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao deletar evento';

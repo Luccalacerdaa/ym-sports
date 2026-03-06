@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { saveCache, loadCache } from '@/lib/offlineCache';
 
 export interface Exercise {
   name: string;
@@ -48,18 +49,24 @@ export const useTrainings = () => {
   // Carregar treinos do usuário
   const fetchTrainings = async () => {
     if (!user) {
-      console.log('useTrainings: Usuário não autenticado, limpando treinos');
       setTrainings([]);
       setLoading(false);
       return;
     }
 
+    // Offline: usar cache
+    if (!navigator.onLine) {
+      const cached = loadCache<Training[]>('trainings', user.id);
+      if (cached) {
+        setTrainings(cached);
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
-      console.log('useTrainings: Iniciando busca de treinos...');
       setLoading(true);
       setError(null);
-
-      console.log('Buscando treinos para usuário:', user.id);
 
       const { data, error: fetchError } = await supabase
         .from('trainings')
@@ -69,14 +76,21 @@ export const useTrainings = () => {
 
       if (fetchError) {
         console.error('Erro ao buscar treinos:', fetchError);
-        setError(fetchError.message);
+        const cached = loadCache<Training[]>('trainings', user.id);
+        if (cached) setTrainings(cached);
+        else setError(fetchError.message);
       } else {
-        console.log('Treinos encontrados:', data);
-        setTrainings(data || []);
+        const data_ = data || [];
+        setTrainings(data_);
+        saveCache('trainings', user.id, data_);
       }
     } catch (err) {
-      setError('Erro ao carregar treinos');
-      console.error('Erro ao carregar treinos:', err);
+      const cached = loadCache<Training[]>('trainings', user.id);
+      if (cached) setTrainings(cached);
+      else {
+        setError('Erro ao carregar treinos');
+        console.error('Erro ao carregar treinos:', err);
+      }
     } finally {
       setLoading(false);
     }
@@ -150,7 +164,11 @@ export const useTrainings = () => {
         title: data.title
       });
 
-      setTrainings(prev => [...prev, data]);
+      setTrainings(prev => {
+        const updated = [...prev, data];
+        saveCache('trainings', user.id, updated);
+        return updated;
+      });
       return { data, error: null };
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao criar treino';
@@ -185,9 +203,11 @@ export const useTrainings = () => {
         throw updateError;
       }
 
-      setTrainings(prev => prev.map(training => 
-        training.id === trainingId ? data : training
-      ));
+      setTrainings(prev => {
+        const updated = prev.map(t => t.id === trainingId ? data : t);
+        saveCache('trainings', user.id, updated);
+        return updated;
+      });
       return { data, error: null };
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao atualizar treino';
@@ -239,7 +259,11 @@ export const useTrainings = () => {
 
       console.log('✅ Treino deletado com sucesso:', trainingId);
 
-      setTrainings(prev => prev.filter(training => training.id !== trainingId));
+      setTrainings(prev => {
+        const updated = prev.filter(t => t.id !== trainingId);
+        saveCache('trainings', user.id, updated);
+        return updated;
+      });
       return { error: null };
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao deletar treino';
