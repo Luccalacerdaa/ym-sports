@@ -432,10 +432,24 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Ignorar requisições para APIs externas (Supabase, OpenAI, etc)
+  // Requisições para APIs externas (Supabase, OpenAI, Hotmart, etc)
+  // Network only — mas trata falha de rede para não quebrar o SW
   if (url.hostname !== self.location.hostname) {
-    // Network only para APIs externas
-    event.respondWith(fetch(request));
+    event.respondWith(
+      fetch(request).catch(() => {
+        // Offline: retornar resposta de erro estruturada em vez de deixar o SW crashar
+        const isJson = request.headers.get('accept')?.includes('application/json') ||
+                       url.pathname.includes('/rest/') ||
+                       url.pathname.includes('/auth/');
+        if (isJson) {
+          return new Response(JSON.stringify({ error: 'offline', message: 'Sem conexão com a internet' }), {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        return new Response('Offline', { status: 503 });
+      })
+    );
     return;
   }
   

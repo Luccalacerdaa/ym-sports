@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,15 +7,20 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, WifiOff } from "lucide-react";
 import logoImage from "@/assets/ym-sports-logo-white-bg.png";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, user, isOffline } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Se já tem sessão em cache (offline ou online), redireciona direto
+  useEffect(() => {
+    if (user) navigate("/dashboard", { replace: true });
+  }, [user]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,6 +91,15 @@ const Login = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {isOffline && (
+            <div className="mb-4 flex items-start gap-3 rounded-xl bg-yellow-500/10 border border-yellow-500/30 p-3">
+              <WifiOff className="h-4 w-4 text-yellow-500 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-yellow-400 leading-relaxed">
+                Você está sem internet. O login requer conexão para verificar sua senha.
+                Se já entrou antes neste dispositivo, reabra o app para acessar automaticamente.
+              </p>
+            </div>
+          )}
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">E-mail</Label>
@@ -111,8 +125,8 @@ const Login = () => {
                 className="bg-secondary/50 border-border"
               />
             </div>
-            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
-              {loading ? "Entrando..." : "Entrar"}
+            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading || isOffline}>
+              {loading ? "Entrando..." : isOffline ? "Sem conexão" : "Entrar"}
             </Button>
           </form>
           <div className="mt-4 text-center">
