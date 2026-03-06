@@ -5,6 +5,43 @@ import { supabase } from "@/lib/supabase";
 import { Loader2 } from "lucide-react";
 import { SubscriptionExpiredOverlay } from "./SubscriptionExpiredOverlay";
 
+// ── Cache de assinatura ───────────────────────────────────────────────────────
+const SUB_CACHE_KEY = 'ym_sub_cache';
+
+interface SubCache {
+  status: string;           // 'active' | 'cancelled' | 'refunded' | 'none'
+  expires_at: string | null;
+  plan: string | null;
+  cached_at: number;        // timestamp em ms
+}
+
+function saveSubCache(data: SubCache) {
+  try { localStorage.setItem(SUB_CACHE_KEY, JSON.stringify(data)); } catch { /* */ }
+}
+
+function loadSubCache(): SubCache | null {
+  try {
+    const raw = localStorage.getItem(SUB_CACHE_KEY);
+    if (!raw) return null;
+    const cache: SubCache = JSON.parse(raw);
+    // Cache válido por 24 h — depois disso, exige conexão para atualizar
+    const ageMs = Date.now() - cache.cached_at;
+    if (ageMs > 24 * 60 * 60 * 1000) return null;
+    return cache;
+  } catch { return null; }
+}
+
+function clearSubCache() {
+  localStorage.removeItem(SUB_CACHE_KEY);
+}
+
+function isSubActiveFromCache(cache: SubCache): boolean {
+  if (cache.status !== 'active') return false;
+  if (!cache.expires_at) return false;
+  return new Date(cache.expires_at) > new Date();
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface SubscriptionGateProps {
   children: React.ReactNode;
 }
@@ -15,10 +52,11 @@ interface SubscriptionInfo {
   status: GateStatus;
   expiredAt?: string | null;
   plan?: string | null;
+  fromCache?: boolean;
 }
 
 const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ children }) => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isOffline } = useAuth();
   const [info, setInfo] = useState<SubscriptionInfo>({ status: 'checking' });
 
   useEffect(() => {
@@ -29,6 +67,28 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ children }) => {
     }
 
     const check = async () => {
+      // ── Modo offline: usar cache ───────────────────────────────────────
+      if (isOffline || !navigator.onLine) {
+        const cache = loadSubCache();
+        if (cache) {
+          if (isSubActiveFromCache(cache)) {
+            setInfo({ status: 'active', fromCache: true });
+          } else if (cache.status === 'active' && cache.expires_at && new Date(cache.expires_at) <= new Date()) {
+            // Assinatura expirou enquanto estava offline
+            setInfo({ status: 'expired', expiredAt: cache.expires_at, plan: cache.plan, fromCache: true });
+          } else if (cache.status === 'none' || !cache.status) {
+            setInfo({ status: 'never_subscribed' });
+          } else {
+            setInfo({ status: 'expired', expiredAt: cache.expires_at, plan: cache.plan, fromCache: true });
+          }
+        } else {
+          // Sem cache e sem internet → não conseguimos verificar
+          setInfo({ status: 'never_subscribed' });
+        }
+        return;
+      }
+
+      // ── Online: verificar no Supabase e atualizar cache ────────────────
       try {
         const { data: profile } = await supabase
           .from('profiles')
@@ -36,23 +96,33 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ children }) => {
           .eq('id', user.id)
           .maybeSingle();
 
-        const hasExpiry = !!profile?.subscription_expires_at;
+        const hasExpiry  = !!profile?.subscription_expires_at;
         const expiryDate = hasExpiry ? new Date(profile.subscription_expires_at!) : null;
-        const isExpired = expiryDate !== null && expiryDate <= new Date();
-        const isActive = profile?.subscription_status === 'active' && expiryDate !== null && !isExpired;
+        const isExpired  = expiryDate !== null && expiryDate <= new Date();
+        const isActive   = profile?.subscription_status === 'active' && expiryDate !== null && !isExpired;
 
-        // Assinatura ativa → acesso liberado
         if (isActive) {
+          saveSubCache({
+            status:    'active',
+            expires_at: profile!.subscription_expires_at,
+            plan:      profile!.subscription_plan ?? null,
+            cached_at: Date.now(),
+          });
           setInfo({ status: 'active' });
           return;
         }
 
-        // Tinha assinatura mas expirou → mostrar overlay de renovação
         if (hasExpiry || profile?.subscription_status === 'cancelled' || profile?.subscription_status === 'refunded') {
+          saveSubCache({
+            status:    profile?.subscription_status ?? 'expired',
+            expires_at: profile?.subscription_expires_at ?? null,
+            plan:      profile?.subscription_plan ?? null,
+            cached_at: Date.now(),
+          });
           setInfo({
-            status: 'expired',
+            status:    'expired',
             expiredAt: profile?.subscription_expires_at,
-            plan: profile?.subscription_plan,
+            plan:      profile?.subscription_plan,
           });
           return;
         }
@@ -67,19 +137,20 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ children }) => {
           .maybeSingle();
 
         if (activeSub) {
-          // Sincronizar profile
           await supabase
             .from('profiles')
-            .update({
-              subscription_status: 'active',
-              subscription_expires_at: activeSub.expires_at,
-            })
+            .update({ subscription_status: 'active', subscription_expires_at: activeSub.expires_at })
             .eq('id', user.id);
+          saveSubCache({
+            status:    'active',
+            expires_at: activeSub.expires_at,
+            plan:      null,
+            cached_at: Date.now(),
+          });
           setInfo({ status: 'active' });
           return;
         }
 
-        // Verificar se teve assinatura expirada em user_subscriptions
         const { data: expiredSub } = await supabase
           .from('user_subscriptions')
           .select('id, expires_at, plan:plan_id(name)')
@@ -89,24 +160,41 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ children }) => {
           .maybeSingle();
 
         if (expiredSub) {
-          setInfo({
-            status: 'expired',
-            expiredAt: expiredSub.expires_at,
+          saveSubCache({
+            status:    'expired',
+            expires_at: expiredSub.expires_at,
+            plan:      null,
+            cached_at: Date.now(),
           });
+          setInfo({ status: 'expired', expiredAt: expiredSub.expires_at });
           return;
         }
 
-        // Nunca teve assinatura → ir para /plans (novo usuário)
+        saveSubCache({ status: 'none', expires_at: null, plan: null, cached_at: Date.now() });
         setInfo({ status: 'never_subscribed' });
+
       } catch {
-        setInfo({ status: 'never_subscribed' });
+        // Falha de rede inesperada — tentar cache
+        const cache = loadSubCache();
+        if (cache && isSubActiveFromCache(cache)) {
+          setInfo({ status: 'active', fromCache: true });
+        } else {
+          setInfo({ status: 'never_subscribed' });
+        }
       }
     };
 
     check();
-  }, [user, authLoading]);
+  }, [user, authLoading, isOffline]);
 
-  // Loading
+  // Quando voltar online, re-verificar
+  useEffect(() => {
+    if (!isOffline && user && !authLoading) {
+      clearSubCache();
+      setInfo({ status: 'checking' });
+    }
+  }, [isOffline]);
+
   if (authLoading || info.status === 'checking') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
@@ -118,30 +206,19 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ children }) => {
     );
   }
 
-  // Não logado → login
-  if (!user) {
-    return <Navigate to="/auth/login" replace />;
-  }
+  if (!user) return <Navigate to="/auth/login" replace />;
 
-  // Nunca assinou → /plans (selecionar plano)
-  if (info.status === 'never_subscribed') {
-    return <Navigate to="/plans" replace />;
-  }
+  if (info.status === 'never_subscribed') return <Navigate to="/plans" replace />;
 
-  // Assinatura expirada → mostrar overlay bloqueante por cima do conteúdo
   if (info.status === 'expired') {
     return (
       <>
         {children}
-        <SubscriptionExpiredOverlay
-          expiredAt={info.expiredAt}
-          plan={info.plan}
-        />
+        <SubscriptionExpiredOverlay expiredAt={info.expiredAt} plan={info.plan} />
       </>
     );
   }
 
-  // Ativo → acesso liberado
   return <>{children}</>;
 };
 

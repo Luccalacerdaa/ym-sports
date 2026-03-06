@@ -1,4 +1,4 @@
--- Atualizar offer codes dos planos Trimestral e Semestral
+    -- Atualizar offer codes dos planos Trimestral e Semestral
 UPDATE subscription_plans SET hotmart_offer_code = 'oqu2blky' WHERE name = 'Trimestral';
 UPDATE subscription_plans SET hotmart_offer_code = 'lpzvw837' WHERE name = 'Semestral';
 

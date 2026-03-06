@@ -41,6 +41,7 @@ import Tutorials from "./pages/Tutorials";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import CheckoutGateway from "./pages/CheckoutGateway";
+import { OfflineBanner } from "./components/OfflineBanner";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const AppContent = () => {
 
   return (
     <BrowserRouter>
+          <OfflineBanner />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/install-guide" element={<InstallGuide />} />
