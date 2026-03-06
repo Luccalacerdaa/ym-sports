@@ -1,7 +1,7 @@
 // Service Worker Completo para YM Sports
 // Notificações + Cache Offline
 
-const SW_VERSION = '21.0.0';
+const SW_VERSION = '22.0.0';
 const CACHE_NAME = `ym-sports-v${SW_VERSION}`;
 const RUNTIME_CACHE = `runtime-${SW_VERSION}`;
 
@@ -429,6 +429,11 @@ self.addEventListener('fetch', (event) => {
   
   // Ignorar requisições de extensões do Chrome e dev tools
   if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return;
+  }
+
+  // Nunca interceptar requisições POST/PUT/PATCH/DELETE — deixar passar direto
+  if (request.method !== 'GET') {
     return;
   }
   

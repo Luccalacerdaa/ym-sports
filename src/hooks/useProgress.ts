@@ -397,10 +397,21 @@ export const useProgress = () => {
   }) => {
     if (!user || !progress) return;
 
+    // Bloquear completar treino offline — pontuação exige verificação no servidor
+    if (!navigator.onLine) {
+      throw new Error('Conecte-se à internet para registrar seu treino e ganhar pontos. 📶');
+    }
+
     try {
       const today = new Date().toISOString().split('T')[0];
+
+      // Verificação local rápida (evita double-submit antes da resposta do servidor)
+      const localKey = `ym_workout_done_${user.id}_${today}`;
+      if (localStorage.getItem(localKey)) {
+        throw new Error('Você já completou um treino hoje! Volte amanhã para ganhar mais pontos. 🔥');
+      }
       
-      // Verificar se já completou QUALQUER treino hoje (não apenas este treino específico)
+      // Verificar no servidor se já completou hoje
       const { data: existingActivities, error: checkError } = await supabase
         .from('user_activities')
         .select('id')
@@ -411,6 +422,7 @@ export const useProgress = () => {
       if (checkError) throw checkError;
 
       if (existingActivities && existingActivities.length > 0) {
+        localStorage.setItem(localKey, '1'); // sincronizar cache local
         throw new Error('Você já completou um treino hoje! Volte amanhã para ganhar mais pontos. 🔥');
       }
 
@@ -465,6 +477,10 @@ export const useProgress = () => {
 
       setProgress(updatedProgress);
 
+      // Marcar localmente que já completou hoje (expira à meia-noite automaticamente via chave com data)
+      const todayKey = `ym_workout_done_${user.id}_${today}`;
+      localStorage.setItem(todayKey, '1');
+
       // Enviar notificação se subiu de nível
       if (result?.levelUp) {
         await NotificationService.levelUp(user.id, result.newLevel);
@@ -474,7 +490,7 @@ export const useProgress = () => {
     } catch (err: any) {
       console.error('Erro ao registrar treino:', err);
       setError(err.message);
-      throw err; // ← Lançar erro para ser capturado no componente
+      throw err;
     }
   };
 
