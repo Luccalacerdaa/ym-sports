@@ -263,27 +263,44 @@ async function handlePurchaseComplete(supabase, payload, userId, webhookId) {
     }
 
     // ── 2. Determinar plano ──────────────────────────────────────────────
-    // Hotmart envia o offer_code em múltiplos caminhos dependendo da versão do payload
+    // Hotmart envia o offer_code em múltiplos caminhos — verificar todos
     const offerCode =
-      purchase.offer?.code              ||  // v2 padrão
-      data.offer?.code                  ||  // raiz alternativa
-      purchase.offer_code               ||  // campo direto
-      data.offer_code                   ||  // raiz campo direto
-      purchase.tracking?.offer_code     ||  // tracking
+      purchase.offer?.code                      ||  // v2 padrão (mais comum)
+      data.offer?.code                          ||  // raiz alternativa
+      purchase.offer_code                       ||  // campo direto legado
+      data.offer_code                           ||  // raiz campo direto legado
+      purchase.tracking?.offer_code             ||  // via tracking
+      data.subscription?.offer?.code            ||  // via objeto subscription
+      data.subscription?.plan?.offer_code       ||  // via plan dentro de subscription
+      purchase.subscription_anticipation_purchase?.offer_code ||
       null;
 
-    // Também verificar preço para inferir plano como último recurso
-    const paidAmount = purchase.price?.value || purchase.amount || null;
+    // Nome do plano da assinatura (quando offer_code não vem, às vezes o nome vem)
+    const subscriptionPlanName =
+      data.subscription?.plan?.name?.toLowerCase() ||
+      data.plan?.name?.toLowerCase()               ||
+      product.name?.toLowerCase()                  ||
+      null;
+
+    // Valor pago para inferência como último recurso
+    const paidAmount =
+      purchase.price?.value   ||
+      purchase.value          ||
+      data.price?.value       ||
+      purchase.amount         ||
+      null;
 
     console.log('🏷️  Offer code:', offerCode || 'não informado');
+    console.log('📋 Nome do plano (subscription):', subscriptionPlanName || 'não informado');
     console.log('💵 Valor pago:', paidAmount || 'não informado');
-    console.log('🔍 Payload purchase.offer:', JSON.stringify(purchase.offer || {}));
-    console.log('🔍 Payload data.offer:', JSON.stringify(data.offer || {}));
+    console.log('🔍 purchase.offer completo:', JSON.stringify(purchase.offer || {}));
+    console.log('🔍 data.subscription completo:', JSON.stringify(data.subscription || {}));
+    console.log('🔍 product completo:', JSON.stringify(product));
 
     let planInfo = null;
     let planId = null;
 
-    // 2a. Tentar pelo offer_code no banco
+    // 2a. Tentar pelo offer_code no banco (fonte mais confiável)
     if (offerCode) {
       const { data: planByOffer } = await supabase
         .from('subscription_plans')
@@ -292,20 +309,50 @@ async function handlePurchaseComplete(supabase, payload, userId, webhookId) {
         .maybeSingle();
 
       if (planByOffer) {
-        console.log('📦 Plano encontrado pelo offer_code:', planByOffer.name);
+        console.log('✅ Plano encontrado pelo offer_code no banco:', planByOffer.name);
         planId = planByOffer.id;
         planInfo = { name: planByOffer.name.toLowerCase(), duration_days: planByOffer.duration_days, price: planByOffer.price_brl };
       }
     }
 
-    // 2b. Fallback: pelo offer_code no mapa fixo
+    // 2b. Fallback: pelo offer_code no mapa fixo hardcoded
     if (!planInfo && offerCode && OFFER_PLAN_MAP[offerCode]) {
-      console.log('📦 Plano encontrado no mapa de ofertas (fallback):', offerCode);
+      console.log('✅ Plano encontrado no mapa fixo de ofertas:', offerCode, '->', OFFER_PLAN_MAP[offerCode].name);
       planInfo = OFFER_PLAN_MAP[offerCode];
     }
 
-    // 2c. Fallback: pelo product_id no banco
-    if (!planInfo) {
+    // 2c. Fallback: pelo nome do plano da assinatura (quando offer_code não vem)
+    if (!planInfo && subscriptionPlanName) {
+      if (subscriptionPlanName.includes('semestral') || subscriptionPlanName.includes('6 m') || subscriptionPlanName.includes('6m')) {
+        planInfo = { name: 'semestral', duration_days: 180, price: 189.90 };
+        console.warn('⚠️ Plano inferido pelo nome da assinatura (semestral):', subscriptionPlanName);
+      } else if (subscriptionPlanName.includes('trimestral') || subscriptionPlanName.includes('3 m') || subscriptionPlanName.includes('3m')) {
+        planInfo = { name: 'trimestral', duration_days: 90, price: 99.90 };
+        console.warn('⚠️ Plano inferido pelo nome da assinatura (trimestral):', subscriptionPlanName);
+      } else if (subscriptionPlanName.includes('mensal') || subscriptionPlanName.includes('1 m')) {
+        planInfo = { name: 'mensal', duration_days: 30, price: 39.90 };
+        console.warn('⚠️ Plano inferido pelo nome da assinatura (mensal):', subscriptionPlanName);
+      }
+    }
+
+    // 2d. Fallback: inferir pelo valor pago (limites seguros para cada plano)
+    if (!planInfo && paidAmount) {
+      const amount = parseFloat(paidAmount);
+      if (amount >= 150) {
+        planInfo = { name: 'semestral',  duration_days: 180, price: 189.90 };
+        console.warn('⚠️ Plano inferido pelo valor (semestral):', amount);
+      } else if (amount >= 70) {
+        planInfo = { name: 'trimestral', duration_days: 90,  price: 99.90 };
+        console.warn('⚠️ Plano inferido pelo valor (trimestral):', amount);
+      } else if (amount >= 1) {
+        planInfo = { name: 'mensal',     duration_days: 30,  price: 39.90 };
+        console.warn('⚠️ Plano inferido pelo valor (mensal):', amount);
+      }
+    }
+
+    // 2e. Último recurso: buscar pelo product_id no banco
+    // (só usado se NADA mais funcionou — não usar com produto único pois não diferencia planos)
+    if (!planInfo && productId) {
       const { data: planByProduct } = await supabase
         .from('subscription_plans')
         .select('id, name, duration_days, price_brl')
@@ -313,36 +360,16 @@ async function handlePurchaseComplete(supabase, payload, userId, webhookId) {
         .maybeSingle();
 
       if (planByProduct) {
-        console.log('📦 Plano encontrado pelo product_id:', planByProduct.name);
+        console.warn('⚠️ Plano pelo product_id (pode estar errado se produto único):', planByProduct.name);
         planId = planByProduct.id;
         planInfo = { name: planByProduct.name.toLowerCase(), duration_days: planByProduct.duration_days, price: planByProduct.price_brl };
       }
     }
 
-    // 2d. Fallback por product_id no mapa fixo
-    if (!planInfo && PRODUCT_PLAN_MAP[productId]) {
-      planInfo = PRODUCT_PLAN_MAP[productId];
-      console.warn('⚠️ Usando mapa fixo por product_id:', productId);
-    }
-
-    // 2e. Último recurso: inferir pelo valor pago
-    if (!planInfo && paidAmount) {
-      const amount = parseFloat(paidAmount);
-      if (amount >= 170) {
-        planInfo = { name: 'semestral',  duration_days: 180, price: 189.90 };
-        console.warn('⚠️ Plano inferido pelo valor (semestral):', amount);
-      } else if (amount >= 80) {
-        planInfo = { name: 'trimestral', duration_days: 90,  price: 99.90 };
-        console.warn('⚠️ Plano inferido pelo valor (trimestral):', amount);
-      } else {
-        planInfo = { name: 'mensal',     duration_days: 30,  price: 39.90 };
-        console.warn('⚠️ Plano inferido pelo valor (mensal):', amount);
-      }
-    }
-
     if (!planInfo) {
-      console.error('❌ Plano não identificado. offer_code:', offerCode, '| product_id:', productId, '| valor:', paidAmount);
-      // NUNCA assumir mensal como padrão — marcar como indefinido para revisão manual
+      console.error('❌ CRÍTICO: Plano não identificado após todos os fallbacks.');
+      console.error('   offer_code:', offerCode, '| product_id:', productId, '| valor:', paidAmount, '| plan_name:', subscriptionPlanName);
+      // Marcar como indefinido para revisão manual — NUNCA assumir 'mensal'
       planInfo = { name: 'indefinido', duration_days: 30, price: 0 };
     }
 
