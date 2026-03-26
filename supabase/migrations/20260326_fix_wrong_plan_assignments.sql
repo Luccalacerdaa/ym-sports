@@ -20,8 +20,9 @@ SELECT
   p.subscription_plan   AS plano_atual,
   p.subscription_expires_at
 FROM hotmart_webhooks hw
-LEFT JOIN profiles p ON p.id::text = hw.user_id
+LEFT JOIN profiles p ON p.id = hw.user_id::uuid
 WHERE hw.event_type IN ('PURCHASE_APPROVED', 'PURCHASE_COMPLETE')
+  AND hw.user_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
 ORDER BY hw.created_at DESC
 LIMIT 50;
 
@@ -36,7 +37,7 @@ UPDATE profiles SET
       NOW()           + INTERVAL '180 days'
     )
     FROM hotmart_webhooks
-    WHERE user_id = 'a3c14655-ec89-40e7-bd8a-cf9f6e52c2a1'
+    WHERE user_id::uuid = 'a3c14655-ec89-40e7-bd8a-cf9f6e52c2a1'
       AND event_type IN ('PURCHASE_APPROVED', 'PURCHASE_COMPLETE')
   )
 WHERE id = 'a3c14655-ec89-40e7-bd8a-cf9f6e52c2a1';
@@ -53,9 +54,10 @@ WITH purchases_with_value AS (
     p.subscription_plan AS plano_atual,
     p.subscription_expires_at
   FROM hotmart_webhooks hw
-  JOIN profiles p ON p.id::text = hw.user_id
+  JOIN profiles p ON p.id = hw.user_id::uuid
   WHERE hw.event_type IN ('PURCHASE_APPROVED', 'PURCHASE_COMPLETE')
     AND p.subscription_status = 'active'
+    AND hw.user_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
   ORDER BY hw.user_id, hw.created_at DESC
 )
 SELECT 
@@ -91,9 +93,10 @@ WITH purchases_with_value AS (
     (hw.payload->'data'->'purchase'->'price'->>'value')::numeric AS valor_pago,
     hw.created_at AS purchase_date
   FROM hotmart_webhooks hw
-  JOIN profiles p ON p.id::text = hw.user_id
+  JOIN profiles p ON p.id = hw.user_id::uuid
   WHERE hw.event_type IN ('PURCHASE_APPROVED', 'PURCHASE_COMPLETE')
     AND p.subscription_status = 'active'
+    AND hw.user_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
   ORDER BY hw.user_id, hw.created_at DESC
 )
 UPDATE profiles p
@@ -109,7 +112,7 @@ SET
     ELSE pwv.purchase_date + INTERVAL '30 days'
   END
 FROM purchases_with_value pwv
-WHERE p.id::text = pwv.user_id
+WHERE p.id = pwv.user_id::uuid
   AND p.subscription_status = 'active'
   AND (
     (pwv.valor_pago >= 150 AND p.subscription_plan != 'semestral')
