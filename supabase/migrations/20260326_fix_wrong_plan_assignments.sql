@@ -1,13 +1,11 @@
 -- ============================================================
 -- Correção: planos errados atribuídos como 'mensal'
 -- Causa: offer_code não extraído corretamente do payload Hotmart
--- 
--- ANTES de rodar: confirme os user_ids e valores pagos
--- nas tabelas hotmart_webhooks e user_subscriptions
+--
+-- NOTA: hw.user_id é do tipo UUID — joins diretos sem cast
 -- ============================================================
 
 -- ── 1. Ver todos os webhooks recentes com o valor pago ──────
--- Use isso para identificar quem pagou quanto e qual plano deveria ter
 SELECT 
   hw.id,
   hw.event_type,
@@ -17,47 +15,44 @@ SELECT
   (hw.payload->'data'->'purchase'->'price'->>'value')::numeric AS valor_pago,
   hw.payload->'data'->'purchase'->'offer'->>'code'             AS offer_code,
   hw.payload->'data'->'subscription'->'plan'->>'name'          AS plan_name,
-  p.subscription_plan   AS plano_atual,
-  p.subscription_expires_at
+  p.subscription_plan       AS plano_atual,
+  p.subscription_expires_at AS expiracao_atual
 FROM hotmart_webhooks hw
-LEFT JOIN profiles p ON p.id = hw.user_id::uuid
+LEFT JOIN profiles p ON p.id = hw.user_id
 WHERE hw.event_type IN ('PURCHASE_APPROVED', 'PURCHASE_COMPLETE')
-  AND hw.user_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+  AND hw.user_id IS NOT NULL
 ORDER BY hw.created_at DESC
 LIMIT 50;
 
 
--- ── 2. Corrigir usuário específico: a3c14655 (semestral → foi salvo como mensal) ──
+-- ── 2. Corrigir usuário específico: a3c14655 (pagou semestral, ficou como mensal) ──
 UPDATE profiles SET
   subscription_plan        = 'semestral',
   subscription_expires_at  = (
-    -- Pega a data de ativação real do webhook e soma 180 dias
     SELECT COALESCE(
       MIN(created_at) + INTERVAL '180 days',
       NOW()           + INTERVAL '180 days'
     )
     FROM hotmart_webhooks
-    WHERE user_id::uuid = 'a3c14655-ec89-40e7-bd8a-cf9f6e52c2a1'
+    WHERE user_id = 'a3c14655-ec89-40e7-bd8a-cf9f6e52c2a1'
       AND event_type IN ('PURCHASE_APPROVED', 'PURCHASE_COMPLETE')
   )
 WHERE id = 'a3c14655-ec89-40e7-bd8a-cf9f6e52c2a1';
 
 
--- ── 3. Corrigir automaticamente baseado no valor pago ────────
--- Identifica quem pagou >= R$150 mas está como 'mensal' → semestral
--- Identifica quem pagou >= R$70  mas está como 'mensal' → trimestral
+-- ── 3. Listar todos com plano possivelmente errado (baseado no valor pago) ──
 WITH purchases_with_value AS (
   SELECT DISTINCT ON (hw.user_id)
     hw.user_id,
     (hw.payload->'data'->'purchase'->'price'->>'value')::numeric AS valor_pago,
     hw.created_at AS purchase_date,
-    p.subscription_plan AS plano_atual,
-    p.subscription_expires_at
+    p.subscription_plan       AS plano_atual,
+    p.subscription_expires_at AS expiracao_atual
   FROM hotmart_webhooks hw
-  JOIN profiles p ON p.id = hw.user_id::uuid
+  JOIN profiles p ON p.id = hw.user_id
   WHERE hw.event_type IN ('PURCHASE_APPROVED', 'PURCHASE_COMPLETE')
     AND p.subscription_status = 'active'
-    AND hw.user_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+    AND hw.user_id IS NOT NULL
   ORDER BY hw.user_id, hw.created_at DESC
 )
 SELECT 
@@ -70,7 +65,7 @@ SELECT
     ELSE 'mensal (30 dias)'
   END AS plano_correto,
   purchase_date,
-  subscription_expires_at AS expiracao_atual,
+  expiracao_atual,
   CASE 
     WHEN valor_pago >= 150 THEN purchase_date + INTERVAL '180 days'
     WHEN valor_pago >= 70  THEN purchase_date + INTERVAL '90 days'
@@ -84,7 +79,7 @@ ORDER BY valor_pago DESC;
 
 
 -- ── 4. APLICAR correção em lote (rode após conferir o SELECT acima) ──
--- Descomente e ajuste se quiser aplicar automaticamente
+-- Descomente para aplicar:
 
 /*
 WITH purchases_with_value AS (
@@ -93,10 +88,10 @@ WITH purchases_with_value AS (
     (hw.payload->'data'->'purchase'->'price'->>'value')::numeric AS valor_pago,
     hw.created_at AS purchase_date
   FROM hotmart_webhooks hw
-  JOIN profiles p ON p.id = hw.user_id::uuid
+  JOIN profiles p ON p.id = hw.user_id
   WHERE hw.event_type IN ('PURCHASE_APPROVED', 'PURCHASE_COMPLETE')
     AND p.subscription_status = 'active'
-    AND hw.user_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+    AND hw.user_id IS NOT NULL
   ORDER BY hw.user_id, hw.created_at DESC
 )
 UPDATE profiles p
@@ -112,7 +107,7 @@ SET
     ELSE pwv.purchase_date + INTERVAL '30 days'
   END
 FROM purchases_with_value pwv
-WHERE p.id = pwv.user_id::uuid
+WHERE p.id = pwv.user_id
   AND p.subscription_status = 'active'
   AND (
     (pwv.valor_pago >= 150 AND p.subscription_plan != 'semestral')
