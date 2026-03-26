@@ -263,9 +263,22 @@ async function handlePurchaseComplete(supabase, payload, userId, webhookId) {
     }
 
     // ── 2. Determinar plano ──────────────────────────────────────────────
-    // Prioridade: offer.code > hotmart_offer_code no banco > product_id
-    const offerCode = purchase.offer?.code || null;
+    // Hotmart envia o offer_code em múltiplos caminhos dependendo da versão do payload
+    const offerCode =
+      purchase.offer?.code              ||  // v2 padrão
+      data.offer?.code                  ||  // raiz alternativa
+      purchase.offer_code               ||  // campo direto
+      data.offer_code                   ||  // raiz campo direto
+      purchase.tracking?.offer_code     ||  // tracking
+      null;
+
+    // Também verificar preço para inferir plano como último recurso
+    const paidAmount = purchase.price?.value || purchase.amount || null;
+
     console.log('🏷️  Offer code:', offerCode || 'não informado');
+    console.log('💵 Valor pago:', paidAmount || 'não informado');
+    console.log('🔍 Payload purchase.offer:', JSON.stringify(purchase.offer || {}));
+    console.log('🔍 Payload data.offer:', JSON.stringify(data.offer || {}));
 
     let planInfo = null;
     let planId = null;
@@ -306,15 +319,31 @@ async function handlePurchaseComplete(supabase, payload, userId, webhookId) {
       }
     }
 
-    // 2d. Fallback final: mapa fixo por product_id
-    if (!planInfo) {
+    // 2d. Fallback por product_id no mapa fixo
+    if (!planInfo && PRODUCT_PLAN_MAP[productId]) {
       planInfo = PRODUCT_PLAN_MAP[productId];
       console.warn('⚠️ Usando mapa fixo por product_id:', productId);
     }
 
+    // 2e. Último recurso: inferir pelo valor pago
+    if (!planInfo && paidAmount) {
+      const amount = parseFloat(paidAmount);
+      if (amount >= 170) {
+        planInfo = { name: 'semestral',  duration_days: 180, price: 189.90 };
+        console.warn('⚠️ Plano inferido pelo valor (semestral):', amount);
+      } else if (amount >= 80) {
+        planInfo = { name: 'trimestral', duration_days: 90,  price: 99.90 };
+        console.warn('⚠️ Plano inferido pelo valor (trimestral):', amount);
+      } else {
+        planInfo = { name: 'mensal',     duration_days: 30,  price: 39.90 };
+        console.warn('⚠️ Plano inferido pelo valor (mensal):', amount);
+      }
+    }
+
     if (!planInfo) {
-      console.error('❌ Plano não identificado. offer_code:', offerCode, '| product_id:', productId);
-      planInfo = { name: 'mensal', duration_days: 30, price: 39.90 }; // safe default
+      console.error('❌ Plano não identificado. offer_code:', offerCode, '| product_id:', productId, '| valor:', paidAmount);
+      // NUNCA assumir mensal como padrão — marcar como indefinido para revisão manual
+      planInfo = { name: 'indefinido', duration_days: 30, price: 0 };
     }
 
     // ── 3. Calcular expiração ────────────────────────────────────────────
