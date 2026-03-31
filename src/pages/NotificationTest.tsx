@@ -79,7 +79,7 @@ export default function NotificationTest() {
     }
   };
 
-  const curlCommand = `curl -X POST https://ym-sports.vercel.app/api/notify \\
+  const curlCommand = `curl -X POST https://ymsports.com.br/api/notify \\
   -H "Content-Type: application/json" \\
   -d '{
     "user_id": "${user?.id || 'SEU_USER_ID'}",

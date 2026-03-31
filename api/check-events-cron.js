@@ -127,7 +127,7 @@ export default async function handler(req, res) {
       try {
         console.log(`   📤 Enviando notificação: ${emoji} ${event.title}`);
         
-        const baseUrl = 'https://ym-sports.vercel.app';
+        const baseUrl = process.env.VITE_APP_URL || 'https://ymsports.com.br';
         
         const notifyResponse = await fetch(`${baseUrl}/api/notify`, {
           method: 'POST',

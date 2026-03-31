@@ -1,7 +1,7 @@
 // Service Worker para Push Notifications - YM Sports
 // Este arquivo gerencia as notificações push mesmo quando o app está fechado
 
-const APP_URL = 'https://ym-sports.vercel.app';
+const APP_URL = 'https://ymsports.com.br';
 const SW_VERSION = '9.0.0'; // Incrementar para forçar atualização
 const CACHE_NAME = `ym-sports-v${SW_VERSION}`;
 

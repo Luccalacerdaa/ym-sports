@@ -2,7 +2,7 @@
 // Este arquivo adiciona logs detalhados para diagnóstico
 
 const SW_VERSION = '10.0.0-DEBUG';
-const APP_URL = 'https://ym-sports.vercel.app';
+const APP_URL = 'https://ymsports.com.br';
 
 console.log(`[SW-DEBUG] 🔍 Service Worker DEBUG v${SW_VERSION} iniciado!`);
 console.log(`[SW-DEBUG] 📅 Timestamp: ${new Date().toISOString()}`);

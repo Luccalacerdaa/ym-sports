@@ -2,7 +2,7 @@
  * /checkout — Gateway de compra via afiliados
  *
  * O afiliado divulga:
- *   https://ym-sports.vercel.app/checkout?plan=mensal&ref=U104670015N
+ *   https://ymsports.com.br/checkout?plan=mensal&ref=U104670015N
  *
  * Fluxo:
  *  1. Usuário já logado  → redireciona imediatamente para Hotmart com sck=UUID

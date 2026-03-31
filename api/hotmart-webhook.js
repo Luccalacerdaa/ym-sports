@@ -2,7 +2,7 @@
  * Webhook da Hotmart - Processar eventos de pagamento
  * 
  * Configure este endpoint na Hotmart:
- * URL: https://ym-sports.vercel.app/api/hotmart-webhook
+ * URL: https://ymsports.com.br/api/hotmart-webhook
  * Eventos: PURCHASE_COMPLETE, SUBSCRIPTION_CANCELLATION, REFUND_REQUESTED
  */
 
@@ -236,7 +236,7 @@ async function handlePurchaseComplete(supabase, payload, userId, webhookId) {
 
             // Enviar email para o usuário definir sua senha
             try {
-              const siteUrl = process.env.VITE_APP_URL || 'https://ym-sports.vercel.app';
+              const siteUrl = process.env.VITE_APP_URL || 'https://ymsports.com.br';
               const { error: resetError } = await supabase.auth.resetPasswordForEmail(
                 buyer.email,
                 { redirectTo: `${siteUrl}/auth/reset-password` }
