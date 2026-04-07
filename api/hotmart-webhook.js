@@ -157,11 +157,13 @@ export default async function handler(req, res) {
 }
 
 // Mapa por offer.code (prioritário — todos os planos estão no mesmo produto agora)
+// IMPORTANTE: Coupons da Hotmart geram offer codes únicos — adicione aqui quando identificar
 const OFFER_PLAN_MAP = {
-  'olbidtw7': { name: 'mensal',     duration_days: 30,  price: 39.90 },
-  'gfag0jsh': { name: 'mensal',     duration_days: 30,  price: 1.00  }, // oferta de teste R$1
-  'fpxzoplr': { name: 'trimestral', duration_days: 90,  price: 99.90 },
-  'nh5b7zqg': { name: 'semestral',  duration_days: 180, price: 189.90 },
+  'olbidtw7':    { name: 'mensal',     duration_days: 30,  price: 39.90  },
+  'gfag0jsh':    { name: 'mensal',     duration_days: 30,  price: 1.00   }, // oferta de teste R$1
+  'fpxzoplr':    { name: 'trimestral', duration_days: 90,  price: 99.90  },
+  'nh5b7zqg':    { name: 'semestral',  duration_days: 180, price: 189.90 },
+  'gar1m61eJWT': { name: 'semestral',  duration_days: 180, price: 1.00   }, // cupom 100OFF semestral
 };
 
 // Fallback por product_id (caso venha de produto antigo separado)
